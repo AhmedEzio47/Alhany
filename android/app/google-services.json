@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "480329879410",
+    "firebase_url": "https://dubsmash-75a05.firebaseio.com",
+    "project_id": "dubsmash-75a05",
+    "storage_bucket": "dubsmash-75a05.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480329879410:android:9c2f979d884054430317eb",
+        "android_client_info": {
+          "package_name": "com.devyat.dubsmash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1yDkbdl4ePr6TCVynjEgapOyf-6fXCXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
