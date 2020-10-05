@@ -39,6 +39,7 @@ class _AppPageState extends State<AppPage> {
           },
         ),
         body: PageView(
+          physics: NeverScrollableScrollPhysics(),
           pageSnapping: false,
           controller: _pageController,
           onPageChanged: _onPageChanged,

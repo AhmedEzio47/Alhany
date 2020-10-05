@@ -112,10 +112,13 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
 
   Future stop() async {
     await advancedPlayer.stop();
-    setState(() {
-      playerState = AudioPlayerState.STOPPED;
-      _position = _duration;
-    });
+
+    if (mounted) {
+      setState(() {
+        playerState = AudioPlayerState.STOPPED;
+        _position = _duration;
+      });
+    }
 
     _positionSubscription.cancel();
     _audioPlayerStateSubscription.cancel();
@@ -180,8 +183,13 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                       activeColor: MyColors.primaryColor,
                       inactiveColor: Colors.grey.shade400,
                       value: _position?.inMilliseconds?.toDouble() ?? 0.0,
-                      onChanged: (double value) =>
-                          advancedPlayer.seek(Duration(seconds: value ~/ 1000)),
+                      onChanged: (double value) {
+                        advancedPlayer.seek(Duration(seconds: value ~/ 1000));
+
+                        if (!isPlaying) {
+                          play();
+                        }
+                      },
                       min: 0.0,
                       max: _duration != null
                           ? _duration?.inMilliseconds?.toDouble()

@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/database_service.dart';
+import 'package:dubsmash/widgets/list_items/melody_item.dart';
 import 'package:dubsmash/widgets/melody_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -16,7 +18,7 @@ class MelodiesPage extends StatefulWidget {
 
 class _MelodiesPageState extends State<MelodiesPage> {
   List<Melody> _melodies = [];
-
+  MelodyPlayer _melodyPlayer;
   getMelodies() async {
     List<Melody> melodies = await DatabaseService.getMelodies();
     setState(() {
@@ -34,13 +36,32 @@ class _MelodiesPageState extends State<MelodiesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MyColors.primaryColor,
-      body: ListView.builder(
-          itemCount: _melodies.length,
-          itemBuilder: (context, index) {
-            return MelodyPlayer(
-              url: _melodies[index].audioUrl,
-            );
-          }),
+      body: Stack(
+        children: [
+          ListView.builder(
+              itemCount: _melodies.length,
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _melodyPlayer = MelodyPlayer(
+                        url: _melodies[index].audioUrl,
+                      );
+                    });
+                  },
+                  child: MelodyItem(
+                    melody: _melodies[index],
+                  ),
+                );
+              }),
+          Positioned.fill(
+              child: Align(
+            child: Container(
+              child: _melodyPlayer,
+            ),
+          ))
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         child: Icon(
@@ -71,7 +92,10 @@ class _MelodiesPageState extends State<MelodiesPage> {
       'name': fileNameWithoutExtension,
       'description': 'Something about the melody',
       'audio_url': melodyUrl,
-      'author_id': Constants.currentUserID
+      'author_id': Constants.currentUserID,
+      'timestamp': FieldValue.serverTimestamp()
     });
+
+    AppUtil.showToast('Melody uploaded!');
   }
 }
