@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'file:///D:/Work/FlutterProjects/dubsmash/lib/services/permissions_service.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
 import 'package:dubsmash/services/route_generator.dart';
@@ -11,6 +10,7 @@ import 'package:video_player/video_player.dart';
 
 import 'app_util.dart';
 import 'services/audio_recorder.dart';
+import 'services/permissions_service.dart';
 
 void main() {
   runApp(MyApp());

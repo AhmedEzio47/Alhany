@@ -21,6 +21,13 @@ class MelodyPlayer extends StatefulWidget {
   final String url;
   MelodyPlayer({Key key, @required this.url}) : super(key: key);
 
+  //static _MelodyPlayerState of(BuildContext context) => context.findAncestorStateOfType();
+
+//  static _MelodyPlayerState of(BuildContext context, {bool root = false}) => root
+//      ? context.findRootAncestorStateOfType<_MelodyPlayerState>()
+//      : context.findAncestorStateOfType<_MelodyPlayerState>();
+
+
   @override
   _MelodyPlayerState createState() => _MelodyPlayerState();
 }

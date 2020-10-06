@@ -43,6 +43,9 @@ class _MelodiesPageState extends State<MelodiesPage> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
+                    if(_melodyPlayer != null){
+                      MelodyPlayer.of(context).stop();
+                    }
                     setState(() {
                       _melodyPlayer = MelodyPlayer(
                         url: _melodies[index].audioUrl,
@@ -54,12 +57,14 @@ class _MelodiesPageState extends State<MelodiesPage> {
                   ),
                 );
               }),
-          Positioned.fill(
+          _melodyPlayer != null ? Positioned.fill(
               child: Align(
+                alignment: Alignment.bottomCenter,
             child: Container(
+              height: 200,
               child: _melodyPlayer,
             ),
-          ))
+          )):Container()
         ],
       ),
       floatingActionButton: FloatingActionButton(
