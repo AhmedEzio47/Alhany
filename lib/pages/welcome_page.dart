@@ -56,7 +56,7 @@ class _WelcomePageState extends State<WelcomePage>
         child: new Column(
           children: <Widget>[
             Container(
-              padding: EdgeInsets.only(top: 250.0),
+              padding: EdgeInsets.only(top: 200.0),
               child: Center(
                 child: Icon(
                   Icons.music_note,
@@ -192,7 +192,7 @@ class _WelcomePageState extends State<WelcomePage>
         child: new Column(
           children: <Widget>[
             Container(
-              padding: EdgeInsets.all(120.0),
+              padding: EdgeInsets.all(100.0),
               child: Center(
                 child: Icon(
                   Icons.music_note,

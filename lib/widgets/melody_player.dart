@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:intl/intl.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dubsmash/constants/colors.dart';
@@ -20,13 +21,6 @@ enum PlayerState { stopped, playing, paused }
 class MelodyPlayer extends StatefulWidget {
   final String url;
   MelodyPlayer({Key key, @required this.url}) : super(key: key);
-
-  //static _MelodyPlayerState of(BuildContext context) => context.findAncestorStateOfType();
-
-//  static _MelodyPlayerState of(BuildContext context, {bool root = false}) => root
-//      ? context.findRootAncestorStateOfType<_MelodyPlayerState>()
-//      : context.findAncestorStateOfType<_MelodyPlayerState>();
-
 
   @override
   _MelodyPlayerState createState() => _MelodyPlayerState();
@@ -127,8 +121,8 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
       });
     }
 
-    _positionSubscription.cancel();
-    _audioPlayerStateSubscription.cancel();
+//    _positionSubscription.cancel();
+//    _audioPlayerStateSubscription.cancel();
   }
 
   Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
@@ -156,53 +150,96 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
       });
   }
 
+  NumberFormat _numberFormatter = new NumberFormat("##");
+
   Widget _buildPlayer() => Container(
         padding: EdgeInsets.all(0),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
             color: Colors.white,
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 10,
+                  ),
+                  _position != null
+                      ? Text(
+                          '${_numberFormatter.format(_position.inMinutes)} : ${_numberFormatter.format(_position.inSeconds % 60)}',
+                          style: TextStyle(color: Colors.grey.shade700),
+                        )
+                      : Container(),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 5.0,
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 16.0),
+                      ),
+                      child: Slider(
+                          activeColor: MyColors.primaryColor,
+                          inactiveColor: Colors.grey.shade400,
+                          value: _position?.inMilliseconds?.toDouble() ?? 0.0,
+                          onChanged: (double value) {
+                            advancedPlayer
+                                .seek(Duration(seconds: value ~/ 1000));
+
+                            if (!isPlaying) {
+                              play();
+                            }
+                          },
+                          min: 0.0,
+                          max: _duration != null
+                              ? _duration?.inMilliseconds?.toDouble()
+                              : 1.7976931348623157e+308),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  _duration != null
+                      ? Text(
+                          '${_numberFormatter.format(_duration.inMinutes)} : ${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          style: TextStyle(color: Colors.grey.shade700),
+                        )
+                      : Container(),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
               _loading
                   ? Loading(indicator: BallPulseIndicator(), size: 25.0)
                   : !isPlaying
-                      ? IconButton(
-                          onPressed: isPlaying ? null : () => play(),
-                          iconSize: 24.0,
-                          icon: Icon(Icons.play_arrow),
-                          color: MyColors.primaryColor,
+                      ? Container(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade400),
+                          child: IconButton(
+                            onPressed: isPlaying ? null : () => play(),
+                            iconSize: 40.0,
+                            icon: Icon(Icons.play_arrow),
+                            color: MyColors.primaryColor,
+                          ),
                         )
-                      : IconButton(
-                          onPressed: isPlaying ? () => pause() : null,
-                          iconSize: 24.0,
-                          icon: Icon(Icons.pause),
-                          color: MyColors.primaryColor,
+                      : Container(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade400),
+                          child: IconButton(
+                            onPressed: isPlaying ? () => pause() : null,
+                            iconSize: 40.0,
+                            icon: Icon(Icons.pause),
+                            color: MyColors.primaryColor,
+                          ),
                         ),
-              Expanded(
-                flex: 9,
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 3.0,
-                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.0),
-                    overlayShape: RoundSliderOverlayShape(overlayRadius: 12.0),
-                  ),
-                  child: Slider(
-                      activeColor: MyColors.primaryColor,
-                      inactiveColor: Colors.grey.shade400,
-                      value: _position?.inMilliseconds?.toDouble() ?? 0.0,
-                      onChanged: (double value) {
-                        advancedPlayer.seek(Duration(seconds: value ~/ 1000));
-
-                        if (!isPlaying) {
-                          play();
-                        }
-                      },
-                      min: 0.0,
-                      max: _duration != null
-                          ? _duration?.inMilliseconds?.toDouble()
-                          : 1.7976931348623157e+308),
-                ),
-              ),
             ]),
           ),
         ),

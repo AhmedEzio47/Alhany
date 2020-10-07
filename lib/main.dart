@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
 import 'package:dubsmash/services/route_generator.dart';
@@ -25,8 +26,10 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+          primaryColor: MyColors.primaryColor,
+          primaryColorDark: MyColors.darkPrimaryColor,
+          primaryColorLight: MyColors.lightPrimaryColor,
+          brightness: Brightness.light,
         ),
 //      home: MyHomePage(title: 'Flutter Demo Home Page'),
         initialRoute: '/',

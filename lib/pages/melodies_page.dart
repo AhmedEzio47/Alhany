@@ -18,7 +18,6 @@ class MelodiesPage extends StatefulWidget {
 
 class _MelodiesPageState extends State<MelodiesPage> {
   List<Melody> _melodies = [];
-  MelodyPlayer _melodyPlayer;
   getMelodies() async {
     List<Melody> melodies = await DatabaseService.getMelodies();
     setState(() {
@@ -43,28 +42,14 @@ class _MelodiesPageState extends State<MelodiesPage> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-                    if(_melodyPlayer != null){
-                      MelodyPlayer.of(context).stop();
-                    }
-                    setState(() {
-                      _melodyPlayer = MelodyPlayer(
-                        url: _melodies[index].audioUrl,
-                      );
-                    });
+                    Navigator.of(context).pushNamed('/melody-page',
+                        arguments: {'melody': _melodies[index]});
                   },
                   child: MelodyItem(
                     melody: _melodies[index],
                   ),
                 );
               }),
-          _melodyPlayer != null ? Positioned.fill(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 200,
-              child: _melodyPlayer,
-            ),
-          )):Container()
         ],
       ),
       floatingActionButton: FloatingActionButton(

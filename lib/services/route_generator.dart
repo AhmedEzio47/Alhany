@@ -1,4 +1,6 @@
 import 'package:dubsmash/pages/app_page.dart';
+import 'package:dubsmash/pages/get_ready_modal.dart';
+import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/root.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,12 @@ class RouteGenerator {
 
       case '/welcome-page':
         return MaterialPageRoute(builder: (_) => WelcomePage());
+
+      case '/melody-page':
+        return MaterialPageRoute(
+            builder: (_) => MelodyPage(
+                  melody: args['melody'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third
