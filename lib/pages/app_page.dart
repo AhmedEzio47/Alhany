@@ -29,6 +29,7 @@ class _AppPageState extends State<AppPage> {
           index: _page,
           height: 55,
           backgroundColor: MyColors.primaryColor,
+          color: Colors.white,
           items: <Widget>[
             Icon(Icons.list, size: 30),
             Icon(Icons.mic, size: 30),

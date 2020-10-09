@@ -12,7 +12,6 @@ import 'package:http/http.dart';
 import 'package:loading/indicator/ball_pulse_indicator.dart';
 import 'package:loading/loading.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:video_player/video_player.dart';
 
 typedef void OnError(Exception exception);
 
@@ -22,38 +21,55 @@ class MelodyPlayer extends StatefulWidget {
   final String url;
   MelodyPlayer({Key key, @required this.url}) : super(key: key);
 
+  AudioPlayer advancedPlayer = AudioPlayer();
+  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+  bool loading = false;
+
+  Duration duration;
+  Duration position;
+
+  Future play() async {
+    print('audio url: $url');
+
+    loading = true;
+
+    await advancedPlayer.play(url);
+
+    loading = false;
+
+    playerState = AudioPlayerState.PLAYING;
+  }
+
+  Future stop() async {
+    await advancedPlayer.stop();
+
+    playerState = AudioPlayerState.STOPPED;
+    position = duration;
+  }
+
   @override
   _MelodyPlayerState createState() => _MelodyPlayerState();
 }
 
 class _MelodyPlayerState extends State<MelodyPlayer> {
-  bool _loading = false;
-
   _MelodyPlayerState();
 
-  Duration _duration;
-  Duration _position;
-
-  AudioPlayer advancedPlayer = AudioPlayer();
   AudioCache audioCache;
 
   String localFilePath;
 
-  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+  get isPlaying => widget.playerState == AudioPlayerState.PLAYING;
+  get isPaused => widget.playerState == AudioPlayerState.PAUSED;
 
-  get isPlaying => playerState == AudioPlayerState.PLAYING;
-  get isPaused => playerState == AudioPlayerState.PAUSED;
+  get durationText => widget.duration != null
+      ? widget.duration.toString().split('.').first
+      : '';
 
-  get durationText =>
-      _duration != null ? _duration.toString().split('.').first : '';
-
-  get positionText =>
-      _position != null ? _position.toString().split('.').first : '';
+  get positionText => widget.position != null
+      ? widget.position.toString().split('.').first
+      : '';
 
   bool isMuted = false;
-
-  StreamSubscription _positionSubscription;
-  StreamSubscription _audioPlayerStateSubscription;
 
   @override
   void initState() {
@@ -69,19 +85,19 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
   }
 
   void initAudioPlayer() {
-    advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    advancedPlayer.durationHandler = (d) => setState(() {
-          _duration = d;
+    widget.advancedPlayer = AudioPlayer();
+    audioCache = AudioCache(fixedPlayer: widget.advancedPlayer);
+    widget.advancedPlayer.durationHandler = (d) => setState(() {
+          widget.duration = d;
         });
 
-    advancedPlayer.positionHandler = (p) => setState(() {
-          _position = p;
-          print('d:${_duration.inMilliseconds} - p:${p.inMilliseconds}');
-          if (_duration.inMilliseconds - p.inMilliseconds < 200) {
+    widget.advancedPlayer.positionHandler = (p) => setState(() {
+          widget.position = p;
+          print('d:${widget.duration.inMilliseconds} - p:${p.inMilliseconds}');
+          if (widget.duration.inMilliseconds - p.inMilliseconds < 200) {
             setState(() {
-              playerState = AudioPlayerState.STOPPED;
-              _duration = null;
+              widget.playerState = AudioPlayerState.STOPPED;
+              widget.duration = null;
             });
           }
         });
@@ -90,39 +106,35 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
   Future play() async {
     print('audio url: ${widget.url}');
     setState(() {
-      _loading = true;
+      widget.loading = true;
     });
-    await advancedPlayer.play(widget.url);
+    await widget.advancedPlayer.play(widget.url);
     setState(() {
-      _loading = false;
+      widget.loading = false;
     });
     setState(() {
-      playerState = AudioPlayerState.PLAYING;
+      widget.playerState = AudioPlayerState.PLAYING;
     });
   }
 
   Future _playLocal() async {
-    await advancedPlayer.play(localFilePath, isLocal: true);
-    setState(() => playerState = AudioPlayerState.PLAYING);
+    await widget.advancedPlayer.play(localFilePath, isLocal: true);
+    setState(() => widget.playerState = AudioPlayerState.PLAYING);
   }
 
   Future pause() async {
-    await advancedPlayer.pause();
-    setState(() => playerState = AudioPlayerState.PAUSED);
+    await widget.advancedPlayer.pause();
+    setState(() => widget.playerState = AudioPlayerState.PAUSED);
   }
 
   Future stop() async {
-    await advancedPlayer.stop();
-
+    await widget.advancedPlayer.stop();
     if (mounted) {
       setState(() {
-        playerState = AudioPlayerState.STOPPED;
-        _position = _duration;
+        widget.playerState = AudioPlayerState.STOPPED;
+        widget.position = widget.duration;
       });
     }
-
-//    _positionSubscription.cancel();
-//    _audioPlayerStateSubscription.cancel();
   }
 
   Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
@@ -164,9 +176,9 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                   SizedBox(
                     width: 10,
                   ),
-                  _position != null
+                  widget.position != null
                       ? Text(
-                          '${_numberFormatter.format(_position.inMinutes)} : ${_numberFormatter.format(_position.inSeconds % 60)}',
+                          '${_numberFormatter.format(widget.position.inMinutes)} : ${_numberFormatter.format(widget.position.inSeconds % 60)}',
                           style: TextStyle(color: Colors.grey.shade700),
                         )
                       : Container(),
@@ -186,9 +198,10 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                       child: Slider(
                           activeColor: MyColors.primaryColor,
                           inactiveColor: Colors.grey.shade400,
-                          value: _position?.inMilliseconds?.toDouble() ?? 0.0,
+                          value: widget.position?.inMilliseconds?.toDouble() ??
+                              0.0,
                           onChanged: (double value) {
-                            advancedPlayer
+                            widget.advancedPlayer
                                 .seek(Duration(seconds: value ~/ 1000));
 
                             if (!isPlaying) {
@@ -196,17 +209,17 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                             }
                           },
                           min: 0.0,
-                          max: _duration != null
-                              ? _duration?.inMilliseconds?.toDouble()
+                          max: widget.duration != null
+                              ? widget.duration?.inMilliseconds?.toDouble()
                               : 1.7976931348623157e+308),
                     ),
                   ),
                   SizedBox(
                     width: 10,
                   ),
-                  _duration != null
+                  widget.duration != null
                       ? Text(
-                          '${_numberFormatter.format(_duration.inMinutes)} : ${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          '${_numberFormatter.format(widget.duration.inMinutes)} : ${_numberFormatter.format(widget.duration.inSeconds % 60)}',
                           style: TextStyle(color: Colors.grey.shade700),
                         )
                       : Container(),
@@ -215,7 +228,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                   ),
                 ],
               ),
-              _loading
+              widget.loading
                   ? Loading(indicator: BallPulseIndicator(), size: 25.0)
                   : !isPlaying
                       ? Container(
@@ -250,18 +263,18 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
       Padding(
         padding: EdgeInsets.all(0),
         child: CircularProgressIndicator(
-          value: _position != null && _position.inMilliseconds > 0
-              ? (_position?.inMilliseconds?.toDouble() ?? 0.0) /
-                  (_duration?.inMilliseconds?.toDouble() ?? 0.0)
+          value: widget.position != null && widget.position.inMilliseconds > 0
+              ? (widget.position?.inMilliseconds?.toDouble() ?? 0.0) /
+                  (widget.duration?.inMilliseconds?.toDouble() ?? 0.0)
               : 0.0,
           valueColor: AlwaysStoppedAnimation(Colors.cyan),
           backgroundColor: Colors.grey.shade400,
         ),
       ),
       Text(
-        _position != null
+        widget.position != null
             ? "${positionText ?? ''} / ${durationText ?? ''}"
-            : _duration != null ? durationText : '',
+            : widget.duration != null ? durationText : '',
         style: TextStyle(fontSize: 16.0),
       )
     ]);

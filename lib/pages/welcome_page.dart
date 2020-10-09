@@ -35,6 +35,8 @@ class _WelcomePageState extends State<WelcomePage>
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
 
+  Color _prefixIconColor = Colors.grey.shade500;
+
   @override
   void initState() {
     super.initState();
@@ -201,23 +203,23 @@ class _WelcomePageState extends State<WelcomePage>
                 ),
               ),
             ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "EMAIL",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+//            new Row(
+//              children: <Widget>[
+//                new Expanded(
+//                  child: new Padding(
+//                    padding: const EdgeInsets.only(left: 40.0),
+//                    child: new Text(
+//                      "EMAIL",
+//                      style: TextStyle(
+//                        fontWeight: FontWeight.bold,
+//                        color: MyColors.primaryColor,
+//                        fontSize: 15.0,
+//                      ),
+//                    ),
+//                  ),
+//                ),
+//              ],
+//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -241,6 +243,10 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: false,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.mail_outline,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
                         hintText: 'johndoe@example.com',
                         hintStyle: TextStyle(color: Colors.grey),
@@ -250,26 +256,26 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-            Divider(
-              height: 24.0,
-            ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "PASSWORD",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+//            Divider(
+//              height: 24.0,
+//            ),
+//            new Row(
+//              children: <Widget>[
+//                new Expanded(
+//                  child: new Padding(
+//                    padding: const EdgeInsets.only(left: 40.0),
+//                    child: new Text(
+//                      "PASSWORD",
+//                      style: TextStyle(
+//                        fontWeight: FontWeight.bold,
+//                        color: MyColors.primaryColor,
+//                        fontSize: 15.0,
+//                      ),
+//                    ),
+//                  ),
+//                ),
+//              ],
+//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -293,8 +299,12 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: true,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
-                        hintText: '********',
+                        hintText: 'Password',
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -302,9 +312,9 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-            Divider(
-              height: 24.0,
-            ),
+//            Divider(
+//              height: 24.0,
+//            ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
@@ -543,23 +553,7 @@ class _WelcomePageState extends State<WelcomePage>
                 ),
               ),
             ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "EMAIL",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -583,6 +577,10 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: false,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.mail_outline,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
                         hintText: 'johndoe@example.com',
                         hintStyle: TextStyle(color: Colors.grey),
@@ -591,26 +589,6 @@ class _WelcomePageState extends State<WelcomePage>
                   ),
                 ],
               ),
-            ),
-            Divider(
-              height: 24.0,
-            ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "Name",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
             new Container(
               width: MediaQuery.of(context).size.width,
@@ -635,34 +613,18 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: false,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.person_outline,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
-                        hintText: 'John Doe',
+                        hintText: 'Name (ex: John Doe)',
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-            Divider(
-              height: 24.0,
-            ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "PASSWORD",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
             new Container(
               width: MediaQuery.of(context).size.width,
@@ -687,8 +649,12 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: true,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
-                        hintText: '********',
+                        hintText: 'Password',
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -696,26 +662,26 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-            Divider(
-              height: 24.0,
-            ),
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: new Text(
-                      "CONFIRM PASSWORD",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+//            Divider(
+//              height: 24.0,
+//            ),
+//            new Row(
+//              children: <Widget>[
+//                new Expanded(
+//                  child: new Padding(
+//                    padding: const EdgeInsets.only(left: 40.0),
+//                    child: new Text(
+//                      "CONFIRM PASSWORD",
+//                      style: TextStyle(
+//                        fontWeight: FontWeight.bold,
+//                        color: MyColors.primaryColor,
+//                        fontSize: 15.0,
+//                      ),
+//                    ),
+//                  ),
+//                ),
+//              ],
+//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -739,8 +705,12 @@ class _WelcomePageState extends State<WelcomePage>
                       obscureText: true,
                       textAlign: TextAlign.left,
                       decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.lock,
+                          color: _prefixIconColor,
+                        ),
                         border: InputBorder.none,
-                        hintText: '********',
+                        hintText: 'Confirm Password',
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -773,7 +743,7 @@ class _WelcomePageState extends State<WelcomePage>
             ),
             Container(
               width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 50.0),
+              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 20.0),
               alignment: Alignment.center,
               child: new Row(
                 children: <Widget>[
@@ -825,7 +795,7 @@ class _WelcomePageState extends State<WelcomePage>
     _pageController.animateToPage(
       0,
       duration: Duration(milliseconds: 800),
-      curve: Curves.bounceOut,
+      curve: Curves.easeOut,
     );
   }
 
@@ -834,7 +804,7 @@ class _WelcomePageState extends State<WelcomePage>
     _pageController.animateToPage(
       2,
       duration: Duration(milliseconds: 800),
-      curve: Curves.bounceOut,
+      curve: Curves.easeOut,
     );
   }
 

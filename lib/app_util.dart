@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 
 import 'constants/colors.dart';
 import 'constants/constants.dart';
@@ -28,21 +29,31 @@ List<String> searchList(String text) {
 }
 
 class AppUtil {
-  static void alertDialog(
-      BuildContext context, String heading, String message, String okBtn) {
+  static void showAlertDialog(
+      {@required BuildContext context,
+      String heading,
+      String message,
+      String firstBtnText,
+      String secondBtnText,
+      Function firstFunc,
+      Function secondFunc}) {
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text(heading),
+            title: heading != null ? Text(heading) : null,
             content: Text(message),
             actions: <Widget>[
               MaterialButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(okBtn),
-              )
+                onPressed: firstFunc,
+                child: Text(firstBtnText),
+              ),
+              secondBtnText != null
+                  ? MaterialButton(
+                      onPressed: secondFunc,
+                      child: Text(secondBtnText),
+                    )
+                  : Container(),
             ],
           );
         });
@@ -90,5 +101,22 @@ class AppUtil {
     String url = await storageReference.getDownloadURL();
 
     return url;
+  }
+
+  static Future<String> downloadFile(String url) async {
+    var response = await get(url);
+    var firstPath = '/sdcard/download/';
+    var contentDisposition = response.headers['content-disposition'];
+    String fileName = contentDisposition
+        .split('filename*=utf-8')
+        .last
+        .replaceAll(RegExp('%20'), ' ')
+        .replaceAll(RegExp('%2C|\''), '');
+    String filePathAndName = firstPath + fileName;
+    filePathAndName = filePathAndName.replaceAll(' ', '_');
+    File file = new File(filePathAndName);
+    file.writeAsBytesSync(response.bodyBytes);
+
+    return filePathAndName;
   }
 }

@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String recordingFilePath;
   String selectedVideoPath = '/sdcard/Download/Criminal.mp4';
   String mergedFilePath = '/sdcard/Download/Criminal_new.mp4';
+  FlutterFFmpeg flutterFFmpeg;
 
   VideoPlayerController _controller;
 
@@ -72,7 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
   }
 
-  FlutterFFmpeg flutterFFmpeg;
   @override
   void initState() {
     flutterFFmpeg = FlutterFFmpeg();
@@ -88,11 +88,15 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       bool isGranted = await PermissionsService().requestMicrophonePermission(
           onPermissionDenied: () {
-        AppUtil.alertDialog(
-            context,
-            'info',
-            'You must grant this microphone access to be able to use this feature.',
-            'OK');
+        AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message:
+                'You must grant this microphone access to be able to use this feature.',
+            firstBtnText: 'OK',
+            firstFunc: () {
+              Navigator.of(context).pop();
+            });
         print('Permission has been denied');
       });
       setState(() {
