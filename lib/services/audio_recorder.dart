@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dubsmash/pages/melody_page.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
 class AudioRecorder {
@@ -6,7 +7,11 @@ class AudioRecorder {
   Recording _recording;
   Timer timer;
 
-  Future init() async {
+  AudioRecorder() {
+    init();
+  }
+
+  void init() async {
     String customPath = '/sdcard/download/';
 
     // can add extension like ".mp4" ".wav" ".m4a" ".aac"
@@ -19,8 +24,6 @@ class AudioRecorder {
     _recorder = FlutterAudioRecorder(customPath,
         audioFormat: AudioFormat.WAV, sampleRate: 22050);
     await _recorder.initialized;
-
-    return customPath;
   }
 
   Future startRecording({var conversation}) async {
@@ -34,9 +37,6 @@ class AudioRecorder {
 
       _recording = current;
       timer = t;
-//     if(conversation != null){
-//       conversation.updateRecordTime(timer.tick.toString());
-//     }
     });
   }
 

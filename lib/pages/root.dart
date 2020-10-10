@@ -1,5 +1,6 @@
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
+import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
@@ -63,11 +64,15 @@ class _RootPageState extends State<RootPage> {
         user.isEmailVerified &&
         ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
+
+      User star = await DatabaseService.getUserWithId(Strings.starId);
+
       setState(() {
         Constants.currentUser = loggedInUser;
         Constants.currentFirebaseUser = user;
         Constants.currentUserID = user?.uid;
         authStatus = AuthStatus.LOGGED_IN;
+        Constants.startUser = star;
       });
     } else if (user?.uid != null && !(user.isEmailVerified)) {
       print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');

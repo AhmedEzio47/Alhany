@@ -21,7 +21,6 @@ class RecordItem extends StatefulWidget {
 class _RecordItemState extends State<RecordItem> {
   User _singer;
   Melody _melody;
-  bool _isFavourite = false;
 
   @override
   void initState() {
@@ -71,11 +70,7 @@ class _RecordItemState extends State<RecordItem> {
               defaultAssetImage: Strings.default_melody_image,
             ),
           ),
-          title: InkWell(
-              onTap: () {
-                _goToProfilePage();
-              },
-              child: Text(_singer?.name ?? '')),
+          title: Text(_singer?.name ?? ''),
           subtitle: InkWell(
             child: Text(_melody?.name ?? ''),
             onTap: () async {

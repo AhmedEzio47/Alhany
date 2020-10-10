@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
@@ -22,54 +20,55 @@ import 'package:random_string/random_string.dart';
 class MelodyPage extends StatefulWidget {
   final Melody melody;
 
-  const MelodyPage({Key key, this.melody}) : super(key: key);
+  MelodyPage({Key key, this.melody}) : super(key: key);
 
   @override
   _MelodyPageState createState() => _MelodyPageState();
 }
 
 class _MelodyPageState extends State<MelodyPage> {
-  num _start = 3;
-  String _getReadyText = 'Get Ready';
-  Timer _timer;
+  num _countDownStart = 3;
+  String _countDownText = 'Get Ready';
 
-  bool _getReady = false;
+  bool _countDownVisible = false;
 
-  MusicPlayer _melodyPlayer;
+  bool isMicrophoneGranted = false;
+
+  RecordingStatus recordingStatus = RecordingStatus.Unset;
+  MusicPlayer melodyPlayer;
   AudioRecorder recorder;
 
   String recordingFilePath;
   String recordingFilePathMp3 = '/sdcard/download/';
   String melodyPath = '/sdcard/download/';
   String mergedFilePath = '/sdcard/download/';
-  bool isMicrophoneGranted = false;
-  var _currentRecordingStatus = RecordingStatus.Unset;
+
   FlutterFFmpeg flutterFFmpeg;
 
   String _isDuplicate;
 
-  _changeText() {
+  _countDown() {
     const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
+    Timer.periodic(
       oneSec,
       (Timer timer) {
-        if (_start == 0) {
+        if (_countDownStart == 0) {
           setState(() {
-            _getReadyText = 'GO';
-            _start--;
+            _countDownText = 'GO';
+            _countDownStart--;
           });
-        } else if (_start < 0) {
+        } else if (_countDownStart < 0) {
           setState(() {
-            _getReady = false;
-            _start = 3;
-            _getReadyText = 'Get Ready';
+            _countDownVisible = false;
+            _countDownStart = 3;
+            _countDownText = 'Get Ready';
           });
           timer.cancel();
           _record();
         } else {
           setState(() {
-            _getReadyText = '$_start';
-            _start--;
+            _countDownText = '$_countDownStart';
+            _countDownStart--;
           });
         }
       },
@@ -97,7 +96,7 @@ class _MelodyPageState extends State<MelodyPage> {
     if (await PermissionsService().hasStoragePermission()) {
       await _downloadMelody();
     } else {
-      PermissionsService().requestStoragePermission();
+      await PermissionsService().requestStoragePermission();
       return;
     }
     if (await PermissionsService().hasMicrophonePermission()) {
@@ -126,60 +125,12 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        _currentRecordingStatus = RecordingStatus.Recording;
+        recordingStatus = RecordingStatus.Recording;
       });
       await initRecorder();
-      await _melodyPlayer.play();
+      await melodyPlayer.play();
       await recorder.startRecording(conversation: this.widget);
     } else {}
-  }
-
-  _saveRecord() async {
-    await _melodyPlayer.stop();
-    setState(() {
-      _currentRecordingStatus = RecordingStatus.Stopped;
-    });
-
-    Recording result = await recorder.stopRecording();
-    recordingFilePath = result.path;
-    //TODO use in case of need of conversion
-//                          recordingFilePathMp3 +=
-//                              path.basenameWithoutExtension(recordingFilePath) +
-//                                  '.mp3';
-//
-//                          int convertSuccess = await flutterFFmpeg.execute(
-//                              '-i $recordingFilePath -vn -ar 44100 -ac 2 -b:a 192k $recordingFilePathMp3');
-//                          print(convertSuccess == 1
-//                              ? 'Conversion Failure!'
-//                              : 'Conversion Success!');
-    int success = await flutterFFmpeg.execute(
-        "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
-    AppUtil.showAlertDialog(
-        context: context,
-        message: 'Do you want to submit the record?',
-        firstBtnText: 'Submit',
-        secondBtnText: 'Preview',
-        firstFunc: () async {
-          await _submitRecord();
-          Navigator.of(context).pop(false);
-        },
-        secondFunc: () {});
-    print(success == 1 ? 'Failure!' : 'Success!');
-  }
-
-  _submitRecord() async {
-    String recordId;
-
-    _isDuplicate == null
-        ? recordId = randomAlphaNumeric(20)
-        : recordId = _isDuplicate;
-
-    String url = await AppUtil.uploadFile(File(mergedFilePath), context,
-        'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
-
-    await DatabaseService.saveRecord(widget.melody.id, recordId, url);
-
-    AppUtil.showToast('Submitted!');
   }
 
   Widget _headphonesDialog() {
@@ -233,7 +184,10 @@ class _MelodyPageState extends State<MelodyPage> {
                   onPressed: () {
                     Navigator.of(context).pop(false);
                     print('hey I\'m here');
-                    _changeText();
+                    setState(() {
+                      _countDownVisible = true;
+                    });
+                    _countDown();
                   },
                 ),
               ),
@@ -242,16 +196,94 @@ class _MelodyPageState extends State<MelodyPage> {
         ));
   }
 
+  Future saveRecord() async {
+    Navigator.of(context).push(CustomModal(
+        child: FlipLoader(
+            loaderBackground: MyColors.primaryColor,
+            iconColor: Colors.white,
+            icon: Icons.music_note,
+            animationType: "full_flip")));
+
+    setState(() {
+      recordingStatus = RecordingStatus.Stopped;
+    });
+    await melodyPlayer.stop();
+
+    Recording result = await recorder.stopRecording();
+    recordingFilePath = result.path;
+    //TODO use in case of need of conversion
+//                          recordingFilePathMp3 +=
+//                              path.basenameWithoutExtension(recordingFilePath) +
+//                                  '.mp3';
+//
+//                          int convertSuccess = await flutterFFmpeg.execute(
+//                              '-i $recordingFilePath -vn -ar 44100 -ac 2 -b:a 192k $recordingFilePathMp3');
+//                          print(convertSuccess == 1
+//                              ? 'Conversion Failure!'
+//                              : 'Conversion Success!');
+    int success = await flutterFFmpeg.execute(
+        "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
+
+    Navigator.of(context).pop();
+
+    AppUtil.showAlertDialog(
+        context: context,
+        message: 'Do you want to submit the record?',
+        firstBtnText: 'Submit',
+        firstFunc: () async {
+          Navigator.of(context).pop(false);
+          await submitRecord();
+        },
+        secondBtnText: 'Preview',
+        secondFunc: () {
+          musicPlayer = MusicPlayer(
+              url: mergedFilePath,
+              isLocal: true,
+              backColor: MyColors.primaryColor);
+          Navigator.of(context).push(CustomModal(
+              child: Container(
+            child: Column(
+              children: [],
+            ),
+          )));
+        });
+    print(success == 1 ? 'Failure!' : 'Success!');
+  }
+
+  submitRecord() async {
+    Navigator.of(context).push(CustomModal(
+        child: FlipLoader(
+            loaderBackground: MyColors.primaryColor,
+            iconColor: Colors.white,
+            icon: Icons.music_note,
+            animationType: "full_flip")));
+
+    String recordId;
+
+    _isDuplicate == null
+        ? recordId = randomAlphaNumeric(20)
+        : recordId = _isDuplicate;
+
+    String url = await AppUtil.uploadFile(File(mergedFilePath), context,
+        'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+
+    await DatabaseService.saveRecord(widget.melody.id, recordId, url);
+
+    Navigator.of(context).pop();
+
+    AppUtil.showToast('Submitted!');
+  }
+
   initRecorder() async {
     recorder = AudioRecorder();
-    recordingFilePath = await recorder.init();
   }
 
   @override
   void initState() {
-    _melodyPlayer = MusicPlayer(
+    melodyPlayer = MusicPlayer(
       url: widget.melody.audioUrl,
       backColor: Colors.transparent,
+      onComplete: saveRecord,
     );
     flutterFFmpeg = FlutterFFmpeg();
     super.initState();
@@ -276,7 +308,7 @@ class _MelodyPageState extends State<MelodyPage> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 80,
+                    height: 70,
                   ),
                   Container(
                       width: 150,
@@ -295,15 +327,14 @@ class _MelodyPageState extends State<MelodyPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  _melodyPlayer,
+                  melodyPlayer,
                   SizedBox(
                     height: 40,
                   ),
                   InkWell(
                     onTap: () async {
-                      if (_currentRecordingStatus ==
-                          RecordingStatus.Recording) {
-                        await _saveRecord();
+                      if (recordingStatus == RecordingStatus.Recording) {
+                        await saveRecord();
                       } else {
                         if ((await PermissionsService()
                                 .hasStoragePermission()) &&
@@ -340,11 +371,12 @@ class _MelodyPageState extends State<MelodyPage> {
                         }
                         if (!await PermissionsService()
                             .hasStoragePermission()) {
-                          PermissionsService().requestStoragePermission();
+                          await PermissionsService().requestStoragePermission();
                         }
                         if (!await PermissionsService()
                             .hasMicrophonePermission()) {
-                          PermissionsService().requestMicrophonePermission();
+                          await PermissionsService()
+                              .requestMicrophonePermission();
                         }
                       }
                     },
@@ -354,7 +386,7 @@ class _MelodyPageState extends State<MelodyPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(30.0),
                         child: Icon(
-                          _currentRecordingStatus == RecordingStatus.Recording
+                          recordingStatus == RecordingStatus.Recording
                               ? Icons.stop
                               : Icons.mic,
                           color: MyColors.primaryColor,
@@ -369,22 +401,22 @@ class _MelodyPageState extends State<MelodyPage> {
                 ],
               ),
             ),
-            _getReady
+            _countDownVisible
                 ? Positioned.fill(
                     child: Align(
                       alignment: Alignment.center,
                       child: Container(
                         height: MediaQuery.of(context).size.height,
                         width: MediaQuery.of(context).size.width,
-                        color: Colors.black45,
+                        color: Colors.white,
                         alignment: Alignment.center,
                         child: Container(
-                          color: MyColors.lightPrimaryColor,
+                          color: MyColors.accentColor,
                           height: 200,
                           width: MediaQuery.of(context).size.width - 50,
                           child: Center(
                             child: Text(
-                              _getReadyText,
+                              _countDownText,
                               style: TextStyle(fontSize: 34),
                             ),
                           ),

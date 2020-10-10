@@ -7,4 +7,6 @@ class Strings {
       'assets/images/default_record_bg.jpg';
   static const String headphones_alert_bg =
       'assets/images/headphones_alert.jpg';
+
+  static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
 }

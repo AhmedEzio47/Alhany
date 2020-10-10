@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dubsmash/pages/melody_page.dart';
+import 'package:dubsmash/services/audio_recorder.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:intl/intl.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -20,11 +23,19 @@ enum PlayerState { stopped, playing, paused }
 class MusicPlayer extends StatefulWidget {
   final String url;
   final Color backColor;
-  MusicPlayer({Key key, @required this.url, this.backColor}) : super(key: key);
+  Function onComplete;
+  final bool isLocal;
+
+  MusicPlayer(
+      {Key key,
+      @required this.url,
+      this.backColor,
+      this.onComplete,
+      this.isLocal = false})
+      : super(key: key);
 
   AudioPlayer advancedPlayer = AudioPlayer();
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
-  bool loading = false;
 
   Duration duration;
   Duration position;
@@ -32,20 +43,16 @@ class MusicPlayer extends StatefulWidget {
   Future play() async {
     print('audio url: $url');
 
-    loading = true;
-
     await advancedPlayer.play(url);
-
-    loading = false;
 
     playerState = AudioPlayerState.PLAYING;
   }
 
   Future stop() async {
     await advancedPlayer.stop();
-
     playerState = AudioPlayerState.STOPPED;
-    position = duration;
+    position = null;
+    duration = null;
   }
 
   @override
@@ -56,8 +63,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
   _MusicPlayerState();
 
   AudioCache audioCache;
-
-  String localFilePath;
 
   get isPlaying => widget.playerState == AudioPlayerState.PLAYING;
   get isPaused => widget.playerState == AudioPlayerState.PAUSED;
@@ -96,31 +101,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
           widget.position = p;
           print('d:${widget.duration.inMilliseconds} - p:${p.inMilliseconds}');
           if (widget.duration.inMilliseconds - p.inMilliseconds < 200) {
-            setState(() {
-              widget.playerState = AudioPlayerState.STOPPED;
-              widget.duration = null;
-            });
+            stop();
           }
         });
   }
 
   Future play() async {
     print('audio url: ${widget.url}');
-    setState(() {
-      widget.loading = true;
-    });
-    await widget.advancedPlayer.play(widget.url);
-    setState(() {
-      widget.loading = false;
-    });
+
+    await widget.advancedPlayer.play(widget.url, isLocal: widget.isLocal);
+
     setState(() {
       widget.playerState = AudioPlayerState.PLAYING;
     });
-  }
-
-  Future _playLocal() async {
-    await widget.advancedPlayer.play(localFilePath, isLocal: true);
-    setState(() => widget.playerState = AudioPlayerState.PLAYING);
   }
 
   Future pause() async {
@@ -133,34 +126,14 @@ class _MusicPlayerState extends State<MusicPlayer> {
     if (mounted) {
       setState(() {
         widget.playerState = AudioPlayerState.STOPPED;
-        widget.position = widget.duration;
+        widget.position = null;
+        widget.duration = null;
       });
     }
-  }
 
-  Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
-    Uint8List bytes;
-    try {
-      bytes = await readBytes(url);
-    } on ClientException {
-      rethrow;
+    if (widget.onComplete != null) {
+      widget.onComplete();
     }
-    return bytes;
-  }
-
-  Future _loadFile() async {
-    final bytes = await _loadFileBytes(widget.url,
-        onError: (Exception exception) =>
-            print('_loadFile => exception $exception'));
-
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/audio.mp3');
-
-    await file.writeAsBytes(bytes);
-    if (await file.exists())
-      setState(() {
-        localFilePath = file.path;
-      });
   }
 
   NumberFormat _numberFormatter = new NumberFormat("##");
@@ -229,31 +202,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ),
                 ],
               ),
-              widget.loading
-                  ? Loading(indicator: BallPulseIndicator(), size: 25.0)
-                  : !isPlaying
-                      ? Container(
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade300),
-                          child: IconButton(
-                            onPressed: isPlaying ? null : () => play(),
-                            iconSize: 40.0,
-                            icon: Icon(Icons.play_arrow),
-                            color: MyColors.primaryColor,
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade300),
-                          child: IconButton(
-                            onPressed: isPlaying ? () => pause() : null,
-                            iconSize: 40.0,
-                            icon: Icon(Icons.pause),
-                            color: MyColors.primaryColor,
-                          ),
-                        ),
               SizedBox(
                 height: 10,
               )

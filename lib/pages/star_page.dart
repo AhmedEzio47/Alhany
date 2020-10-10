@@ -3,6 +3,7 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/services/database_service.dart';
+import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/list_items/record_item.dart';
 import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
@@ -52,31 +53,47 @@ class _StarPageState extends State<StarPage> {
           ),
           child: Stack(
             children: [
-              ListView.builder(
-                  itemCount: _records.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
-                        musicPlayer = MusicPlayer(
-                          url: _records[index].audioUrl,
-                          backColor: MyColors.accentColor.withOpacity(.7),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: RecordItem(
-                        record: _records[index],
-                      ),
-                    );
-                  }),
+              Column(
+                children: [
+                  CachedImage(
+                    width: MediaQuery.of(context).size.width,
+                    height: 250,
+                    imageShape: BoxShape.rectangle,
+                    imageUrl: Constants.startUser.profileImageUrl,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: _records.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () async {
+                              if (musicPlayer != null) {
+                                musicPlayer.stop();
+                              }
+                              musicPlayer = MusicPlayer(
+                                url: _records[index].audioUrl,
+                                backColor: Colors.white.withOpacity(.4),
+                              );
+                              setState(() {
+                                _isPlaying = true;
+                              });
+                            },
+                            child: RecordItem(
+                              record: _records[index],
+                            ),
+                          );
+                        }),
+                  ),
+                ],
+              ),
               _isPlaying
                   ? Positioned.fill(
                       child: Align(
-                      child: musicPlayer,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: musicPlayer,
+                      ),
                       alignment: Alignment.bottomCenter,
                     ))
                   : Container()

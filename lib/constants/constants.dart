@@ -24,8 +24,8 @@ AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 
 class Constants {
   static String currentUserID;
-
   static User currentUser;
-
   static FirebaseUser currentFirebaseUser;
+
+  static User startUser;
 }
