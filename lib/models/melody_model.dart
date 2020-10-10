@@ -5,6 +5,7 @@ class Melody {
   final String name;
   final String description;
   final String audioUrl;
+  final String imageUrl;
   final String authorId;
   final Timestamp timestamp;
 
@@ -13,6 +14,7 @@ class Melody {
       this.name,
       this.description,
       this.audioUrl,
+      this.imageUrl,
       this.authorId,
       this.timestamp});
 
@@ -22,6 +24,7 @@ class Melody {
         name: doc['name'],
         description: doc['description'] ?? '',
         audioUrl: doc['audio_url'],
+        imageUrl: doc['image_url'],
         authorId: doc['author_id'],
         timestamp: doc['timestamp']);
   }

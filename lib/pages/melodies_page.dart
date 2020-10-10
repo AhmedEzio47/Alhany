@@ -8,7 +8,7 @@ import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/list_items/melody_item.dart';
-import 'package:dubsmash/widgets/melody_player.dart';
+import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 

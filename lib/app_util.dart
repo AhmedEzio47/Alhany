@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 
 import 'constants/colors.dart';
 import 'constants/constants.dart';
+import 'constants/strings.dart';
 
 saveToken() async {
   String token = await FirebaseMessaging().getToken();
@@ -75,6 +76,21 @@ class AppUtil {
         .pickFiles(type: FileType.custom, allowedExtensions: [
       'mp3',
       'wav',
+    ]);
+
+    if (result != null) {
+      File file = File(result.files.single.path);
+      return file;
+    }
+
+    return null;
+  }
+
+  static Future<File> chooseImage() async {
+    FilePickerResult result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: [
+      'jpg',
+      'png',
     ]);
 
     if (result != null) {

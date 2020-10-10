@@ -1,6 +1,8 @@
 import 'package:dubsmash/constants/colors.dart';
+import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/pages/melodies_page.dart';
 import 'package:dubsmash/pages/profile_page.dart';
+import 'package:dubsmash/pages/star_page.dart';
 import 'package:dubsmash/widgets/curved_navigation_bar.dart';
 import 'package:dubsmash/widgets/drawer.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,7 @@ class _AppPageState extends State<AppPage> {
           backgroundColor: MyColors.primaryColor,
           color: Colors.white,
           items: <Widget>[
-            Icon(Icons.list, size: 30),
+            Icon(Icons.star, size: 30),
             Icon(Icons.mic, size: 30),
             Icon(Icons.person, size: 30),
           ],
@@ -45,9 +47,11 @@ class _AppPageState extends State<AppPage> {
           controller: _pageController,
           onPageChanged: _onPageChanged,
           children: [
+            StarPage(),
             MelodiesPage(),
-            MelodiesPage(),
-            ProfilePage(),
+            ProfilePage(
+              userId: Constants.currentUserID,
+            ),
           ],
         ));
   }

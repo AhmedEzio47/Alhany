@@ -17,9 +17,10 @@ typedef void OnError(Exception exception);
 
 enum PlayerState { stopped, playing, paused }
 
-class MelodyPlayer extends StatefulWidget {
+class MusicPlayer extends StatefulWidget {
   final String url;
-  MelodyPlayer({Key key, @required this.url}) : super(key: key);
+  final Color backColor;
+  MusicPlayer({Key key, @required this.url, this.backColor}) : super(key: key);
 
   AudioPlayer advancedPlayer = AudioPlayer();
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
@@ -48,11 +49,11 @@ class MelodyPlayer extends StatefulWidget {
   }
 
   @override
-  _MelodyPlayerState createState() => _MelodyPlayerState();
+  _MusicPlayerState createState() => _MusicPlayerState();
 }
 
-class _MelodyPlayerState extends State<MelodyPlayer> {
-  _MelodyPlayerState();
+class _MusicPlayerState extends State<MusicPlayer> {
+  _MusicPlayerState();
 
   AudioCache audioCache;
 
@@ -169,7 +170,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            color: Colors.white,
+            color: widget.backColor,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Row(
                 children: [
@@ -179,7 +180,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                   widget.position != null
                       ? Text(
                           '${_numberFormatter.format(widget.position.inMinutes)} : ${_numberFormatter.format(widget.position.inSeconds % 60)}',
-                          style: TextStyle(color: Colors.grey.shade700),
+                          style: TextStyle(color: Colors.white),
                         )
                       : Container(),
                   SizedBox(
@@ -196,8 +197,8 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                             RoundSliderOverlayShape(overlayRadius: 16.0),
                       ),
                       child: Slider(
-                          activeColor: MyColors.primaryColor,
-                          inactiveColor: Colors.grey.shade400,
+                          activeColor: MyColors.darkPrimaryColor,
+                          inactiveColor: Colors.grey.shade300,
                           value: widget.position?.inMilliseconds?.toDouble() ??
                               0.0,
                           onChanged: (double value) {
@@ -220,7 +221,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                   widget.duration != null
                       ? Text(
                           '${_numberFormatter.format(widget.duration.inMinutes)} : ${_numberFormatter.format(widget.duration.inSeconds % 60)}',
-                          style: TextStyle(color: Colors.grey.shade700),
+                          style: TextStyle(color: Colors.white),
                         )
                       : Container(),
                   SizedBox(
@@ -234,7 +235,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                       ? Container(
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.grey.shade400),
+                              color: Colors.grey.shade300),
                           child: IconButton(
                             onPressed: isPlaying ? null : () => play(),
                             iconSize: 40.0,
@@ -245,7 +246,7 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                       : Container(
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.grey.shade400),
+                              color: Colors.grey.shade300),
                           child: IconButton(
                             onPressed: isPlaying ? () => pause() : null,
                             iconSize: 40.0,
@@ -253,6 +254,9 @@ class _MelodyPlayerState extends State<MelodyPlayer> {
                             color: MyColors.primaryColor,
                           ),
                         ),
+              SizedBox(
+                height: 10,
+              )
             ]),
           ),
         ),

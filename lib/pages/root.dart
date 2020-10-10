@@ -25,6 +25,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
+    authAssignment();
     super.initState();
   }
 

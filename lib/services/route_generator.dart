@@ -1,5 +1,6 @@
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/melody_page.dart';
+import 'package:dubsmash/pages/profile_page.dart';
 import 'package:dubsmash/pages/root.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,12 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => MelodyPage(
                   melody: args['melody'],
+                ));
+
+      case '/profile-page':
+        return MaterialPageRoute(
+            builder: (_) => ProfilePage(
+                  userId: args['user_id'],
                 ));
 
       default:
