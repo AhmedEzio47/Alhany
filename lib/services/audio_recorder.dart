@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
@@ -12,7 +13,7 @@ class AudioRecorder {
   }
 
   void init() async {
-    String customPath = '/sdcard/download/';
+    String customPath = appTempDirectoryPath;
 
     // can add extension like ".mp4" ".wav" ".m4a" ".aac"
     customPath = customPath + DateTime.now().millisecondsSinceEpoch.toString();

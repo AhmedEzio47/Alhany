@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/pages/profile_page.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class BuildDrawer extends StatefulWidget {
@@ -33,10 +32,10 @@ class _BuildDrawerState extends State<BuildDrawer> {
                         MaterialPageRoute(builder: (context) => ProfilePage()));
                   },
                   child: CircleAvatar(
-                    radius: 35.0,
+                    radius: 50.0,
                     backgroundColor: Theme.of(context).primaryColor,
                     backgroundImage:
-                        Constants.currentUser.profileImageUrl != null
+                        Constants.currentUser?.profileImageUrl != null
                             ? CachedNetworkImageProvider(
                                 Constants.currentUser.profileImageUrl)
                             : AssetImage(Strings.default_profile_image),
@@ -48,7 +47,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        Constants.currentUser.name ?? '',
+                        Constants.currentUser?.name ?? '',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 20),
                       ),
@@ -66,19 +65,22 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ListTile(
             onTap: () async {
               try {
-                String token = await FirebaseMessaging().getToken();
-                usersRef
-                    .document(Constants.currentUserID)
-                    .collection('tokens')
-                    .document(token)
-                    .updateData({
-                  'modifiedAt': FieldValue.serverTimestamp(),
-                  'signed': false
-                });
+                // String token = await FirebaseMessaging().getToken();
+                // usersRef
+                //     .document(Constants.currentUserID)
+                //     .collection('tokens')
+                //     .document(token)
+                //     .updateData({
+                //   'modifiedAt': FieldValue.serverTimestamp(),
+                //   'signed': false
+                // });
 
                 await firebaseAuth.signOut();
 
                 setState(() {
+                  Constants.currentFirebaseUser = null;
+                  Constants.currentUserID = null;
+                  Constants.currentUser = null;
                   authStatus = AuthStatus.NOT_LOGGED_IN;
                 });
                 print('Now, authStatus = $authStatus');

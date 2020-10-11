@@ -162,7 +162,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Future _saveEdits() async {
     await usersRef.document(Constants.currentUserID).updateData({
       'name': _nameController.text,
-      'description': _descriptionController.text
+      'description': _descriptionController.text,
+      'search': searchList(_nameController.text)
     });
     User user = await DatabaseService.getUserWithId(Constants.currentUserID);
     setState(() {

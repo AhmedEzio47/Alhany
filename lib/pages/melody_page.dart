@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
 
 class MelodyPage extends StatefulWidget {
@@ -39,9 +40,9 @@ class _MelodyPageState extends State<MelodyPage> {
   AudioRecorder recorder;
 
   String recordingFilePath;
-  String recordingFilePathMp3 = '/sdcard/download/';
-  String melodyPath = '/sdcard/download/';
-  String mergedFilePath = '/sdcard/download/';
+  //String recordingFilePathMp3;
+  String melodyPath;
+  String mergedFilePath;
 
   FlutterFFmpeg flutterFFmpeg;
 
@@ -236,14 +237,33 @@ class _MelodyPageState extends State<MelodyPage> {
         },
         secondBtnText: 'Preview',
         secondFunc: () {
+          Navigator.of(context).pop();
           musicPlayer = MusicPlayer(
               url: mergedFilePath,
               isLocal: true,
               backColor: MyColors.primaryColor);
+
           Navigator.of(context).push(CustomModal(
               child: Container(
             child: Column(
-              children: [],
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                musicPlayer,
+                SizedBox(
+                  height: 10,
+                ),
+                RaisedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop(false);
+                    await submitRecord();
+                  },
+                  color: MyColors.primaryColor,
+                  child: Text(
+                    'Submit',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           )));
         });
@@ -268,10 +288,16 @@ class _MelodyPageState extends State<MelodyPage> {
         'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
 
     await DatabaseService.saveRecord(widget.melody.id, recordId, url);
-
+    _deleteFiles();
     Navigator.of(context).pop();
 
     AppUtil.showToast('Submitted!');
+  }
+
+  _deleteFiles() async {
+    final dir = Directory(appTempDirectoryPath);
+    await dir.delete(recursive: true);
+    await AppUtil.createAppDirectory();
   }
 
   initRecorder() async {
@@ -280,6 +306,10 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   void initState() {
+    recordingFilePath = appTempDirectoryPath;
+    melodyPath = appTempDirectoryPath;
+    mergedFilePath = appTempDirectoryPath;
+
     melodyPlayer = MusicPlayer(
       url: widget.melody.audioUrl,
       backColor: Colors.transparent,
@@ -382,7 +412,17 @@ class _MelodyPageState extends State<MelodyPage> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.grey.shade300, shape: BoxShape.circle),
+                        color: Colors.grey.shade300,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black54,
+                            spreadRadius: 4,
+                            blurRadius: 6,
+                            offset: Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(30.0),
                         child: Icon(
@@ -402,23 +442,21 @@ class _MelodyPageState extends State<MelodyPage> {
               ),
             ),
             _countDownVisible
-                ? Positioned.fill(
-                    child: Align(
+                ? Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black45,
                       alignment: Alignment.center,
                       child: Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.white,
-                        alignment: Alignment.center,
-                        child: Container(
-                          color: MyColors.accentColor,
-                          height: 200,
-                          width: MediaQuery.of(context).size.width - 50,
-                          child: Center(
-                            child: Text(
-                              _countDownText,
-                              style: TextStyle(fontSize: 34),
-                            ),
+                        color: MyColors.accentColor,
+                        height: 200,
+                        width: MediaQuery.of(context).size.width - 50,
+                        child: Center(
+                          child: Text(
+                            _countDownText,
+                            style: TextStyle(fontSize: 34),
                           ),
                         ),
                       ),

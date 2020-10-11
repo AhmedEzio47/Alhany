@@ -1,3 +1,6 @@
+const String appName = 'Dubsmash';
+String appTempDirectoryPath;
+
 class Strings {
   static const String default_profile_image =
       'assets/images/default_profile.png';
@@ -9,4 +12,6 @@ class Strings {
       'assets/images/headphones_alert.jpg';
 
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
+
+  static const String splash = 'assets/images/splash.jpg';
 }

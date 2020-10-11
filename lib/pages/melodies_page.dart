@@ -8,7 +8,6 @@ import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/list_items/melody_item.dart';
-import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -70,7 +69,19 @@ class _MelodiesPageState extends State<MelodiesPage> {
           color: MyColors.primaryColor,
         ),
         onPressed: () async {
-          await addMelody();
+          AppUtil.showAlertDialog(
+              context: context,
+              message: 'What do you want to upload?',
+              firstBtnText: 'Melody',
+              firstFunc: () async {
+                Navigator.of(context).pop();
+                await addMelody();
+              },
+              secondBtnText: 'Song',
+              secondFunc: () async {
+                Navigator.of(context).pop();
+                await addSong();
+              });
         },
       ),
     );
@@ -94,9 +105,35 @@ class _MelodiesPageState extends State<MelodiesPage> {
       'description': 'Something about the melody',
       'audio_url': melodyUrl,
       'author_id': Constants.currentUserID,
+      'is_song': false,
       'timestamp': FieldValue.serverTimestamp()
     });
 
     AppUtil.showToast('Melody uploaded!');
+  }
+
+  addSong() async {
+    File songFile = await AppUtil.chooseAudio();
+    String fileName = path.basename(songFile.path);
+    String fileNameWithoutExtension =
+        path.basenameWithoutExtension(songFile.path);
+    String songUrl =
+        await AppUtil.uploadFile(songFile, context, '/songs/$fileName');
+
+    if (songUrl == '') {
+      print('no file chosen error');
+      return;
+    }
+
+    melodiesRef.add({
+      'name': fileNameWithoutExtension,
+      'description': 'Something about the song',
+      'audio_url': songUrl,
+      'author_id': Constants.currentUserID,
+      'is_song': true,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+
+    AppUtil.showToast('Song uploaded!');
   }
 }

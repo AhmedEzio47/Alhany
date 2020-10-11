@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
@@ -18,6 +21,8 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   bool emailVerified;
 
+  AuthStatus _authStatus = AuthStatus.NOT_DETERMINED;
+
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -26,7 +31,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    authAssignment();
+    AppUtil.createAppDirectory();
     super.initState();
   }
 
@@ -47,7 +52,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    switch (authStatus) {
+    switch (_authStatus) {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
       case AuthStatus.NOT_LOGGED_IN:
@@ -71,20 +76,22 @@ class _RootPageState extends State<RootPage> {
         Constants.currentUser = loggedInUser;
         Constants.currentFirebaseUser = user;
         Constants.currentUserID = user?.uid;
+        _authStatus = AuthStatus.LOGGED_IN;
         authStatus = AuthStatus.LOGGED_IN;
         Constants.startUser = star;
       });
     } else if (user?.uid != null && !(user.isEmailVerified)) {
       print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');
-      //await showVerifyEmailSentDialog(context);
       setState(() {
+        _authStatus = AuthStatus.NOT_LOGGED_IN;
         authStatus = AuthStatus.NOT_LOGGED_IN;
       });
     } else {
       setState(() {
+        _authStatus = AuthStatus.NOT_LOGGED_IN;
         authStatus = AuthStatus.NOT_LOGGED_IN;
       });
     }
-    print('authStatus = $authStatus');
+    print('authStatus = $_authStatus');
   }
 }

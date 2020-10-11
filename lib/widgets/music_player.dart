@@ -1,20 +1,10 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:dubsmash/pages/melody_page.dart';
-import 'package:dubsmash/services/audio_recorder.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:intl/intl.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:loading/indicator/ball_pulse_indicator.dart';
-import 'package:loading/loading.dart';
-import 'package:path_provider/path_provider.dart';
 
 typedef void OnError(Exception exception);
 
@@ -204,33 +194,55 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
               SizedBox(
                 height: 10,
+              ),
+              !isPlaying
+                  ? Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey.shade300,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black54,
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: Offset(0, 2), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: isPlaying ? null : () => play(),
+                        iconSize: 40.0,
+                        icon: Icon(Icons.play_arrow),
+                        color: MyColors.primaryColor,
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey.shade300,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black54,
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: Offset(0, 2), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: isPlaying ? () => pause() : null,
+                        iconSize: 40.0,
+                        icon: Icon(Icons.pause),
+                        color: MyColors.primaryColor,
+                      ),
+                    ),
+              SizedBox(
+                height: 10,
               )
             ]),
           ),
         ),
       );
-
-  Row _buildProgressView() {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Padding(
-        padding: EdgeInsets.all(0),
-        child: CircularProgressIndicator(
-          value: widget.position != null && widget.position.inMilliseconds > 0
-              ? (widget.position?.inMilliseconds?.toDouble() ?? 0.0) /
-                  (widget.duration?.inMilliseconds?.toDouble() ?? 0.0)
-              : 0.0,
-          valueColor: AlwaysStoppedAnimation(Colors.cyan),
-          backgroundColor: Colors.grey.shade400,
-        ),
-      ),
-      Text(
-        widget.position != null
-            ? "${positionText ?? ''} / ${durationText ?? ''}"
-            : widget.duration != null ? durationText : '',
-        style: TextStyle(fontSize: 16.0),
-      )
-    ]);
-  }
 
   @override
   Widget build(BuildContext context) {

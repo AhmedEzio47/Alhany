@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
           primaryColorLight: MyColors.lightPrimaryColor,
           brightness: Brightness.light,
         ),
+        debugShowCheckedModeBanner: false,
         initialRoute: '/',
         onGenerateRoute: RouteGenerator.generateRoute,
       ),

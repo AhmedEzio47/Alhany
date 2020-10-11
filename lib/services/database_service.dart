@@ -16,6 +16,15 @@ class DatabaseService {
     return User();
   }
 
+  static Future<User> getUserWithEmail(String email) async {
+    QuerySnapshot userDocSnapshot =
+        await usersRef.where('email', isEqualTo: email).getDocuments();
+    if (userDocSnapshot.documents.length != 0) {
+      return User.fromDoc(userDocSnapshot.documents[0]);
+    }
+    return User();
+  }
+
   static Future<Melody> getMelodyWithId(String melodyId) async {
     DocumentSnapshot melodyDocSnapshot =
         await melodiesRef?.document(melodyId)?.get();
@@ -28,7 +37,7 @@ class DatabaseService {
   static addUserToDatabase(String id, String email, String name) async {
     List search = searchList(name);
     Map<String, dynamic> userMap = {
-      'name': name,
+      'name': name ?? 'John Doe',
       'email': email,
       'description': 'Write something about yourself',
       'notificationsNumber': 0,
@@ -39,8 +48,20 @@ class DatabaseService {
   }
 
   static Future<List<Melody>> getMelodies() async {
-    QuerySnapshot melodiesSnapshot =
-        await melodiesRef.orderBy('timestamp', descending: true).getDocuments();
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: false)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> melodies =
+        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static Future<List<Melody>> getSongs() async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
     List<Melody> melodies =
         melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;

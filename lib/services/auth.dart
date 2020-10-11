@@ -115,7 +115,7 @@ class Auth implements BaseAuth {
   Future<void> changeEmail(String email) async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     user.updateEmail(email).then((_) {
-      print("Succesfully changed email");
+      print("Successfully changed email");
     }).catchError((error) {
       print("email can't be changed" + error.toString());
     });

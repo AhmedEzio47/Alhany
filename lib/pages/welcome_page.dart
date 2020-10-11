@@ -1,4 +1,6 @@
 import 'package:dubsmash/constants/colors.dart';
+import 'package:dubsmash/constants/constants.dart';
+import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
@@ -7,6 +9,7 @@ import 'package:dubsmash/widgets/loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_util.dart';
@@ -203,23 +206,6 @@ class _WelcomePageState extends State<WelcomePage>
                 ),
               ),
             ),
-//            new Row(
-//              children: <Widget>[
-//                new Expanded(
-//                  child: new Padding(
-//                    padding: const EdgeInsets.only(left: 40.0),
-//                    child: new Text(
-//                      "EMAIL",
-//                      style: TextStyle(
-//                        fontWeight: FontWeight.bold,
-//                        color: MyColors.primaryColor,
-//                        fontSize: 15.0,
-//                      ),
-//                    ),
-//                  ),
-//                ),
-//              ],
-//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -256,26 +242,6 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-//            Divider(
-//              height: 24.0,
-//            ),
-//            new Row(
-//              children: <Widget>[
-//                new Expanded(
-//                  child: new Padding(
-//                    padding: const EdgeInsets.only(left: 40.0),
-//                    child: new Text(
-//                      "PASSWORD",
-//                      style: TextStyle(
-//                        fontWeight: FontWeight.bold,
-//                        color: MyColors.primaryColor,
-//                        fontSize: 15.0,
-//                      ),
-//                    ),
-//                  ),
-//                ),
-//              ],
-//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -312,25 +278,42 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-//            Divider(
-//              height: 24.0,
-//            ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(right: 20.0),
-                  child: new FlatButton(
-                    child: new Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primaryColor,
-                        fontSize: 15.0,
-                      ),
-                      textAlign: TextAlign.end,
-                    ),
-                    onPressed: () => {},
+                  child: FlatButton(
+                    child:
+                        Constants.currentFirebaseUser?.isEmailVerified ?? true
+                            ? Text(
+                                "Forgot Password?",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: MyColors.primaryColor,
+                                  fontSize: 15.0,
+                                ),
+                                textAlign: TextAlign.end,
+                              )
+                            : Text(
+                                "Resend verification email",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: MyColors.primaryColor,
+                                  fontSize: 15.0,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                    onPressed: () async {
+                      if (Constants.currentFirebaseUser?.isEmailVerified ??
+                          true) {
+                        Navigator.of(context).pushNamed('/password-reset');
+                      } else {
+                        await Constants.currentFirebaseUser
+                            .sendEmailVerification();
+                        AppUtil.showToast('Verification email sent');
+                      }
+                    },
                   ),
                 ),
               ],
@@ -410,59 +393,59 @@ class _WelcomePageState extends State<WelcomePage>
               margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 20.0),
               child: new Row(
                 children: <Widget>[
-                  new Expanded(
-                    child: new Container(
-                      margin: EdgeInsets.only(right: 8.0),
-                      alignment: Alignment.center,
-                      child: new Row(
-                        children: <Widget>[
-                          new Expanded(
-                            child: new FlatButton(
-                              shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(30.0),
-                              ),
-                              color: Color(0Xff3B5998),
-                              onPressed: () => {},
-                              child: new Container(
-                                child: new Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    new Expanded(
-                                      child: new FlatButton(
-                                        onPressed: () => {},
-                                        padding: EdgeInsets.only(
-                                          top: 10.0,
-                                          bottom: 10.0,
-                                        ),
-                                        child: new Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: <Widget>[
-                                            Image.asset(
-                                              'assets/images/facebook.png',
-                                              height: 25,
-                                              width: 25,
-                                            ),
-                                            Text(
-                                              "FACEBOOK",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  //   new Expanded(
+                  //     child: new Container(
+                  //       margin: EdgeInsets.only(right: 8.0),
+                  //       alignment: Alignment.center,
+                  //       child: new Row(
+                  //         children: <Widget>[
+                  //           new Expanded(
+                  //             child: new FlatButton(
+                  //               shape: new RoundedRectangleBorder(
+                  //                 borderRadius: new BorderRadius.circular(30.0),
+                  //               ),
+                  //               color: Color(0Xff3B5998),
+                  //               onPressed: () => {},
+                  //               child: new Container(
+                  //                 child: new Row(
+                  //                   mainAxisAlignment: MainAxisAlignment.center,
+                  //                   children: <Widget>[
+                  //                     new Expanded(
+                  //                       child: new FlatButton(
+                  //                         onPressed: () => {},
+                  //                         padding: EdgeInsets.only(
+                  //                           top: 10.0,
+                  //                           bottom: 10.0,
+                  //                         ),
+                  //                         child: new Row(
+                  //                           mainAxisAlignment:
+                  //                               MainAxisAlignment.spaceEvenly,
+                  //                           children: <Widget>[
+                  //                             Image.asset(
+                  //                               'assets/images/facebook.png',
+                  //                               height: 25,
+                  //                               width: 25,
+                  //                             ),
+                  //                             Text(
+                  //                               "FACEBOOK",
+                  //                               textAlign: TextAlign.center,
+                  //                               style: TextStyle(
+                  //                                   color: Colors.white,
+                  //                                   fontWeight: FontWeight.bold),
+                  //                             ),
+                  //                           ],
+                  //                         ),
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
                   new Expanded(
                     child: new Container(
                       margin: EdgeInsets.only(left: 8.0),
@@ -482,23 +465,43 @@ class _WelcomePageState extends State<WelcomePage>
                                   children: <Widget>[
                                     new Expanded(
                                       child: new FlatButton(
-                                        onPressed: () => {},
+                                        onPressed: () async {
+                                          FirebaseUser user =
+                                              await signInWithGoogle();
+
+                                          if ((await DatabaseService
+                                                      .getUserWithId(user.uid))
+                                                  .id ==
+                                              null) {
+                                            await DatabaseService
+                                                .addUserToDatabase(
+                                                    user.uid, user.email, null);
+                                            Navigator.of(context)
+                                                .pushReplacementNamed('/');
+                                          } else {
+                                            Navigator.of(context)
+                                                .pushReplacementNamed('/');
+                                          }
+                                        },
                                         padding: EdgeInsets.only(
                                           top: 10.0,
                                           bottom: 10.0,
                                         ),
                                         child: new Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
+                                              MainAxisAlignment.center,
                                           children: <Widget>[
                                             Image.asset(
                                               'assets/images/google.png',
                                               height: 25,
                                               width: 25,
                                             ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
                                             Text(
                                               "GOOGLE",
-                                              textAlign: TextAlign.center,
+                                              textAlign: TextAlign.left,
                                               style: TextStyle(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.bold),
@@ -536,7 +539,7 @@ class _WelcomePageState extends State<WelcomePage>
         image: DecorationImage(
           colorFilter: new ColorFilter.mode(
               Colors.black.withOpacity(0.1), BlendMode.dstATop),
-          image: AssetImage('assets/images/splash.jpg'),
+          image: AssetImage(Strings.splash),
           fit: BoxFit.cover,
         ),
       ),
@@ -553,7 +556,6 @@ class _WelcomePageState extends State<WelcomePage>
                 ),
               ),
             ),
-
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -662,26 +664,6 @@ class _WelcomePageState extends State<WelcomePage>
                 ],
               ),
             ),
-//            Divider(
-//              height: 24.0,
-//            ),
-//            new Row(
-//              children: <Widget>[
-//                new Expanded(
-//                  child: new Padding(
-//                    padding: const EdgeInsets.only(left: 40.0),
-//                    child: new Text(
-//                      "CONFIRM PASSWORD",
-//                      style: TextStyle(
-//                        fontWeight: FontWeight.bold,
-//                        color: MyColors.primaryColor,
-//                        fontSize: 15.0,
-//                      ),
-//                    ),
-//                  ),
-//                ),
-//              ],
-//            ),
             new Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
@@ -808,6 +790,9 @@ class _WelcomePageState extends State<WelcomePage>
     );
   }
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
   PageController _pageController =
       new PageController(initialPage: 1, viewportFraction: 1.0);
 
@@ -924,6 +909,7 @@ class _WelcomePageState extends State<WelcomePage>
       // Validation Passed
       _userId = await auth.signUp(_nameController.text, _emailController.text,
           _passwordController.text);
+
       if (_userId == 'Email is already in use') {
         AppUtil.showToast('Email is already in use');
         _setFocusNode(myFocusNodeEmail);
@@ -944,7 +930,7 @@ class _WelcomePageState extends State<WelcomePage>
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('name', _nameController.text);
-
+      AppUtil.showToast('Verification Email Sent');
       _gotoLogin();
     } else {
       if (_passwordController.text != _confirmPasswordController.text) {
@@ -982,14 +968,14 @@ class _WelcomePageState extends State<WelcomePage>
 
         //TODO saveToken();
 
-        Navigator.of(context).pushReplacementNamed('/app-page');
+        Navigator.of(context).pushReplacementNamed('/');
       } else if (!user.isEmailVerified) {
         await auth.signOut();
         //await showVerifyEmailSentDialog(context);
       } else {
         //saveToken(); // We don't want to saveToken for non-verified users
         AppUtil.showToast('Logged In!');
-        Navigator.of(context).pushReplacementNamed('/app-page');
+        Navigator.of(context).pushReplacementNamed('/');
       }
     } catch (e) {
       // Email or Password Incorrect
@@ -997,6 +983,32 @@ class _WelcomePageState extends State<WelcomePage>
       AppUtil.showToast('The email address or password is incorrect.');
     }
     //print('Should be true: $_loading');
+  }
+
+  Future<FirebaseUser> signInWithGoogle() async {
+    final GoogleSignInAccount googleSignInAccount =
+        await googleSignIn.signIn().catchError((onError) {
+      print('google sign in error code: ${onError.code}');
+      AppUtil.showToast('Unknown error, please try another sign in method!');
+    });
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
+
+    final AuthResult authResult = await _auth.signInWithCredential(credential);
+    final FirebaseUser user = authResult.user;
+
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+
+    return user;
   }
 
   void _setFocusNode(FocusNode focusNode) {

@@ -1,25 +1,22 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dubsmash/constants/strings.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 
 import 'constants/colors.dart';
-import 'constants/constants.dart';
-import 'constants/strings.dart';
 
-saveToken() async {
-  String token = await FirebaseMessaging().getToken();
-  usersRef
-      .document(Constants.currentUserID)
-      .collection('tokens')
-      .document(token)
-      .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
-}
+// saveToken() async {
+//   String token = await FirebaseMessaging().getToken();
+//   usersRef
+//       .document(Constants.currentUserID)
+//       .collection('tokens')
+//       .document(token)
+//       .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+// }
 
 List<String> searchList(String text) {
   List<String> list = [];
@@ -66,7 +63,7 @@ class AppUtil {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: MyColors.lightPrimaryColor,
+        backgroundColor: MyColors.accentColor,
         textColor: Colors.white,
         fontSize: 16.0);
   }
@@ -121,7 +118,7 @@ class AppUtil {
 
   static Future<String> downloadFile(String url) async {
     var response = await get(url);
-    var firstPath = '/sdcard/download/';
+    var firstPath = appTempDirectoryPath;
     var contentDisposition = response.headers['content-disposition'];
     String fileName = contentDisposition
         .split('filename*=utf-8')
@@ -134,5 +131,13 @@ class AppUtil {
     file.writeAsBytesSync(response.bodyBytes);
 
     return filePathAndName;
+  }
+
+  static createAppDirectory() async {
+    if (!(await Directory('/sdcard/download/$appName').exists())) {
+      final dir = await Directory('/sdcard/download/$appName').create();
+      appTempDirectoryPath = dir.path + '/';
+      print('appTempDirectoryPath: $appTempDirectoryPath');
+    }
   }
 }

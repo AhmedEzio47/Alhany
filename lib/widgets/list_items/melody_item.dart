@@ -24,8 +24,13 @@ class _MelodyItemState extends State<MelodyItem> {
   @override
   void initState() {
     getAuthor();
-    isFavourite();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    await isFavourite();
   }
 
   getAuthor() async {
@@ -74,7 +79,7 @@ class _MelodyItemState extends State<MelodyItem> {
                   : await DatabaseService.addMelodyToFavourites(
                       widget.melody.id);
 
-              isFavourite();
+              await isFavourite();
             },
             child: Icon(
               _isFavourite ? Icons.favorite : Icons.favorite_border,
