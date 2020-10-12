@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/widgets/custom_modal.dart';
+import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'constants/colors.dart';
 
@@ -69,8 +72,7 @@ class AppUtil {
   }
 
   static Future<File> chooseAudio() async {
-    FilePickerResult result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: [
+    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
       'mp3',
       'wav',
     ]);
@@ -83,9 +85,8 @@ class AppUtil {
     return null;
   }
 
-  static Future<File> chooseImage() async {
-    FilePickerResult result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: [
+  static Future<File> pickImageFromGallery() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
       'jpg',
       'png',
     ]);
@@ -98,12 +99,10 @@ class AppUtil {
     return null;
   }
 
-  static Future<String> uploadFile(
-      File file, BuildContext context, String path) async {
+  static Future<String> uploadFile(File file, BuildContext context, String path) async {
     if (file == null) return '';
 
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(path);
+    StorageReference storageReference = FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
     StorageUploadTask uploadTask;
 
@@ -138,6 +137,22 @@ class AppUtil {
       final dir = await Directory('/sdcard/download/$appName').create();
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
+    } else {
+      appTempDirectoryPath = '/sdcard/download/$appName/';
     }
+  }
+
+  static Future<File> takePhoto() async {
+    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    return image;
+  }
+
+  static showLoader(BuildContext context){
+    Navigator.of(context).push(CustomModal(
+        child: FlipLoader(
+            loaderBackground: MyColors.primaryColor,
+            iconColor: Colors.white,
+            icon: Icons.music_note,
+            animationType: "full_flip")));
   }
 }

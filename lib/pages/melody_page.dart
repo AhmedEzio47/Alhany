@@ -9,7 +9,7 @@ import 'package:dubsmash/services/audio_recorder.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/permissions_service.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
-import 'package:dubsmash/widgets/loader.dart';
+import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
@@ -77,18 +77,12 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future _downloadMelody() async {
-    Navigator.of(context).push(CustomModal(
-        child: FlipLoader(
-            loaderBackground: MyColors.primaryColor,
-            iconColor: Colors.white,
-            icon: Icons.music_note,
-            animationType: "full_flip")));
+    AppUtil.showLoader(context);
 
     String filePath = await AppUtil.downloadFile(widget.melody.audioUrl);
     setState(() {
       melodyPath = filePath;
-      mergedFilePath +=
-          '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+      mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
     });
     Navigator.of(context).pop();
   }
@@ -105,13 +99,11 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService().requestMicrophonePermission(onPermissionDenied: () {
         AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
+            message: 'You must grant this microphone access to be able to use this feature.',
             firstBtnText: 'OK',
             firstFunc: () {
               Navigator.of(context).pop();
@@ -142,8 +134,7 @@ class _MelodyPageState extends State<MelodyPage> {
           borderRadius: BorderRadius.all(Radius.circular(20)),
           color: Colors.grey,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.4), BlendMode.dstOut),
+            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstOut),
             image: AssetImage(Strings.headphones_alert_bg),
             fit: BoxFit.cover,
           ),
@@ -158,10 +149,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: Text(
                     'For optimal result, please put some headphones.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -175,13 +163,8 @@ class _MelodyPageState extends State<MelodyPage> {
                     style: BorderStyle.solid,
                     width: 1,
                   ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20.0)),
-                  child: Text('OK',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold)),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                  child: Text('OK', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                     print('hey I\'m here');
@@ -198,12 +181,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future saveRecord() async {
-    Navigator.of(context).push(CustomModal(
-        child: FlipLoader(
-            loaderBackground: MyColors.primaryColor,
-            iconColor: Colors.white,
-            icon: Icons.music_note,
-            animationType: "full_flip")));
+    AppUtil.showLoader(context);
 
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
@@ -238,10 +216,7 @@ class _MelodyPageState extends State<MelodyPage> {
         secondBtnText: 'Preview',
         secondFunc: () {
           Navigator.of(context).pop();
-          musicPlayer = MusicPlayer(
-              url: mergedFilePath,
-              isLocal: true,
-              backColor: MyColors.primaryColor);
+          musicPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
 
           Navigator.of(context).push(CustomModal(
               child: Container(
@@ -271,21 +246,14 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   submitRecord() async {
-    Navigator.of(context).push(CustomModal(
-        child: FlipLoader(
-            loaderBackground: MyColors.primaryColor,
-            iconColor: Colors.white,
-            icon: Icons.music_note,
-            animationType: "full_flip")));
+    AppUtil.showLoader(context);
 
     String recordId;
 
-    _isDuplicate == null
-        ? recordId = randomAlphaNumeric(20)
-        : recordId = _isDuplicate;
+    _isDuplicate == null ? recordId = randomAlphaNumeric(20) : recordId = _isDuplicate;
 
-    String url = await AppUtil.uploadFile(File(mergedFilePath), context,
-        'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+    String url = await AppUtil.uploadFile(
+        File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
 
     await DatabaseService.saveRecord(widget.melody.id, recordId, url);
     _deleteFiles();
@@ -326,8 +294,7 @@ class _MelodyPageState extends State<MelodyPage> {
         decoration: BoxDecoration(
           color: MyColors.primaryColor,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.1), BlendMode.dstATop),
+            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
             image: AssetImage(Strings.default_melody_page_bg),
             fit: BoxFit.cover,
           ),
@@ -340,19 +307,13 @@ class _MelodyPageState extends State<MelodyPage> {
                   SizedBox(
                     height: 70,
                   ),
-                  Container(
-                      width: 150,
-                      height: 150,
-                      child: Image.asset(Strings.default_melody_image)),
+                  Container(width: 150, height: 150, child: Image.asset(Strings.default_melody_image)),
                   SizedBox(
                     height: 20,
                   ),
                   Text(
                     widget.melody.name,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   SizedBox(
                     height: 30,
@@ -366,13 +327,9 @@ class _MelodyPageState extends State<MelodyPage> {
                       if (recordingStatus == RecordingStatus.Recording) {
                         await saveRecord();
                       } else {
-                        if ((await PermissionsService()
-                                .hasStoragePermission()) &&
-                            (await PermissionsService()
-                                .hasMicrophonePermission())) {
-                          String isDuplicate =
-                              await DatabaseService.checkForDuplicateRecords(
-                                  widget.melody.id);
+                        if ((await PermissionsService().hasStoragePermission()) &&
+                            (await PermissionsService().hasMicrophonePermission())) {
+                          String isDuplicate = await DatabaseService.checkForDuplicateRecords(widget.melody.id);
                           setState(() {
                             _isDuplicate = isDuplicate;
                           });
@@ -380,8 +337,7 @@ class _MelodyPageState extends State<MelodyPage> {
                             AppUtil.showAlertDialog(
                                 context: context,
                                 heading: 'Duplicate Record',
-                                message:
-                                    'You have recorded on this melody before, do you want to overwrite it?',
+                                message: 'You have recorded on this melody before, do you want to overwrite it?',
                                 firstBtnText: 'Yes',
                                 firstFunc: () {
                                   Navigator.of(context).pop();
@@ -399,14 +355,11 @@ class _MelodyPageState extends State<MelodyPage> {
                             ));
                           }
                         }
-                        if (!await PermissionsService()
-                            .hasStoragePermission()) {
+                        if (!await PermissionsService().hasStoragePermission()) {
                           await PermissionsService().requestStoragePermission();
                         }
-                        if (!await PermissionsService()
-                            .hasMicrophonePermission()) {
-                          await PermissionsService()
-                              .requestMicrophonePermission();
+                        if (!await PermissionsService().hasMicrophonePermission()) {
+                          await PermissionsService().requestMicrophonePermission();
                         }
                       }
                     },
@@ -426,9 +379,7 @@ class _MelodyPageState extends State<MelodyPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(30.0),
                         child: Icon(
-                          recordingStatus == RecordingStatus.Recording
-                              ? Icons.stop
-                              : Icons.mic,
+                          recordingStatus == RecordingStatus.Recording ? Icons.stop : Icons.mic,
                           color: MyColors.primaryColor,
                           size: 70,
                         ),

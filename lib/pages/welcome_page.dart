@@ -5,7 +5,8 @@ import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
 import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/widgets/loader.dart';
+import 'package:dubsmash/widgets/custom_modal.dart';
+import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,7 @@ class WelcomePage extends StatefulWidget {
   _WelcomePageState createState() => new _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage>
-    with TickerProviderStateMixin {
+class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin {
   String _errorMsgEmail = '';
 
   final FocusNode myFocusNodePassword = FocusNode();
@@ -30,8 +30,6 @@ class _WelcomePageState extends State<WelcomePage>
 
   int _currentPage;
   String _userId = "";
-
-  bool _isLoading = false;
 
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
@@ -51,8 +49,7 @@ class _WelcomePageState extends State<WelcomePage>
       decoration: BoxDecoration(
         color: MyColors.primaryColor,
         image: DecorationImage(
-          colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage('assets/images/splash.jpg'),
           fit: BoxFit.cover,
         ),
@@ -84,18 +81,14 @@ class _WelcomePageState extends State<WelcomePage>
                   ),
                   Text(
                     "App",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
             new Container(
               width: MediaQuery.of(context).size.width,
-              margin:
-                  const EdgeInsets.only(left: 30.0, right: 30.0, top: 150.0),
+              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 150.0),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
@@ -105,8 +98,7 @@ class _WelcomePageState extends State<WelcomePage>
                 children: <Widget>[
                   new Expanded(
                     child: new OutlineButton(
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0)),
+                      shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
                       color: MyColors.darkPrimaryColor,
                       highlightedBorderColor: Colors.white,
                       onPressed: () => _gotoSignup(),
@@ -122,9 +114,7 @@ class _WelcomePageState extends State<WelcomePage>
                               child: Text(
                                 "SIGN UP",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -143,8 +133,7 @@ class _WelcomePageState extends State<WelcomePage>
                 children: <Widget>[
                   new Expanded(
                     child: new FlatButton(
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0)),
+                      shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
                       color: Colors.white,
                       onPressed: () => _gotoLogin(),
                       child: new Container(
@@ -159,9 +148,7 @@ class _WelcomePageState extends State<WelcomePage>
                               child: Text(
                                 "LOGIN",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: MyColors.primaryColor,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: MyColors.primaryColor, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -187,8 +174,7 @@ class _WelcomePageState extends State<WelcomePage>
       decoration: BoxDecoration(
         color: Colors.white,
         image: DecorationImage(
-          colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage('assets/images/splash.jpg'),
           fit: BoxFit.cover,
         ),
@@ -212,10 +198,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -248,10 +231,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -284,33 +264,32 @@ class _WelcomePageState extends State<WelcomePage>
                 Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: FlatButton(
-                    child:
-                        Constants.currentFirebaseUser?.isEmailVerified ?? true
-                            ? Text(
-                                "Forgot Password?",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: MyColors.primaryColor,
-                                  fontSize: 15.0,
-                                ),
-                                textAlign: TextAlign.end,
-                              )
-                            : Text(
-                                "Resend verification email",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: MyColors.primaryColor,
-                                  fontSize: 15.0,
-                                ),
-                                textAlign: TextAlign.end,
-                              ),
+                    child: Constants.currentFirebaseUser?.isEmailVerified ?? true
+                        ? Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: MyColors.primaryColor,
+                              fontSize: 15.0,
+                            ),
+                            textAlign: TextAlign.end,
+                          )
+                        : Text(
+                            "Resend verification email",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: MyColors.primaryColor,
+                              fontSize: 15.0,
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
                     onPressed: () async {
-                      if (Constants.currentFirebaseUser?.isEmailVerified ??
-                          true) {
+                      if (Constants.currentFirebaseUser?.isEmailVerified ?? true) {
                         Navigator.of(context).pushNamed('/password-reset');
                       } else {
-                        await Constants.currentFirebaseUser
-                            .sendEmailVerification();
+                        AppUtil.showLoader(context);
+                        await Constants.currentFirebaseUser.sendEmailVerification();
+                        Navigator.of(context).pop();
                         AppUtil.showToast('Verification email sent');
                       }
                     },
@@ -331,6 +310,8 @@ class _WelcomePageState extends State<WelcomePage>
                       ),
                       color: MyColors.primaryColor,
                       onPressed: () async {
+                        AppUtil.showLoader(context);
+
                         await _checkFields();
                       },
                       child: new Container(
@@ -345,9 +326,7 @@ class _WelcomePageState extends State<WelcomePage>
                               child: Text(
                                 "LOGIN",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -367,8 +346,7 @@ class _WelcomePageState extends State<WelcomePage>
                   new Expanded(
                     child: new Container(
                       margin: EdgeInsets.all(8.0),
-                      decoration:
-                          BoxDecoration(border: Border.all(width: 0.25)),
+                      decoration: BoxDecoration(border: Border.all(width: 0.25)),
                     ),
                   ),
                   Text(
@@ -381,8 +359,7 @@ class _WelcomePageState extends State<WelcomePage>
                   new Expanded(
                     child: new Container(
                       margin: EdgeInsets.all(8.0),
-                      decoration:
-                          BoxDecoration(border: Border.all(width: 0.25)),
+                      decoration: BoxDecoration(border: Border.all(width: 0.25)),
                     ),
                   ),
                 ],
@@ -466,21 +443,14 @@ class _WelcomePageState extends State<WelcomePage>
                                     new Expanded(
                                       child: new FlatButton(
                                         onPressed: () async {
-                                          FirebaseUser user =
-                                              await signInWithGoogle();
+                                          AppUtil.showLoader(context);
 
-                                          if ((await DatabaseService
-                                                      .getUserWithId(user.uid))
-                                                  .id ==
-                                              null) {
-                                            await DatabaseService
-                                                .addUserToDatabase(
-                                                    user.uid, user.email, null);
-                                            Navigator.of(context)
-                                                .pushReplacementNamed('/');
+                                          FirebaseUser user = await signInWithGoogle();
+                                          if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
+                                            await DatabaseService.addUserToDatabase(user.uid, user.email, null);
+                                            Navigator.of(context).pushReplacementNamed('/');
                                           } else {
-                                            Navigator.of(context)
-                                                .pushReplacementNamed('/');
+                                            Navigator.of(context).pushReplacementNamed('/');
                                           }
                                         },
                                         padding: EdgeInsets.only(
@@ -488,8 +458,7 @@ class _WelcomePageState extends State<WelcomePage>
                                           bottom: 10.0,
                                         ),
                                         child: new Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             Image.asset(
                                               'assets/images/google.png',
@@ -502,9 +471,7 @@ class _WelcomePageState extends State<WelcomePage>
                                             Text(
                                               "GOOGLE",
                                               textAlign: TextAlign.left,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
+                                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -537,8 +504,7 @@ class _WelcomePageState extends State<WelcomePage>
       decoration: BoxDecoration(
         color: Colors.white,
         image: DecorationImage(
-          colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage(Strings.splash),
           fit: BoxFit.cover,
         ),
@@ -562,10 +528,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -598,10 +561,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -634,10 +594,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -670,10 +627,7 @@ class _WelcomePageState extends State<WelcomePage>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: MyColors.primaryColor,
-                      width: 0.5,
-                      style: BorderStyle.solid),
+                  bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
                 ),
               ),
               padding: const EdgeInsets.only(left: 0.0, right: 10.0),
@@ -736,6 +690,8 @@ class _WelcomePageState extends State<WelcomePage>
                       ),
                       color: MyColors.primaryColor,
                       onPressed: () async {
+                        AppUtil.showLoader(context);
+
                         await _checkFields();
                       },
                       child: new Container(
@@ -750,9 +706,7 @@ class _WelcomePageState extends State<WelcomePage>
                               child: Text(
                                 "SIGN UP",
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -793,8 +747,7 @@ class _WelcomePageState extends State<WelcomePage>
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
-  PageController _pageController =
-      new PageController(initialPage: 1, viewportFraction: 1.0);
+  PageController _pageController = new PageController(initialPage: 1, viewportFraction: 1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -819,21 +772,6 @@ class _WelcomePageState extends State<WelcomePage>
                 children: <Widget>[LoginPage(), HomePage(), SignupPage()],
                 scrollDirection: Axis.horizontal,
               )),
-          _isLoading
-              ? Positioned.fill(
-                  child: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    child: FlipLoader(
-                        loaderBackground: MyColors.primaryColor,
-                        iconColor: Colors.white,
-                        icon: Icons.music_note,
-                        animationType: "full_flip"),
-                  ),
-                ))
-              : Container(),
         ],
       ),
     );
@@ -841,18 +779,10 @@ class _WelcomePageState extends State<WelcomePage>
 
   Future<void> _checkFields() async {
     if (_currentPage == 0) {
-      if (_emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty) {
-        setState(() {
-          _isLoading = true;
-        });
-
+      if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
         await _login();
-
-        setState(() {
-          _isLoading = false;
-        });
       } else {
+        Navigator.of(context).pop();
         AppUtil.showToast('Please enter your login details');
       }
     } else if (_currentPage == 2) {
@@ -860,16 +790,9 @@ class _WelcomePageState extends State<WelcomePage>
           _passwordController.text.isNotEmpty &&
           _nameController.text.isNotEmpty &&
           _confirmPasswordController.text.isNotEmpty) {
-        setState(() {
-          _isLoading = true;
-        });
-
         await _signUp();
-
-        setState(() {
-          _isLoading = false;
-        });
       } else {
+        Navigator.of(context).pop();
         AppUtil.showToast('Please enter your fill all fields');
       }
     }
@@ -904,11 +827,9 @@ class _WelcomePageState extends State<WelcomePage>
 
     print('validEmail: $validEmail ');
 
-    if (validEmail == null &&
-        _passwordController.text == _confirmPasswordController.text) {
+    if (validEmail == null && _passwordController.text == _confirmPasswordController.text) {
       // Validation Passed
-      _userId = await auth.signUp(_nameController.text, _emailController.text,
-          _passwordController.text);
+      _userId = await auth.signUp(_nameController.text, _emailController.text, _passwordController.text);
 
       if (_userId == 'Email is already in use') {
         AppUtil.showToast('Email is already in use');
@@ -930,6 +851,7 @@ class _WelcomePageState extends State<WelcomePage>
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('name', _nameController.text);
+      Navigator.of(context).pop();
       AppUtil.showToast('Verification Email Sent');
       _gotoLogin();
     } else {
@@ -955,8 +877,7 @@ class _WelcomePageState extends State<WelcomePage>
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     try {
-      FirebaseUser user = await auth.signInWithEmailAndPassword(
-          _emailController.text, _passwordController.text);
+      FirebaseUser user = await auth.signInWithEmailAndPassword(_emailController.text, _passwordController.text);
       _userId = user.uid;
       User temp = await DatabaseService.getUserWithId(_userId);
 
@@ -970,8 +891,18 @@ class _WelcomePageState extends State<WelcomePage>
 
         Navigator.of(context).pushReplacementNamed('/');
       } else if (!user.isEmailVerified) {
-        await auth.signOut();
-        //await showVerifyEmailSentDialog(context);
+        Navigator.of(context).pop();
+        AppUtil.showAlertDialog(
+            context: context,
+            message: 'Please check your mail for the verification email',
+            firstBtnText: 'OK',
+            firstFunc: () => Navigator.of(context).pop(),
+            secondBtnText: 'Resend',
+            secondFunc: () async {
+              Navigator.of(context).pop();
+              await user.sendEmailVerification();
+            });
+        //await auth.signOut();
       } else {
         //saveToken(); // We don't want to saveToken for non-verified users
         AppUtil.showToast('Logged In!');
@@ -980,19 +911,18 @@ class _WelcomePageState extends State<WelcomePage>
     } catch (e) {
       // Email or Password Incorrect
       //Navigator.of(context).pop();
+      Navigator.of(context).pop();
       AppUtil.showToast('The email address or password is incorrect.');
     }
     //print('Should be true: $_loading');
   }
 
   Future<FirebaseUser> signInWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount =
-        await googleSignIn.signIn().catchError((onError) {
+    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
       AppUtil.showToast('Unknown error, please try another sign in method!');
     });
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleSignInAuthentication.accessToken,

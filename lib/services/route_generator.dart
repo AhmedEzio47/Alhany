@@ -1,4 +1,5 @@
 import 'package:dubsmash/pages/app_page.dart';
+import 'package:dubsmash/pages/conversation.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
@@ -35,6 +36,12 @@ class RouteGenerator {
 
       case '/password-reset':
         return MaterialPageRoute(builder: (_) => PasswordResetPage());
+
+      case '/conversation':
+        return MaterialPageRoute(
+            builder: (_) => Conversation(
+                  otherUid: args['other_uid'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

@@ -9,7 +9,7 @@ import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/widgets/loader.dart';
+import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,6 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    AppUtil.createAppDirectory();
     super.initState();
   }
 
@@ -65,12 +64,12 @@ class _RootPageState extends State<RootPage> {
 
   Future authAssignment() async {
     FirebaseUser user = await Auth().getCurrentUser();
-    if (user?.uid != null &&
-        user.isEmailVerified &&
-        ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
+
+    if (user?.uid != null && user.isEmailVerified && ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
 
       User star = await DatabaseService.getUserWithId(Strings.starId);
+      AppUtil.createAppDirectory();
 
       setState(() {
         Constants.currentUser = loggedInUser;

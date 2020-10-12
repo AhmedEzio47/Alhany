@@ -5,7 +5,7 @@ import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
-import 'package:dubsmash/widgets/loader.dart';
+import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:flutter/material.dart';
 
 class PasswordResetPage extends StatefulWidget {
@@ -31,8 +31,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(
-                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.splash),
                     fit: BoxFit.cover,
                   ),
@@ -68,10 +67,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border(
-          bottom: BorderSide(
-              color: MyColors.primaryColor,
-              width: 0.5,
-              style: BorderStyle.solid),
+          bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
         ),
       ),
       child: Row(
@@ -113,12 +109,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   Widget _submitButton() {
     return InkWell(
       onTap: () async {
-        Navigator.of(context).push(CustomModal(
-            child: FlipLoader(
-                loaderBackground: MyColors.primaryColor,
-                iconColor: Colors.white,
-                icon: Icons.music_note,
-                animationType: "full_flip")));
+        AppUtil.showLoader(context);
 
         User user = await DatabaseService.getUserWithEmail(_email);
         if (user.id == null) {
@@ -142,10 +133,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             gradient: LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerRight,
-                colors: [
-                  MyColors.lightPrimaryColor,
-                  MyColors.darkPrimaryColor
-                ])),
+                colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
         child: Text(
           'Reset Password',
           style: TextStyle(fontSize: 20, color: Colors.white),

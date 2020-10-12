@@ -16,13 +16,7 @@ class MusicPlayer extends StatefulWidget {
   Function onComplete;
   final bool isLocal;
 
-  MusicPlayer(
-      {Key key,
-      @required this.url,
-      this.backColor,
-      this.onComplete,
-      this.isLocal = false})
-      : super(key: key);
+  MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false}) : super(key: key);
 
   AudioPlayer advancedPlayer = AudioPlayer();
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
@@ -57,13 +51,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   get isPlaying => widget.playerState == AudioPlayerState.PLAYING;
   get isPaused => widget.playerState == AudioPlayerState.PAUSED;
 
-  get durationText => widget.duration != null
-      ? widget.duration.toString().split('.').first
-      : '';
+  get durationText => widget.duration != null ? widget.duration.toString().split('.').first : '';
 
-  get positionText => widget.position != null
-      ? widget.position.toString().split('.').first
-      : '';
+  get positionText => widget.position != null ? widget.position.toString().split('.').first : '';
 
   bool isMuted = false;
 
@@ -154,19 +144,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         trackHeight: 5.0,
-                        thumbShape:
-                            RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                        overlayShape:
-                            RoundSliderOverlayShape(overlayRadius: 16.0),
+                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                        overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
                       ),
                       child: Slider(
                           activeColor: MyColors.darkPrimaryColor,
                           inactiveColor: Colors.grey.shade300,
-                          value: widget.position?.inMilliseconds?.toDouble() ??
-                              0.0,
+                          value: widget.position?.inMilliseconds?.toDouble() ?? 0.0,
                           onChanged: (double value) {
-                            widget.advancedPlayer
-                                .seek(Duration(seconds: value ~/ 1000));
+                            widget.advancedPlayer.seek(Duration(seconds: value ~/ 1000));
 
                             if (!isPlaying) {
                               play();

@@ -28,17 +28,14 @@ class _BuildDrawerState extends State<BuildDrawer> {
               children: <Widget>[
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
                   },
                   child: CircleAvatar(
                     radius: 50.0,
                     backgroundColor: Theme.of(context).primaryColor,
-                    backgroundImage:
-                        Constants.currentUser?.profileImageUrl != null
-                            ? CachedNetworkImageProvider(
-                                Constants.currentUser.profileImageUrl)
-                            : AssetImage(Strings.default_profile_image),
+                    backgroundImage: Constants.currentUser?.profileImageUrl != null
+                        ? CachedNetworkImageProvider(Constants.currentUser.profileImageUrl)
+                        : AssetImage(Strings.default_profile_image),
                   ),
                 ),
                 Row(
@@ -48,8 +45,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         Constants.currentUser?.name ?? '',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       ),
                     ),
                     //Icon(Icons.arrow_drop_down)
@@ -61,6 +57,17 @@ class _BuildDrawerState extends State<BuildDrawer> {
           Container(
             width: double.infinity,
             height: 0.5,
+          ),
+          ListTile(
+            onTap: () async {
+              Navigator.of(context).pushNamed('/favourites');
+            },
+            title: Text(
+              'Favourites',
+            ),
+            leading: Icon(
+              Icons.favorite,
+            ),
           ),
           ListTile(
             onTap: () async {

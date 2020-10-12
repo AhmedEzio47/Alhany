@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/models/melody_model.dart';
+import 'package:dubsmash/models/message_model.dart';
 import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +18,7 @@ class DatabaseService {
   }
 
   static Future<User> getUserWithEmail(String email) async {
-    QuerySnapshot userDocSnapshot =
-        await usersRef.where('email', isEqualTo: email).getDocuments();
+    QuerySnapshot userDocSnapshot = await usersRef.where('email', isEqualTo: email).getDocuments();
     if (userDocSnapshot.documents.length != 0) {
       return User.fromDoc(userDocSnapshot.documents[0]);
     }
@@ -26,8 +26,7 @@ class DatabaseService {
   }
 
   static Future<Melody> getMelodyWithId(String melodyId) async {
-    DocumentSnapshot melodyDocSnapshot =
-        await melodiesRef?.document(melodyId)?.get();
+    DocumentSnapshot melodyDocSnapshot = await melodiesRef?.document(melodyId)?.get();
     if (melodyDocSnapshot.exists) {
       return Melody.fromDoc(melodyDocSnapshot);
     }
@@ -41,6 +40,8 @@ class DatabaseService {
       'email': email,
       'description': 'Write something about yourself',
       'notificationsNumber': 0,
+      'followers': 0,
+      'following': 0,
       'search': search
     };
 
@@ -48,30 +49,46 @@ class DatabaseService {
   }
 
   static Future<List<Melody>> getMelodies() async {
-    QuerySnapshot melodiesSnapshot = await melodiesRef
-        .where('is_song', isEqualTo: false)
+    QuerySnapshot melodiesSnapshot =
+        await melodiesRef.where('is_song', isEqualTo: false).orderBy('timestamp', descending: true).getDocuments();
+    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static Future<List<Melody>> getFavourites() async {
+    QuerySnapshot melodiesSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('favourites')
         .orderBy('timestamp', descending: true)
         .getDocuments();
-    List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+
+    List<Melody> melodies = [];
+
+    for (DocumentSnapshot doc in melodiesSnapshot.documents) {
+      Melody melody = await getMelodyWithId(doc.documentID);
+      melodies.add(melody);
+    }
+
     return melodies;
   }
 
   static Future<List<Melody>> getSongs() async {
-    QuerySnapshot melodiesSnapshot = await melodiesRef
-        .where('is_song', isEqualTo: true)
-        .orderBy('timestamp', descending: true)
-        .getDocuments();
-    List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    QuerySnapshot melodiesSnapshot =
+        await melodiesRef.where('is_song', isEqualTo: true).orderBy('timestamp', descending: true).getDocuments();
+    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
   static Future<List<Record>> getRecords() async {
+    QuerySnapshot recordsSnapshot = await recordsRef.orderBy('timestamp', descending: true).getDocuments();
+    List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+    return records;
+  }
+
+  static getUserRecords(String userId) async {
     QuerySnapshot recordsSnapshot =
-        await recordsRef.orderBy('timestamp', descending: true).getDocuments();
-    List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        await recordsRef.where('singer_id', isEqualTo: userId).orderBy('timestamp', descending: true).getDocuments();
+    List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
 
@@ -84,11 +101,7 @@ class DatabaseService {
   }
 
   static Future deleteMelodyFromFavourites(String melodyId) async {
-    await usersRef
-        .document(Constants.currentUserID)
-        .collection('favourites')
-        .document(melodyId)
-        .delete();
+    await usersRef.document(Constants.currentUserID).collection('favourites').document(melodyId).delete();
   }
 
   static saveRecord(String melodyId, String recordId, String url) async {
@@ -99,25 +112,17 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp()
     });
 
-    await melodiesRef
-        .document(melodyId)
-        .collection('records')
-        .document(recordId)
-        .setData({
-      'audio_url': url,
-      'singer_id': Constants.currentUserID,
-      'timestamp': FieldValue.serverTimestamp()
-    });
-
-    await usersRef
-        .document(Constants.currentUserID)
-        .collection('records')
-        .document(recordId)
-        .setData({
-      'audio_url': url,
-      'melody_id': melodyId,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+    // await melodiesRef
+    //     .document(melodyId)
+    //     .collection('records')
+    //     .document(recordId)
+    //     .setData({'audio_url': url, 'singer_id': Constants.currentUserID, 'timestamp': FieldValue.serverTimestamp()});
+    //
+    // await usersRef
+    //     .document(Constants.currentUserID)
+    //     .collection('records')
+    //     .document(recordId)
+    //     .setData({'audio_url': url, 'melody_id': melodyId, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static Future<String> checkForDuplicateRecords(String melodyId) async {
@@ -129,5 +134,86 @@ class DatabaseService {
       return snapshot.documents[0].documentID;
     }
     return null;
+  }
+
+  static unfollowUser(String userId) async {
+    await usersRef.document(Constants.currentUserID).collection('following').document(userId).delete();
+
+    await usersRef.document(userId).collection('followers').document(Constants.currentUserID).delete();
+
+    //Store/update user locally
+    User user = await DatabaseService.getUserWithId(userId);
+
+    await usersRef.document(Constants.currentUserID).updateData({'following': FieldValue.increment(-1)});
+
+    await usersRef.document(userId).updateData({'followers': FieldValue.increment(-1)});
+  }
+
+  static followUser(String userId) async {
+    await usersRef.document(userId).collection('followers').document(Constants.currentUserID).setData({
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    await usersRef.document(Constants.currentUserID).collection('following').document(userId).setData({
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    //Increment current user following and other user followers
+    await usersRef.document(Constants.currentUserID).updateData({'following': FieldValue.increment(1)});
+
+    await usersRef.document(userId).updateData({'followers': FieldValue.increment(1)});
+  }
+
+  static sendMessage(String otherUserId, String type, String message) async {
+    await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .add({
+      'sender': Constants.currentUserID,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': type
+    });
+
+    await chatsRef
+        .document(otherUserId)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .add({
+      'sender': Constants.currentUserID,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': type
+    });
+  }
+
+  static Future<List<Message>> getMessages(String otherUserId) async {
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(20)
+        .getDocuments();
+    List<Message> messages = msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
+  }
+
+  static Future<List<Message>> getPrevMessages(Timestamp firstVisibleGameSnapShot, String otherUserId) async {
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .startAfter([firstVisibleGameSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Message> messages = msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
   }
 }
