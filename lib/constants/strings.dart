@@ -7,10 +7,13 @@ class Strings {
   static const String default_melody_image = 'assets/images/default_melody.jpg';
   static const String default_melody_page_bg = 'assets/images/default_record_bg.jpg';
   static const String headphones_alert_bg = 'assets/images/headphones_alert.jpg';
+  static const String splash = 'assets/images/splash.jpg';
 
+  //Admin ID
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
 
-  static const String splash = 'assets/images/splash.jpg';
+  //Melodies categories
+  static const List<String> melodyCategories = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
 
   //Icons
   static const String person_remove = 'assets/icons/person_remove.png';

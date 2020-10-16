@@ -8,18 +8,18 @@ import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/audio_recorder.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/permissions_service.dart';
+import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
-import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
 
 class MelodyPage extends StatefulWidget {
   final Melody melody;
+  static RecordingStatus recordingStatus = RecordingStatus.Unset;
 
   MelodyPage({Key key, this.melody}) : super(key: key);
 
@@ -28,6 +28,7 @@ class MelodyPage extends StatefulWidget {
 }
 
 class _MelodyPageState extends State<MelodyPage> {
+  //TODO don't forget to delete files in all cases
   num _countDownStart = 3;
   String _countDownText = 'Get Ready';
 
@@ -47,6 +48,8 @@ class _MelodyPageState extends State<MelodyPage> {
   FlutterFFmpeg flutterFFmpeg;
 
   String _isDuplicate;
+
+  String _dropdownValue;
 
   _countDown() {
     const oneSec = const Duration(seconds: 1);
@@ -79,7 +82,16 @@ class _MelodyPageState extends State<MelodyPage> {
   Future _downloadMelody() async {
     AppUtil.showLoader(context);
 
-    String filePath = await AppUtil.downloadFile(widget.melody.audioUrl);
+    String url;
+    if (widget.melody.audioUrl != null) {
+      url = widget.melody.audioUrl;
+    } else if (Constants.currentMelodyLevel != null) {
+      url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+    } else {
+      url = widget.melody.levelUrls.values.elementAt(0).toString();
+    }
+
+    String filePath = await AppUtil.downloadFile(url);
     setState(() {
       melodyPath = filePath;
       mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
@@ -89,10 +101,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
   void _record() async {
     if (await PermissionsService().hasStoragePermission()) {
+      await AppUtil.createAppDirectory();
+      recordingFilePath = appTempDirectoryPath;
+      melodyPath = appTempDirectoryPath;
+      mergedFilePath = appTempDirectoryPath;
+
       await _downloadMelody();
     } else {
       await PermissionsService().requestStoragePermission();
-      return;
     }
     if (await PermissionsService().hasMicrophonePermission()) {
       setState(() {
@@ -120,6 +136,8 @@ class _MelodyPageState extends State<MelodyPage> {
       setState(() {
         recordingStatus = RecordingStatus.Recording;
       });
+      MelodyPage.recordingStatus = RecordingStatus.Recording;
+
       await initRecorder();
       await melodyPlayer.play();
       await recorder.startRecording(conversation: this.widget);
@@ -182,11 +200,12 @@ class _MelodyPageState extends State<MelodyPage> {
 
   Future saveRecord() async {
     AppUtil.showLoader(context);
+    await melodyPlayer.stop();
 
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
     });
-    await melodyPlayer.stop();
+    MelodyPage.recordingStatus = RecordingStatus.Recording;
 
     Recording result = await recorder.stopRecording();
     recordingFilePath = result.path;
@@ -205,43 +224,36 @@ class _MelodyPageState extends State<MelodyPage> {
 
     Navigator.of(context).pop();
 
-    AppUtil.showAlertDialog(
-        context: context,
-        message: 'Do you want to submit the record?',
-        firstBtnText: 'Submit',
-        firstFunc: () async {
-          Navigator.of(context).pop(false);
-          await submitRecord();
-        },
-        secondBtnText: 'Preview',
-        secondFunc: () {
-          Navigator.of(context).pop();
-          musicPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
+    musicPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
 
-          Navigator.of(context).push(CustomModal(
-              child: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                musicPlayer,
-                SizedBox(
-                  height: 10,
+    Navigator.of(context).push(CustomModal(
+        onWillPop: () {
+          _deleteFiles();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              musicPlayer,
+              SizedBox(
+                height: 10,
+              ),
+              RaisedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(false);
+                  await submitRecord();
+                },
+                color: MyColors.primaryColor,
+                child: Text(
+                  'Submit',
+                  style: TextStyle(color: Colors.white),
                 ),
-                RaisedButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop(false);
-                    await submitRecord();
-                  },
-                  color: MyColors.primaryColor,
-                  child: Text(
-                    'Submit',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          )));
-        });
+              ),
+            ],
+          ),
+        )));
+
     print(success == 1 ? 'Failure!' : 'Success!');
   }
 
@@ -274,17 +286,39 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   void initState() {
-    recordingFilePath = appTempDirectoryPath;
-    melodyPath = appTempDirectoryPath;
-    mergedFilePath = appTempDirectoryPath;
+    if (widget.melody.levelUrls != null) {
+      _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
+    }
 
-    melodyPlayer = MusicPlayer(
-      url: widget.melody.audioUrl,
-      backColor: Colors.transparent,
-      onComplete: saveRecord,
-    );
+    // melodyPlayer = MusicPlayer(
+    //   url: widget.melody.audioUrl ?? widget.melody.levelUrls.values.elementAt(0),
+    //   backColor: Colors.transparent,
+    //   onComplete: saveRecord,
+    // );
+
+    if (widget.melody.audioUrl != null) {
+      initMelodyPlayer(widget.melody.audioUrl);
+    } else if (Constants.currentMelodyLevel != null) {
+      initMelodyPlayer(widget.melody.levelUrls[Constants.currentMelodyLevel]);
+    } else {
+      initMelodyPlayer(widget.melody.levelUrls.values.elementAt(0).toString());
+    }
+
     flutterFFmpeg = FlutterFFmpeg();
     super.initState();
+  }
+
+  initMelodyPlayer(String url) async {
+    if (melodyPlayer != null) {
+      await melodyPlayer.stop();
+    }
+    setState(() {
+      melodyPlayer = new MusicPlayer(
+        url: url,
+        backColor: Colors.transparent,
+        onComplete: saveRecord,
+      );
+    });
   }
 
   @override
@@ -305,9 +339,48 @@ class _MelodyPageState extends State<MelodyPage> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 70,
+                    height: 50,
                   ),
-                  Container(width: 150, height: 150, child: Image.asset(Strings.default_melody_image)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 50,
+                      ),
+                      CachedImage(
+                        width: 150,
+                        height: 150,
+                        defaultAssetImage: Strings.default_melody_image,
+                        imageUrl: widget.melody.imageUrl,
+                        imageShape: BoxShape.rectangle,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      widget.melody.levelUrls != null
+                          ? DropdownButton(
+                              dropdownColor: MyColors.lightPrimaryColor,
+                              iconEnabledColor: Colors.white,
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                              value: Constants.currentMelodyLevel ?? _dropdownValue,
+                              onChanged: (choice) async {
+                                Constants.currentMelodyLevel = choice;
+                                Navigator.of(context)
+                                    .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody});
+                              },
+                              items: (widget.melody.levelUrls.keys.toList())
+                                  .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                                return DropdownMenuItem<dynamic>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            )
+                          : SizedBox(
+                              width: 50,
+                            )
+                    ],
+                  ),
                   SizedBox(
                     height: 20,
                   ),

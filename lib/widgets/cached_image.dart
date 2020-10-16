@@ -25,12 +25,11 @@ class CachedImage extends StatefulWidget {
 class _CachedImageState extends State<CachedImage> {
   @override
   Widget build(BuildContext context) {
-    return _cacheRoundedImage(widget.imageUrl, widget.imageShape, widget.width,
-        widget.height, widget.defaultAssetImage);
+    return _cacheRoundedImage(
+        widget.imageUrl, widget.imageShape, widget.width, widget.height, widget.defaultAssetImage);
   }
 
-  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width,
-      double height, String defaultAssetImage) {
+  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width, double height, String defaultAssetImage) {
     return Container(
       width: width,
       height: height,
@@ -45,26 +44,23 @@ class _CachedImageState extends State<CachedImage> {
                 height: height,
                 decoration: BoxDecoration(
                   shape: boxShape,
-                  image:
-                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                  image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
               placeholder: (context, loggedInProfileImageURL) => Center(
                   child: Image.asset(
-                Strings.default_profile_image,
+                defaultAssetImage,
                 height: 80,
                 width: 80,
               )),
-              errorWidget: (context, loggedInProfileImageURL, error) =>
-                  Icon(Icons.error),
+              errorWidget: (context, loggedInProfileImageURL, error) => Icon(Icons.error),
             )
           : Container(
               width: width,
               height: height,
               decoration: BoxDecoration(
                 shape: boxShape,
-                image: DecorationImage(
-                    image: AssetImage(defaultAssetImage), fit: BoxFit.cover),
+                image: DecorationImage(image: AssetImage(defaultAssetImage), fit: BoxFit.cover),
               ),
             ),
     );

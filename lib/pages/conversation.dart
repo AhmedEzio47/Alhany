@@ -594,6 +594,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
   }
 
   Future<bool> _onBackBtnPressed() async {
-    Navigator.of(context).pop();
+    var message = await DatabaseService.getLastMessage(widget.otherUid);
+    Navigator.of(context).pop(message);
   }
 }

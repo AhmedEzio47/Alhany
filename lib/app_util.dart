@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:dubsmash/widgets/flip_loader.dart';
@@ -9,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'constants/colors.dart';
 
 // saveToken() async {
@@ -30,7 +32,7 @@ List<String> searchList(String text) {
 }
 
 class AppUtil {
-  static void showAlertDialog(
+  static showAlertDialog(
       {@required BuildContext context,
       String heading,
       String message,
@@ -133,12 +135,12 @@ class AppUtil {
   }
 
   static createAppDirectory() async {
-    if (!(await Directory('/sdcard/download/$appName').exists())) {
-      final dir = await Directory('/sdcard/download/$appName').create();
+    if (!(await Directory('sdcard/download/$appName').exists())) {
+      final dir = await Directory('sdcard/download/$appName').create();
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
-      appTempDirectoryPath = '/sdcard/download/$appName/';
+      appTempDirectoryPath = 'sdcard/download/$appName/';
     }
   }
 
@@ -147,12 +149,53 @@ class AppUtil {
     return image;
   }
 
-  static showLoader(BuildContext context){
+  static showLoader(BuildContext context) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
             loaderBackground: MyColors.primaryColor,
             iconColor: Colors.white,
             icon: Icons.music_note,
             animationType: "full_flip")));
+  }
+
+  static String formatTimestamp(Timestamp timestamp) {
+    if (timestamp == null) return '';
+
+    var now = Timestamp.now().toDate();
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var diff = now.difference(date);
+    var time = '';
+
+    if (diff.inSeconds <= 60) {
+      time = 'now';
+    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
+      if (diff.inMinutes == 1) {
+        time = 'A minute ago';
+      } else {
+        time = diff.inMinutes.toString() + ' minutes ago';
+      }
+    } else if (diff.inHours > 0 && diff.inHours < 24) {
+      if (diff.inHours == 1) {
+        time = 'An hour ago';
+      } else {
+        time = diff.inHours.toString() + ' hours ago';
+      }
+    } else if (diff.inDays > 0 && diff.inDays < 7) {
+      if (diff.inDays == 1) {
+        time = 'Yesterday';
+      } else {
+        time = diff.inDays.toString() + ' DAYS AGO';
+      }
+    } else {
+      if (diff.inDays == 7) {
+        time = 'A WEEK AGO';
+      } else {
+        /// Show in Format => 21-05-2019 10:59 AM
+        final df = new DateFormat('dd-MM-yyyy hh:mm a');
+        time = df.format(date);
+      }
+    }
+
+    return time;
   }
 }

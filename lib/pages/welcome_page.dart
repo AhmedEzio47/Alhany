@@ -5,8 +5,6 @@ import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
 import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/widgets/custom_modal.dart';
-import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -443,8 +441,6 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                     new Expanded(
                                       child: new FlatButton(
                                         onPressed: () async {
-                                          AppUtil.showLoader(context);
-
                                           FirebaseUser user = await signInWithGoogle();
                                           if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
                                             await DatabaseService.addUserToDatabase(user.uid, user.email, null);

@@ -1,9 +1,11 @@
 import 'package:dubsmash/pages/app_page.dart';
+import 'package:dubsmash/pages/chats.dart';
 import 'package:dubsmash/pages/conversation.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:dubsmash/pages/root.dart';
+import 'package:dubsmash/pages/upload_melodies.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +44,12 @@ class RouteGenerator {
             builder: (_) => Conversation(
                   otherUid: args['other_uid'],
                 ));
+
+      case '/chats':
+        return MaterialPageRoute(builder: (_) => Chats());
+
+      case '/upload-melodies':
+        return MaterialPageRoute(builder: (_) => UploadMelodies());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

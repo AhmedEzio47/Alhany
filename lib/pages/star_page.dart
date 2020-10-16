@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
@@ -168,6 +172,28 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        child: Icon(
+          Icons.add_circle,
+          color: MyColors.primaryColor,
+        ),
+        onPressed: () async {
+          AppUtil.showAlertDialog(
+              context: context,
+              message: 'What do you want to upload?',
+              firstBtnText: 'Melody',
+              firstFunc: () async {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/upload-melodies');
+              },
+              secondBtnText: 'Song',
+              secondFunc: () async {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/upload-songs');
+              });
+        },
+      ),
     );
   }
 
@@ -218,6 +244,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     });
                   },
                   child: MelodyItem(
+                    key: ValueKey('melody_item'),
                     melody: _melodies[index],
                   ),
                 );
@@ -244,6 +271,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     });
                   },
                   child: MelodyItem(
+                    //Solves confusion between songs and melodies when adding to favourites
+                    key: ValueKey('song_item'),
                     melody: _songs[index],
                   ),
                 );
@@ -254,5 +283,28 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
       default:
         return Container();
     }
+  }
+
+  addSong() async {
+    File songFile = await AppUtil.chooseAudio();
+    String fileName = path.basename(songFile.path);
+    String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+    String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$fileName');
+
+    if (songUrl == '') {
+      print('no file chosen error');
+      return;
+    }
+
+    melodiesRef.add({
+      'name': fileNameWithoutExtension,
+      'description': 'Something about the song',
+      'audio_url': songUrl,
+      'author_id': Constants.currentUserID,
+      'is_song': true,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+
+    AppUtil.showToast('Song uploaded!');
   }
 }

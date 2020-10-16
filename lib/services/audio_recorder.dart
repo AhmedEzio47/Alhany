@@ -22,8 +22,7 @@ class AudioRecorder {
     // .mp4 .m4a .aac <---> AudioFormat.AAC
     // AudioFormat is optional, if given value, will overwrite path extension when there is conflicts.
 
-    _recorder = FlutterAudioRecorder(customPath,
-        audioFormat: AudioFormat.WAV, sampleRate: 22050);
+    _recorder = FlutterAudioRecorder(customPath, audioFormat: AudioFormat.WAV, sampleRate: 22050);
     await _recorder.initialized;
   }
 
@@ -42,7 +41,9 @@ class AudioRecorder {
   }
 
   Future stopRecording() async {
-    timer.cancel();
+    if (timer != null) {
+      timer.cancel();
+    }
     var result = await _recorder.stop();
     _recording = result;
     return result;

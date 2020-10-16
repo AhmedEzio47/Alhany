@@ -4,7 +4,6 @@ import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/models/message_model.dart';
 import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/models/user_model.dart';
-import 'package:flutter/material.dart';
 
 import '../app_util.dart';
 
@@ -215,5 +214,39 @@ class DatabaseService {
         .getDocuments();
     List<Message> messages = msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
+  }
+
+  static getLastMessage(String otherUserId) async {
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .getDocuments();
+    List<Message> messages = msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    if (messages.length == 0)
+      return Message(message: 'Say hi to your new friend!', type: 'text', sender: otherUserId, timestamp: null);
+    return messages[0];
+  }
+
+  static makeUserOnline() async {
+    await usersRef.document(Constants.currentUserID).updateData({'online': 'online'});
+  }
+
+  static makeUserOffline() async {
+    await usersRef.document(Constants.currentUserID).updateData({'online': FieldValue.serverTimestamp()});
+  }
+
+  static Future<List<String>> getChats() async {
+    QuerySnapshot chatsSnapshot =
+        await chatsRef.document(Constants.currentUserID).collection('conversations').getDocuments();
+
+    List<String> chattersIds = [];
+    for (DocumentSnapshot doc in chatsSnapshot.documents) {
+      chattersIds.add(doc.documentID);
+    }
+    return chattersIds;
   }
 }

@@ -5,6 +5,7 @@ class Melody {
   final String name;
   final String description;
   final String audioUrl;
+  final Map levelUrls;
   final String imageUrl;
   final String authorId;
   final bool isSong;
@@ -15,6 +16,7 @@ class Melody {
       this.name,
       this.description,
       this.audioUrl,
+      this.levelUrls,
       this.imageUrl,
       this.authorId,
       this.isSong,
@@ -26,6 +28,7 @@ class Melody {
         name: doc['name'],
         description: doc['description'] ?? '',
         audioUrl: doc['audio_url'],
+        levelUrls: doc['level_urls'],
         imageUrl: doc['image_url'],
         authorId: doc['author_id'],
         isSong: doc['is_song'],

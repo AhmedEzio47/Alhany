@@ -1,9 +1,4 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/database_service.dart';
@@ -38,8 +33,7 @@ class _MelodiesPageState extends State<MelodiesPage> {
         decoration: BoxDecoration(
           color: MyColors.primaryColor,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.1), BlendMode.dstATop),
+            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
             image: AssetImage(Strings.default_bg),
             fit: BoxFit.cover,
           ),
@@ -51,8 +45,7 @@ class _MelodiesPageState extends State<MelodiesPage> {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.of(context).pushNamed('/melody-page',
-                          arguments: {'melody': _melodies[index]});
+                      Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': _melodies[index]});
                     },
                     child: MelodyItem(
                       melody: _melodies[index],
@@ -62,78 +55,6 @@ class _MelodiesPageState extends State<MelodiesPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        child: Icon(
-          Icons.add_circle,
-          color: MyColors.primaryColor,
-        ),
-        onPressed: () async {
-          AppUtil.showAlertDialog(
-              context: context,
-              message: 'What do you want to upload?',
-              firstBtnText: 'Melody',
-              firstFunc: () async {
-                Navigator.of(context).pop();
-                await addMelody();
-              },
-              secondBtnText: 'Song',
-              secondFunc: () async {
-                Navigator.of(context).pop();
-                await addSong();
-              });
-        },
-      ),
     );
-  }
-
-  addMelody() async {
-    File melodyFile = await AppUtil.chooseAudio();
-    String fileName = path.basename(melodyFile.path);
-    String fileNameWithoutExtension =
-        path.basenameWithoutExtension(melodyFile.path);
-    String melodyUrl =
-        await AppUtil.uploadFile(melodyFile, context, '/melodies/$fileName');
-
-    if (melodyUrl == '') {
-      print('no file chosen error');
-      return;
-    }
-
-    melodiesRef.add({
-      'name': fileNameWithoutExtension,
-      'description': 'Something about the melody',
-      'audio_url': melodyUrl,
-      'author_id': Constants.currentUserID,
-      'is_song': false,
-      'timestamp': FieldValue.serverTimestamp()
-    });
-
-    AppUtil.showToast('Melody uploaded!');
-  }
-
-  addSong() async {
-    File songFile = await AppUtil.chooseAudio();
-    String fileName = path.basename(songFile.path);
-    String fileNameWithoutExtension =
-        path.basenameWithoutExtension(songFile.path);
-    String songUrl =
-        await AppUtil.uploadFile(songFile, context, '/songs/$fileName');
-
-    if (songUrl == '') {
-      print('no file chosen error');
-      return;
-    }
-
-    melodiesRef.add({
-      'name': fileNameWithoutExtension,
-      'description': 'Something about the song',
-      'audio_url': songUrl,
-      'author_id': Constants.currentUserID,
-      'is_song': true,
-      'timestamp': FieldValue.serverTimestamp()
-    });
-
-    AppUtil.showToast('Song uploaded!');
   }
 }

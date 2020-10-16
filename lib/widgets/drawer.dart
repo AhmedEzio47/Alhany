@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/pages/profile_page.dart';
@@ -60,13 +61,17 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () async {
-              Navigator.of(context).pushNamed('/favourites');
+              Navigator.of(context).pushNamed('/chats');
             },
             title: Text(
-              'Favourites',
+              'Chats',
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
             ),
             leading: Icon(
-              Icons.favorite,
+              Icons.chat_bubble,
+              color: MyColors.primaryColor,
             ),
           ),
           ListTile(
@@ -99,9 +104,13 @@ class _BuildDrawerState extends State<BuildDrawer> {
             },
             title: Text(
               'Sign Out',
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
             ),
             leading: Icon(
               Icons.power_settings_new,
+              color: MyColors.primaryColor,
             ),
           ),
         ],

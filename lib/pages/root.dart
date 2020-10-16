@@ -69,7 +69,7 @@ class _RootPageState extends State<RootPage> {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
 
       User star = await DatabaseService.getUserWithId(Strings.starId);
-      AppUtil.createAppDirectory();
+      //AppUtil.createAppDirectory();
 
       setState(() {
         Constants.currentUser = loggedInUser;

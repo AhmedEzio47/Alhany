@@ -37,16 +37,14 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   getMelody() async {
-    Melody melody =
-        await DatabaseService.getMelodyWithId(widget.record.melodyId);
+    Melody melody = await DatabaseService.getMelodyWithId(widget.record.melodyId);
     setState(() {
       _melody = melody;
     });
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': widget.record.singerId});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': widget.record.singerId});
   }
 
   @override
@@ -67,17 +65,15 @@ class _RecordItemState extends State<RecordItem> {
               height: 50,
               imageUrl: _singer?.profileImageUrl,
               imageShape: BoxShape.rectangle,
-              defaultAssetImage: Strings.default_melody_image,
+              defaultAssetImage: Strings.default_profile_image,
             ),
           ),
           title: Text(_singer?.name ?? ''),
           subtitle: InkWell(
             child: Text(_melody?.name ?? ''),
             onTap: () async {
-              Navigator.of(context).pushNamed('/melody-page', arguments: {
-                'melody': (await DatabaseService.getMelodyWithId(
-                    widget.record.melodyId))
-              });
+              Navigator.of(context).pushNamed('/melody-page',
+                  arguments: {'melody': (await DatabaseService.getMelodyWithId(widget.record.melodyId))});
             },
           ),
         ),
