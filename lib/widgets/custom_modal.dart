@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class CustomModal extends ModalRoute<void> {
   final Widget child;
   final Function onWillPop;
+
+  BuildContext _context;
   CustomModal({this.onWillPop, this.child});
   @override
   Color get barrierColor => Colors.black.withOpacity(0.5);
@@ -29,6 +31,8 @@ class CustomModal extends ModalRoute<void> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
+    _context = context;
+
     // This makes sure that text and other content follows the material style
     return WillPopScope(
       onWillPop: onBackPressed,
@@ -43,7 +47,11 @@ class CustomModal extends ModalRoute<void> {
   }
 
   Future<bool> onBackPressed() {
-    onWillPop();
+    if (onWillPop != null) {
+      onWillPop();
+    } else {
+      Navigator.of(_context).pop();
+    }
   }
 
   Widget _buildOverlayContent(BuildContext context) {

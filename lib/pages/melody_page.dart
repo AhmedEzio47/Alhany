@@ -28,7 +28,6 @@ class MelodyPage extends StatefulWidget {
 }
 
 class _MelodyPageState extends State<MelodyPage> {
-  //TODO don't forget to delete files in all cases
   num _countDownStart = 3;
   String _countDownText = 'Get Ready';
 
@@ -139,6 +138,15 @@ class _MelodyPageState extends State<MelodyPage> {
       MelodyPage.recordingStatus = RecordingStatus.Recording;
 
       await initRecorder();
+      String url;
+      if (widget.melody.audioUrl != null) {
+        url = widget.melody.audioUrl;
+      } else if (Constants.currentMelodyLevel != null) {
+        url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+      } else {
+        url = widget.melody.levelUrls.values.elementAt(0).toString();
+      }
+      await initMelodyPlayer(url);
       await melodyPlayer.play();
       await recorder.startRecording(conversation: this.widget);
     } else {}
@@ -224,7 +232,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
     Navigator.of(context).pop();
 
-    musicPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
+    melodyPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
 
     Navigator.of(context).push(CustomModal(
         onWillPop: () {
@@ -235,7 +243,7 @@ class _MelodyPageState extends State<MelodyPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              musicPlayer,
+              melodyPlayer,
               SizedBox(
                 height: 10,
               ),

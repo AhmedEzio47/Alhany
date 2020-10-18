@@ -75,17 +75,33 @@ class _MusicPlayerState extends State<MusicPlayer> {
   void initAudioPlayer() {
     widget.advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: widget.advancedPlayer);
-    widget.advancedPlayer.durationHandler = (d) => setState(() {
-          duration = d;
+
+    widget.advancedPlayer.onDurationChanged.listen((Duration d) {
+      print('Max duration: $d');
+      setState(() => duration = d);
+    });
+
+    // widget.advancedPlayer.durationHandler = (d) => setState(() {
+    //       duration = d;
+    //     });
+
+    widget.advancedPlayer.onAudioPositionChanged.listen((Duration p) => {
+          setState(() {
+            position = p;
+            print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
+            if (duration.inMilliseconds - p.inMilliseconds < 200) {
+              stop();
+            }
+          })
         });
 
-    widget.advancedPlayer.positionHandler = (p) => setState(() {
-          position = p;
-          print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
-          if (duration.inMilliseconds - p.inMilliseconds < 200) {
-            stop();
-          }
-        });
+    // widget.advancedPlayer.positionHandler = (p) => setState(() {
+    //       position = p;
+    //       print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
+    //       if (duration.inMilliseconds - p.inMilliseconds < 200) {
+    //         stop();
+    //       }
+    //     });
   }
 
   Future play() async {
@@ -118,6 +134,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
         position = null;
         duration = null;
       });
+
+      widget.advancedPlayer.release();
+      widget.advancedPlayer.dispose();
     }
 
     if (widget.onComplete != null && MelodyPage.recordingStatus == RecordingStatus.Recording) {
