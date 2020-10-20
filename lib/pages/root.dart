@@ -78,6 +78,8 @@ class _RootPageState extends State<RootPage> {
         _authStatus = AuthStatus.LOGGED_IN;
         authStatus = AuthStatus.LOGGED_IN;
         Constants.startUser = star;
+
+        Constants.isAdmin = (Constants.currentUserID == Strings.starId);
       });
     } else if (user?.uid != null && !(user.isEmailVerified)) {
       print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');

@@ -29,6 +29,7 @@ class Constants {
   static FirebaseUser currentFirebaseUser;
 
   static User startUser;
+  static bool isAdmin;
 
   static String currentMelodyLevel;
 }

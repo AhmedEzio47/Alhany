@@ -794,32 +794,12 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
     }
   }
 
-  String validateEmail(String value) {
-    String pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regExp = new RegExp(pattern);
-    if (value.length == 0) {
-      AppUtil.showToast("Email is Required");
-      setState(() {
-        _errorMsgEmail = "Email is Required";
-      });
-    } else if (!regExp.hasMatch(value)) {
-      AppUtil.showToast("Invalid Email");
-      setState(() {
-        _errorMsgEmail = "Invalid Email";
-      });
-    } else {
-      setState(() {
-        _errorMsgEmail = null;
-      });
-    }
-    return _errorMsgEmail;
-  }
+
 
   Future _signUp() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
-    String validEmail = validateEmail(_emailController.text);
+    String validEmail = AppUtil.validateEmail(_emailController.text);
 
     print('validEmail: $validEmail ');
 
@@ -856,15 +836,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         _setFocusNode(myFocusNodePassword);
         return;
       } else {
-        if (_errorMsgEmail != null) {
-          AppUtil.showToast(_errorMsgEmail);
-          _setFocusNode(myFocusNodeEmail);
-          return;
-        } else {
-          AppUtil.showToast("An Error Occurred");
-          _setFocusNode(myFocusNodeEmail);
-          return;
-        }
+        _setFocusNode(myFocusNodeEmail);
       }
     }
   }

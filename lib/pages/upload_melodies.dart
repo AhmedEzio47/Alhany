@@ -7,6 +7,7 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:random_string/random_string.dart';
 
 class UploadMelodies extends StatefulWidget {
   @override
@@ -200,36 +201,40 @@ class _UploadMelodiesState extends State<UploadMelodies> {
   }
 
   uploadMelody() async {
-    if (_melodyName.isEmpty) {
+    if (_melodyName.trim().isEmpty) {
       AppUtil.showToast('Please choose a name for the melody');
       return;
     }
+
     AppUtil.showLoader(context);
 
     Map<String, String> levelsUrls = {};
 
+    String id = randomAlphaNumeric(20);
+
     for (String key in melodies.keys) {
       String ext = path.extension(melodies[key].path);
-      String url = await AppUtil.uploadFile(melodies[key], context, '/melodies/$_melodyName\_$key$ext');
+      String url = await AppUtil.uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
       levelsUrls.putIfAbsent(key, () => url);
     }
 
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil.uploadFile(_image, context, '/melodies_images/$_melodyName$ext)');
+      imageUrl = await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
-    await melodiesRef.add({
+    await melodiesRef.document(id).setData({
       'name': _melodyName,
-      'description': 'Something about the melody',
       'audio_url': _melodyUrl,
       'image_url': imageUrl,
       'level_urls': levelsUrls,
       'author_id': Constants.currentUserID,
       'is_song': false,
+      'search': searchList(_melodyName),
       'timestamp': FieldValue.serverTimestamp()
     });
+
     Navigator.of(context).pop();
     AppUtil.showToast('Melody uploaded!');
     Navigator.of(context).pop();

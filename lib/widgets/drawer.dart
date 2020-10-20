@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/pages/email_change.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
@@ -71,6 +72,25 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
             leading: Icon(
               Icons.chat_bubble,
+              color: MyColors.primaryColor,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
+              try {
+                Navigator.of(context).pushNamed('/change-email');
+              } catch (e) {
+                print('Sign out: $e');
+              }
+            },
+            title: Text(
+              'Change Email',
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.alternate_email,
               color: MyColors.primaryColor,
             ),
           ),

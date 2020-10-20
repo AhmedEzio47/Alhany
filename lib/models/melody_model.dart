@@ -9,6 +9,7 @@ class Melody {
   final String imageUrl;
   final String authorId;
   final bool isSong;
+  final List search;
   final Timestamp timestamp;
 
   Melody(
@@ -20,6 +21,7 @@ class Melody {
       this.imageUrl,
       this.authorId,
       this.isSong,
+      this.search,
       this.timestamp});
 
   factory Melody.fromDoc(DocumentSnapshot doc) {
@@ -32,6 +34,7 @@ class Melody {
         imageUrl: doc['image_url'],
         authorId: doc['author_id'],
         isSong: doc['is_song'],
+        search: doc['search'],
         timestamp: doc['timestamp']);
   }
 }

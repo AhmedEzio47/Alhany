@@ -48,8 +48,33 @@ class DatabaseService {
   }
 
   static Future<List<Melody>> getMelodies() async {
-    QuerySnapshot melodiesSnapshot =
-        await melodiesRef.where('is_song', isEqualTo: false).orderBy('timestamp', descending: true).getDocuments();
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: false)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static Future<List<Melody>> getNextMelodies(Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: false)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static searchMelodies(String text) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: false)
+        .where('search', arrayContains: text)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
     List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
@@ -72,14 +97,56 @@ class DatabaseService {
   }
 
   static Future<List<Melody>> getSongs() async {
-    QuerySnapshot melodiesSnapshot =
-        await melodiesRef.where('is_song', isEqualTo: true).orderBy('timestamp', descending: true).getDocuments();
-    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
-    return melodies;
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
+  }
+
+  static Future<List<Melody>> getNextSongs(Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
+  }
+
+  static searchSongs(String text) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .where('search', arrayContains: text)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
   }
 
   static Future<List<Record>> getRecords() async {
     QuerySnapshot recordsSnapshot = await recordsRef.orderBy('timestamp', descending: true).getDocuments();
+    List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+    return records;
+  }
+
+  static Future<List<Record>> getRecordsByMelody(String melodyId) async {
+    QuerySnapshot recordsSnapshot =
+        await recordsRef.where('melody_id', isEqualTo: melodyId).orderBy('timestamp', descending: true).getDocuments();
+    List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+    return records;
+  }
+
+  static Future<List<Record>> getNextRecords(Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot recordsSnapshot = await recordsRef
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
     List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
@@ -110,18 +177,6 @@ class DatabaseService {
       'melody_id': melodyId,
       'timestamp': FieldValue.serverTimestamp()
     });
-
-    // await melodiesRef
-    //     .document(melodyId)
-    //     .collection('records')
-    //     .document(recordId)
-    //     .setData({'audio_url': url, 'singer_id': Constants.currentUserID, 'timestamp': FieldValue.serverTimestamp()});
-    //
-    // await usersRef
-    //     .document(Constants.currentUserID)
-    //     .collection('records')
-    //     .document(recordId)
-    //     .setData({'audio_url': url, 'melody_id': melodyId, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static Future<String> checkForDuplicateRecords(String melodyId) async {
@@ -248,5 +303,25 @@ class DatabaseService {
       chattersIds.add(doc.documentID);
     }
     return chattersIds;
+  }
+
+  static removeNotification(String receiverId, String objectId, String type) async {
+    QuerySnapshot snapshot = await usersRef
+        .document(receiverId)
+        .collection('notifications')
+        .where('sender', isEqualTo: Constants.currentUserID)
+        .where('type', isEqualTo: type)
+        .where('object_id', isEqualTo: objectId)
+        .getDocuments();
+
+    if (snapshot.documents.length > 0) {
+      await usersRef
+          .document(receiverId)
+          .collection('notifications')
+          .document(snapshot.documents[0].documentID)
+          .delete();
+
+      await usersRef.document(receiverId).updateData({'notificationsNumber': FieldValue.increment(-1)});
+    }
   }
 }

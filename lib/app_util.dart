@@ -73,15 +73,26 @@ class AppUtil {
         fontSize: 16.0);
   }
 
-  static Future<File> chooseAudio() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
-      'mp3',
-      'wav',
-    ]);
+  static Future chooseAudio({bool multiple = false}) async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'mp3',
+          'wav',
+        ],
+        allowMultiple: multiple);
 
     if (result != null) {
-      File file = File(result.files.single.path);
-      return file;
+      if (multiple) {
+        List<File> files = [];
+        result.files.forEach((file) {
+          files.add(File(file.path));
+        });
+        return files;
+      } else {
+        File file = File(result.files.single.path);
+        return file;
+      }
     }
 
     return null;
@@ -118,20 +129,37 @@ class AppUtil {
   }
 
   static Future<String> downloadFile(String url) async {
-    var response = await get(url);
     var firstPath = appTempDirectoryPath;
+
+    var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
-    String fileName = contentDisposition
-        .split('filename*=utf-8')
-        .last
-        .replaceAll(RegExp('%20'), ' ')
-        .replaceAll(RegExp('%2C|\''), '');
+    String fileName = await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
     file.writeAsBytesSync(response.bodyBytes);
 
     return filePathAndName;
+  }
+
+  static Future<String> getStorageFileNameFromUrl(String url) async {
+    var response = await get(url);
+    var contentDisposition = response.headers['content-disposition'];
+    String fileName = contentDisposition
+        .split('filename*=utf-8')
+        .last
+        .replaceAll(RegExp('%20'), ' ')
+        .replaceAll(RegExp('%2C|\''), '');
+    return fileName;
+  }
+
+  static Future<String> getStorageFileNameFromContentDisposition(var contentDisposition) async {
+    String fileName = contentDisposition
+        .split('filename*=utf-8')
+        .last
+        .replaceAll(RegExp('%20'), ' ')
+        .replaceAll(RegExp('%2C|\''), '');
+    return fileName;
   }
 
   static createAppDirectory() async {
@@ -197,5 +225,19 @@ class AppUtil {
     }
 
     return time;
+  }
+
+  static String validateEmail(String value) {
+    String pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil.showToast("Email is Required");
+      return "Email is Required";
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil.showToast("Invalid Email");
+      return "Invalid Email";
+    }
+    return null;
   }
 }

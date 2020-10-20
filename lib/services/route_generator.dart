@@ -1,11 +1,13 @@
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/chats.dart';
 import 'package:dubsmash/pages/conversation.dart';
+import 'package:dubsmash/pages/email_change.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:dubsmash/pages/root.dart';
 import 'package:dubsmash/pages/upload_melodies.dart';
+import 'package:dubsmash/pages/upload_songs.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
 
@@ -50,6 +52,12 @@ class RouteGenerator {
 
       case '/upload-melodies':
         return MaterialPageRoute(builder: (_) => UploadMelodies());
+
+      case '/upload-songs':
+        return MaterialPageRoute(builder: (_) => UploadSongs());
+
+      case '/change-email':
+        return MaterialPageRoute(builder: (_) => EmailChangePage());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third
