@@ -50,6 +50,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
   String _dropdownValue;
 
+  String _recordingText = '';
+
   _countDown() {
     const oneSec = const Duration(seconds: 1);
     Timer.periodic(
@@ -399,9 +401,9 @@ class _MelodyPageState extends State<MelodyPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  melodyPlayer,
+                  recordingStatus != RecordingStatus.Recording ? melodyPlayer : recordingTimerText(),
                   SizedBox(
-                    height: 40,
+                    height: 30,
                   ),
                   InkWell(
                     onTap: () async {
@@ -499,5 +501,21 @@ class _MelodyPageState extends State<MelodyPage> {
         ),
       ),
     );
+  }
+
+  _recordingTimer() {
+    const oneSec = const Duration(seconds: 1);
+    num counter = 0;
+    Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        counter++;
+        setState(() {});
+      },
+    );
+  }
+
+  Widget recordingTimerText() {
+    return Text(_recordingText);
   }
 }

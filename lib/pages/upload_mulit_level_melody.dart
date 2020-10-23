@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
-class UploadMelodies extends StatefulWidget {
+class UploadMultiLevelMelody extends StatefulWidget {
   @override
-  _UploadMelodiesState createState() => _UploadMelodiesState();
+  _UploadMultiLevelMelodyState createState() => _UploadMultiLevelMelodyState();
 }
 
-class _UploadMelodiesState extends State<UploadMelodies> {
+class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
   Map<String, File> melodies = {};
 
   String _melodyName;

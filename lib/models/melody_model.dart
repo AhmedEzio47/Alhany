@@ -9,6 +9,7 @@ class Melody {
   final String imageUrl;
   final String authorId;
   final bool isSong;
+  final String price;
   final List search;
   final Timestamp timestamp;
 
@@ -21,6 +22,7 @@ class Melody {
       this.imageUrl,
       this.authorId,
       this.isSong,
+      this.price,
       this.search,
       this.timestamp});
 
@@ -34,6 +36,7 @@ class Melody {
         imageUrl: doc['image_url'],
         authorId: doc['author_id'],
         isSong: doc['is_song'],
+        price: doc['price'],
         search: doc['search'],
         timestamp: doc['timestamp']);
   }

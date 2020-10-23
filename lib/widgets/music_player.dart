@@ -36,8 +36,9 @@ class MusicPlayer extends StatefulWidget {
   Future stop() async {
     await advancedPlayer.stop();
     playerState = AudioPlayerState.STOPPED;
-    advancedPlayer.setReleaseMode(ReleaseMode.STOP);
-    advancedPlayer.release();
+    // advancedPlayer.setReleaseMode(ReleaseMode.STOP);
+    // advancedPlayer.release();
+    // advancedPlayer.dispose();
   }
 
   @override
@@ -155,17 +156,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
           child: Container(
             color: widget.backColor,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: MyColors.accentColor,
-                    border: Border.all(color: MyColors.accentColor),
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text(
-                  widget.title,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              widget.title != null
+                  ? Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                          color: MyColors.accentColor,
+                          border: Border.all(color: MyColors.accentColor),
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: Text(
+                        widget.title,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  : Container(),
               Row(
                 children: [
                   SizedBox(

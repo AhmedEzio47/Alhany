@@ -8,7 +8,8 @@ import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:dubsmash/pages/root.dart';
-import 'package:dubsmash/pages/upload_melodies.dart';
+import 'package:dubsmash/pages/upload_mulit_level_melody.dart';
+import 'package:dubsmash/pages/upload_single_level_melody.dart';
 import 'package:dubsmash/pages/upload_songs.dart';
 import 'package:dubsmash/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +53,11 @@ class RouteGenerator {
       case '/chats':
         return MaterialPageRoute(builder: (_) => Chats());
 
-      case '/upload-melodies':
-        return MaterialPageRoute(builder: (_) => UploadMelodies());
+      case '/upload-multi-level-melody':
+        return MaterialPageRoute(builder: (_) => UploadMultiLevelMelody());
+
+      case '/upload-single-level-melody':
+        return MaterialPageRoute(builder: (_) => UploadSingleLevelMelody());
 
       case '/upload-songs':
         return MaterialPageRoute(builder: (_) => UploadSongs());

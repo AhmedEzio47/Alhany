@@ -280,7 +280,19 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     firstBtnText: 'Melody',
                     firstFunc: () async {
                       Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed('/upload-melodies');
+                      AppUtil.showAlertDialog(
+                          context: context,
+                          message: 'Single level or multi-level melody?',
+                          firstBtnText: 'Single',
+                          firstFunc: () async {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushNamed('/upload-single-level-melody');
+                          },
+                          secondBtnText: 'Multi level',
+                          secondFunc: () async {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushNamed('/upload-multi-level-melody');
+                          });
                     },
                     secondBtnText: 'Song',
                     secondFunc: () async {

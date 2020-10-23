@@ -75,7 +75,6 @@ class PaymentService {
     }
     Token token = await StripePayment.paymentRequestWithNativePay(
       androidPayOptions: AndroidPayPaymentRequest(
-        lineItems: [LineItem(description: 'Melody', quantity: '1', unitPrice: '5 EUR')],
         totalPrice: "5",
         currencyCode: "EUR",
       ),
