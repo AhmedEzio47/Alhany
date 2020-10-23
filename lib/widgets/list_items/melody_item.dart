@@ -123,7 +123,7 @@ class _MelodyItemState extends State<MelodyItem> {
                           padding: const EdgeInsets.only(left: 8.0),
                           child: InkWell(
                             onTap: () async {
-                              await _downloadMelody();
+                              _downloadMelody();
                             },
                             child: Icon(
                               Icons.file_download,
@@ -274,9 +274,10 @@ class _MelodyItemState extends State<MelodyItem> {
   }
 
   void _downloadMelody() async {
-    bool alreadyDownloaded =
-        (await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get())
-            .exists;
+    DocumentSnapshot doc =
+        await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
+    bool alreadyDownloaded = doc.exists;
+    print('alreadyDownloaded: $alreadyDownloaded');
     Token token;
     if (!alreadyDownloaded) {
       token = await PaymentService.nativePayment();
@@ -304,15 +305,19 @@ class _MelodyItemState extends State<MelodyItem> {
           imageUrl: widget.melody.imageUrl,
           name: widget.melody.name,
           audioUrl: path);
-
-      await MelodySqlite.insert(melody);
-      await usersRef
-          .document(Constants.currentUserID)
-          .collection('downloads')
-          .document(widget.melody.id)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      Navigator.of(context).pop();
-      AppUtil.showToast('Downloaded!');
+      if (MelodySqlite.getMelodyWithId(widget.melody.id) == null) {
+        await MelodySqlite.insert(melody);
+        await usersRef
+            .document(Constants.currentUserID)
+            .collection('downloads')
+            .document(widget.melody.id)
+            .setData({'timestamp': FieldValue.serverTimestamp()});
+        Navigator.of(context).pop();
+        AppUtil.showToast('Downloaded!');
+      } else {
+        Navigator.of(context).pop();
+        AppUtil.showToast('Already downloaded!');
+      }
     }
   }
 }

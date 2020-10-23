@@ -20,6 +20,7 @@ class Strings {
       "pk_test_51HeoJlKcQzB5OdSOSFKB5rf0v6micyHbExBXYogHRcSbqoMP0LUWuPjs3ojQz9mQBMnLyY6S5ZIpWKsNwxGc43l800htm1GfEw";
   static const String paymentSecret =
       'sk_test_51HeoJlKcQzB5OdSOt6U9dHeE0AycFD0go3mogovD0SDtBWNIxesy5p5R414Z8dPiIDkPS88ecWhtIKqibOiyW9XA00em5I6n1c';
+  // static const merchantId = "05674331101508648233";
   static const merchantId = "Test";
 
   //File encryption key

@@ -370,54 +370,68 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
       case 0:
         return Expanded(
           flex: 8,
-          child: ListView.builder(
-              itemCount: _records.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    if (musicPlayer != null) {
-                      musicPlayer.stop();
-                    }
-                    musicPlayer = MusicPlayer(
-                      url: _records[index].audioUrl,
-                      backColor: Colors.white.withOpacity(.4),
+          child: _records.length > 0
+              ? ListView.builder(
+                  itemCount: _records.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () async {
+                        if (musicPlayer != null) {
+                          musicPlayer.stop();
+                        }
+                        musicPlayer = MusicPlayer(
+                          url: _records[index].audioUrl,
+                          backColor: Colors.white.withOpacity(.4),
+                        );
+                        setState(() {
+                          _isPlaying = true;
+                        });
+                      },
+                      child: RecordItem(
+                        record: _records[index],
+                      ),
                     );
-                    setState(() {
-                      _isPlaying = true;
-                    });
-                  },
-                  child: RecordItem(
-                    record: _records[index],
+                  })
+              : Center(
+                  child: Text(
+                    'User records are listed here',
+                    style: TextStyle(color: Colors.white),
                   ),
-                );
-              }),
+                ),
         );
         break;
       case 1:
         getFavourites();
         return Expanded(
           flex: 8,
-          child: ListView.builder(
-              itemCount: _favourites.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    if (musicPlayer != null) {
-                      musicPlayer.stop();
-                    }
-                    musicPlayer = MusicPlayer(
-                      url: _favourites[index].audioUrl,
-                      backColor: Colors.white.withOpacity(.4),
+          child: _favourites.length > 0
+              ? ListView.builder(
+                  itemCount: _favourites.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () async {
+                        if (musicPlayer != null) {
+                          musicPlayer.stop();
+                        }
+                        musicPlayer = MusicPlayer(
+                          url: _favourites[index].audioUrl,
+                          backColor: Colors.white.withOpacity(.4),
+                        );
+                        setState(() {
+                          _isPlaying = true;
+                        });
+                      },
+                      child: MelodyItem(
+                        melody: _favourites[index],
+                      ),
                     );
-                    setState(() {
-                      _isPlaying = true;
-                    });
-                  },
-                  child: MelodyItem(
-                    melody: _favourites[index],
+                  })
+              : Center(
+                  child: Text(
+                    'Your favourites are listed here',
+                    style: TextStyle(color: Colors.white),
                   ),
-                );
-              }),
+                ),
         );
         break;
 
