@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/models/melody_model.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 class PaymentService {
@@ -69,22 +70,22 @@ class PaymentService {
     return paymentIntentResult;
   }
 
-  static Future<Token> nativePayment({var controller}) async {
+  static Future<Token> nativePayment(String price, {var controller}) async {
     if (Platform.isIOS) {
       controller.jumpTo(450);
     }
     Token token = await StripePayment.paymentRequestWithNativePay(
       androidPayOptions: AndroidPayPaymentRequest(
-        totalPrice: "5",
-        currencyCode: "EUR",
+        totalPrice: price,
+        currencyCode: "USD",
       ),
       applePayOptions: ApplePayPaymentOptions(
         countryCode: 'DE',
-        currencyCode: 'EUR',
+        currencyCode: 'USD',
         items: [
           ApplePayItem(
             label: 'Test',
-            amount: '27',
+            amount: '1',
           )
         ],
       ),

@@ -8,6 +8,7 @@ class Melody {
   final Map levelUrls;
   final String imageUrl;
   final String authorId;
+  final String singer;
   final bool isSong;
   final String price;
   final List search;
@@ -21,6 +22,7 @@ class Melody {
       this.levelUrls,
       this.imageUrl,
       this.authorId,
+        this.singer,
       this.isSong,
       this.price,
       this.search,
@@ -35,6 +37,7 @@ class Melody {
         levelUrls: doc['level_urls'],
         imageUrl: doc['image_url'],
         authorId: doc['author_id'],
+        singer: doc['singer'],
         isSong: doc['is_song'],
         price: doc['price'],
         search: doc['search'],

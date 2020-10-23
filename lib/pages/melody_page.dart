@@ -510,7 +510,9 @@ class _MelodyPageState extends State<MelodyPage> {
       oneSec,
       (Timer timer) {
         counter++;
-        setState(() {});
+        setState(() {
+          _recordingText = '${counter/60}/${counter%60} / ${melodyPlayer}';
+        });
       },
     );
   }

@@ -12,6 +12,7 @@ final usersRef = firestore.collection('users');
 final melodiesRef = firestore.collection('melodies');
 final recordsRef = firestore.collection('records');
 final chatsRef = firestore.collection('chats');
+final singersRef = firestore.collection('singers');
 
 MusicPlayer musicPlayer;
 

@@ -94,7 +94,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    'Upload Multiple Songs',
+                    'Upload Multiple Melodies',
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -108,23 +108,23 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
   }
 
   uploadMelody() async {
-    if (_melodyName.trim().isEmpty) {
-      AppUtil.showToast('Please choose a name for the melody');
-      return;
-    }
+//    if (_melodyName.trim().isEmpty) {
+//      AppUtil.showToast('Please choose a name for the melody');
+//      return;
+//    }
     File melodyFile = await AppUtil.chooseAudio();
     String ext = path.extension(melodyFile.path);
-    //String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+    String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String songUrl = await AppUtil.uploadFile(melodyFile, context, '/melodies/$id$ext');
+    String melodyUrl = await AppUtil.uploadFile(melodyFile, context, '/melodies/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
       imageUrl = await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
-    if (songUrl == '') {
+    if (melodyUrl == '') {
       print('no file chosen error');
       AppUtil.showToast('No files chosen');
       Navigator.of(context).pop();
@@ -132,8 +132,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     }
 
     await melodiesRef.document(id).setData({
-      'name': _melodyName,
-      'audio_url': songUrl,
+      'name': _melodyName ?? fileNameWithoutExtension,
+      'audio_url': melodyUrl,
       'image_url': imageUrl,
       'author_id': Constants.currentUserID,
       'is_song': false,
@@ -142,7 +142,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     });
 
     Navigator.of(context).pop();
-    AppUtil.showToast('Song uploaded!');
+    AppUtil.showToast('Melody uploaded!');
   }
 
   uploadMelodies() async {
@@ -153,22 +153,22 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     }
     AppUtil.showLoader(context);
 
-    for (File songFile in melodiesFiles) {
+    for (File melodyFile in melodiesFiles) {
       String id = randomAlphaNumeric(20);
-      String songExt = path.extension(songFile.path);
-      String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
-      String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$songExt');
+      String melodyExt = path.extension(melodyFile.path);
+      String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
+      String melodyUrl = await AppUtil.uploadFile(melodyFile, context, '/melodies/$id$melodyExt');
 
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
-        'audio_url': songUrl,
+        'audio_url': melodyUrl,
         'author_id': Constants.currentUserID,
         'is_song': false,
         'search': searchList(fileNameWithoutExtension),
         'timestamp': FieldValue.serverTimestamp()
       });
     }
-    AppUtil.showToast('Songs uploaded!');
+    AppUtil.showToast('Melodiess uploaded!');
     Navigator.of(context).pop();
   }
 }

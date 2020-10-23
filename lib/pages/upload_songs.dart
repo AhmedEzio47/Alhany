@@ -5,6 +5,7 @@ import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
@@ -18,9 +19,40 @@ class _UploadSongsState extends State<UploadSongs> {
   String _songName;
   File _image;
 
+  String _price;
+  TextEditingController _singerController = TextEditingController();
+
+  List<String> _singers = [];
+
+  String _selectedSinger;
+
+
+  getSingers() async{
+    _singers = [];
+    QuerySnapshot singersSnapshot = await singersRef.getDocuments();
+    for(DocumentSnapshot doc in singersSnapshot.documents){
+      setState(() {
+        _singers.add(doc.data['name']);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    getSingers();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: MyColors.accentColor,
+        onPressed: () async{
+          await addSinger();
+        },
+        child: Icon(Icons.person_add),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
@@ -32,8 +64,8 @@ class _UploadSongsState extends State<UploadSongs> {
                 height: 50,
               ),
               Container(
-                  height: 200,
-                  width: 200,
+                  height: 180,
+                  width: 180,
                   child: _image == null
                       ? InkWell(
                           onTap: () async {
@@ -44,16 +76,57 @@ class _UploadSongsState extends State<UploadSongs> {
                           },
                           child: Image.asset(Strings.default_melody_image))
                       : Image.file(_image)),
+              SizedBox(height: 10,),
+              Text('Note: Price and singer applies for both single and multiple songs', style: TextStyle(color: MyColors.accentColor),textAlign: TextAlign.center,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: DropdownButton(hint: Text('Singer'),
+                        value: _selectedSinger,
+                        onChanged: (text){
+                        setState(() {
+                          _selectedSinger = text;
+                        });
+                      },
+                        items: (_singers)
+                            .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                          return DropdownMenuItem<dynamic>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    SizedBox(width: 10,),
+                    Expanded(
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        onChanged: (text) {
+                          setState(() {
+                            _price = text;
+                          });
+                        },keyboardType: TextInputType.number,
+                        decoration: InputDecoration(hintText: 'Price',),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  onChanged: (text) {
-                    setState(() {
-                      _songName = text;
-                    });
-                  },
-                  decoration: InputDecoration(hintText: 'Song name'),
+                child: Container(width: MediaQuery.of(context).size.width,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    onChanged: (text) {
+                      setState(() {
+                        _songName = text;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: 'Song name'),
+                  ),
                 ),
               ),
               RaisedButton(
@@ -107,14 +180,61 @@ class _UploadSongsState extends State<UploadSongs> {
     );
   }
 
+  addSinger(){
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+          height: 200,
+          color: Colors.white,
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _singerController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(hintText: 'Singer name'),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              RaisedButton(
+                onPressed: () async {
+                  if (_singerController.text.trim().isEmpty) {
+                    AppUtil.showToast('Please enter a name');
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                  AppUtil.showLoader(context);
+                  await singersRef.add({
+                    'name': _singerController.text,
+                    'search': searchList(_singerController.text),
+                  });
+                  await getSingers();
+                  AppUtil.showToast('Singer added');
+                  Navigator.of(context).pop();
+
+                },
+                color: MyColors.primaryColor,
+                child: Text(
+                  'Add Singer',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          ),
+        )));
+  }
+
   uploadSong() async {
-    if (_songName.trim().isEmpty) {
-      AppUtil.showToast('Please choose a name for the song');
-      return;
-    }
+//    if (_songName.trim().isEmpty) {
+//      AppUtil.showToast('Please choose a name for the song');
+//      return;
+//    }
     File songFile = await AppUtil.chooseAudio();
     String ext = path.extension(songFile.path);
-    //String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+    String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$ext');
@@ -132,11 +252,12 @@ class _UploadSongsState extends State<UploadSongs> {
     }
 
     await melodiesRef.document(id).setData({
-      'name': _songName,
+      'name': _songName ?? fileNameWithoutExtension,
       'audio_url': songUrl,
       'image_url': imageUrl,
-      'author_id': Constants.currentUserID,
       'is_song': true,
+      'price':_price,
+      'singer': _selectedSinger,
       'search': searchList(_songName),
       'timestamp': FieldValue.serverTimestamp()
     });
@@ -162,8 +283,9 @@ class _UploadSongsState extends State<UploadSongs> {
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
-        'author_id': Constants.currentUserID,
         'is_song': true,
+        'price':_price,
+        'singer': _selectedSinger,
         'search': searchList(fileNameWithoutExtension),
         'timestamp': FieldValue.serverTimestamp()
       });

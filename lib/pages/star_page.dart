@@ -247,7 +247,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                             ),
                           ),
                         ]),
-                    _currentPage()
+                    Expanded(child: _currentPage())
                   ],
                 ),
               ),
@@ -320,7 +320,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                   }
                   musicPlayer = MusicPlayer(
                     url: _records[index].audioUrl,
-                    backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                    backColor: MyColors.lightPrimaryColor,
                   );
                   setState(() {
                     _isPlaying = true;
@@ -347,7 +347,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       }
                       musicPlayer = MusicPlayer(
                         url: _filteredMelodies[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        backColor: MyColors.lightPrimaryColor,
                         title: _filteredMelodies[index].name,
                       );
                       setState(() {
@@ -372,7 +372,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       }
                       musicPlayer = MusicPlayer(
                         url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        backColor: MyColors.lightPrimaryColor,
                         title: _melodies[index].name,
                       );
                       setState(() {
@@ -401,7 +401,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       }
                       musicPlayer = MusicPlayer(
                         url: _filteredSongs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        backColor: MyColors.lightPrimaryColor,
                         title: _filteredSongs[index].name,
                       );
                       setState(() {
@@ -427,7 +427,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       }
                       musicPlayer = MusicPlayer(
                         url: _songs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        backColor: MyColors.lightPrimaryColor,
                         title: _songs[index].name,
                       );
                       setState(() {

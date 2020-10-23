@@ -19,6 +19,9 @@ class MusicPlayer extends StatefulWidget {
   final bool isLocal;
   final String title;
 
+  Duration duration;
+
+
   MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false, this.title})
       : super(key: key);
 
@@ -156,19 +159,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
           child: Container(
             color: widget.backColor,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              widget.title != null
-                  ? Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                          color: MyColors.accentColor,
-                          border: Border.all(color: MyColors.accentColor),
-                          borderRadius: BorderRadius.all(Radius.circular(20))),
-                      child: Text(
-                        widget.title,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )
-                  : Container(),
               Row(
                 children: [
                   SizedBox(
@@ -266,7 +256,22 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               SizedBox(
                 height: 10,
+              ),
+              widget.title != null
+                  ? Container(width: MediaQuery.of(context).size.width - 150,
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                    color: MyColors.accentColor,
+                    border: Border.all(color: MyColors.accentColor),
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Text(
+                  widget.title,
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
               )
+                  : Container(),
+              SizedBox(height: 5)
             ]),
           ),
         ),

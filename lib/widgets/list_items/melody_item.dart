@@ -35,7 +35,9 @@ class _MelodyItemState extends State<MelodyItem> {
 
   @override
   void initState() {
-    getAuthor();
+    if(widget.melody.authorId != null){
+      getAuthor();
+    }
     super.initState();
     PaymentService.configureStripePayment();
   }
@@ -80,7 +82,7 @@ class _MelodyItemState extends State<MelodyItem> {
             defaultAssetImage: Strings.default_melody_image,
           ),
           title: Text(widget.melody.name),
-          subtitle: Text(_author?.name ?? ''),
+          subtitle: Text(_author?.name ?? widget.melody.singer??''),
           trailing: InkWell(
             onTap: () async {
               _isFavourite
@@ -274,20 +276,23 @@ class _MelodyItemState extends State<MelodyItem> {
   }
 
   void _downloadMelody() async {
-    DocumentSnapshot doc =
-        await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
-    bool alreadyDownloaded = doc.exists;
-    print('alreadyDownloaded: $alreadyDownloaded');
-    Token token;
-    if (!alreadyDownloaded) {
-      token = await PaymentService.nativePayment();
-      print(token.tokenId);
-    } else {
-      token = Token();
-      token.tokenId = 'already purchased';
-      AppUtil.showToast('already purchased');
-    }
+    Token token = Token();
+    if(widget.melody.price == null || widget.melody.price== '0'){
+      token.tokenId = 'free';
+    }else{
+      DocumentSnapshot doc =
+      await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
+      bool alreadyDownloaded = doc.exists;
+      print('alreadyDownloaded: $alreadyDownloaded');
 
+      if (!alreadyDownloaded) {
+        token = await PaymentService.nativePayment(widget.melody.price);
+        print(token.tokenId);
+      } else {
+        token.tokenId = 'already purchased';
+        AppUtil.showToast('already purchased');
+      }
+    }
     if (token.tokenId != null) {
       AppUtil.showLoader(context);
       await AppUtil.createAppDirectory();
