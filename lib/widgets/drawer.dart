@@ -77,6 +77,21 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () async {
+              Navigator.of(context).pushNamed('/downloads');
+            },
+            title: Text(
+              'Downloads',
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.file_download,
+              color: MyColors.primaryColor,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
               try {
                 Navigator.of(context).pushNamed('/change-email');
               } catch (e) {

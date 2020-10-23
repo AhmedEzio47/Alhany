@@ -1,6 +1,8 @@
+import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/chats.dart';
 import 'package:dubsmash/pages/conversation.dart';
+import 'package:dubsmash/pages/downloads.dart';
 import 'package:dubsmash/pages/email_change.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
@@ -58,6 +60,10 @@ class RouteGenerator {
 
       case '/change-email':
         return MaterialPageRoute(builder: (_) => EmailChangePage());
+
+      case '/downloads':
+        Constants.currentRoute = settings.name;
+        return MaterialPageRoute(builder: (_) => DownloadsPage());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

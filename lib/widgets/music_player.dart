@@ -17,8 +17,10 @@ class MusicPlayer extends StatefulWidget {
   final Color backColor;
   Function onComplete;
   final bool isLocal;
+  final String title;
 
-  MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false}) : super(key: key);
+  MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false, this.title})
+      : super(key: key);
 
   AudioPlayer advancedPlayer = AudioPlayer();
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
@@ -149,10 +151,21 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Widget _buildPlayer() => Container(
         padding: EdgeInsets.all(0),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(18.0),
           child: Container(
             color: widget.backColor,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                    color: MyColors.accentColor,
+                    border: Border.all(color: MyColors.accentColor),
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Text(
+                  widget.title,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
               Row(
                 children: [
                   SizedBox(

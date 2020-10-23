@@ -32,4 +32,6 @@ class Constants {
   static bool isAdmin;
 
   static String currentMelodyLevel;
+
+  static String currentRoute;
 }

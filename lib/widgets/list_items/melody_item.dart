@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
@@ -7,10 +8,13 @@ import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
+import 'package:dubsmash/services/payment_service.dart';
+import 'package:dubsmash/services/sqlite_service.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:stripe_payment/stripe_payment.dart';
 
 class MelodyItem extends StatefulWidget {
   final Melody melody;
@@ -33,6 +37,7 @@ class _MelodyItemState extends State<MelodyItem> {
   void initState() {
     getAuthor();
     super.initState();
+    PaymentService.configureStripePayment();
   }
 
   @override
@@ -114,7 +119,18 @@ class _MelodyItemState extends State<MelodyItem> {
                             }).toList();
                           },
                         )
-                      : Container()
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: InkWell(
+                            onTap: () async {
+                              await _downloadMelody();
+                            },
+                            child: Icon(
+                              Icons.file_download,
+                              color: MyColors.accentColor,
+                            ),
+                          ),
+                        )
                 ],
               ),
             ),
@@ -255,5 +271,48 @@ class _MelodyItemState extends State<MelodyItem> {
         secondFunc: () {
           Navigator.of(context).pop();
         });
+  }
+
+  void _downloadMelody() async {
+    bool alreadyDownloaded =
+        (await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get())
+            .exists;
+    Token token;
+    if (!alreadyDownloaded) {
+      token = await PaymentService.nativePayment();
+      print(token.tokenId);
+    } else {
+      token = Token();
+      token.tokenId = 'already purchased';
+      AppUtil.showToast('already purchased');
+    }
+
+    if (token.tokenId != null) {
+      AppUtil.showLoader(context);
+      await AppUtil.createAppDirectory();
+      String path;
+      if (widget.melody.audioUrl != null) {
+        path = await AppUtil.downloadFile(widget.melody.audioUrl, encrypt: true);
+      } else {
+        path = await AppUtil.downloadFile(widget.melody.levelUrls.values.elementAt(0), encrypt: true);
+      }
+
+      Melody melody = Melody(
+          id: widget.melody.id,
+          authorId: widget.melody.authorId,
+          description: widget.melody.description,
+          imageUrl: widget.melody.imageUrl,
+          name: widget.melody.name,
+          audioUrl: path);
+
+      await MelodySqlite.insert(melody);
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('downloads')
+          .document(widget.melody.id)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      Navigator.of(context).pop();
+      AppUtil.showToast('Downloaded!');
+    }
   }
 }

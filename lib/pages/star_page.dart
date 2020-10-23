@@ -24,10 +24,9 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
   TabController _tabController;
   ScrollController _mainScrollController = ScrollController();
   ScrollController _melodiesScrollController = ScrollController();
+  ScrollController _recordsScrollController = ScrollController();
   ScrollController _songsScrollController = ScrollController();
   int _page = 0;
-
-  List<Record> _records = [];
 
   Timestamp lastVisiblePostSnapShot;
 
@@ -35,11 +34,23 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   TextEditingController _searchController = TextEditingController();
 
+  List<Record> _records = [];
   getRecords() async {
     List<Record> records = await DatabaseService.getRecords();
     if (mounted) {
       setState(() {
         _records = records;
+        if (_records.length > 0) this.lastVisiblePostSnapShot = records.last.timestamp;
+      });
+    }
+  }
+
+  nextRecords() async {
+    List<Record> records = await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
+    if (records.length > 0) {
+      setState(() {
+        records.forEach((element) => _records.add(element));
+        this.lastVisiblePostSnapShot = records.last.timestamp;
       });
     }
   }
@@ -77,7 +88,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   List<Melody> _songs = [];
   List<Melody> _filteredSongs = [];
-
   getSongs() async {
     List<Melody> songs = await DatabaseService.getSongs();
     if (mounted) {
@@ -286,141 +296,139 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
   Widget _currentPage() {
     switch (_page) {
       case 0:
-        return Flexible(
-          flex: 4,
-          child: ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: _records.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    if (musicPlayer != null) {
-                      musicPlayer.stop();
-                    }
-                    musicPlayer = MusicPlayer(
-                      url: _records[index].audioUrl,
-                      backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-                    );
-                    setState(() {
-                      _isPlaying = true;
-                    });
-                  },
-                  child: RecordItem(
-                    record: _records[index],
-                  ),
-                );
-              }),
-        );
+        return ListView.builder(
+            shrinkWrap: true,
+            controller: _recordsScrollController,
+            itemCount: _records.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () async {
+                  if (musicPlayer != null) {
+                    musicPlayer.stop();
+                  }
+                  musicPlayer = MusicPlayer(
+                    url: _records[index].audioUrl,
+                    backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                  );
+                  setState(() {
+                    _isPlaying = true;
+                  });
+                },
+                child: RecordItem(
+                  record: _records[index],
+                ),
+              );
+            });
         break;
       case 1:
         getMelodies();
-        return Flexible(
-          flex: 4,
-          child: _isSearching
-              ? ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  controller: _melodiesScrollController,
-                  itemCount: _filteredMelodies.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
-                        musicPlayer = MusicPlayer(
-                          url: _filteredMelodies[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        key: ValueKey('melody_item'),
-                        melody: _filteredMelodies[index],
-                      ),
-                    );
-                  })
-              : ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  controller: _melodiesScrollController,
-                  itemCount: _melodies.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
-                        musicPlayer = MusicPlayer(
-                          url: _melodies[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        key: ValueKey('melody_item'),
-                        melody: _melodies[index],
-                      ),
-                    );
-                  }),
-        );
+        return _isSearching
+            ? ListView.builder(
+                shrinkWrap: true,
+                controller: _melodiesScrollController,
+                itemCount: _filteredMelodies.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {
+                      if (musicPlayer != null) {
+                        musicPlayer.stop();
+                      }
+                      musicPlayer = MusicPlayer(
+                        url: _filteredMelodies[index].audioUrl,
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        title: _filteredMelodies[index].name,
+                      );
+                      setState(() {
+                        _isPlaying = true;
+                      });
+                    },
+                    child: MelodyItem(
+                      key: ValueKey('melody_item'),
+                      melody: _filteredMelodies[index],
+                    ),
+                  );
+                })
+            : ListView.builder(
+                shrinkWrap: true,
+                controller: _melodiesScrollController,
+                itemCount: _melodies.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {
+                      if (musicPlayer != null) {
+                        musicPlayer.stop();
+                      }
+                      musicPlayer = MusicPlayer(
+                        url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        title: _melodies[index].name,
+                      );
+                      setState(() {
+                        _isPlaying = true;
+                      });
+                    },
+                    child: MelodyItem(
+                      key: ValueKey('melody_item'),
+                      melody: _melodies[index],
+                    ),
+                  );
+                });
         break;
       case 2:
         getSongs();
-        return Flexible(
-          flex: 4,
-          child: _isSearching
-              ? ListView.builder(
-                  controller: _songsScrollController,
-                  itemCount: _filteredSongs.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
-                        musicPlayer = MusicPlayer(
-                          url: _filteredSongs[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        //Solves confusion between songs and melodies when adding to favourites
-                        key: ValueKey('song_item'),
-                        melody: _filteredSongs[index],
-                      ),
-                    );
-                  })
-              : ListView.builder(
-                  controller: _songsScrollController,
-                  itemCount: _songs.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
-                        musicPlayer = MusicPlayer(
-                          url: _songs[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        //Solves confusion between songs and melodies when adding to favourites
-                        key: ValueKey('song_item'),
-                        melody: _songs[index],
-                      ),
-                    );
-                  }),
-        );
+        return _isSearching
+            ? ListView.builder(
+                shrinkWrap: true,
+                controller: _songsScrollController,
+                itemCount: _filteredSongs.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {
+                      if (musicPlayer != null) {
+                        musicPlayer.stop();
+                      }
+                      musicPlayer = MusicPlayer(
+                        url: _filteredSongs[index].audioUrl,
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        title: _filteredSongs[index].name,
+                      );
+                      setState(() {
+                        _isPlaying = true;
+                      });
+                    },
+                    child: MelodyItem(
+                      //Solves confusion between songs and melodies when adding to favourites
+                      key: ValueKey('song_item'),
+                      melody: _filteredSongs[index],
+                    ),
+                  );
+                })
+            : ListView.builder(
+                shrinkWrap: true,
+                controller: _songsScrollController,
+                itemCount: _songs.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {
+                      if (musicPlayer != null) {
+                        musicPlayer.stop();
+                      }
+                      musicPlayer = MusicPlayer(
+                        url: _songs[index].audioUrl,
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+                        title: _songs[index].name,
+                      );
+                      setState(() {
+                        _isPlaying = true;
+                      });
+                    },
+                    child: MelodyItem(
+                      //Solves confusion between songs and melodies when adding to favourites
+                      key: ValueKey('song_item'),
+                      melody: _songs[index],
+                    ),
+                  );
+                });
         break;
 
       default:

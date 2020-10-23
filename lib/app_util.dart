@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/services/encryption_service.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:dubsmash/widgets/flip_loader.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -128,7 +131,7 @@ class AppUtil {
     return url;
   }
 
-  static Future<String> downloadFile(String url) async {
+  static Future<String> downloadFile(String url, {bool encrypt = false}) async {
     var firstPath = appTempDirectoryPath;
 
     var response = await get(url);
@@ -137,8 +140,10 @@ class AppUtil {
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
-    file.writeAsBytesSync(response.bodyBytes);
-
+    await file.writeAsBytes(response.bodyBytes);
+    if (encrypt) {
+      return EncryptionService.encryptFile(file.path);
+    }
     return filePathAndName;
   }
 
@@ -163,12 +168,13 @@ class AppUtil {
   }
 
   static createAppDirectory() async {
-    if (!(await Directory('sdcard/download/$appName').exists())) {
-      final dir = await Directory('sdcard/download/$appName').create();
+    String initialPath = '${(await getApplicationSupportDirectory()).path}/';
+    if (!(await Directory('$initialPath$appName').exists())) {
+      final dir = await Directory('$initialPath$appName').create();
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
-      appTempDirectoryPath = 'sdcard/download/$appName/';
+      appTempDirectoryPath = '$initialPath$appName/';
     }
   }
 
