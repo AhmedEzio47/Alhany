@@ -126,11 +126,11 @@ class _DownloadsPageState extends State<DownloadsPage> {
 
   void playMelody(int index) {
     AppUtil.showLoader(context);
-    if (musicPlayer != null) {
-      setState(() {
-        musicPlayer.stop();
-      });
-    }
+    // if (musicPlayer != null) {
+    //   setState(() {
+    //     musicPlayer.stop();
+    //   });
+    // }
     String path = EncryptionService.decryptFile(_downloads[index].audioUrl);
     _decryptedPaths.add(path);
     musicPlayer = MusicPlayer(

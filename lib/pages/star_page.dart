@@ -156,9 +156,9 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          if (musicPlayer != null) {
-            musicPlayer.stop();
-          }
+          // if (musicPlayer != null) {
+          //   musicPlayer.stop();
+          // }
           setState(() {
             _isPlaying = false;
             _isSearching = false;
@@ -315,14 +315,15 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
             itemBuilder: (context, index) {
               return InkWell(
                 onTap: () async {
-                  if (musicPlayer != null) {
-                    musicPlayer.stop();
-                  }
-                  musicPlayer = MusicPlayer(
-                    url: _records[index].audioUrl,
-                    backColor: MyColors.lightPrimaryColor,
-                  );
+                  // if (musicPlayer != null) {
+                  //   musicPlayer.stop();
+                  // }
+
                   setState(() {
+                    musicPlayer = MusicPlayer(
+                      url: _records[index].audioUrl,
+                      backColor: MyColors.lightPrimaryColor,
+                    );
                     _isPlaying = true;
                   });
                 },
@@ -342,15 +343,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      if (musicPlayer != null) {
-                        musicPlayer.stop();
-                      }
-                      musicPlayer = MusicPlayer(
-                        url: _filteredMelodies[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _filteredMelodies[index].name,
-                      );
+                      // if (musicPlayer != null) {
+                      //   musicPlayer.stop();
+                      // }
+
                       setState(() {
+                        musicPlayer = MusicPlayer(
+                          url: _filteredMelodies[index].audioUrl,
+                          backColor: MyColors.lightPrimaryColor,
+                          title: _filteredMelodies[index].name,
+                        );
                         _isPlaying = true;
                       });
                     },
@@ -367,15 +369,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      if (musicPlayer != null) {
-                        musicPlayer.stop();
-                      }
-                      musicPlayer = MusicPlayer(
-                        url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _melodies[index].name,
-                      );
+                      // if (musicPlayer != null) {
+                      //   musicPlayer.stop();
+                      // }
+
                       setState(() {
+                        musicPlayer = MusicPlayer(
+                          url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
+                          backColor: MyColors.lightPrimaryColor,
+                          title: _melodies[index].name,
+                        );
                         _isPlaying = true;
                       });
                     },
@@ -396,15 +399,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      if (musicPlayer != null) {
-                        musicPlayer.stop();
-                      }
-                      musicPlayer = MusicPlayer(
-                        url: _filteredSongs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _filteredSongs[index].name,
-                      );
+                      // if (musicPlayer != null) {
+                      //   musicPlayer.stop();
+                      // }
+
                       setState(() {
+                        musicPlayer = MusicPlayer(
+                          url: _filteredSongs[index].audioUrl,
+                          backColor: MyColors.lightPrimaryColor,
+                          title: _filteredSongs[index].name,
+                        );
                         _isPlaying = true;
                       });
                     },
@@ -422,15 +426,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      if (musicPlayer != null) {
-                        musicPlayer.stop();
-                      }
-                      musicPlayer = MusicPlayer(
-                        url: _songs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _songs[index].name,
-                      );
+                      // if (musicPlayer != null) {
+                      //   musicPlayer.stop();
+                      // }
+
                       setState(() {
+                        musicPlayer = MusicPlayer(
+                          url: _songs[index].audioUrl,
+                          backColor: MyColors.lightPrimaryColor,
+                          title: _songs[index].name,
+                        );
                         _isPlaying = true;
                       });
                     },

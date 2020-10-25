@@ -7,6 +7,7 @@ import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/audio_recorder.dart';
 import 'package:dubsmash/services/database_service.dart';
+import 'package:dubsmash/services/my_audio_player.dart';
 import 'package:dubsmash/services/permissions_service.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
@@ -156,12 +157,16 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      await initMelodyPlayer(url);
-      await melodyPlayer.play();
+      myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
+
+      await myAudioPlayer.play();
+
       await recorder.startRecording(conversation: this.widget);
       _recordingTimer();
     } else {}
   }
+
+  MyAudioPlayer myAudioPlayer;
 
   Widget _headphonesDialog() {
     return Container(
@@ -219,7 +224,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   Future saveRecord() async {
     AppUtil.showLoader(context);
-    await melodyPlayer.stop();
+    await myAudioPlayer.stop();
 
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
@@ -309,12 +314,6 @@ class _MelodyPageState extends State<MelodyPage> {
       _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
     }
 
-    // melodyPlayer = MusicPlayer(
-    //   url: widget.melody.audioUrl ?? widget.melody.levelUrls.values.elementAt(0),
-    //   backColor: Colors.transparent,
-    //   onComplete: saveRecord,
-    // );
-
     if (widget.melody.audioUrl != null) {
       initMelodyPlayer(widget.melody.audioUrl);
     } else if (Constants.currentMelodyLevel != null) {
@@ -328,14 +327,10 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   initMelodyPlayer(String url) async {
-    // if (melodyPlayer != null) {
-    //   await melodyPlayer.stop();
-    // }
     setState(() {
       melodyPlayer = new MusicPlayer(
         url: url,
         backColor: Colors.transparent,
-        onComplete: saveRecord,
       );
     });
   }

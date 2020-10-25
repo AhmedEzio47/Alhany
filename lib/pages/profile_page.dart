@@ -134,9 +134,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          if (musicPlayer != null) {
-            musicPlayer.stop();
-          }
+          // if (musicPlayer != null) {
+          //   musicPlayer.stop();
+          // }
           setState(() {
             _isPlaying = false;
           });
@@ -376,9 +376,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
+                        // if (musicPlayer != null) {
+                        //   musicPlayer.stop();
+                        // }
                         musicPlayer = MusicPlayer(
                           url: _records[index].audioUrl,
                           backColor: Colors.white.withOpacity(.4),
@@ -410,9 +410,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () async {
-                        if (musicPlayer != null) {
-                          musicPlayer.stop();
-                        }
+                        // if (musicPlayer != null) {
+                        //   musicPlayer.stop();
+                        // }
                         musicPlayer = MusicPlayer(
                           url: _favourites[index].audioUrl,
                           backColor: Colors.white.withOpacity(.4),

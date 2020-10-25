@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:dubsmash/pages/melody_page.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+import 'package:dubsmash/services/my_audio_player.dart';
 import 'package:intl/intl.dart';
-import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:flutter/foundation.dart';
@@ -15,33 +13,12 @@ enum PlayerState { stopped, playing, paused }
 class MusicPlayer extends StatefulWidget {
   final String url;
   final Color backColor;
-  Function onComplete;
+  final Function onComplete;
   final bool isLocal;
   final String title;
 
-  Duration duration;
-
   MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false, this.title})
       : super(key: key);
-
-  AudioPlayer advancedPlayer = AudioPlayer();
-  AudioPlayerState playerState = AudioPlayerState.STOPPED;
-
-  Future play() async {
-    print('audio url: $url');
-
-    await advancedPlayer.play(url);
-
-    playerState = AudioPlayerState.PLAYING;
-  }
-
-  Future stop() async {
-    await advancedPlayer.stop();
-    playerState = AudioPlayerState.STOPPED;
-    // advancedPlayer.setReleaseMode(ReleaseMode.STOP);
-    // advancedPlayer.release();
-    // advancedPlayer.dispose();
-  }
 
   @override
   _MusicPlayerState createState() => _MusicPlayerState();
@@ -50,18 +27,14 @@ class MusicPlayer extends StatefulWidget {
 class _MusicPlayerState extends State<MusicPlayer> {
   _MusicPlayerState();
 
-  AudioCache audioCache;
-  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+  MyAudioPlayer myAudioPlayer;
 
-  Duration duration;
-  Duration position;
+  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
+  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
-  get isPlaying => playerState == AudioPlayerState.PLAYING || widget.playerState == AudioPlayerState.PLAYING;
-  get isPaused => playerState == AudioPlayerState.PAUSED || widget.playerState == AudioPlayerState.PAUSED;
+  get durationText => myAudioPlayer.duration != null ? myAudioPlayer.duration.toString().split('.').first : '';
 
-  get durationText => duration != null ? duration.toString().split('.').first : '';
-
-  get positionText => position != null ? position.toString().split('.').first : '';
+  get positionText => myAudioPlayer.position != null ? myAudioPlayer.position.toString().split('.').first : '';
 
   bool isMuted = false;
 
@@ -73,63 +46,34 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void dispose() {
-    //stop();
+    myAudioPlayer.stop();
     super.dispose();
   }
 
+  Duration _duration;
+
   void initAudioPlayer() {
-    widget.advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: widget.advancedPlayer);
-
-    widget.advancedPlayer.durationHandler = (d) => setState(() {
-          duration = d;
-          widget.duration = d;
+    myAudioPlayer = MyAudioPlayer(url: widget.url, isLocal: widget.isLocal, onComplete: widget.onComplete);
+    myAudioPlayer.addListener(() {
+      if (mounted) {
+        setState(() {
+          _duration = myAudioPlayer.duration;
         });
-
-    widget.advancedPlayer.positionHandler = (p) => setState(() {
-          position = p;
-          print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
-          if (duration.inMilliseconds - p.inMilliseconds < 200) {
-            stop();
-          }
-        });
+      }
+    });
   }
 
   Future play() async {
     print('audio url: ${widget.url}');
-
-    await widget.advancedPlayer.play(widget.url, isLocal: widget.isLocal);
-
-    setState(() {
-      widget.playerState = AudioPlayerState.PLAYING;
-      playerState = AudioPlayerState.PLAYING;
-    });
+    myAudioPlayer.play();
   }
 
   Future pause() async {
-    await widget.advancedPlayer.pause();
-
-    setState(() {
-      playerState = AudioPlayerState.PAUSED;
-      widget.playerState = AudioPlayerState.PAUSED;
-    });
+    await myAudioPlayer.pause();
   }
 
   Future stop() async {
-    await widget.advancedPlayer.stop();
-
-    if (mounted) {
-      setState(() {
-        widget.playerState = AudioPlayerState.STOPPED;
-        playerState = AudioPlayerState.STOPPED;
-        position = null;
-        duration = null;
-      });
-    }
-
-    if (widget.onComplete != null && MelodyPage.recordingStatus == RecordingStatus.Recording) {
-      widget.onComplete();
-    }
+    await myAudioPlayer.stop();
   }
 
   NumberFormat _numberFormatter = new NumberFormat("##");
@@ -146,9 +90,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   SizedBox(
                     width: 10,
                   ),
-                  position != null
+                  myAudioPlayer.position != null
                       ? Text(
-                          '${_numberFormatter.format(position.inMinutes)} : ${_numberFormatter.format(position.inSeconds % 60)}',
+                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)} : ${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
                           style: TextStyle(color: Colors.white),
                         )
                       : Container(),
@@ -158,32 +102,31 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   Expanded(
                     flex: 9,
                     child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 5.0,
-                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                        overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
-                      ),
-                      child: Slider(
-                          activeColor: MyColors.darkPrimaryColor,
-                          inactiveColor: Colors.grey.shade300,
-                          value: position?.inMilliseconds?.toDouble() ?? 0.0,
-                          onChanged: (double value) {
-                            widget.advancedPlayer.seek(Duration(seconds: value ~/ 1000));
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 5.0,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
+                        ),
+                        child: Slider(
+                            activeColor: MyColors.darkPrimaryColor,
+                            inactiveColor: Colors.grey.shade300,
+                            value: myAudioPlayer.position?.inMilliseconds?.toDouble() ?? 0.0,
+                            onChanged: (double value) {
+                              myAudioPlayer.seek(Duration(seconds: _duration.inMilliseconds ~/ 1000));
 
-                            if (!isPlaying) {
-                              play();
-                            }
-                          },
-                          min: 0.0,
-                          max: duration != null ? duration?.inMilliseconds?.toDouble() : 1.7976931348623157e+308),
-                    ),
+                              if (!isPlaying) {
+                                play();
+                              }
+                            },
+                            min: 0.0,
+                            max: _duration != null ? _duration?.inMilliseconds?.toDouble() : 1.7976931348623157e+308)),
                   ),
                   SizedBox(
                     width: 10,
                   ),
-                  duration != null
+                  myAudioPlayer.duration != null
                       ? Text(
-                          '${_numberFormatter.format(duration.inMinutes)} : ${_numberFormatter.format(duration.inSeconds % 60)}',
+                          '${_numberFormatter.format(_duration.inMinutes)} : ${_numberFormatter.format(_duration.inSeconds % 60)}',
                           style: TextStyle(color: Colors.white),
                         )
                       : Container(),
