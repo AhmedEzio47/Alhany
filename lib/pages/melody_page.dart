@@ -14,6 +14,7 @@ import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
@@ -40,7 +41,6 @@ class _MelodyPageState extends State<MelodyPage> {
   AudioRecorder recorder;
 
   String recordingFilePath;
-  //String recordingFilePathMp3;
   String melodyPath;
   String mergedFilePath;
 
@@ -51,6 +51,8 @@ class _MelodyPageState extends State<MelodyPage> {
   String _dropdownValue;
 
   String _recordingText = '';
+
+  int _duration;
 
   _countDown() {
     const oneSec = const Duration(seconds: 1);
@@ -93,6 +95,12 @@ class _MelodyPageState extends State<MelodyPage> {
     }
 
     String filePath = await AppUtil.downloadFile(url);
+
+    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
+    //print("File Duration: ${info.getMediaProperties()['duration']}");
+    _duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
     setState(() {
       melodyPath = filePath;
       mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
@@ -151,6 +159,7 @@ class _MelodyPageState extends State<MelodyPage> {
       await initMelodyPlayer(url);
       await melodyPlayer.play();
       await recorder.startRecording(conversation: this.widget);
+      _recordingTimer();
     } else {}
   }
 
@@ -215,7 +224,7 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
     });
-    MelodyPage.recordingStatus = RecordingStatus.Recording;
+    MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
     Recording result = await recorder.stopRecording();
     recordingFilePath = result.path;
@@ -319,9 +328,9 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   initMelodyPlayer(String url) async {
-    if (melodyPlayer != null) {
-      await melodyPlayer.stop();
-    }
+    // if (melodyPlayer != null) {
+    //   await melodyPlayer.stop();
+    // }
     setState(() {
       melodyPlayer = new MusicPlayer(
         url: url,
@@ -508,16 +517,28 @@ class _MelodyPageState extends State<MelodyPage> {
     num counter = 0;
     Timer.periodic(
       oneSec,
-      (Timer timer) {
+      (timer) {
+        if (counter == _duration || recordingStatus == RecordingStatus.Stopped) {
+          timer.cancel();
+          counter = 0;
+        }
         counter++;
-        setState(() {
-          _recordingText = '${counter/60}/${counter%60} / ${melodyPlayer}';
-        });
+        if (mounted) {
+          setState(() {
+            _recordingText = '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
+          });
+        }
       },
     );
   }
 
   Widget recordingTimerText() {
-    return Text(_recordingText);
+    return Container(
+      margin: EdgeInsets.all(20),
+      child: Text(
+        _recordingText,
+        style: TextStyle(fontSize: 20, color: Colors.white),
+      ),
+    );
   }
 }

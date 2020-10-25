@@ -21,7 +21,6 @@ class MusicPlayer extends StatefulWidget {
 
   Duration duration;
 
-
   MusicPlayer({Key key, @required this.url, this.backColor, this.onComplete, this.isLocal = false, this.title})
       : super(key: key);
 
@@ -74,7 +73,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void dispose() {
-    stop();
+    //stop();
     super.dispose();
   }
 
@@ -82,32 +81,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
     widget.advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: widget.advancedPlayer);
 
-    widget.advancedPlayer.onDurationChanged.listen((Duration d) {
-      print('Max duration: $d');
-      setState(() => duration = d);
-    });
-
-    // widget.advancedPlayer.durationHandler = (d) => setState(() {
-    //       duration = d;
-    //     });
-
-    widget.advancedPlayer.onAudioPositionChanged.listen((Duration p) => {
-          setState(() {
-            position = p;
-            print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
-            if (duration.inMilliseconds - p.inMilliseconds < 200) {
-              stop();
-            }
-          })
+    widget.advancedPlayer.durationHandler = (d) => setState(() {
+          duration = d;
+          widget.duration = d;
         });
 
-    // widget.advancedPlayer.positionHandler = (p) => setState(() {
-    //       position = p;
-    //       print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
-    //       if (duration.inMilliseconds - p.inMilliseconds < 200) {
-    //         stop();
-    //       }
-    //     });
+    widget.advancedPlayer.positionHandler = (p) => setState(() {
+          position = p;
+          print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
+          if (duration.inMilliseconds - p.inMilliseconds < 200) {
+            stop();
+          }
+        });
   }
 
   Future play() async {
@@ -140,9 +125,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
         position = null;
         duration = null;
       });
-
-      widget.advancedPlayer.release();
-      widget.advancedPlayer.dispose();
     }
 
     if (widget.onComplete != null && MelodyPage.recordingStatus == RecordingStatus.Recording) {
@@ -258,18 +240,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 height: 10,
               ),
               widget.title != null
-                  ? Container(width: MediaQuery.of(context).size.width - 150,
-                alignment: Alignment.center,
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: MyColors.accentColor,
-                    border: Border.all(color: MyColors.accentColor),
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text(
-                  widget.title,
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              )
+                  ? Container(
+                      width: MediaQuery.of(context).size.width - 150,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                          color: MyColors.accentColor,
+                          border: Border.all(color: MyColors.accentColor),
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: Text(
+                        widget.title,
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    )
                   : Container(),
               SizedBox(height: 5)
             ]),
