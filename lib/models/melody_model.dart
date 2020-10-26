@@ -11,6 +11,7 @@ class Melody {
   final String singer;
   final bool isSong;
   final String price;
+  final int views;
   final List search;
   final Timestamp timestamp;
 
@@ -22,9 +23,10 @@ class Melody {
       this.levelUrls,
       this.imageUrl,
       this.authorId,
-        this.singer,
+      this.singer,
       this.isSong,
       this.price,
+      this.views,
       this.search,
       this.timestamp});
 
@@ -40,6 +42,7 @@ class Melody {
         singer: doc['singer'],
         isSong: doc['is_song'],
         price: doc['price'],
+        views: doc['views'],
         search: doc['search'],
         timestamp: doc['timestamp']);
   }
@@ -52,15 +55,6 @@ class Melody {
       authorId: map['author_id'],
       audioUrl: map['audio_url'],
       imageUrl: map['image_url'],
-      // levelUrls: {
-      //   'do': map['do'],
-      //   're': map['re'],
-      //   'mi': map['mi'],
-      //   'fa': map['fa'],
-      //   'sol': map['sol'],
-      //   'la': map['la'],
-      //   'si': map['si']
-      // },
     );
   }
 
@@ -72,13 +66,6 @@ class Melody {
       'author_id': this.authorId,
       'audio_url': this.audioUrl,
       'image_url': this.imageUrl,
-      // 'do': this.levelUrls['do'] ?? null,
-      // 're': this.levelUrls['re'] ?? null,
-      // 'mi': this.levelUrls['mi'] ?? null,
-      // 'fa': this.levelUrls['fa'] ?? null,
-      // 'sol': this.levelUrls['sol'] ?? null,
-      // 'la': this.levelUrls['la'] ?? null,
-      // 'si': this.levelUrls['si'] ?? null,
     };
     return map;
   }

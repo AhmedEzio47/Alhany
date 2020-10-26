@@ -126,24 +126,23 @@ class _EmailChangePageState extends State<EmailChangePage> {
         try {
           String validEmail = AppUtil.validateEmail(_email);
           if (validEmail != null) {
-            AppUtil.showToast('Invalid email!');
             return;
           }
           if (_email != _confirm) {
-            AppUtil.showToast('Two emails does not match');
+            AppUtil.showToast(language(en: 'Two emails does not match', ar: 'عنواني البريد غير متطابقان'));
             return;
           }
           AppUtil.showLoader(context);
 
           User user = await DatabaseService.getUserWithEmail(_email);
           if (user.id != null) {
-            AppUtil.showToast('Email already in use!');
+            AppUtil.showToast(language(en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
           } else {
             final BaseAuth auth = AuthProvider.of(context).auth;
             FirebaseUser firebaseUser =
                 await auth.signInWithEmailAndPassword(Constants.currentFirebaseUser.email, _password);
             if (firebaseUser == null) {
-              AppUtil.showToast('Wrong Password');
+              AppUtil.showToast(language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
               return;
             }
 
@@ -153,14 +152,15 @@ class _EmailChangePageState extends State<EmailChangePage> {
             Constants.currentUser = await DatabaseService.getUserWithId(firebaseUser.uid);
             Constants.currentFirebaseUser = firebaseUser;
             // print('Password reset e-mail sent');
-            AppUtil.showToast('Email changed, verification email sent!');
+            AppUtil.showToast(
+                language(en: 'Email changed, verification email sent!', ar: 'تم تغيير البريد، من فضلك قم بالتفعيل'));
             Navigator.of(context).pop();
           }
 
           Navigator.of(context).pop();
         } catch (e) {
           Navigator.of(context).pop();
-          AppUtil.showToast('Wrong Password');
+          AppUtil.showToast(language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
           return;
         }
       },
@@ -175,7 +175,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
                 end: Alignment.centerRight,
                 colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
         child: Text(
-          'Change Email',
+          language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),

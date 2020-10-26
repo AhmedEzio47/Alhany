@@ -15,7 +15,9 @@ import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/colors.dart';
+import 'constants/constants.dart';
 
 // saveToken() async {
 //   String token = await FirebaseMessaging().getToken();
@@ -48,16 +50,25 @@ class AppUtil {
         builder: (context) {
           return AlertDialog(
             title: heading != null ? Text(heading) : null,
-            content: Text(message),
+            content: Text(
+              message,
+              textAlign: TextAlign.center,
+            ),
             actions: <Widget>[
               MaterialButton(
                 onPressed: firstFunc,
-                child: Text(firstBtnText),
+                child: Text(
+                  firstBtnText,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               secondBtnText != null
                   ? MaterialButton(
                       onPressed: secondFunc,
-                      child: Text(secondBtnText),
+                      child: Text(
+                        secondBtnText,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     )
                   : Container(),
             ],
@@ -238,12 +249,37 @@ class AppUtil {
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil.showToast("Email is Required");
+      AppUtil.showToast(language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
       return "Email is Required";
     } else if (!regExp.hasMatch(value)) {
-      AppUtil.showToast("Invalid Email");
+      AppUtil.showToast(language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
       return "Invalid Email";
     }
     return null;
+  }
+
+  static switchLanguage() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String language = sharedPreferences.getString('language');
+    if (language == 'ar') {
+      sharedPreferences.setString('language', 'en');
+      Constants.language = 'en';
+    } else {
+      sharedPreferences.setString('language', 'ar');
+      Constants.language = 'ar';
+    }
+  }
+
+  static Future<String> getLanguage() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getString('language');
+  }
+}
+
+String language({String ar, String en}) {
+  if (Constants.language == 'ar') {
+    return ar;
+  } else {
+    return en;
   }
 }

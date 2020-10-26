@@ -187,7 +187,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    'Upload Melody',
+                    language(en: 'Upload Melody', ar: 'رفع اللحن'),
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
                   onPressed: () async {
@@ -202,7 +202,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
   uploadMelody() async {
     if (_melodyName.trim().isEmpty) {
-      AppUtil.showToast('Please choose a name for the melody');
+      AppUtil.showToast(language(en: 'Please choose a name for the melody', ar: 'قم باختيار اسم اللحن'));
       return;
     }
 
@@ -236,7 +236,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     });
 
     Navigator.of(context).pop();
-    AppUtil.showToast('Melody uploaded!');
+    AppUtil.showToast(language(en: 'Melody uploaded!', ar: 'تم رقع اللحن'));
     Navigator.of(context).pop();
   }
 }

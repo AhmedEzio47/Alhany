@@ -135,7 +135,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 end: Alignment.centerRight,
                 colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
         child: Text(
-          'Reset Password',
+          language(en: 'Reset Password', ar: 'استعادة كلمة المرور'),
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),

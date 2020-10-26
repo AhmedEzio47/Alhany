@@ -1,7 +1,9 @@
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
+import 'package:dubsmash/pages/home_page.dart';
 import 'package:dubsmash/pages/melodies_page.dart';
 import 'package:dubsmash/pages/profile_page.dart';
+import 'package:dubsmash/pages/singers_page.dart';
 import 'package:dubsmash/pages/star_page.dart';
 import 'package:dubsmash/widgets/curved_navigation_bar.dart';
 import 'package:dubsmash/widgets/drawer.dart';
@@ -15,11 +17,11 @@ class AppPage extends StatefulWidget {
 class _AppPageState extends State<AppPage> {
   PageController _pageController;
 
-  int _page = 1;
+  int _page = 2;
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: 2);
     super.initState();
   }
 
@@ -35,6 +37,7 @@ class _AppPageState extends State<AppPage> {
           items: <Widget>[
             Icon(Icons.star, size: 30),
             Icon(Icons.mic, size: 30),
+            Icon(Icons.home, size: 30),
             Icon(Icons.person, size: 30),
           ],
           onTap: (index) {
@@ -49,6 +52,7 @@ class _AppPageState extends State<AppPage> {
           children: [
             StarPage(),
             MelodiesPage(),
+            SingersPage(),
             ProfilePage(
               userId: Constants.currentUserID,
             ),

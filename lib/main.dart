@@ -8,48 +8,46 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
+  const MyApp({
+    Key key,
+  }) : super(key: key);
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>().restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<MyApp> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AuthProvider(
-      auth: Auth(),
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primaryColor: MyColors.primaryColor,
-          primaryColorDark: MyColors.darkPrimaryColor,
-          primaryColorLight: MyColors.lightPrimaryColor,
-          brightness: Brightness.light,
+    return KeyedSubtree(
+      key: key,
+      child: AuthProvider(
+        auth: Auth(),
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primaryColor: MyColors.primaryColor,
+            primaryColorDark: MyColors.darkPrimaryColor,
+            primaryColorLight: MyColors.lightPrimaryColor,
+            brightness: Brightness.light,
+          ),
+          debugShowCheckedModeBanner: false,
+          initialRoute: '/',
+          onGenerateRoute: RouteGenerator.generateRoute,
         ),
-        debugShowCheckedModeBanner: false,
-        initialRoute: '/',
-        onGenerateRoute: RouteGenerator.generateRoute,
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
       ),
     );
   }

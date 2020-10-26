@@ -438,7 +438,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                 } else if (bottomSheet.source == ImageSource.camera) {
                                   image = await AppUtil.takePhoto();
                                 } else {
-                                  AppUtil.showToast('Nothing chosen');
+                                  AppUtil.showToast(language(en: 'Nothing chosen', ar: 'لم يتم اختيار صورة'));
                                   return;
                                 }
 

@@ -3,6 +3,7 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/models/message_model.dart';
 import 'package:dubsmash/models/record.dart';
+import 'package:dubsmash/models/singer_model.dart';
 import 'package:dubsmash/models/user_model.dart';
 
 import '../app_util.dart';
@@ -323,5 +324,26 @@ class DatabaseService {
 
       await usersRef.document(receiverId).updateData({'notificationsNumber': FieldValue.increment(-1)});
     }
+  }
+
+  static incrementMelodyViews(String melodyId) async {
+    await melodiesRef.document(melodyId).updateData({'views': FieldValue.increment(1)});
+  }
+
+  static Future<List<Singer>> getSingers() async {
+    QuerySnapshot singersSnapshot = await singersRef.orderBy('name', descending: false).getDocuments();
+    List<Singer> singers = singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+    return singers;
+  }
+
+  static Future<List<Melody>> getSongsBySingerName(String singerName) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .where('singer', isEqualTo: singerName)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
   }
 }

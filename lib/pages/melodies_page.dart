@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/melody_model.dart';
@@ -100,6 +101,7 @@ class _MelodiesPageState extends State<MelodiesPage> {
                             },
                             child: MelodyItem(
                               melody: _melodies[index],
+                              key: ValueKey('melody_item'),
                             ),
                           );
                         })
@@ -119,6 +121,20 @@ class _MelodiesPageState extends State<MelodiesPage> {
                         }),
               ),
               _searchBar(),
+              _isSearching
+                  ? Container()
+                  : Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Align(
+                          child: Text(
+                            language(en: 'Melodies', ar: 'الألحان'),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          alignment: Alignment.topCenter,
+                        ),
+                      ),
+                    )
             ],
           ),
         ),

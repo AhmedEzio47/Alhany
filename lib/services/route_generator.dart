@@ -1,13 +1,16 @@
 import 'package:dubsmash/constants/constants.dart';
+import 'package:dubsmash/pages/add_singer.dart';
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/chats.dart';
 import 'package:dubsmash/pages/conversation.dart';
 import 'package:dubsmash/pages/downloads.dart';
 import 'package:dubsmash/pages/email_change.dart';
+import 'package:dubsmash/pages/lyrics_editor.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:dubsmash/pages/root.dart';
+import 'package:dubsmash/pages/songs_page.dart';
 import 'package:dubsmash/pages/upload_mulit_level_melody.dart';
 import 'package:dubsmash/pages/upload_single_level_melody.dart';
 import 'package:dubsmash/pages/upload_songs.dart';
@@ -68,6 +71,16 @@ class RouteGenerator {
       case '/downloads':
         Constants.currentRoute = settings.name;
         return MaterialPageRoute(builder: (_) => DownloadsPage());
+
+      case '/add-singer':
+        return MaterialPageRoute(builder: (_) => AddSingerPage());
+      case '/songs-page':
+        return MaterialPageRoute(
+            builder: (_) => SongsPage(
+                  singer: args['singer'],
+                ));
+      case '/lyrics-editor':
+        return MaterialPageRoute(builder: (_) => LyricsEditor());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

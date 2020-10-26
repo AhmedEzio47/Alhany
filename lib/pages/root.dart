@@ -31,7 +31,17 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
+    getLanguage();
     super.initState();
+  }
+
+  getLanguage() async {
+    String language = await AppUtil.getLanguage();
+    if (language == null) {
+      Constants.language = 'ar';
+    } else {
+      Constants.language = language;
+    }
   }
 
   Widget buildWaitingScreen() {

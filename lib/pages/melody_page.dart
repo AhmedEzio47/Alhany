@@ -310,6 +310,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   void initState() {
+    DatabaseService.incrementMelodyViews(widget.melody.id);
     if (widget.melody.levelUrls != null) {
       _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
     }
@@ -405,7 +406,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  recordingStatus != RecordingStatus.Recording ? melodyPlayer : recordingTimerText(),
+                  recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
                   SizedBox(
                     height: 30,
                   ),
@@ -500,7 +501,18 @@ class _MelodyPageState extends State<MelodyPage> {
                       ),
                     ),
                   )
-                : Container()
+                : Container(),
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.only(top: 30, left: 10),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  'Views: ${widget.melody.views ?? 0}',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ))
           ],
         ),
       ),
@@ -527,7 +539,7 @@ class _MelodyPageState extends State<MelodyPage> {
     );
   }
 
-  Widget recordingTimerText() {
+  Widget _recordingTimerText() {
     return Container(
       margin: EdgeInsets.all(20),
       child: Text(

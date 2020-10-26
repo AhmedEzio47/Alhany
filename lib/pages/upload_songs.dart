@@ -20,17 +20,15 @@ class _UploadSongsState extends State<UploadSongs> {
   File _image;
 
   String _price;
-  TextEditingController _singerController = TextEditingController();
 
   List<String> _singers = [];
 
   String _selectedSinger;
 
-
-  getSingers() async{
+  getSingers() async {
     _singers = [];
     QuerySnapshot singersSnapshot = await singersRef.getDocuments();
-    for(DocumentSnapshot doc in singersSnapshot.documents){
+    for (DocumentSnapshot doc in singersSnapshot.documents) {
       setState(() {
         _singers.add(doc.data['name']);
       });
@@ -48,7 +46,7 @@ class _UploadSongsState extends State<UploadSongs> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: MyColors.accentColor,
-        onPressed: () async{
+        onPressed: () async {
           await addSinger();
         },
         child: Icon(Icons.person_add),
@@ -76,23 +74,30 @@ class _UploadSongsState extends State<UploadSongs> {
                           },
                           child: Image.asset(Strings.default_melody_image))
                       : Image.file(_image)),
-              SizedBox(height: 10,),
-              Text('Note: Price and singer applies for both single and multiple songs', style: TextStyle(color: MyColors.accentColor),textAlign: TextAlign.center,),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                'Note: Price and singer applies for both single and multiple songs',
+                style: TextStyle(color: MyColors.accentColor),
+                textAlign: TextAlign.center,
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 50),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: DropdownButton(hint: Text('Singer'),
+                      flex: 7,
+                      child: DropdownButton(
+                        hint: Text('Singer'),
                         value: _selectedSinger,
-                        onChanged: (text){
-                        setState(() {
-                          _selectedSinger = text;
-                        });
-                      },
-                        items: (_singers)
-                            .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                        onChanged: (text) {
+                          setState(() {
+                            _selectedSinger = text;
+                          });
+                        },
+                        items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
                           return DropdownMenuItem<dynamic>(
                             value: value,
                             child: Text(value),
@@ -100,16 +105,22 @@ class _UploadSongsState extends State<UploadSongs> {
                         }).toList(),
                       ),
                     ),
-                    SizedBox(width: 10,),
+                    SizedBox(
+                      width: 10,
+                    ),
                     Expanded(
+                      flex: 3,
                       child: TextField(
                         textAlign: TextAlign.center,
                         onChanged: (text) {
                           setState(() {
                             _price = text;
                           });
-                        },keyboardType: TextInputType.number,
-                        decoration: InputDecoration(hintText: 'Price',),
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: 'Price',
+                        ),
                       ),
                     ),
                   ],
@@ -117,7 +128,8 @@ class _UploadSongsState extends State<UploadSongs> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
-                child: Container(width: MediaQuery.of(context).size.width,
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
                   child: TextField(
                     textAlign: TextAlign.center,
                     onChanged: (text) {
@@ -180,51 +192,10 @@ class _UploadSongsState extends State<UploadSongs> {
     );
   }
 
-  addSinger(){
-    Navigator.of(context).push(CustomModal(
-        child: Container(
-          height: 200,
-          color: Colors.white,
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: _singerController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(hintText: 'Singer name'),
-                ),
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              RaisedButton(
-                onPressed: () async {
-                  if (_singerController.text.trim().isEmpty) {
-                    AppUtil.showToast('Please enter a name');
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                  AppUtil.showLoader(context);
-                  await singersRef.add({
-                    'name': _singerController.text,
-                    'search': searchList(_singerController.text),
-                  });
-                  await getSingers();
-                  AppUtil.showToast('Singer added');
-                  Navigator.of(context).pop();
+  addSinger() {
+    Navigator.of(context).pushNamed('/add-singer');
 
-                },
-                color: MyColors.primaryColor,
-                child: Text(
-                  'Add Singer',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ],
-          ),
-        )));
+    getSingers();
   }
 
   uploadSong() async {
@@ -256,7 +227,7 @@ class _UploadSongsState extends State<UploadSongs> {
       'audio_url': songUrl,
       'image_url': imageUrl,
       'is_song': true,
-      'price':_price,
+      'price': _price,
       'singer': _selectedSinger,
       'search': searchList(_songName),
       'timestamp': FieldValue.serverTimestamp()
@@ -284,7 +255,7 @@ class _UploadSongsState extends State<UploadSongs> {
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
         'is_song': true,
-        'price':_price,
+        'price': _price,
         'singer': _selectedSinger,
         'search': searchList(fileNameWithoutExtension),
         'timestamp': FieldValue.serverTimestamp()

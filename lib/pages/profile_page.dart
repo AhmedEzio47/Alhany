@@ -89,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                     border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
                 child: Align(
                   alignment: Alignment.center,
-                  child: Text("Records"),
+                  child: Text(language(en: "Records", ar: 'التسجيلات')),
                 ),
               ),
             ),
@@ -100,7 +100,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                     border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
                 child: Align(
                   alignment: Alignment.center,
-                  child: Text("Favourites"),
+                  child: Text(language(en: "Favourites", ar: 'المفضلات')),
                 ),
               ),
             )
@@ -113,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                     border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
                 child: Align(
                   alignment: Alignment.center,
-                  child: Text("Records"),
+                  child: Text(language(en: "Records", ar: 'التسجيلات')),
                 ),
               ),
             )
@@ -289,7 +289,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                 _saveEdits();
                               }
                             },
-                            child: Text(_editing ? 'Save' : 'Edit Profile',
+                            child: Text(
+                                _editing ? language(en: 'Save', ar: 'حفظ') : language(en: 'Edit Profile', ar: 'تعديل'),
                                 style: TextStyle(fontSize: 14, color: Colors.white)),
                           )
                         : Container(),
@@ -394,7 +395,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   })
               : Center(
                   child: Text(
-                    'User records are listed here',
+                    language(en: 'No records yet', ar: 'لا توجد تسجيلات'),
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -428,7 +429,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   })
               : Center(
                   child: Text(
-                    'Your favourites are listed here',
+                    language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

@@ -166,90 +166,87 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
         },
         child: Stack(
           children: [
-            SingleChildScrollView(
-              controller: _mainScrollController,
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  gradient: new LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      MyColors.primaryColor,
-                    ],
-                  ),
-                  color: MyColors.primaryColor,
-                  image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                    image: AssetImage(Strings.default_bg),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 70,
-                    ),
-                    CachedImage(
-                      width: 150,
-                      height: 150,
-                      imageShape: BoxShape.circle,
-                      imageUrl: Constants.startUser?.profileImageUrl,
-                      defaultAssetImage: Strings.default_profile_image,
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    TabBar(
-                        onTap: (index) {
-                          setState(() {
-                            _page = index;
-                          });
-                        },
-                        controller: _tabController,
-                        unselectedLabelColor: MyColors.lightPrimaryColor,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicator:
-                            BoxDecoration(borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
-                        tabs: [
-                          Tab(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("Records"),
-                              ),
-                            ),
-                          ),
-                          Tab(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("Melodies"),
-                              ),
-                            ),
-                          ),
-                          Tab(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("Songs"),
-                              ),
-                            ),
-                          ),
-                        ]),
-                    Expanded(child: _currentPage())
+            Container(
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                gradient: new LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black,
+                    MyColors.primaryColor,
                   ],
                 ),
+                color: MyColors.primaryColor,
+                image: DecorationImage(
+                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  image: AssetImage(Strings.default_bg),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 70,
+                  ),
+                  CachedImage(
+                    width: 150,
+                    height: 150,
+                    imageShape: BoxShape.circle,
+                    imageUrl: Constants.startUser?.profileImageUrl,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  TabBar(
+                      onTap: (index) {
+                        setState(() {
+                          _page = index;
+                        });
+                      },
+                      controller: _tabController,
+                      unselectedLabelColor: MyColors.lightPrimaryColor,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      indicator:
+                          BoxDecoration(borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
+                      tabs: [
+                        Tab(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(language(en: "Records", ar: 'التسجيلات')),
+                            ),
+                          ),
+                        ),
+                        Tab(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(language(en: 'Melodies', ar: 'الألحان')),
+                            ),
+                          ),
+                        ),
+                        Tab(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(language(en: "Songs", ar: 'الأغاني')),
+                            ),
+                          ),
+                        ),
+                      ]),
+                  Expanded(child: _currentPage())
+                ],
               ),
             ),
             _isPlaying
@@ -276,25 +273,26 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
               onPressed: () async {
                 AppUtil.showAlertDialog(
                     context: context,
-                    message: 'What do you want to upload?',
-                    firstBtnText: 'Melody',
+                    message: language(en: 'What do you want to upload?', ar: 'ما الذي تريد رفعه؟'),
+                    firstBtnText: language(en: 'Melody', ar: 'لحن'),
                     firstFunc: () async {
                       Navigator.of(context).pop();
                       AppUtil.showAlertDialog(
                           context: context,
-                          message: 'Single level or multi-level melody?',
-                          firstBtnText: 'Single',
+                          message: language(
+                              en: 'Single level or multi-level melody?', ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
+                          firstBtnText: language(en: 'Single', ar: 'أحادي'),
                           firstFunc: () async {
                             Navigator.of(context).pop();
                             Navigator.of(context).pushNamed('/upload-single-level-melody');
                           },
-                          secondBtnText: 'Multi level',
+                          secondBtnText: language(en: 'Multi level', ar: 'متعدد المستويات'),
                           secondFunc: () async {
                             Navigator.of(context).pop();
                             Navigator.of(context).pushNamed('/upload-multi-level-melody');
                           });
                     },
-                    secondBtnText: 'Song',
+                    secondBtnText: language(en: 'Song', ar: 'أغنية'),
                     secondFunc: () async {
                       Navigator.of(context).pop();
                       Navigator.of(context).pushNamed('/upload-songs');

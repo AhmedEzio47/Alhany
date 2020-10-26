@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/main.dart';
 import 'package:dubsmash/pages/email_change.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +67,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
               Navigator.of(context).pushNamed('/chats');
             },
             title: Text(
-              'Chats',
+              language(en: 'Chats', ar: 'الدردشات'),
               style: TextStyle(
                 color: MyColors.primaryColor,
               ),
@@ -80,7 +82,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
               Navigator.of(context).pushNamed('/downloads');
             },
             title: Text(
-              'Downloads',
+              language(en: 'Downloads', ar: 'التحميلات'),
               style: TextStyle(
                 color: MyColors.primaryColor,
               ),
@@ -99,13 +101,29 @@ class _BuildDrawerState extends State<BuildDrawer> {
               }
             },
             title: Text(
-              'Change Email',
+              language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
               style: TextStyle(
                 color: MyColors.primaryColor,
               ),
             ),
             leading: Icon(
               Icons.alternate_email,
+              color: MyColors.primaryColor,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
+              await AppUtil.switchLanguage();
+              MyApp.restartApp(context);
+            },
+            title: Text(
+              language(ar: 'تغيير اللغة', en: 'Change Language'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.language,
               color: MyColors.primaryColor,
             ),
           ),
@@ -138,7 +156,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
               }
             },
             title: Text(
-              'Sign Out',
+              language(ar: 'تسجيل الخروج', en: 'Sign Out'),
               style: TextStyle(
                 color: MyColors.primaryColor,
               ),

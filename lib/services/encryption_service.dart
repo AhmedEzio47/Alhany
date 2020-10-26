@@ -54,7 +54,7 @@ class EncryptionService {
       print('File content: ' + File(decFilepath).path);
     } catch (e) {
       print(path);
-      AppUtil.showToast('The decryption failed.');
+      //AppUtil.showToast('The decryption failed.');
       return 'ERROR';
     }
     return decFilepath;

@@ -19,7 +19,11 @@ import 'package:stripe_payment/stripe_payment.dart';
 class MelodyItem extends StatefulWidget {
   final Melody melody;
   final BuildContext context;
-  MelodyItem({Key key, this.melody, this.context}) : super(key: key);
+  final bool isRounded;
+  final double imageSize;
+  final double padding;
+  MelodyItem({Key key, this.melody, this.context, this.isRounded = true, this.imageSize = 50, this.padding = 8})
+      : super(key: key);
 
   @override
   _MelodyItemState createState() => _MelodyItemState();
@@ -29,13 +33,27 @@ class _MelodyItemState extends State<MelodyItem> {
   User _author;
   bool _isFavourite = false;
 
-  var choices = ['Edit Image', 'Edit Name', 'Delete'];
+  List<String> choices;
 
   TextEditingController _nameController = TextEditingController();
 
   @override
   void initState() {
-    if(widget.melody.authorId != null){
+    if (widget.melody.isSong) {
+      choices = [
+        language(en: 'Edit lyrics', ar: 'تعديل الكلمات'),
+        language(en: 'Edit Image', ar: 'تعديل الصورة'),
+        language(en: 'Edit Name', ar: 'تعديل الإسم'),
+        language(en: 'Delete', ar: 'حذف')
+      ];
+    } else {
+      choices = [
+        language(en: 'Edit Image', ar: 'تعديل الصورة'),
+        language(en: 'Edit Name', ar: 'تعديل الإسم'),
+        language(en: 'Delete', ar: 'حذف')
+      ];
+    }
+    if (widget.melody.authorId != null) {
       getAuthor();
     }
     super.initState();
@@ -68,21 +86,23 @@ class _MelodyItemState extends State<MelodyItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(widget.padding),
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: 70,
-        color: Colors.white.withOpacity(.4),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.4),
+          borderRadius: widget.isRounded ? BorderRadius.circular(20.0) : null,
+        ),
         child: ListTile(
           leading: CachedImage(
-            width: 50,
-            height: 50,
+            width: widget.imageSize,
+            height: widget.imageSize,
             imageUrl: widget.melody.imageUrl,
             imageShape: BoxShape.rectangle,
             defaultAssetImage: Strings.default_melody_image,
           ),
           title: Text(widget.melody.name),
-          subtitle: Text(_author?.name ?? widget.melody.singer??''),
+          subtitle: Text(_author?.name ?? widget.melody.singer ?? ''),
           trailing: InkWell(
             onTap: () async {
               _isFavourite
@@ -154,6 +174,9 @@ class _MelodyItemState extends State<MelodyItem> {
 
       case 'Delete':
         await deleteMelody();
+        break;
+      case 'Edit lyrics':
+        Navigator.of(context).pushNamed('/lyrics-editor');
         break;
     }
   }
@@ -277,11 +300,11 @@ class _MelodyItemState extends State<MelodyItem> {
 
   void _downloadMelody() async {
     Token token = Token();
-    if(widget.melody.price == null || widget.melody.price== '0'){
+    if (widget.melody.price == null || widget.melody.price == '0') {
       token.tokenId = 'free';
-    }else{
+    } else {
       DocumentSnapshot doc =
-      await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
+          await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
       bool alreadyDownloaded = doc.exists;
       print('alreadyDownloaded: $alreadyDownloaded');
 

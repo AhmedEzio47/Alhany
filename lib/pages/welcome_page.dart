@@ -71,15 +71,11 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    "Awesome",
+                    appName,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
                     ),
-                  ),
-                  Text(
-                    "App",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -110,7 +106,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                           children: <Widget>[
                             new Expanded(
                               child: Text(
-                                "SIGN UP",
+                                language(en: "SIGN UP", ar: 'تسجيل'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
@@ -144,7 +140,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                           children: <Widget>[
                             new Expanded(
                               child: Text(
-                                "LOGIN",
+                                language(en: "LOGIN", ar: 'تسجيل الدخول'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: MyColors.primaryColor, fontWeight: FontWeight.bold),
                               ),
@@ -322,7 +318,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                           children: <Widget>[
                             new Expanded(
                               child: Text(
-                                "LOGIN",
+                                language(en: "LOGIN", ar: 'تسجيل الدخول'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
@@ -660,7 +656,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                   padding: const EdgeInsets.only(right: 20.0),
                   child: new FlatButton(
                     child: new Text(
-                      "Already have an account?",
+                      language(en: "Already have an account?", ar: 'لديك حساب بالفعل؟'),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: MyColors.primaryColor,
@@ -700,7 +696,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                           children: <Widget>[
                             new Expanded(
                               child: Text(
-                                "SIGN UP",
+                                language(en: "SIGN UP", ar: 'تسجيل'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
@@ -779,7 +775,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         await _login();
       } else {
         Navigator.of(context).pop();
-        AppUtil.showToast('Please enter your login details');
+        AppUtil.showToast(language(en: 'Please enter your login details', ar: 'من فضلك املأ الخانات'));
       }
     } else if (_currentPage == 2) {
       if (_emailController.text.isNotEmpty &&
@@ -789,12 +785,10 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         await _signUp();
       } else {
         Navigator.of(context).pop();
-        AppUtil.showToast('Please enter your fill all fields');
+        AppUtil.showToast(language(en: 'Please enter your fill all fields', ar: 'من فضلك املأ كل الخانات'));
       }
     }
   }
-
-
 
   Future _signUp() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
@@ -808,19 +802,19 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       _userId = await auth.signUp(_nameController.text, _emailController.text, _passwordController.text);
 
       if (_userId == 'Email is already in use') {
-        AppUtil.showToast('Email is already in use');
+        AppUtil.showToast(language(en: 'Email is already in use', ar: 'هذا العنوان محجوز'));
         _setFocusNode(myFocusNodeEmail);
         return;
       } else if (_userId == 'Weak Password') {
-        AppUtil.showToast('Weak Password!');
+        AppUtil.showToast(language(en: 'Weak Password!', ar: 'كلمة مرور ضعيفة'));
         _setFocusNode(myFocusNodePassword);
         return;
       } else if (_userId == 'Invalid Email') {
-        AppUtil.showToast('Invalid Email!');
+        AppUtil.showToast(language(en: 'Invalid Email!', ar: 'البريد الإلكتروني غير صحيح'));
         _setFocusNode(myFocusNodeEmail);
         return;
       } else if (_userId == 'sign_up_error') {
-        AppUtil.showToast('Sign up error!');
+        AppUtil.showToast(language(en: 'Sign up error!', ar: 'خطأ في التسجيل'));
         _setFocusNode(myFocusNodeName);
         return;
       }
@@ -828,11 +822,11 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('name', _nameController.text);
       Navigator.of(context).pop();
-      AppUtil.showToast('Verification Email Sent');
+      AppUtil.showToast(language(en: 'Verification Email Sent', ar: 'تم إرسال رسالة التفعيل'));
       _gotoLogin();
     } else {
       if (_passwordController.text != _confirmPasswordController.text) {
-        AppUtil.showToast("Passwords don't match");
+        AppUtil.showToast(language(en: "Passwords don't match", ar: 'كلمتا المرور غير متطابقتان'));
         _setFocusNode(myFocusNodePassword);
         return;
       } else {
@@ -862,10 +856,11 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         Navigator.of(context).pop();
         AppUtil.showAlertDialog(
             context: context,
-            message: 'Please check your mail for the verification email',
-            firstBtnText: 'OK',
+            message:
+                language(en: 'Please check your mail for the verification email', ar: 'رجاءا قم بالتفعيل عبر بريدك'),
+            firstBtnText: language(en: 'OK', ar: 'تم'),
             firstFunc: () => Navigator.of(context).pop(),
-            secondBtnText: 'Resend',
+            secondBtnText: language(en: 'Resend', ar: 'إعادة إرسال'),
             secondFunc: () async {
               Navigator.of(context).pop();
               await user.sendEmailVerification();
@@ -873,14 +868,15 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         //await auth.signOut();
       } else {
         //saveToken(); // We don't want to saveToken for non-verified users
-        AppUtil.showToast('Logged In!');
+        //AppUtil.showToast('Logged In!');
         Navigator.of(context).pushReplacementNamed('/');
       }
     } catch (e) {
       // Email or Password Incorrect
       //Navigator.of(context).pop();
       Navigator.of(context).pop();
-      AppUtil.showToast('The email address or password is incorrect.');
+      AppUtil.showToast(
+          language(en: 'The email address or password is incorrect.', ar: 'خطأ ف البريد الإلكتروني أو كلمة المرور'));
     }
     //print('Should be true: $_loading');
   }
@@ -888,7 +884,8 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
   Future<FirebaseUser> signInWithGoogle() async {
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
-      AppUtil.showToast('Unknown error, please try another sign in method!');
+      AppUtil.showToast(language(
+          en: 'Unknown error, please try another sign in method!', ar: 'خطأ غير معروف، رجاءا استخدام طريقة أخرى'));
     });
     final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 

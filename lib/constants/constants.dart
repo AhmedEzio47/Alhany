@@ -35,4 +35,6 @@ class Constants {
   static String currentMelodyLevel;
 
   static String currentRoute;
+
+  static String language;
 }

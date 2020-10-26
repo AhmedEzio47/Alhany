@@ -59,7 +59,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    'Upload Melody',
+                    language(en: 'Upload Melody', ar: 'رفع اللحن'),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -94,7 +94,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    'Upload Multiple Melodies',
+                    language(en: 'Upload Multiple Melodies', ar: 'رفع الألحان'),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -168,7 +168,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
         'timestamp': FieldValue.serverTimestamp()
       });
     }
-    AppUtil.showToast('Melodiess uploaded!');
+    AppUtil.showToast(language(en: 'Melodies uploaded!', ar: 'تم رفع الألحان'));
     Navigator.of(context).pop();
   }
 }
