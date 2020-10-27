@@ -28,4 +28,17 @@ class Strings {
 
   //Icons
   static const String person_remove = 'assets/icons/person_remove.png';
+
+  //Translations
+  static const en_edit_image = 'Edit Image';
+  static const ar_edit_image = 'تعديل الصورة';
+
+  static const en_edit_lyrics = 'Edit lyrics';
+  static const ar_edit_lyrics = 'تعديل الكلمات';
+
+  static const en_edit_name = 'Edit Name';
+  static const ar_edit_name = 'تعديل الإسم';
+
+  static const en_delete = 'Delete';
+  static const ar_delete = 'حذف';
 }

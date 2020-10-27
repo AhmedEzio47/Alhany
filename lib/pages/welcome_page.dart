@@ -260,7 +260,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                   child: FlatButton(
                     child: Constants.currentFirebaseUser?.isEmailVerified ?? true
                         ? Text(
-                            "Forgot Password?",
+                            language(en: "Forgot Password?", ar: 'نسيت كلمة المرور'),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: MyColors.primaryColor,

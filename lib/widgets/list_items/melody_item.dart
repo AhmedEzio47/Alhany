@@ -41,16 +41,16 @@ class _MelodyItemState extends State<MelodyItem> {
   void initState() {
     if (widget.melody.isSong) {
       choices = [
-        language(en: 'Edit lyrics', ar: 'تعديل الكلمات'),
-        language(en: 'Edit Image', ar: 'تعديل الصورة'),
-        language(en: 'Edit Name', ar: 'تعديل الإسم'),
-        language(en: 'Delete', ar: 'حذف')
+        language(en: Strings.en_edit_lyrics, ar: Strings.ar_edit_lyrics),
+        language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
+        language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
+        language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     } else {
       choices = [
-        language(en: 'Edit Image', ar: 'تعديل الصورة'),
-        language(en: 'Edit Name', ar: 'تعديل الإسم'),
-        language(en: 'Delete', ar: 'حذف')
+        language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
+        language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
+        language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     }
     if (widget.melody.authorId != null) {
@@ -164,18 +164,31 @@ class _MelodyItemState extends State<MelodyItem> {
 
   void _select(String value) async {
     switch (value) {
-      case 'Edit Image':
+      case Strings.en_edit_image:
+        await editImage();
+        break;
+      case Strings.ar_edit_image:
         await editImage();
         break;
 
-      case 'Edit Name':
+      case Strings.en_edit_name:
+        await editName();
+        break;
+      case Strings.ar_edit_name:
         await editName();
         break;
 
-      case 'Delete':
+      case Strings.en_delete:
         await deleteMelody();
         break;
-      case 'Edit lyrics':
+      case Strings.ar_delete:
+        await deleteMelody();
+        break;
+
+      case Strings.ar_edit_lyrics:
+        Navigator.of(context).pushNamed('/lyrics-editor');
+        break;
+      case Strings.ar_edit_lyrics:
         Navigator.of(context).pushNamed('/lyrics-editor');
         break;
     }

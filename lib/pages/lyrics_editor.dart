@@ -1,5 +1,7 @@
+import 'package:dubsmash/app_util.dart';
 import 'package:flutter/material.dart';
-import 'package:zefyr/zefyr.dart';
+import 'package:flutter_summernote/flutter_summernote.dart';
+import 'package:html_editor/html_editor.dart';
 
 class LyricsEditor extends StatefulWidget {
   @override
@@ -7,22 +9,25 @@ class LyricsEditor extends StatefulWidget {
 }
 
 class _LyricsEditorState extends State<LyricsEditor> {
-  // NotusDocument _notusDocument = NotusDocument();
-  // ZefyrController _zefyrController;
-  //
-  // FocusNode _focusNode = FocusNode();
+  GlobalKey<FlutterSummernoteState> _keyEditor = GlobalKey();
 
   @override
   void initState() {
-    // _zefyrController = ZefyrController(_notusDocument);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // return ZefyrEditor(
-    //   controller: _zefyrController,
-    //   focusNode: _focusNode,
-    // );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lyrics Editor'),
+      ),
+      body:
+          SingleChildScrollView(child: FlutterSummernote(hint: "Your text here...", key: _keyEditor, customToolbar: """
+            [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['strikethrough', 'superscript', 'subscript']]
+            ]""")),
+    );
   }
 }
