@@ -50,4 +50,13 @@ class Strings {
 
   static const en_choose_melody = 'Choose Melody';
   static const ar_choose_melody = 'اختيار اللحن';
+
+  static const en_choose_melodies = 'Choose Melodies';
+  static const ar_choose_melodies = 'اختيار الألحان';
+
+  static const en_update = 'Update';
+  static const ar_update = 'تعديل';
+
+  static const en_updated = 'Updated!';
+  static const ar_updated = 'تم التعديل';
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/services/my_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -23,6 +24,8 @@ class MusicPlayer extends StatefulWidget {
   final double btnSize;
   final int initialDuration;
 
+  final Melody melody;
+
   MusicPlayer(
       {Key key,
       @required this.url,
@@ -32,7 +35,8 @@ class MusicPlayer extends StatefulWidget {
       this.title,
       this.recordBtnVisible = false,
       this.btnSize = 40.0,
-      this.initialDuration})
+      this.initialDuration,
+      this.melody})
       : super(key: key);
 
   @override
@@ -233,7 +237,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             ],
                           ),
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': widget.melody});
+                            },
                             iconSize: widget.btnSize,
                             icon: Icon(Icons.mic),
                             color: MyColors.primaryColor,

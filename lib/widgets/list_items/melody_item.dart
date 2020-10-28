@@ -205,7 +205,7 @@ class _MelodyItemState extends State<MelodyItem> {
 
     String url = await AppUtil.uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
     await melodiesRef.document(widget.melody.id).updateData({'image_url': url});
-    AppUtil.showToast('Image updated!');
+    AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }
 
   editName() async {
@@ -242,12 +242,12 @@ class _MelodyItemState extends State<MelodyItem> {
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
-              AppUtil.showToast('Name Updated');
+              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pop();
             },
             color: MyColors.primaryColor,
             child: Text(
-              'Update',
+              language(en: Strings.en_update, ar: Strings.ar_update),
               style: TextStyle(color: Colors.white),
             ),
           )

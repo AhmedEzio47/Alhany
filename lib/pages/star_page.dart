@@ -354,6 +354,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           btnSize: 30,
                           recordBtnVisible: true,
                           initialDuration: _filteredMelodies[index].duration,
+                          melody: _filteredMelodies[index],
                         );
                         _isPlaying = true;
                       });
@@ -384,6 +385,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           btnSize: 30,
                           recordBtnVisible: true,
                           initialDuration: _melodies[index].duration,
+                          melody: _melodies[index],
                         );
                         _isPlaying = true;
                       });

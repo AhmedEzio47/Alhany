@@ -96,7 +96,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    language(en: 'Upload Multiple Melodies', ar: 'رفع الألحان'),
+                    language(en: Strings.en_choose_melodies, ar: Strings.ar_choose_melodies),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
