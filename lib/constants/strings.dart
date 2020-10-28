@@ -41,4 +41,13 @@ class Strings {
 
   static const en_delete = 'Delete';
   static const ar_delete = 'حذف';
+
+  static const en_forgot_password = "Forgot Password?";
+  static const ar_forgot_password = 'نسيت كلمة المرور؟';
+
+  static const en_melody_uploaded = 'Melody uploaded!';
+  static const ar_melody_uploaded = 'تم رفع اللحن';
+
+  static const en_choose_melody = 'Choose Melody';
+  static const ar_choose_melody = 'اختيار اللحن';
 }

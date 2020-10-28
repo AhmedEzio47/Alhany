@@ -7,10 +7,15 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
 class UploadSongs extends StatefulWidget {
+  final String singer;
+
+  const UploadSongs({Key key, this.singer}) : super(key: key);
   @override
   _UploadSongsState createState() => _UploadSongsState();
 }
@@ -23,7 +28,7 @@ class _UploadSongsState extends State<UploadSongs> {
 
   List<String> _singers = [];
 
-  String _selectedSinger;
+  String _singer;
 
   getSingers() async {
     _singers = [];
@@ -39,6 +44,9 @@ class _UploadSongsState extends State<UploadSongs> {
   void initState() {
     getSingers();
     super.initState();
+    setState(() {
+      _singer = widget.singer;
+    });
   }
 
   @override
@@ -91,10 +99,10 @@ class _UploadSongsState extends State<UploadSongs> {
                       flex: 7,
                       child: DropdownButton(
                         hint: Text('Singer'),
-                        value: _selectedSinger,
+                        value: _singer,
                         onChanged: (text) {
                           setState(() {
-                            _selectedSinger = text;
+                            _singer = text;
                           });
                         },
                         items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
@@ -206,6 +214,10 @@ class _UploadSongsState extends State<UploadSongs> {
     File songFile = await AppUtil.chooseAudio();
     String ext = path.extension(songFile.path);
     String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$ext');
@@ -228,8 +240,9 @@ class _UploadSongsState extends State<UploadSongs> {
       'image_url': imageUrl,
       'is_song': true,
       'price': _price,
-      'singer': _selectedSinger,
-      'search': searchList(_songName),
+      'singer': _singer,
+      'search': _songName != null ? searchList(_songName) : searchList(fileNameWithoutExtension),
+      'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
 
@@ -251,12 +264,17 @@ class _UploadSongsState extends State<UploadSongs> {
       String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
       String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$songExt');
 
+      final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
+      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
         'is_song': true,
         'price': _price,
-        'singer': _selectedSinger,
+        'singer': _singer,
+        'duration': duration,
         'search': searchList(fileNameWithoutExtension),
         'timestamp': FieldValue.serverTimestamp()
       });

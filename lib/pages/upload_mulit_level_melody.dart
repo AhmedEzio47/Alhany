@@ -6,6 +6,8 @@ import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
@@ -209,13 +211,20 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     AppUtil.showLoader(context);
 
     Map<String, String> levelsUrls = {};
+    Map<String, int> levelsDurations = {};
 
     String id = randomAlphaNumeric(20);
 
     for (String key in melodies.keys) {
       String ext = path.extension(melodies[key].path);
       String url = await AppUtil.uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
+
+      final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(melodies[key].path);
+      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
       levelsUrls.putIfAbsent(key, () => url);
+      levelsDurations.putIfAbsent(key, () => duration);
     }
 
     String imageUrl;
@@ -229,6 +238,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
       'audio_url': _melodyUrl,
       'image_url': imageUrl,
       'level_urls': levelsUrls,
+      'level_durations': levelsDurations,
       'author_id': Constants.currentUserID,
       'is_song': false,
       'search': searchList(_melodyName),

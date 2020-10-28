@@ -6,6 +6,7 @@ class Melody {
   final String description;
   final String audioUrl;
   final Map levelUrls;
+  final Map levelDurations;
   final String imageUrl;
   final String authorId;
   final String singer;
@@ -13,6 +14,7 @@ class Melody {
   final String price;
   final int views;
   final List search;
+  final int duration;
   final Timestamp timestamp;
 
   Melody(
@@ -21,6 +23,7 @@ class Melody {
       this.description,
       this.audioUrl,
       this.levelUrls,
+      this.levelDurations,
       this.imageUrl,
       this.authorId,
       this.singer,
@@ -28,6 +31,7 @@ class Melody {
       this.price,
       this.views,
       this.search,
+      this.duration,
       this.timestamp});
 
   factory Melody.fromDoc(DocumentSnapshot doc) {
@@ -37,12 +41,14 @@ class Melody {
         description: doc['description'] ?? '',
         audioUrl: doc['audio_url'],
         levelUrls: doc['level_urls'],
+        levelDurations: doc['level_durations'],
         imageUrl: doc['image_url'],
         authorId: doc['author_id'],
         singer: doc['singer'],
         isSong: doc['is_song'],
         price: doc['price'],
         views: doc['views'],
+        duration: doc['duration'],
         search: doc['search'],
         timestamp: doc['timestamp']);
   }
@@ -55,6 +61,7 @@ class Melody {
       authorId: map['author_id'],
       audioUrl: map['audio_url'],
       imageUrl: map['image_url'],
+      duration: map['duration'],
     );
   }
 
@@ -66,6 +73,7 @@ class Melody {
       'author_id': this.authorId,
       'audio_url': this.audioUrl,
       'image_url': this.imageUrl,
+      'duration': this.duration,
     };
     return map;
   }

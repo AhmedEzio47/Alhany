@@ -248,7 +248,16 @@ class _MelodyPageState extends State<MelodyPage> {
 
     Navigator.of(context).pop();
 
-    melodyPlayer = MusicPlayer(url: mergedFilePath, isLocal: true, backColor: MyColors.primaryColor);
+    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
+    melodyPlayer = MusicPlayer(
+      url: mergedFilePath,
+      isLocal: true,
+      backColor: MyColors.primaryColor,
+      initialDuration: duration,
+    );
 
     Navigator.of(context).push(CustomModal(
         onWillPop: () {
@@ -291,7 +300,11 @@ class _MelodyPageState extends State<MelodyPage> {
     String url = await AppUtil.uploadFile(
         File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
 
-    await DatabaseService.saveRecord(widget.melody.id, recordId, url);
+    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
+    await DatabaseService.saveRecord(widget.melody.id, recordId, url, duration);
     _deleteFiles();
     Navigator.of(context).pop();
 
@@ -332,6 +345,7 @@ class _MelodyPageState extends State<MelodyPage> {
       melodyPlayer = new MusicPlayer(
         url: url,
         backColor: Colors.transparent,
+        initialDuration: widget.melody.duration,
       );
     });
   }

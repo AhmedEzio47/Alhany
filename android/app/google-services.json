@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "480329879410-qvreh9ljau6vrmj8h3oi7bjde8to67u0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.dubsmash",
+            "certificate_hash": "6a8af290b55ac94a7b81f546960aef3d27bf178c"
+          }
+        },
+        {
           "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
           "client_type": 3
         }

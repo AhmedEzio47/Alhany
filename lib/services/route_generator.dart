@@ -63,7 +63,10 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => UploadSingleLevelMelody());
 
       case '/upload-songs':
-        return MaterialPageRoute(builder: (_) => UploadSongs());
+        return MaterialPageRoute(
+            builder: (_) => UploadSongs(
+                  singer: args['singer'],
+                ));
 
       case '/change-email':
         return MaterialPageRoute(builder: (_) => EmailChangePage());

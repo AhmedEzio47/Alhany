@@ -320,7 +320,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                   setState(() {
                     musicPlayer = MusicPlayer(
                       url: _records[index].audioUrl,
-                      backColor: MyColors.lightPrimaryColor,
+                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                      initialDuration: _records[index].duration,
                     );
                     _isPlaying = true;
                   });
@@ -348,13 +349,17 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           url: _filteredMelodies[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredMelodies[index].name,
+                          btnSize: 30,
+                          recordBtnVisible: true,
+                          initialDuration: _filteredMelodies[index].duration,
                         );
                         _isPlaying = true;
                       });
                     },
                     child: MelodyItem(
+                      context: context,
                       key: ValueKey('melody_item'),
                       melody: _filteredMelodies[index],
                     ),
@@ -374,13 +379,17 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
-                          backColor: MyColors.lightPrimaryColor,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
+                          btnSize: 30,
+                          recordBtnVisible: true,
+                          initialDuration: _melodies[index].duration,
                         );
                         _isPlaying = true;
                       });
                     },
                     child: MelodyItem(
+                      context: context,
                       key: ValueKey('melody_item'),
                       melody: _melodies[index],
                     ),
@@ -404,14 +413,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           url: _filteredSongs[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredSongs[index].name,
+                          initialDuration: _filteredSongs[index].duration,
                         );
                         _isPlaying = true;
                       });
                     },
                     child: MelodyItem(
                       //Solves confusion between songs and melodies when adding to favourites
+                      context: context,
                       key: ValueKey('song_item'),
                       melody: _filteredSongs[index],
                     ),
@@ -431,14 +442,16 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           url: _songs[index].audioUrl,
-                          backColor: MyColors.lightPrimaryColor,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _songs[index].name,
+                          initialDuration: _songs[index].duration,
                         );
                         _isPlaying = true;
                       });
                     },
                     child: MelodyItem(
                       //Solves confusion between songs and melodies when adding to favourites
+                      context: context,
                       key: ValueKey('song_item'),
                       melody: _songs[index],
                     ),

@@ -38,70 +38,97 @@ class _SongsPageState extends State<SongsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                color: MyColors.primaryColor,
-                image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                  image: AssetImage(Strings.default_bg),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 60,
+      floatingActionButton: Constants.isAdmin
+          ? FloatingActionButton(
+              backgroundColor: MyColors.accentColor,
+              child: Icon(Icons.add),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/upload-songs', arguments: {'singer': widget.singer.name});
+              },
+            )
+          : null,
+      body: GestureDetector(
+        onTap: () {
+          setState(() {
+            _isPlaying = false;
+          });
+        },
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  color: MyColors.primaryColor,
+                  image: DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    image: AssetImage(Strings.default_bg),
+                    fit: BoxFit.cover,
                   ),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      controller: _songsScrollController,
-                      itemCount: _songs.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () async {
-                            // if (musicPlayer != null) {
-                            //   musicPlayer.stop();
-                            // }
-
-                            setState(() {
-                              musicPlayer = MusicPlayer(
-                                url: _songs[index].audioUrl,
-                                backColor: MyColors.lightPrimaryColor,
-                                title: _songs[index].name,
-                              );
-                              _isPlaying = true;
-                            });
-                          },
-                          child: MelodyItem(
-                            padding: 0,
-                            imageSize: 40,
-                            isRounded: false,
-                            key: ValueKey('song_item'),
-                            melody: _songs[index],
-                          ),
-                        );
-                      }),
-                ],
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Align(
-                child: Text(
-                  widget.singer.name,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-                alignment: Alignment.topCenter,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 60,
+                    ),
+                    ListView.builder(
+                        shrinkWrap: true,
+                        controller: _songsScrollController,
+                        itemCount: _songs.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () async {
+                              // if (musicPlayer != null) {
+                              //   musicPlayer.stop();
+                              // }
+
+                              setState(() {
+                                musicPlayer = MusicPlayer(
+                                  url: _songs[index].audioUrl,
+                                  backColor: MyColors.lightPrimaryColor,
+                                  title: _songs[index].name,
+                                  initialDuration: _songs[index].duration,
+                                );
+                                _isPlaying = true;
+                              });
+                            },
+                            child: MelodyItem(
+                              padding: 0,
+                              imageSize: 40,
+                              isRounded: false,
+                              key: ValueKey('song_item'),
+                              melody: _songs[index],
+                            ),
+                          );
+                        }),
+                  ],
+                ),
               ),
             ),
-          )
-        ],
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Align(
+                  child: Text(
+                    widget.singer.name,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
+            _isPlaying
+                ? Positioned.fill(
+                    child: Align(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: musicPlayer,
+                    ),
+                    alignment: Alignment.bottomCenter,
+                  ))
+                : Container(),
+          ],
+        ),
       ),
     );
   }
