@@ -36,26 +36,48 @@ class _AppPageState extends State<AppPage> {
           color: Colors.white,
           items: <Widget>[
             Icon(Icons.star, size: 30),
-            Icon(Icons.mic, size: 30),
             Icon(Icons.home, size: 30),
+            Icon(Icons.group, size: 30),
             Icon(Icons.person, size: 30),
           ],
           onTap: (index) {
             navigationTapped(index);
           },
         ),
-        body: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          pageSnapping: false,
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
+        body: Stack(
           children: [
-            StarPage(),
-            MelodiesPage(),
-            SingersPage(),
-            ProfilePage(
-              userId: Constants.currentUserID,
+            PageView(
+              physics: NeverScrollableScrollPhysics(),
+              pageSnapping: false,
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              children: [
+                StarPage(),
+                MelodiesPage(),
+                SingersPage(),
+                ProfilePage(
+                  userId: Constants.currentUserID,
+                ),
+              ],
             ),
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.only(left: 15.0, top: 40),
+              child: Align(
+                child: Builder(
+                  builder: (context) => InkWell(
+                    onTap: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                    child: Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.topLeft,
+              ),
+            ))
           ],
         ));
   }
