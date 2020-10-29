@@ -11,6 +11,7 @@ import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/list_items/melody_item.dart';
 import 'package:dubsmash/widgets/list_items/record_item.dart';
+import 'package:dubsmash/widgets/list_items/record_item2.dart';
 import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -326,8 +327,9 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     _isPlaying = true;
                   });
                 },
-                child: RecordItem(
+                child: RecordItem2(
                   record: _records[index],
+                  key: UniqueKey(),
                 ),
               );
             });

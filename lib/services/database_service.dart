@@ -33,10 +33,11 @@ class DatabaseService {
     return Melody();
   }
 
-  static addUserToDatabase(String id, String email, String name) async {
+  static addUserToDatabase(String id, String email, String name, String username) async {
     List search = searchList(name);
     Map<String, dynamic> userMap = {
       'name': name ?? 'John Doe',
+      'username': username,
       'email': email,
       'description': 'Write something about yourself',
       'notificationsNumber': 0,

@@ -8,9 +8,19 @@ class Record {
   final int duration;
   int likes;
   int comments;
+  int shares;
   final Timestamp timestamp;
 
-  Record({this.id, this.audioUrl, this.singerId, this.melodyId, this.duration,this.likes,this.comments, this.timestamp});
+  Record(
+      {this.id,
+      this.audioUrl,
+      this.singerId,
+      this.melodyId,
+      this.duration,
+      this.likes,
+      this.comments,
+      this.shares,
+      this.timestamp});
 
   factory Record.fromDoc(DocumentSnapshot doc) {
     return Record(
@@ -21,6 +31,7 @@ class Record {
         duration: doc['duration'],
         likes: doc['likes'],
         comments: doc['comments'],
+        shares: doc['shares'],
         timestamp: doc['timestamp']);
   }
 }

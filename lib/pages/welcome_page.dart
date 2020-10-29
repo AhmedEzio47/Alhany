@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_util.dart';
@@ -129,7 +131,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                       shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
                       color: MyColors.darkPrimaryColor,
                       highlightedBorderColor: Colors.white,
-                      onPressed: () => _gotoSignup(),
+                      onPressed: () => _gotoSignUp(),
                       child: new Container(
                         padding: const EdgeInsets.symmetric(
                           vertical: 20.0,
@@ -441,7 +443,9 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                             onPressed: () async {
                                               FirebaseUser user = await signInWithGoogle();
                                               if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
-                                                await DatabaseService.addUserToDatabase(user.uid, user.email, null);
+                                                String username = await _createUsername();
+                                                await DatabaseService.addUserToDatabase(
+                                                    _userId, user.email, null, username);
                                                 Navigator.of(context).pushReplacementNamed('/');
                                               } else {
                                                 Navigator.of(context).pushReplacementNamed('/');
@@ -781,7 +785,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
     );
   }
 
-  _gotoSignup() {
+  _gotoSignUp() {
     //controller_minus1To0.reverse(from: 0.0);
     _pageController.animateToPage(
       2,
@@ -900,8 +904,8 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       if (user.isEmailVerified && temp.id == null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String name = prefs.getString('name');
-
-        await DatabaseService.addUserToDatabase(_userId, user.email, name);
+        String username = await _createUsername();
+        await DatabaseService.addUserToDatabase(_userId, user.email, name, username);
 
         //TODO saveToken();
 
@@ -933,6 +937,17 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
           language(en: 'The email address or password is incorrect.', ar: 'خطأ ف البريد الإلكتروني أو كلمة المرور'));
     }
     //print('Should be true: $_loading');
+  }
+
+  Future<String> _createUsername() async {
+    while (true) {
+      String username = randomAlphaNumeric(6);
+
+      QuerySnapshot snapshot = await usersRef.where('username', isEqualTo: username).getDocuments();
+      if (snapshot.documents.length == 0) {
+        return username;
+      }
+    }
   }
 
   Future<FirebaseUser> signInWithGoogle() async {

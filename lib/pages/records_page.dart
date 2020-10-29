@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
+import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/list_items/record_item.dart';
+import 'package:dubsmash/widgets/list_items/record_item2.dart';
+import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -20,6 +23,8 @@ class _RecordsPageState extends State<RecordsPage> {
   TextEditingController _searchController = TextEditingController();
 
   List<Record> _records = [];
+
+  bool _isPlaying = false;
   getRecords() async {
     List<Record> records = await DatabaseService.getRecords();
     if (mounted) {
@@ -61,48 +66,77 @@ class _RecordsPageState extends State<RecordsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          color: MyColors.primaryColor,
-          image: DecorationImage(
-            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
-            image: AssetImage(Strings.default_bg),
-            fit: BoxFit.cover,
+      body: GestureDetector(
+        onTap: () {
+          setState(() {
+            _isPlaying = false;
+          });
+        },
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            color: MyColors.primaryColor,
+            image: DecorationImage(
+              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              image: AssetImage(Strings.default_bg),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                  padding: const EdgeInsets.only(top: 45),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                      controller: _melodiesScrollController,
-                      itemCount: _records.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {},
-                          child: RecordItem(
-                            record: _records[index],
-                            key: ValueKey('record_item'),
-                          ),
-                        );
-                      })),
-            )
-            ,Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Align(
-                  child: Text(
-                    language(en: 'Records', ar: 'التسجيلات'),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Padding(
+                    padding: const EdgeInsets.only(top: 45),
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        controller: _melodiesScrollController,
+                        itemCount: _records.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                musicPlayer = MusicPlayer(
+                                  url: _records[index].audioUrl,
+                                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                                  btnSize: 35,
+                                  recordBtnVisible: true,
+                                  initialDuration: _records[index].duration,
+                                  playBtnPosition: PlayBtnPosition.left,
+                                );
+                                _isPlaying = true;
+                              });
+                            },
+                            child: RecordItem2(
+                              record: _records[index],
+                              key: UniqueKey(),
+                            ),
+                          );
+                        })),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Align(
+                    child: Text(
+                      language(en: 'Records', ar: 'التسجيلات'),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    alignment: Alignment.topCenter,
                   ),
-                  alignment: Alignment.topCenter,
                 ),
               ),
-            )
-          ],
+              _isPlaying
+                  ? Positioned.fill(
+                      child: Align(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: musicPlayer,
+                      ),
+                      alignment: Alignment.bottomCenter,
+                    ))
+                  : Container(),
+            ],
+          ),
         ),
       ),
     );

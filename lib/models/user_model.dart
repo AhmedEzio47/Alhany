@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class User {
   final String id;
   final String name;
+  final String username;
   final String profileImageUrl;
   final String email;
   final String description;
@@ -14,6 +15,7 @@ class User {
   User(
       {this.id,
       this.name,
+      this.username,
       this.profileImageUrl,
       this.email,
       this.description,
@@ -26,6 +28,7 @@ class User {
     return User(
         id: doc.documentID,
         name: doc['name'],
+        username: doc['username'],
         profileImageUrl: doc['profile_url'],
         email: doc['email'],
         description: doc['description'] ?? '',

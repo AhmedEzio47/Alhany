@@ -25,7 +25,7 @@ class MusicPlayer extends StatefulWidget {
   final double btnSize;
   final int initialDuration;
   final PlayBtnPosition playBtnPosition;
-
+  final bool isCompact;
 
   final Melody melody;
 
@@ -39,7 +39,9 @@ class MusicPlayer extends StatefulWidget {
       this.recordBtnVisible = false,
       this.btnSize = 40.0,
       this.initialDuration,
-      this.melody, this.playBtnPosition = PlayBtnPosition.bottom})
+      this.melody,
+      this.playBtnPosition = PlayBtnPosition.bottom,
+      this.isCompact = false})
       : super(key: key);
 
   @override
@@ -103,16 +105,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Widget _buildPlayer() => Container(
         padding: EdgeInsets.all(0),
         child: Padding(
-          padding: const EdgeInsets.all(18.0),
+          padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: new BorderRadius.circular(20.0),
               color: widget.backColor,
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              SizedBox(
-                height: 5,
-              ),
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 5,
+                    ),
               widget.title != null
                   ? Text(
                       widget.title,
@@ -121,10 +125,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   : Container(),
               Row(
                 children: [
-                  SizedBox(
-                    width: 10,
+                  widget.isCompact
+                      ? Container()
+                      : SizedBox(
+                          height: 10,
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn() : Container(),
                   ),
-                  widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn():Container(),
                   myAudioPlayer.position != null
                       ? Text(
                           '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
@@ -176,43 +185,49 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-              widget.playBtnPosition == PlayBtnPosition.bottom?Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-playPauseBtn(),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  widget.recordBtnVisible
-                      ? Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey.shade300,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                spreadRadius: 2,
-                                blurRadius: 4,
-                                offset: Offset(0, 2), // changes position of shadow
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': widget.melody});
-                            },
-                            iconSize: widget.btnSize,
-                            icon: Icon(Icons.mic),
-                            color: MyColors.primaryColor,
-                          ),
-                        )
-                      : Container()
-                ],
-              ):Container(),
-              SizedBox(height: 10)
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 10,
+                    ),
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        playPauseBtn(),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        widget.recordBtnVisible
+                            ? InkWell(
+                                onTap: () => Navigator.of(context)
+                                    .pushNamed('/melody-page', arguments: {'melody': widget.melody}),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.mic,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            : Container()
+                      ],
+                    )
+                  : Container(),
+              widget.playBtnPosition == PlayBtnPosition.bottom ? SizedBox(height: 10) : Container()
             ]),
           ),
         ),
@@ -223,47 +238,55 @@ playPauseBtn(),
     return _buildPlayer();
   }
 
-  Widget playPauseBtn(){
+  Widget playPauseBtn() {
     return !isPlaying
-        ? Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.grey.shade300,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black54,
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: Offset(0, 2), // changes position of shadow
-          ),
-        ],
-      ),
-      child: IconButton(
-        onPressed: isPlaying ? null : () => play(),
-        iconSize: widget.btnSize,
-        icon: Icon(Icons.play_arrow),
-        color: MyColors.primaryColor,
-      ),
-    )
-        : Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.grey.shade300,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black54,
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: Offset(0, 2), // changes position of shadow
-          ),
-        ],
-      ),
-      child: IconButton(
-        onPressed: isPlaying ? () => pause() : null,
-        iconSize: widget.btnSize,
-        icon: Icon(Icons.pause),
-        color: MyColors.primaryColor,
-      ),
-    );
+        ? InkWell(
+            onTap: () => isPlaying ? null : play(),
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.play_arrow,
+                size: widget.btnSize - 5,
+                color: MyColors.primaryColor,
+              ),
+            ),
+          )
+        : InkWell(
+            onTap: isPlaying ? () => pause() : null,
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.pause,
+                color: MyColors.primaryColor,
+                size: widget.btnSize - 5,
+              ),
+            ),
+          );
   }
 }

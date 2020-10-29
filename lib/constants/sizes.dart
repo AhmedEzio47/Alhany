@@ -16,7 +16,7 @@ class Sizes {
   static const double home_post_image_h = 200.0;
 
   /// UI Card Sizes
-  static const double card_btn_size = 25.0;
+  static const double card_btn_size = 20.0;
   static const double small_card_btn_size = 18.0;
   static const double inline_break = 32.0;
   static const double small_inline_break = 28.0;
