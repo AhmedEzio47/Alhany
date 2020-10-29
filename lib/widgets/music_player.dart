@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 typedef void OnError(Exception exception);
 
 enum PlayerState { stopped, playing, paused }
+enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
   final String url;
@@ -23,6 +24,8 @@ class MusicPlayer extends StatefulWidget {
   final bool recordBtnVisible;
   final double btnSize;
   final int initialDuration;
+  final PlayBtnPosition playBtnPosition;
+
 
   final Melody melody;
 
@@ -36,7 +39,7 @@ class MusicPlayer extends StatefulWidget {
       this.recordBtnVisible = false,
       this.btnSize = 40.0,
       this.initialDuration,
-      this.melody})
+      this.melody, this.playBtnPosition = PlayBtnPosition.bottom})
       : super(key: key);
 
   @override
@@ -121,6 +124,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   SizedBox(
                     width: 10,
                   ),
+                  widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn():Container(),
                   myAudioPlayer.position != null
                       ? Text(
                           '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
@@ -175,50 +179,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
               SizedBox(
                 height: 10,
               ),
-              Row(
+              widget.playBtnPosition == PlayBtnPosition.bottom?Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  !isPlaying
-                      ? Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey.shade300,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                spreadRadius: 2,
-                                blurRadius: 4,
-                                offset: Offset(0, 2), // changes position of shadow
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            onPressed: isPlaying ? null : () => play(),
-                            iconSize: widget.btnSize,
-                            icon: Icon(Icons.play_arrow),
-                            color: MyColors.primaryColor,
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey.shade300,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                spreadRadius: 2,
-                                blurRadius: 4,
-                                offset: Offset(0, 2), // changes position of shadow
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            onPressed: isPlaying ? () => pause() : null,
-                            iconSize: widget.btnSize,
-                            icon: Icon(Icons.pause),
-                            color: MyColors.primaryColor,
-                          ),
-                        ),
+playPauseBtn(),
                   SizedBox(
                     width: 20,
                   ),
@@ -247,7 +211,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         )
                       : Container()
                 ],
-              ),
+              ):Container(),
               SizedBox(height: 10)
             ]),
           ),
@@ -257,5 +221,49 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   Widget build(BuildContext context) {
     return _buildPlayer();
+  }
+
+  Widget playPauseBtn(){
+    return !isPlaying
+        ? Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey.shade300,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(0, 2), // changes position of shadow
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: isPlaying ? null : () => play(),
+        iconSize: widget.btnSize,
+        icon: Icon(Icons.play_arrow),
+        color: MyColors.primaryColor,
+      ),
+    )
+        : Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey.shade300,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(0, 2), // changes position of shadow
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: isPlaying ? () => pause() : null,
+        iconSize: widget.btnSize,
+        icon: Icon(Icons.pause),
+        color: MyColors.primaryColor,
+      ),
+    );
   }
 }

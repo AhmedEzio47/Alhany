@@ -5,10 +5,12 @@ class Record {
   final String audioUrl;
   final String singerId;
   final String melodyId;
-  final duration;
+  final int duration;
+  int likes;
+  int comments;
   final Timestamp timestamp;
 
-  Record({this.id, this.audioUrl, this.singerId, this.melodyId, this.duration, this.timestamp});
+  Record({this.id, this.audioUrl, this.singerId, this.melodyId, this.duration,this.likes,this.comments, this.timestamp});
 
   factory Record.fromDoc(DocumentSnapshot doc) {
     return Record(
@@ -17,6 +19,8 @@ class Record {
         singerId: doc['singer_id'],
         melodyId: doc['melody_id'],
         duration: doc['duration'],
+        likes: doc['likes'],
+        comments: doc['comments'],
         timestamp: doc['timestamp']);
   }
 }

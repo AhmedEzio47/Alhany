@@ -347,4 +347,14 @@ class DatabaseService {
     List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
+
+  static Future<Map> getRecordMeta(String recordId) async {
+    var recordMeta = Map();
+    DocumentSnapshot postDocSnapshot = await recordsRef.document(recordId).get();
+    if (postDocSnapshot.exists) {
+      recordMeta['likes'] = postDocSnapshot.data['likes'];
+      recordMeta['comments'] = postDocSnapshot.data['comments'];
+    }
+    return recordMeta;
+  }
 }

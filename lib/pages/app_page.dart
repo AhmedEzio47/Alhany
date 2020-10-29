@@ -3,6 +3,7 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/pages/home_page.dart';
 import 'package:dubsmash/pages/melodies_page.dart';
 import 'package:dubsmash/pages/profile_page.dart';
+import 'package:dubsmash/pages/records_page.dart';
 import 'package:dubsmash/pages/singers_page.dart';
 import 'package:dubsmash/pages/star_page.dart';
 import 'package:dubsmash/widgets/curved_navigation_bar.dart';
@@ -53,7 +54,7 @@ class _AppPageState extends State<AppPage> {
               onPageChanged: _onPageChanged,
               children: [
                 StarPage(),
-                MelodiesPage(),
+                RecordsPage(),
                 SingersPage(),
                 ProfilePage(
                   userId: Constants.currentUserID,
