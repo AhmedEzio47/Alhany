@@ -46,9 +46,11 @@ class _RecordItem2State extends State<RecordItem2> {
 
   getMelody() async {
     Melody melody = await DatabaseService.getMelodyWithId(widget.record.melodyId);
-    setState(() {
-      _melody = melody;
-    });
+    if (mounted) {
+      setState(() {
+        _melody = melody;
+      });
+    }
   }
 
   void _goToProfilePage() {
@@ -113,7 +115,7 @@ class _RecordItem2State extends State<RecordItem2> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
-        onTap: ()=> Navigator.of(context).pushNamed('/record-page', arguments: {'record':widget.record}),
+        onTap: () => Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record}),
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: 120,
@@ -244,7 +246,7 @@ class _RecordItem2State extends State<RecordItem2> {
                         ),
                         SizedBox(
                           child: Icon(
-                            Icons.chat_bubble_outline,
+                            Icons.comment,
                             size: Sizes.card_btn_size,
                             color: Colors.white,
                           ),

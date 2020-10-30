@@ -10,30 +10,24 @@ import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/notification_handler.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
-import 'package:dubsmash/widgets/comment_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class CommentItem extends StatefulWidget {
+class CommentItem2 extends StatefulWidget {
   final Record record;
   final Comment comment;
   final User commenter;
   final bool isReply;
   final Comment parentComment;
 
-  CommentItem(
-      {Key key,
-      @required this.record,
-      @required this.comment,
-      @required this.commenter,
-      @required this.isReply,
-      this.parentComment})
+  const CommentItem2({Key key, this.record, this.comment, this.commenter, this.isReply, this.parentComment})
       : super(key: key);
+
   @override
-  _CommentItemState createState() => _CommentItemState();
+  _CommentItem2State createState() => _CommentItem2State();
 }
 
-class _CommentItemState extends State<CommentItem> {
+class _CommentItem2State extends State<CommentItem2> {
   bool isLiked = false;
   bool isLikeEnabled = true;
   var likes = [];
@@ -50,130 +44,93 @@ class _CommentItemState extends State<CommentItem> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 3),
+      decoration: BoxDecoration(color: MyColors.lightPrimaryColor),
       child: Column(
-        children: <Widget>[
-          commentListTile(context),
-        ],
-      ),
-    );
-  }
-
-  Widget commentListTile(BuildContext context) {
-    return SingleChildScrollView(
-      controller: scrollController,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          color: MyColors.lightPrimaryColor,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              ListTile(
-                leading: InkWell(
-                    child: CachedImage(
-                      imageUrl: widget.commenter.profileImageUrl,
-                      imageShape: BoxShape.circle,
-                      width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
-                      height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
-                      defaultAssetImage: Strings.default_profile_image,
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pushNamed('/profile-page', arguments: {
-                        'user_id': widget.comment.commenterID,
-                      });
-                    }),
-                title: InkWell(
-                  child: widget.commenter.username == null
-                      ? Text('')
-                      : RichText(
+            children: [
+              InkWell(
+                  child: CachedImage(
+                    imageUrl: widget.commenter.profileImageUrl,
+                    imageShape: BoxShape.circle,
+                    width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
+                    height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/profile-page', arguments: {
+                      'user_id': widget.comment.commenterID,
+                    });
+                  }),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InkWell(
+                        child: RichText(
                           text: TextSpan(
-// Note: Styles for TextSpans must be explicitly defined.
-// Child text spans will inherit styles from parent
                             style: TextStyle(
                               fontSize: 15.0,
                               color: Colors.white,
                             ),
                             children: <TextSpan>[
-                              TextSpan(text: ' ${widget.commenter.name}', style: TextStyle(color: Colors.white)),
                               TextSpan(
-                                  text: ' - ${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
-                                  style: TextStyle(color: Colors.grey.shade300)),
+                                  text: ' ${widget.commenter.name}',
+                                  style: TextStyle(
+                                      color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                              TextSpan(
+                                  text: ' @${widget.commenter.username}',
+                                  style: TextStyle(color: MyColors.primaryColor)),
                             ],
                           ),
                         ),
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/profile-page', arguments: {
-                      'user_id': widget.comment.commenterID,
-                    });
-                  },
-                ),
-                subtitle: widget.comment.text == null
-                    ? Text('')
-                    : Text.rich(
-                        TextSpan(
-                            text: '',
-                            children: widget.comment.text.split(' ').map((w) {
-                              return w.startsWith('@') && w.length > 1
-                                  ? TextSpan(
-                                      text: ' ' + w,
-                                      style: TextStyle(color: Colors.blue),
-                                      recognizer: TapGestureRecognizer()..onTap = () => mentionedUserProfile(w),
-                                    )
-                                  : TextSpan(
-                                      text: ' ' + w,
-                                      style: TextStyle(color: MyColors.darkPrimaryColor),
-                                    );
-                            }).toList()),
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/profile-page', arguments: {
+                            'user_id': widget.comment.commenterID,
+                          });
+                        },
                       ),
-                trailing: ValueListenableBuilder<int>(
-                  valueListenable: number,
-                  builder: (context, value, child) {
-                    return CommentBottomSheet()
-                        .commentOptionIcon(context, widget.record, widget.comment, widget.parentComment);
-                  },
-                ),
-                isThreeLine: true,
-              ),
-              !widget.isReply
-                  ? InkWell(
-                      onTap: () {
-                        setState(() {
-                          repliesVisible = !repliesVisible;
-                        });
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: (widget.comment.replies != null && widget.comment.replies != 0)
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    !repliesVisible ? 'view ${widget.comment.replies} replies' : 'hide replies',
-                                    style: TextStyle(color: MyColors.primaryColor),
-                                  ),
-                                )
-                              : Container(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
+                        child: Text.rich(
+                          TextSpan(
+                              text: '',
+                              children: widget.comment.text.split(' ').map((w) {
+                                return w.startsWith('@') && w.length > 1
+                                    ? TextSpan(
+                                        text: ' ' + w,
+                                        style: TextStyle(color: Colors.blue),
+                                        recognizer: TapGestureRecognizer()..onTap = () => mentionedUserProfile(w),
+                                      )
+                                    : TextSpan(
+                                        text: ' ' + w,
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                              }).toList()),
                         ),
                       ),
-                    )
-                  : Container(),
-              SizedBox(
-                height: 1.0,
-                width: double.infinity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: MyColors.darkPrimaryColor),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                height: Sizes.inline_break,
-                color: MyColors.lightPrimaryColor,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
+              )
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
+                    style: TextStyle(color: MyColors.primaryColor, fontSize: 12)),
+                Row(
+                  children: [
                     InkWell(
                       child: Row(
                         children: <Widget>[
@@ -191,7 +148,7 @@ class _CommentItemState extends State<CommentItem> {
                                   ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(widget.comment.likes == null ? 0.toString() : widget.comment.likes.toString(),
                                 style: TextStyle(color: Colors.white)),
                           ),
@@ -207,25 +164,18 @@ class _CommentItemState extends State<CommentItem> {
                         }
                       },
                     ),
-                    SizedBox(
-                      width: 1.0,
-                      height: Sizes.inline_break,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(color: MyColors.darkPrimaryColor),
-                      ),
-                    ),
                     InkWell(
                       child: Row(
                         children: <Widget>[
                           SizedBox(
-                            child: Icon(
-                              Icons.chat_bubble_outline,
-                              size: Sizes.small_card_btn_size,
-                              color: Colors.white,
-                            ),
-                          ),
+                              child: Image.asset(
+                            Strings.reply,
+                            height: Sizes.small_card_btn_size,
+                            width: Sizes.small_card_btn_size,
+                            color: Colors.white,
+                          )),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
                               widget.comment.replies == null ? 0.toString() : widget.comment.replies.toString(),
                               style: TextStyle(color: Colors.white),
@@ -245,41 +195,11 @@ class _CommentItemState extends State<CommentItem> {
                       },
                     ),
                   ],
-                ),
-              ),
-              SizedBox(
-                height: 1.0,
-                width: double.infinity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: MyColors.lightPrimaryColor),
-                ),
-              ),
-              !widget.isReply && repliesVisible
-                  ? Flexible(
-                      fit: FlexFit.loose,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 40.0),
-                        child: ListView.builder(
-                            controller: scrollController,
-                            itemCount: replies.length,
-                            physics: NeverScrollableScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemBuilder: (BuildContext context, int index) {
-                              return CommentItem(
-                                record: widget.record,
-                                comment: replies[index],
-                                parentComment: widget.comment,
-                                commenter: repliers[index],
-                                isReply: true,
-                              );
-                            }),
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
-        ),
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

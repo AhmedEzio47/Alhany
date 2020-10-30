@@ -12,10 +12,8 @@ import 'package:flutter/material.dart';
 import 'custom_inkwell.dart';
 import 'custom_text.dart';
 
-
 class CommentBottomSheet {
-  Widget commentOptionIcon(
-      BuildContext context, Record post, Comment comment, Comment parentComment) {
+  Widget commentOptionIcon(BuildContext context, Record post, Comment comment, Comment parentComment) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
@@ -42,10 +40,10 @@ class CommentBottomSheet {
     return ratio;
   }
 
-  void _openBottomSheet(BuildContext context, Record record, Comment comment,
-      Comment parentComment) async {
-    User user = await DatabaseService.getUserWithId(comment.commenterID,
-        );
+  void _openBottomSheet(BuildContext context, Record record, Comment comment, Comment parentComment) async {
+    User user = await DatabaseService.getUserWithId(
+      comment.commenterID,
+    );
     bool isMyComment = Constants.currentUserID == comment.commenterID;
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,
@@ -53,8 +51,7 @@ class CommentBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height:
-                Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
+            height: Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: MyColors.lightPrimaryColor,
@@ -63,14 +60,13 @@ class CommentBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _commentOptions(
-                context, isMyComment, record, comment, parentComment, user));
+            child: _commentOptions(context, isMyComment, record, comment, parentComment, user));
       },
     );
   }
 
-  Widget _commentOptions(BuildContext context, bool isMyComment, Record record,
-      Comment comment, Comment parentComment, User user) {
+  Widget _commentOptions(
+      BuildContext context, bool isMyComment, Record record, Comment comment, Comment parentComment, User user) {
     return Column(
       children: <Widget>[
         Container(
@@ -86,23 +82,18 @@ class CommentBottomSheet {
         isMyComment
             ? _widgetBottomSheetRow(
                 context,
-                Icon(Icons.edit),
+                Icon(
+                  Icons.edit,
+                  color: MyColors.darkPrimaryColor,
+                ),
                 text: 'Edit Comment',
                 onPressed: () {
                   if (parentComment == null) {
-                    Navigator.of(context).pushNamed('/edit-comment',
-                        arguments: {
-                          'post': record,
-                          'user': user,
-                          'comment': comment
-                        });
+                    Navigator.of(context)
+                        .pushNamed('/edit-comment', arguments: {'post': record, 'user': user, 'comment': comment});
                   } else {
-                    Navigator.of(context).pushNamed('/edit-reply', arguments: {
-                      'post': record,
-                      'comment': parentComment,
-                      'reply': comment,
-                      'user': user
-                    });
+                    Navigator.of(context).pushNamed('/edit-reply',
+                        arguments: {'post': record, 'comment': parentComment, 'reply': comment, 'user': user});
                   }
                 },
                 isEnable: false,
@@ -117,17 +108,15 @@ class CommentBottomSheet {
                 ),
                 text: 'Delete Comment',
                 onPressed: () {
-                  _deleteComment(context, record.id, comment.id,
-                      parentComment == null ? null : parentComment.id);
+                  _deleteComment(context, record.id, comment.id, parentComment == null ? null : parentComment.id);
                 },
                 isEnable: true,
               )
             : Container(),
         isMyComment
             ? Container()
-            : _widgetBottomSheetRow(
-                context, Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${user.username}', onPressed: () async {
+            : _widgetBottomSheetRow(context, Icon(Icons.indeterminate_check_box), text: 'Unfollow ${user.username}',
+                onPressed: () async {
                 unfollowUser(context, user);
               }),
 
@@ -180,8 +169,7 @@ class CommentBottomSheet {
                 AppUtil.showLoader(context);
 
                 await DatabaseService.unfollowUser(user.id);
-                await NotificationHandler.removeNotification(
-                    user.id, Constants.currentUserID, 'follow');
+                await NotificationHandler.removeNotification(user.id, Constants.currentUserID, 'follow');
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -223,7 +211,7 @@ class CommentBottomSheet {
                 text,
                 context: context,
                 style: TextStyle(
-                  color: isEnable ?MyColors.primaryColor : Colors.grey,
+                  color: MyColors.primaryColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
@@ -235,8 +223,7 @@ class CommentBottomSheet {
     );
   }
 
-  void _deleteComment(BuildContext context, String recordId, String commentId,
-      String parentCommentId) async {
+  void _deleteComment(BuildContext context, String recordId, String commentId, String parentCommentId) async {
     await showDialog(
       context: context,
       builder: (context) => Padding(
@@ -257,13 +244,10 @@ class CommentBottomSheet {
             SizedBox(height: 16),
             new GestureDetector(
               onTap: () async {
-                await DatabaseService.deleteComment(
-                    recordId, commentId, parentCommentId);
+                await DatabaseService.deleteComment(recordId, commentId, parentCommentId);
 
                 await NotificationHandler.removeNotification(
-                    (await DatabaseService.getRecordWithId(recordId)).singerId,
-                    recordId,
-                    'comment');
+                    (await DatabaseService.getRecordWithId(recordId)).singerId, recordId, 'comment');
 
                 Navigator.of(context).pop();
               },

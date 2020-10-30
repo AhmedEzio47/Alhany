@@ -28,6 +28,7 @@ class Strings {
 
   //Icons
   static const String person_remove = 'assets/icons/person_remove.png';
+  static const String reply = 'assets/icons/reply.png';
 
   //Translations
   static const en_edit_image = 'Edit Image';

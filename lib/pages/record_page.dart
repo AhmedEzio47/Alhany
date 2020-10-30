@@ -8,6 +8,7 @@ import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/notification_handler.dart';
 import 'package:dubsmash/widgets/list_items/comment_item.dart';
+import 'package:dubsmash/widgets/list_items/comment_item2.dart';
 import 'package:dubsmash/widgets/list_items/record_item2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,21 +26,15 @@ class _RecordPageState extends State<RecordPage> {
 
   /// Submit Comment to save in firebase database
   void _submitButton() async {
-
     AppUtil.showLoader(context);
 
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(widget.record.id, _commentController.text);
 
-      await NotificationHandler.sendNotification(
-          widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post',
-          _commentController.text,
-          widget.record.id,
-          'comment');
+      await NotificationHandler.sendNotification(widget.record.singerId,
+          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.record.id, 'comment');
 
-      await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
 
       Navigator.pop(context);
     } else {
@@ -68,7 +63,7 @@ class _RecordPageState extends State<RecordPage> {
 
   List<Comment> _comments = [];
 
-  getComments() async{
+  getComments() async {
     List<Comment> comments = await DatabaseService.getComments(widget.record.id);
     setState(() {
       _comments = comments;
@@ -79,6 +74,22 @@ class _RecordPageState extends State<RecordPage> {
   void initState() {
     getComments();
     super.initState();
+  }
+
+  sendBtn() {
+    return InkWell(
+        onTap: () {
+          _submitButton();
+          _commentController.clear();
+          getComments();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Image.asset(
+            Constants.language == 'en' ? 'assets/icons/send.png' : 'assets/icons/send_ar.png',
+            color: MyColors.darkPrimaryColor,
+          ),
+        ));
   }
 
   @override
@@ -96,7 +107,9 @@ class _RecordPageState extends State<RecordPage> {
         ),
         child: Column(
           children: [
-            SizedBox(height: 40,),
+            SizedBox(
+              height: 40,
+            ),
             RecordItem2(
               record: widget.record,
             ),
@@ -106,46 +119,55 @@ class _RecordPageState extends State<RecordPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  textAlign: Constants.language == 'ar'? TextAlign.right:TextAlign.left,
-                  controller: _commentController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.white),
-                    hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),suffix: InkWell(onTap:(){
-                    _submitButton();
-                    _commentController.clear();
-                  },child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Icon(Icons.send, size: 20,color: MyColors.darkPrimaryColor,),
-                  ))
-                  ),
-                ),
+                    style: TextStyle(color: Colors.white),
+                    textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                    controller: _commentController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintStyle: TextStyle(color: Colors.white),
+                      hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
+                      suffix: Constants.language == 'en' ? sendBtn() : null,
+                      prefix: Constants.language == 'ar' ? sendBtn() : null,
+                    )),
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: _comments.length,itemBuilder: (context, index){
-                Comment comment = _comments[index];
-                return FutureBuilder(
-                    future: DatabaseService.getUserWithId(comment.commenterID,
-                        ),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox.shrink();
-                      }
-                      User commenter = snapshot.data;
-                      //print('commenter: $commenter and comment: $comment');
-                      return CommentItem(
-                        record: widget.record,
-                        comment: comment,
-                        commenter: commenter,
-                        isReply: false,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: new BorderRadius.circular(50.0),
+                ),
+                child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider(
+                        height: 2,
+                        thickness: 2,
+                        color: Colors.transparent,
                       );
-                    });
-              }),
+                    },
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: _comments.length,
+                    itemBuilder: (context, index) {
+                      Comment comment = _comments[index];
+                      return FutureBuilder(
+                          future: DatabaseService.getUserWithId(
+                            comment.commenterID,
+                          ),
+                          builder: (BuildContext context, AsyncSnapshot snapshot) {
+                            if (!snapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
+                            User commenter = snapshot.data;
+                            //print('commenter: $commenter and comment: $comment');
+                            return CommentItem2(
+                              record: widget.record,
+                              comment: comment,
+                              commenter: commenter,
+                              isReply: false,
+                            );
+                          });
+                    }),
+              ),
             )
           ],
         ),
@@ -153,5 +175,3 @@ class _RecordPageState extends State<RecordPage> {
     );
   }
 }
-
-
