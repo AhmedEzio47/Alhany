@@ -52,7 +52,7 @@ class _CommentItem2State extends State<CommentItem2> {
 //          builder: (context, value, child){return CommentBottomSheet().commentOptionIcon(
 //              context, widget.record, widget.comment, widget.parentComment);},
 //        );
-      print('lol');
+        print('lol');
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8),
@@ -133,10 +133,10 @@ class _CommentItem2State extends State<CommentItem2> {
                 ValueListenableBuilder<int>(
                   valueListenable: number,
                   builder: (context, value, child) {
-                    return CommentBottomSheet().commentOptionIcon(
-                    context, widget.record, widget.comment, widget.parentComment);
-                },
-    )
+                    return CommentBottomSheet()
+                        .commentOptionIcon(context, widget.record, widget.comment, widget.parentComment);
+                  },
+                )
               ],
             ),
             Padding(
@@ -186,8 +186,9 @@ class _CommentItem2State extends State<CommentItem2> {
                           children: <Widget>[
                             InkWell(
                               onTap: () {
-                                if(Constants.currentRoute != '/comment-page'){
-                                  Navigator.of(context).pushNamed('/comment-page', arguments: {'record':widget.record, 'comment':widget.comment});
+                                if (Constants.currentRoute != '/comment-page') {
+                                  Navigator.of(context).pushNamed('/comment-page',
+                                      arguments: {'record': widget.record, 'comment': widget.comment});
                                 }
                               },
                               child: SizedBox(
@@ -275,6 +276,7 @@ class _CommentItem2State extends State<CommentItem2> {
     var commentMeta = await DatabaseService.getCommentMeta(record.id, widget.comment.id);
     setState(() {
       widget.comment.likes = commentMeta['likes'];
+      widget.comment.replies = commentMeta['replies'];
       isLikeEnabled = true;
     });
   }

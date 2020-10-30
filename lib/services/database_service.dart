@@ -361,18 +361,14 @@ class DatabaseService {
   }
 
   static void addComment(String recordId, String commentText) async {
-    await recordsRef.document(recordId).collection('comments').add({
-      'commenter': Constants.currentUserID,
-      'text': commentText,
-      'timestamp': FieldValue.serverTimestamp()
-    });
     await recordsRef
         .document(recordId)
-        .updateData({'comments': FieldValue.increment(1)});
+        .collection('comments')
+        .add({'commenter': Constants.currentUserID, 'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
+    await recordsRef.document(recordId).updateData({'comments': FieldValue.increment(1)});
   }
 
-  static Future<Map> getReplyMeta(
-      String recordId, String commentId, String replyId) async {
+  static Future<Map> getReplyMeta(String recordId, String commentId, String replyId) async {
     var replyMeta = Map();
     DocumentSnapshot replyDocSnapshot = await recordsRef
         .document(recordId)
@@ -388,8 +384,7 @@ class DatabaseService {
     return replyMeta;
   }
 
-  static Future<List<Comment>> getCommentReplies(
-      String recordId, String commentId) async {
+  static Future<List<Comment>> getCommentReplies(String recordId, String commentId) async {
     QuerySnapshot commentSnapshot = await recordsRef
         .document(recordId)
         .collection('comments')
@@ -398,27 +393,21 @@ class DatabaseService {
         ?.orderBy('timestamp', descending: true)
         ?.limit(20)
         ?.getDocuments();
-    List<Comment> comments =
-    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    List<Comment> comments = commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
   static Future<User> getUserWithUsername(String username) async {
-    QuerySnapshot userDocSnapshot =
-    await usersRef.where('username', isEqualTo: username).getDocuments();
-    User user =
-    userDocSnapshot.documents.map((doc) => User.fromDoc(doc)).toList()[0];
+    QuerySnapshot userDocSnapshot = await usersRef.where('username', isEqualTo: username).getDocuments();
+    User user = userDocSnapshot.documents.map((doc) => User.fromDoc(doc)).toList()[0];
 
     return user;
   }
 
   static Future<Map> getCommentMeta(String recordId, String commentId) async {
     var commentMeta = Map();
-    DocumentSnapshot commentDocSnapshot = await recordsRef
-        .document(recordId)
-        .collection('comments')
-        .document(commentId)
-        .get();
+    DocumentSnapshot commentDocSnapshot =
+        await recordsRef.document(recordId).collection('comments').document(commentId).get();
 
     if (commentDocSnapshot.exists) {
       commentMeta['likes'] = commentDocSnapshot.data['likes'];
@@ -428,7 +417,7 @@ class DatabaseService {
     return commentMeta;
   }
 
-  static Future<Record> getRecordWithId(String recordId) async{
+  static Future<Record> getRecordWithId(String recordId) async {
     DocumentSnapshot recordDocSnapshot = await recordsRef?.document(recordId)?.get();
     if (recordDocSnapshot.exists) {
       return Record.fromDoc(recordDocSnapshot);
@@ -436,101 +425,78 @@ class DatabaseService {
     return Record();
   }
 
-  static deleteComment(
-      String recordId, String commentId, String parentCommentId) async {
-    if (parentCommentId == null) {
-      DocumentReference commentRef =
-      recordsRef.document(recordId).collection('comments').document(commentId);
-      (await commentRef.collection('replies').getDocuments())
-          .documents
-          .forEach((reply) async {
-        (await commentRef
-            .collection('replies')
-            .document(reply.documentID)
-            .collection('likes')
-            .getDocuments())
-            .documents
-            .forEach((replyLike) {
-          commentRef
-              .collection('replies')
-              .document(reply.documentID)
-              .collection('likes')
-              .document(replyLike.documentID)
-              .delete();
-        });
-
-        (await commentRef
-            .collection('replies')
-            .document(reply.documentID)
-            .collection('dislikes')
-            .getDocuments())
-            .documents
-            .forEach((replyDislike) {
-          commentRef
-              .collection('replies')
-              .document(reply.documentID)
-              .collection('dislikes')
-              .document(replyDislike.documentID)
-              .delete();
-        });
-
-        commentRef.collection('replies').document(reply.documentID).delete();
-      });
-
-      (await commentRef.collection('likes').getDocuments())
-          .documents
-          .forEach((commentLike) async {
-        await commentRef
-            .collection('likes')
-            .document(commentLike.documentID)
-            .delete();
-      });
-
-      (await commentRef.collection('dislikes').getDocuments())
-          .documents
-          .forEach((commentDislike) async {
-        await commentRef
-            .collection('dislikes')
-            .document(commentDislike.documentID)
-            .delete();
-      });
-
-      await commentRef.delete();
-
-      await recordsRef
-          .document(recordId)
-          .updateData({'comments': FieldValue.increment(-1)});
-    } else {
-      DocumentReference replyRef = recordsRef
-          .document(recordId)
-          .collection('comments')
-          .document(parentCommentId)
-          .collection('replies')
-          .document(commentId);
-
-      (await replyRef.collection('likes').getDocuments())
+  static deleteComment(String recordId, String commentId) async {
+    DocumentReference commentRef = recordsRef.document(recordId).collection('comments').document(commentId);
+    (await commentRef.collection('replies').getDocuments()).documents.forEach((reply) async {
+      (await commentRef.collection('replies').document(reply.documentID).collection('likes').getDocuments())
           .documents
           .forEach((replyLike) {
-        replyRef.collection('likes').document(replyLike.documentID).delete();
+        commentRef
+            .collection('replies')
+            .document(reply.documentID)
+            .collection('likes')
+            .document(replyLike.documentID)
+            .delete();
       });
 
-      (await replyRef.collection('dislikes').getDocuments())
+      (await commentRef.collection('replies').document(reply.documentID).collection('dislikes').getDocuments())
           .documents
           .forEach((replyDislike) {
-        replyRef
+        commentRef
+            .collection('replies')
+            .document(reply.documentID)
             .collection('dislikes')
             .document(replyDislike.documentID)
             .delete();
       });
 
-      replyRef.delete();
+      commentRef.collection('replies').document(reply.documentID).delete();
+    });
 
-      await recordsRef
-          .document(recordId)
-          .collection('comments')
-          .document(parentCommentId)
-          .updateData({'replies': FieldValue.increment(-1)});
-    }
+    (await commentRef.collection('likes').getDocuments()).documents.forEach((commentLike) async {
+      await commentRef.collection('likes').document(commentLike.documentID).delete();
+    });
+
+    (await commentRef.collection('dislikes').getDocuments()).documents.forEach((commentDislike) async {
+      await commentRef.collection('dislikes').document(commentDislike.documentID).delete();
+    });
+
+    await commentRef.delete();
+
+    await recordsRef.document(recordId).updateData({'comments': FieldValue.increment(-1)});
+  }
+
+  static deleteReply(String recordId, String commentId, String parentCommentId) async {
+
+    DocumentReference replyRef = recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(parentCommentId)
+        .collection('replies')
+        .document(commentId);
+
+    (await replyRef.collection('likes').getDocuments())
+        .documents
+        .forEach((replyLike) {
+      replyRef.collection('likes').document(replyLike.documentID).delete();
+    });
+
+    (await replyRef.collection('dislikes').getDocuments())
+        .documents
+        .forEach((replyDislike) {
+      replyRef
+          .collection('dislikes')
+          .document(replyDislike.documentID)
+          .delete();
+    });
+
+    replyRef.delete();
+
+    await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(parentCommentId)
+        .updateData({'replies': FieldValue.increment(-1)});
   }
 
   static Future<List<Comment>> getComments(String recordId) async {
@@ -540,23 +506,17 @@ class DatabaseService {
         ?.orderBy('timestamp', descending: true)
         ?.limit(20)
         ?.getDocuments();
-    List<Comment> comments =
-    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    List<Comment> comments = commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
-  static void addReply(
-      String recordId, String commentId, String replyText) async {
+  static void addReply(String recordId, String commentId, String replyText) async {
     await recordsRef
         .document(recordId)
         .collection('comments')
         .document(commentId)
         .collection('replies')
-        .add({
-      'commenter': Constants.currentUserID,
-      'text': replyText,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+        .add({'commenter': Constants.currentUserID, 'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
     await recordsRef
         .document(recordId)
         .collection('comments')
@@ -564,25 +524,21 @@ class DatabaseService {
         .updateData({'replies': FieldValue.increment(1)});
   }
 
-  static Future editComment(
-      String recordId, String commentId, String commentText) async {
+  static Future editComment(String recordId, String commentId, String commentText) async {
     await recordsRef
         .document(recordId)
         .collection('comments')
         .document(commentId)
-        .updateData(
-        {'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
+        .updateData({'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
-  static Future editReply(
-      String recordId, String commentId, String replyId, String replyText) async {
+  static Future editReply(String recordId, String commentId, String replyId, String replyText) async {
     await recordsRef
         .document(recordId)
         .collection('comments')
         .document(commentId)
         .collection('replies')
         .document(replyId)
-        .updateData(
-        {'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
+        .updateData({'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
   }
 }

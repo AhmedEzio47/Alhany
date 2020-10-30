@@ -25,14 +25,14 @@ class _CommentPageState extends State<CommentPage> {
     AppUtil.showLoader(context);
 
     if (_replyController.text.isNotEmpty) {
-      DatabaseService.addReply(widget.record.id,widget.comment.id, _replyController.text);
+      DatabaseService.addReply(widget.record.id, widget.comment.id, _replyController.text);
 
       await NotificationHandler.sendNotification(widget.record.singerId,
           Constants.currentUser.name + ' commented on your post', _replyController.text, widget.record.id, 'comment');
 
       await AppUtil.checkIfContainsMention(_replyController.text, widget.record.id);
 
-      Navigator.pop(context);
+      _onBackPressed();
     } else {
       showDialog(
         context: context,
@@ -88,7 +88,8 @@ class _CommentPageState extends State<CommentPage> {
         ));
   }
 
-  @override  @override
+  @override
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onBackPressed,
@@ -145,8 +146,7 @@ class _CommentPageState extends State<CommentPage> {
               ),
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
-                  ),
+                  decoration: BoxDecoration(),
                   child: ListView.separated(
                       separatorBuilder: (context, index) {
                         return Divider(
@@ -187,6 +187,7 @@ class _CommentPageState extends State<CommentPage> {
       ),
     );
   }
+
   Future<bool> _onBackPressed() {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
