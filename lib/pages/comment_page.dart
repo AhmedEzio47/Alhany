@@ -7,34 +7,30 @@ import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/notification_handler.dart';
-import 'package:dubsmash/widgets/list_items/comment_item.dart';
 import 'package:dubsmash/widgets/list_items/comment_item2.dart';
-import 'package:dubsmash/widgets/list_items/record_item2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class RecordPage extends StatefulWidget {
+class CommentPage extends StatefulWidget {
   final Record record;
+  final Comment comment;
+  const CommentPage({Key key, this.record, this.comment}) : super(key: key);
 
-  const RecordPage({Key key, this.record}) : super(key: key);
   @override
-  _RecordPageState createState() => _RecordPageState();
+  _CommentPageState createState() => _CommentPageState();
 }
 
-class _RecordPageState extends State<RecordPage> {
-  TextEditingController _commentController = TextEditingController();
-
-  /// Submit Comment to save in firebase database
+class _CommentPageState extends State<CommentPage> {
+  TextEditingController _replyController = TextEditingController();
   void _submitButton() async {
     AppUtil.showLoader(context);
 
-    if (_commentController.text.isNotEmpty) {
-      DatabaseService.addComment(widget.record.id, _commentController.text);
+    if (_replyController.text.isNotEmpty) {
+      DatabaseService.addReply(widget.record.id,widget.comment.id, _replyController.text);
 
       await NotificationHandler.sendNotification(widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.record.id, 'comment');
+          Constants.currentUser.name + ' commented on your post', _replyController.text, widget.record.id, 'comment');
 
-      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(_replyController.text, widget.record.id);
 
       Navigator.pop(context);
     } else {
@@ -57,22 +53,21 @@ class _RecordPageState extends State<RecordPage> {
         },
       );
     }
-
     Navigator.of(context).pop();
   }
 
-  List<Comment> _comments = [];
+  List<Comment> _replies = [];
 
-  getComments() async {
-    List<Comment> comments = await DatabaseService.getComments(widget.record.id);
+  getReplies() async {
+    List<Comment> replies = await DatabaseService.getCommentReplies(widget.record.id, widget.comment.id);
     setState(() {
-      _comments = comments;
+      _replies = replies;
     });
   }
 
   @override
   void initState() {
-    getComments();
+    getReplies();
     super.initState();
   }
 
@@ -80,8 +75,8 @@ class _RecordPageState extends State<RecordPage> {
     return InkWell(
         onTap: () {
           _submitButton();
-          _commentController.clear();
-          getComments();
+          _replyController.clear();
+          getReplies();
         },
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0),
@@ -93,7 +88,7 @@ class _RecordPageState extends State<RecordPage> {
         ));
   }
 
-  @override
+  @override  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onBackPressed,
@@ -113,9 +108,23 @@ class _RecordPageState extends State<RecordPage> {
               SizedBox(
                 height: 40,
               ),
-              RecordItem2(
-                record: widget.record,
-              ),
+              FutureBuilder(
+                  future: DatabaseService.getUserWithId(
+                    widget.comment.commenterID,
+                  ),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox.shrink();
+                    }
+                    User commenter = snapshot.data;
+                    //print('commenter: $commenter and comment: $comment');
+                    return CommentItem2(
+                      record: widget.record,
+                      comment: widget.comment,
+                      commenter: commenter,
+                      isReply: false,
+                    );
+                  }),
               Container(
                 margin: EdgeInsets.only(left: 8, right: 8, top: 8),
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
@@ -124,11 +133,11 @@ class _RecordPageState extends State<RecordPage> {
                   child: TextField(
                       style: TextStyle(color: Colors.white),
                       textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
-                      controller: _commentController,
+                      controller: _replyController,
                       autofocus: true,
                       decoration: InputDecoration(
                         hintStyle: TextStyle(color: Colors.white),
-                        hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
+                        hintText: language(en: Strings.en_leave_reply, ar: Strings.ar_leave_reply),
                         suffix: Constants.language == 'en' ? sendBtn() : null,
                         prefix: Constants.language == 'ar' ? sendBtn() : null,
                       )),
@@ -148,9 +157,9 @@ class _RecordPageState extends State<RecordPage> {
                       },
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
-                      itemCount: _comments.length,
+                      itemCount: _replies.length,
                       itemBuilder: (context, index) {
-                        Comment comment = _comments[index];
+                        Comment comment = _replies[index];
                         return FutureBuilder(
                             future: DatabaseService.getUserWithId(
                               comment.commenterID,
@@ -165,7 +174,8 @@ class _RecordPageState extends State<RecordPage> {
                                 record: widget.record,
                                 comment: comment,
                                 commenter: commenter,
-                                isReply: false,
+                                parentComment: widget.comment,
+                                isReply: true,
                               );
                             });
                       }),

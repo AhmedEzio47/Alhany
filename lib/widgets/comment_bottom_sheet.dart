@@ -2,11 +2,13 @@ import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/sizes.dart';
+import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/models/comment_model.dart';
 import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/notification_handler.dart';
+import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 
 import 'custom_inkwell.dart';
@@ -89,11 +91,13 @@ class CommentBottomSheet {
                 text: 'Edit Comment',
                 onPressed: () {
                   if (parentComment == null) {
-                    Navigator.of(context)
-                        .pushNamed('/edit-comment', arguments: {'post': record, 'user': user, 'comment': comment});
+//                    Navigator.of(context)
+//                        .pushNamed('/edit-comment', arguments: {'record': record, 'user': user, 'comment': comment});
+                  editComment(context, comment, record);
                   } else {
-                    Navigator.of(context).pushNamed('/edit-reply',
-                        arguments: {'post': record, 'comment': parentComment, 'reply': comment, 'user': user});
+//                    Navigator.of(context).pushNamed('/edit-comment',
+//                        arguments: {'record': record, 'comment': parentComment, 'reply': comment, 'user': user});
+                  editReply(context, comment, parentComment, record);
                   }
                 },
                 isEnable: false,
@@ -144,6 +148,97 @@ class CommentBottomSheet {
       ],
     );
   }
+TextEditingController _commentController = TextEditingController();
+
+  editComment(BuildContext context, Comment comment, Record record) async {
+
+    _commentController.text = comment.text;
+
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+          height: 200,
+          color: Colors.white,
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _commentController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(hintText: 'New comment'),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              RaisedButton(
+                onPressed: () async {
+                  if (_commentController.text.trim().isEmpty) {
+                    AppUtil.showToast('Please enter some text');
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                  AppUtil.showLoader(context);
+                  await DatabaseService.editComment(record.id, comment.id, _commentController.text);
+                  AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+                  Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record':record});
+                },
+                color: MyColors.primaryColor,
+                child: Text(
+                  language(en: Strings.en_update, ar: Strings.ar_update),
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          ),
+        )));
+  }
+
+  editReply(BuildContext context, Comment reply,Comment parentComment, Record record) async {
+
+    _commentController.text = reply.text;
+
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+          height: 200,
+          color: Colors.white,
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _commentController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(hintText: 'New reply'),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              RaisedButton(
+                onPressed: () async {
+                  if (_commentController.text.trim().isEmpty) {
+                    AppUtil.showToast('Please enter some text');
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                  AppUtil.showLoader(context);
+                  await DatabaseService.editReply(record.id, parentComment.id,reply.id, _commentController.text);
+                  AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+                  Navigator.of(context).pushReplacementNamed('/comment-page', arguments: {'record':record, 'comment':parentComment});
+                },
+                color: MyColors.primaryColor,
+                child: Text(
+                  language(en: Strings.en_update, ar: Strings.ar_update),
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          ),
+        )));
+  }
 
   void unfollowUser(BuildContext context, User user) async {
     await showDialog(
@@ -183,8 +278,6 @@ class CommentBottomSheet {
       ),
     );
     Navigator.of(context).pop();
-    Navigator.of(context).pushReplacementNamed('/home');
-    print('deleting post!');
   }
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,

@@ -29,6 +29,8 @@ class Strings {
   //Icons
   static const String person_remove = 'assets/icons/person_remove.png';
   static const String reply = 'assets/icons/reply.png';
+  static const String send = 'assets/icons/send.png';
+  static const String send_ar = 'assets/icons/send_ar.png';
 
   //Translations
   static const en_edit_image = 'Edit Image';
@@ -63,4 +65,7 @@ class Strings {
 
   static const en_leave_comment = 'Leave a comment...';
   static const ar_leave_comment = '...اترك تعليقا';
+
+  static const en_leave_reply = 'Leave a reply...';
+  static const ar_leave_reply = '...اترك ردا';
 }

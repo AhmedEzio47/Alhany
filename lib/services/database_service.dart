@@ -544,4 +544,45 @@ class DatabaseService {
     commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
+
+  static void addReply(
+      String recordId, String commentId, String replyText) async {
+    await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .add({
+      'commenter': Constants.currentUserID,
+      'text': replyText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .updateData({'replies': FieldValue.increment(1)});
+  }
+
+  static Future editComment(
+      String recordId, String commentId, String commentText) async {
+    await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .updateData(
+        {'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
+  }
+
+  static Future editReply(
+      String recordId, String commentId, String replyId, String replyText) async {
+    await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .document(replyId)
+        .updateData(
+        {'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
+  }
 }

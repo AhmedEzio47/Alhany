@@ -2,6 +2,7 @@ import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/pages/add_singer.dart';
 import 'package:dubsmash/pages/app_page.dart';
 import 'package:dubsmash/pages/chats.dart';
+import 'package:dubsmash/pages/comment_page.dart';
 import 'package:dubsmash/pages/conversation.dart';
 import 'package:dubsmash/pages/downloads.dart';
 import 'package:dubsmash/pages/email_change.dart';
@@ -87,9 +88,18 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => LyricsEditor());
 
       case '/record-page':
+        Constants.currentRoute = settings.name;
         return MaterialPageRoute(
             builder: (_) => RecordPage(
               record: args['record'],
+            ));
+
+      case '/comment-page':
+        Constants.currentRoute = settings.name;
+        return MaterialPageRoute(
+            builder: (_) => CommentPage(
+              record: args['record'],
+              comment: args['comment'],
             ));
 
       default:

@@ -115,7 +115,9 @@ class _RecordItem2State extends State<RecordItem2> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
-        onTap: () => Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record}),
+        onTap: () {
+          if(Constants.currentRoute != '/record-page')
+            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record});} ,
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: 120,

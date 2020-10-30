@@ -10,6 +10,7 @@ import 'package:dubsmash/models/user_model.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/notification_handler.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
+import 'package:dubsmash/widgets/comment_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -44,162 +45,186 @@ class _CommentItem2State extends State<CommentItem2> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 3),
-      decoration: BoxDecoration(color: MyColors.lightPrimaryColor),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              InkWell(
-                  child: CachedImage(
-                    imageUrl: widget.commenter.profileImageUrl,
-                    imageShape: BoxShape.circle,
-                    width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
-                    height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
-                    defaultAssetImage: Strings.default_profile_image,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/profile-page', arguments: {
-                      'user_id': widget.comment.commenterID,
-                    });
-                  }),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      InkWell(
-                        child: RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.white,
+    return GestureDetector(
+      onLongPress: () {
+//        return ValueListenableBuilder<int>(
+//          valueListenable: number,
+//          builder: (context, value, child){return CommentBottomSheet().commentOptionIcon(
+//              context, widget.record, widget.comment, widget.parentComment);},
+//        );
+      print('lol');
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 3),
+        decoration: BoxDecoration(color: MyColors.lightPrimaryColor),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                InkWell(
+                    child: CachedImage(
+                      imageUrl: widget.commenter.profileImageUrl,
+                      imageShape: BoxShape.circle,
+                      width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
+                      height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/profile-page', arguments: {
+                        'user_id': widget.comment.commenterID,
+                      });
+                    }),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                color: Colors.white,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: ' ${widget.commenter.name}',
+                                    style: TextStyle(
+                                        color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                                TextSpan(
+                                    text: ' @${widget.commenter.username}',
+                                    style: TextStyle(color: MyColors.primaryColor)),
+                              ],
                             ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: ' ${widget.commenter.name}',
-                                  style: TextStyle(
-                                      color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
-                              TextSpan(
-                                  text: ' @${widget.commenter.username}',
-                                  style: TextStyle(color: MyColors.primaryColor)),
-                            ],
+                          ),
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/profile-page', arguments: {
+                              'user_id': widget.comment.commenterID,
+                            });
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
+                          child: Text.rich(
+                            TextSpan(
+                                text: '',
+                                children: widget.comment.text.split(' ').map((w) {
+                                  return w.startsWith('@') && w.length > 1
+                                      ? TextSpan(
+                                          text: ' ' + w,
+                                          style: TextStyle(color: Colors.blue),
+                                          recognizer: TapGestureRecognizer()..onTap = () => mentionedUserProfile(w),
+                                        )
+                                      : TextSpan(
+                                          text: ' ' + w,
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                }).toList()),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                ),
+                ValueListenableBuilder<int>(
+                  valueListenable: number,
+                  builder: (context, value, child) {
+                    return CommentBottomSheet().commentOptionIcon(
+                    context, widget.record, widget.comment, widget.parentComment);
+                },
+    )
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 40.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
+                      style: TextStyle(color: MyColors.primaryColor, fontSize: 12)),
+                  Row(
+                    children: [
+                      InkWell(
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(
+                              child: isLiked
+                                  ? Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: MyColors.primaryColor,
+                                    )
+                                  : Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(widget.comment.likes == null ? 0.toString() : widget.comment.likes.toString(),
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                        onTap: () async {
+                          if (isLikeEnabled) {
+                            if (!widget.isReply) {
+                              await likeBtnHandler(widget.record, widget.comment);
+                            } else {
+                              await repliesLikeBtnHandler(widget.record, widget.comment, widget.parentComment.id);
+                            }
+                          }
+                        },
+                      ),
+                      InkWell(
+                        child: Row(
+                          children: <Widget>[
+                            InkWell(
+                              onTap: () {
+                                if(Constants.currentRoute != '/comment-page'){
+                                  Navigator.of(context).pushNamed('/comment-page', arguments: {'record':widget.record, 'comment':widget.comment});
+                                }
+                              },
+                              child: SizedBox(
+                                  child: Image.asset(
+                                Strings.reply,
+                                height: Sizes.small_card_btn_size,
+                                width: Sizes.small_card_btn_size,
+                                color: Colors.white,
+                              )),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                widget.comment.replies == null ? 0.toString() : widget.comment.replies.toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
                         onTap: () {
-                          Navigator.of(context).pushNamed('/profile-page', arguments: {
-                            'user_id': widget.comment.commenterID,
+                          print('Mention reply : ${widget.commenter.username}');
+
+                          Navigator.of(context).pushNamed('/add-reply', arguments: {
+                            'post': widget.record,
+                            'comment': widget.isReply ? widget.parentComment : widget.comment,
+                            'user': widget.commenter,
+                            'mention': widget.isReply ? '@${widget.commenter.username} ' : '',
                           });
                         },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
-                        child: Text.rich(
-                          TextSpan(
-                              text: '',
-                              children: widget.comment.text.split(' ').map((w) {
-                                return w.startsWith('@') && w.length > 1
-                                    ? TextSpan(
-                                        text: ' ' + w,
-                                        style: TextStyle(color: Colors.blue),
-                                        recognizer: TapGestureRecognizer()..onTap = () => mentionedUserProfile(w),
-                                      )
-                                    : TextSpan(
-                                        text: ' ' + w,
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                              }).toList()),
-                        ),
-                      ),
                     ],
-                  ),
-                ),
-              )
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 40.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
-                    style: TextStyle(color: MyColors.primaryColor, fontSize: 12)),
-                Row(
-                  children: [
-                    InkWell(
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(
-                            child: isLiked
-                                ? Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: MyColors.primaryColor,
-                                  )
-                                : Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: Colors.white,
-                                  ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(widget.comment.likes == null ? 0.toString() : widget.comment.likes.toString(),
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                      onTap: () async {
-                        if (isLikeEnabled) {
-                          if (!widget.isReply) {
-                            await likeBtnHandler(widget.record, widget.comment);
-                          } else {
-                            await repliesLikeBtnHandler(widget.record, widget.comment, widget.parentComment.id);
-                          }
-                        }
-                      },
-                    ),
-                    InkWell(
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(
-                              child: Image.asset(
-                            Strings.reply,
-                            height: Sizes.small_card_btn_size,
-                            width: Sizes.small_card_btn_size,
-                            color: Colors.white,
-                          )),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              widget.comment.replies == null ? 0.toString() : widget.comment.replies.toString(),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        print('Mention reply : ${widget.commenter.username}');
-
-                        Navigator.of(context).pushNamed('/add-reply', arguments: {
-                          'post': widget.record,
-                          'comment': widget.isReply ? widget.parentComment : widget.comment,
-                          'user': widget.commenter,
-                          'mention': widget.isReply ? '@${widget.commenter.username} ' : '',
-                        });
-                      },
-                    ),
-                  ],
-                )
-              ],
-            ),
-          )
-        ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
