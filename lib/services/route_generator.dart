@@ -9,6 +9,7 @@ import 'package:dubsmash/pages/lyrics_editor.dart';
 import 'package:dubsmash/pages/melody_page.dart';
 import 'package:dubsmash/pages/password_reset.dart';
 import 'package:dubsmash/pages/profile_page.dart';
+import 'package:dubsmash/pages/record_page.dart';
 import 'package:dubsmash/pages/root.dart';
 import 'package:dubsmash/pages/songs_page.dart';
 import 'package:dubsmash/pages/upload_mulit_level_melody.dart';
@@ -84,6 +85,12 @@ class RouteGenerator {
                 ));
       case '/lyrics-editor':
         return MaterialPageRoute(builder: (_) => LyricsEditor());
+
+      case '/record-page':
+        return MaterialPageRoute(
+            builder: (_) => RecordPage(
+              record: args['record'],
+            ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

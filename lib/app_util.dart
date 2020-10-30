@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dubsmash/constants/strings.dart';
+import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/services/encryption_service.dart';
+import 'package:dubsmash/services/notification_handler.dart';
 import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -18,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/colors.dart';
 import 'constants/constants.dart';
+import 'models/user_model.dart';
 
 // saveToken() async {
 //   String token = await FirebaseMessaging().getToken();
@@ -273,6 +276,54 @@ class AppUtil {
   static Future<String> getLanguage() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences.getString('language');
+  }
+
+  /// Format Time For Comments
+  static String formatCommentsTimestamp(Timestamp timestamp) {
+    var now = Timestamp.now().toDate();
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
+    var diff = now.difference(date);
+    var time = '';
+
+    if (diff.inSeconds <= 60) {
+      time = 'now';
+    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
+      if (diff.inMinutes == 1) {
+        time = '1m';
+      } else {
+        time = diff.inMinutes.toString() + 'm';
+      }
+    } else if (diff.inHours > 0 && diff.inHours < 24) {
+      if (diff.inHours == 1) {
+        time = '1h';
+      } else {
+        time = diff.inHours.toString() + 'h';
+      }
+    } else if (diff.inDays > 0) {
+      if (diff.inDays == 1) {
+        time = '1d';
+      } else {
+        time = diff.inDays.toString() + 'd';
+      }
+    }
+
+    return time;
+  }
+  static checkIfContainsMention(String text, String recordId) async {
+    text.split(' ').forEach((word) async {
+      if (word.startsWith('@')) {
+        User user =
+        await DatabaseService.getUserWithUsername(word.substring(1));
+
+        await NotificationHandler.sendNotification(
+            user.id,
+            'New mention',
+            Constants.currentUser.username + ' mentioned you',
+            recordId,
+            'mention');
+      }
+    });
   }
 }
 

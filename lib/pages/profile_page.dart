@@ -15,7 +15,6 @@ import 'package:dubsmash/widgets/custom_modal.dart';
 import 'package:dubsmash/widgets/custom_ovelay.dart';
 import 'package:dubsmash/widgets/image_edit_bottom_sheet.dart';
 import 'package:dubsmash/widgets/list_items/melody_item.dart';
-import 'package:dubsmash/widgets/list_items/record_item.dart';
 import 'package:dubsmash/widgets/flip_loader.dart';
 import 'package:dubsmash/widgets/list_items/record_item2.dart';
 import 'package:dubsmash/widgets/music_player.dart';

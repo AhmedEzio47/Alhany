@@ -10,7 +10,6 @@ import 'package:dubsmash/models/record.dart';
 import 'package:dubsmash/services/database_service.dart';
 import 'package:dubsmash/widgets/cached_image.dart';
 import 'package:dubsmash/widgets/list_items/melody_item.dart';
-import 'package:dubsmash/widgets/list_items/record_item.dart';
 import 'package:dubsmash/widgets/list_items/record_item2.dart';
 import 'package:dubsmash/widgets/music_player.dart';
 import 'package:flutter/material.dart';

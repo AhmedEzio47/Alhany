@@ -112,157 +112,160 @@ class _RecordItem2State extends State<RecordItem2> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: new BorderRadius.circular(10.0),
-          color: Colors.white.withOpacity(.4),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  InkWell(
-                    child: CachedImage(
-                      height: 25,
-                      width: 25,
-                      imageShape: BoxShape.circle,
-                      imageUrl: _singer?.profileImageUrl,
-                      defaultAssetImage: Strings.default_profile_image,
+      child: InkWell(
+        onTap: ()=> Navigator.of(context).pushNamed('/record-page', arguments: {'record':widget.record}),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: new BorderRadius.circular(10.0),
+            color: Colors.white.withOpacity(.4),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    InkWell(
+                      child: CachedImage(
+                        height: 25,
+                        width: 25,
+                        imageShape: BoxShape.circle,
+                        imageUrl: _singer?.profileImageUrl,
+                        defaultAssetImage: Strings.default_profile_image,
+                      ),
+                      onTap: () => _goToProfilePage(),
                     ),
-                    onTap: () => _goToProfilePage(),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  InkWell(
-                    child: Text(
-                      _singer?.name ?? '',
+                    SizedBox(
+                      width: 10,
+                    ),
+                    InkWell(
+                      child: Text(
+                        _singer?.name ?? '',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      onTap: () => _goToProfilePage(),
+                    ),
+                    Text(
+                      ' singed ',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
-                    onTap: () => _goToProfilePage(),
-                  ),
-                  Text(
-                    ' singed ',
-                    style: TextStyle(
-                      color: Colors.black,
+                    InkWell(
+                      child: Text(
+                        _melody?.name ?? '',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      onTap: () => _goToMelodyPage(),
                     ),
-                  ),
-                  InkWell(
-                    child: Text(
-                      _melody?.name ?? '',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                    onTap: () => _goToMelodyPage(),
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              height: 1,
-              thickness: 3,
-              color: MyColors.primaryColor,
-            ),
-            MusicPlayer(
-              url: widget.record.audioUrl,
-              backColor: Colors.transparent,
-              btnSize: 26,
-              recordBtnVisible: true,
-              initialDuration: widget.record.duration,
-              playBtnPosition: PlayBtnPosition.left,
-              isCompact: true,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        '${widget.record.likes ?? 0}',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      Text(
-                        ' Likes, ',
-                        style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
-                      ),
-                      Text(
-                        '${widget.record.comments ?? 0}',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      Text(
-                        '  Comments, ',
-                        style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
-                      ),
-                      Text(
-                        '${widget.record.shares ?? 0}',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      Text(
-                        ' Shares, ',
-                        style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () async {
-                          if (isLikeEnabled) {
-                            await likeBtnHandler(widget.record);
-                          }
-                        },
-                        child: SizedBox(
-                          child: isLiked
-                              ? Icon(
-                                  Icons.thumb_up,
-                                  size: Sizes.card_btn_size,
-                                  color: MyColors.primaryColor,
-                                )
-                              : Icon(
-                                  Icons.thumb_up,
-                                  size: Sizes.card_btn_size,
-                                  color: Colors.white,
-                                ),
+              ),
+              Divider(
+                height: 1,
+                thickness: 3,
+                color: MyColors.primaryColor,
+              ),
+              MusicPlayer(
+                url: widget.record.audioUrl,
+                backColor: Colors.transparent,
+                btnSize: 26,
+                recordBtnVisible: true,
+                initialDuration: widget.record.duration,
+                playBtnPosition: PlayBtnPosition.left,
+                isCompact: true,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${widget.record.likes ?? 0}',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      SizedBox(
-                        child: Icon(
-                          Icons.chat_bubble_outline,
-                          size: Sizes.card_btn_size,
-                          color: Colors.white,
+                        Text(
+                          ' Likes, ',
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      SizedBox(
-                        child: Icon(
-                          Icons.share,
-                          size: Sizes.card_btn_size,
-                          color: Colors.white,
+                        Text(
+                          '${widget.record.comments ?? 0}',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
-                      ),
-                    ],
+                        Text(
+                          '  Comments, ',
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
+                        ),
+                        Text(
+                          '${widget.record.shares ?? 0}',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        Text(
+                          ' Shares, ',
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
-                )
-              ],
-            )
-          ],
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Row(
+                      children: [
+                        InkWell(
+                          onTap: () async {
+                            if (isLikeEnabled) {
+                              await likeBtnHandler(widget.record);
+                            }
+                          },
+                          child: SizedBox(
+                            child: isLiked
+                                ? Icon(
+                                    Icons.thumb_up,
+                                    size: Sizes.card_btn_size,
+                                    color: MyColors.primaryColor,
+                                  )
+                                : Icon(
+                                    Icons.thumb_up,
+                                    size: Sizes.card_btn_size,
+                                    color: Colors.white,
+                                  ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          child: Icon(
+                            Icons.chat_bubble_outline,
+                            size: Sizes.card_btn_size,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          child: Icon(
+                            Icons.share,
+                            size: Sizes.card_btn_size,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

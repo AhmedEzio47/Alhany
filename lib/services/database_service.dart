@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/constants/constants.dart';
+import 'package:dubsmash/models/comment_model.dart';
 import 'package:dubsmash/models/melody_model.dart';
 import 'package:dubsmash/models/message_model.dart';
 import 'package:dubsmash/models/record.dart';
@@ -357,5 +358,190 @@ class DatabaseService {
       recordMeta['comments'] = postDocSnapshot.data['comments'];
     }
     return recordMeta;
+  }
+
+  static void addComment(String recordId, String commentText) async {
+    await recordsRef.document(recordId).collection('comments').add({
+      'commenter': Constants.currentUserID,
+      'text': commentText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await recordsRef
+        .document(recordId)
+        .updateData({'comments': FieldValue.increment(1)});
+  }
+
+  static Future<Map> getReplyMeta(
+      String recordId, String commentId, String replyId) async {
+    var replyMeta = Map();
+    DocumentSnapshot replyDocSnapshot = await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .document(replyId)
+        .get();
+
+    if (replyDocSnapshot.exists) {
+      replyMeta['likes'] = replyDocSnapshot.data['likes'];
+    }
+    return replyMeta;
+  }
+
+  static Future<List<Comment>> getCommentReplies(
+      String recordId, String commentId) async {
+    QuerySnapshot commentSnapshot = await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        ?.orderBy('timestamp', descending: true)
+        ?.limit(20)
+        ?.getDocuments();
+    List<Comment> comments =
+    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
+  }
+
+  static Future<User> getUserWithUsername(String username) async {
+    QuerySnapshot userDocSnapshot =
+    await usersRef.where('username', isEqualTo: username).getDocuments();
+    User user =
+    userDocSnapshot.documents.map((doc) => User.fromDoc(doc)).toList()[0];
+
+    return user;
+  }
+
+  static Future<Map> getCommentMeta(String recordId, String commentId) async {
+    var commentMeta = Map();
+    DocumentSnapshot commentDocSnapshot = await recordsRef
+        .document(recordId)
+        .collection('comments')
+        .document(commentId)
+        .get();
+
+    if (commentDocSnapshot.exists) {
+      commentMeta['likes'] = commentDocSnapshot.data['likes'];
+      commentMeta['dislikes'] = commentDocSnapshot.data['dislikes'];
+      commentMeta['replies'] = commentDocSnapshot.data['replies'];
+    }
+    return commentMeta;
+  }
+
+  static Future<Record> getRecordWithId(String recordId) async{
+    DocumentSnapshot recordDocSnapshot = await recordsRef?.document(recordId)?.get();
+    if (recordDocSnapshot.exists) {
+      return Record.fromDoc(recordDocSnapshot);
+    }
+    return Record();
+  }
+
+  static deleteComment(
+      String recordId, String commentId, String parentCommentId) async {
+    if (parentCommentId == null) {
+      DocumentReference commentRef =
+      recordsRef.document(recordId).collection('comments').document(commentId);
+      (await commentRef.collection('replies').getDocuments())
+          .documents
+          .forEach((reply) async {
+        (await commentRef
+            .collection('replies')
+            .document(reply.documentID)
+            .collection('likes')
+            .getDocuments())
+            .documents
+            .forEach((replyLike) {
+          commentRef
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('likes')
+              .document(replyLike.documentID)
+              .delete();
+        });
+
+        (await commentRef
+            .collection('replies')
+            .document(reply.documentID)
+            .collection('dislikes')
+            .getDocuments())
+            .documents
+            .forEach((replyDislike) {
+          commentRef
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('dislikes')
+              .document(replyDislike.documentID)
+              .delete();
+        });
+
+        commentRef.collection('replies').document(reply.documentID).delete();
+      });
+
+      (await commentRef.collection('likes').getDocuments())
+          .documents
+          .forEach((commentLike) async {
+        await commentRef
+            .collection('likes')
+            .document(commentLike.documentID)
+            .delete();
+      });
+
+      (await commentRef.collection('dislikes').getDocuments())
+          .documents
+          .forEach((commentDislike) async {
+        await commentRef
+            .collection('dislikes')
+            .document(commentDislike.documentID)
+            .delete();
+      });
+
+      await commentRef.delete();
+
+      await recordsRef
+          .document(recordId)
+          .updateData({'comments': FieldValue.increment(-1)});
+    } else {
+      DocumentReference replyRef = recordsRef
+          .document(recordId)
+          .collection('comments')
+          .document(parentCommentId)
+          .collection('replies')
+          .document(commentId);
+
+      (await replyRef.collection('likes').getDocuments())
+          .documents
+          .forEach((replyLike) {
+        replyRef.collection('likes').document(replyLike.documentID).delete();
+      });
+
+      (await replyRef.collection('dislikes').getDocuments())
+          .documents
+          .forEach((replyDislike) {
+        replyRef
+            .collection('dislikes')
+            .document(replyDislike.documentID)
+            .delete();
+      });
+
+      replyRef.delete();
+
+      await recordsRef
+          .document(recordId)
+          .collection('comments')
+          .document(parentCommentId)
+          .updateData({'replies': FieldValue.increment(-1)});
+    }
+  }
+
+  static Future<List<Comment>> getComments(String recordId) async {
+    QuerySnapshot commentSnapshot = await recordsRef
+        .document(recordId)
+        .collection('comments')
+        ?.orderBy('timestamp', descending: true)
+        ?.limit(20)
+        ?.getDocuments();
+    List<Comment> comments =
+    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
   }
 }

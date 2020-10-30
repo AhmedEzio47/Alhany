@@ -59,4 +59,7 @@ class Strings {
 
   static const en_updated = 'Updated!';
   static const ar_updated = 'تم التعديل';
+
+  static const en_leave_comment = 'Leave a comment...';
+  static const ar_leave_comment = '...اترك تعليقا';
 }
