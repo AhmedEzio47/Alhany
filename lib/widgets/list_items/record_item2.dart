@@ -39,9 +39,11 @@ class _RecordItem2State extends State<RecordItem2> {
 
   getAuthor() async {
     User author = await DatabaseService.getUserWithId(widget.record.singerId);
-    setState(() {
-      _singer = author;
-    });
+    if (mounted) {
+      setState(() {
+        _singer = author;
+      });
+    }
   }
 
   getMelody() async {
@@ -116,8 +118,9 @@ class _RecordItem2State extends State<RecordItem2> {
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
-          if(Constants.currentRoute != '/record-page')
-            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record});} ,
+          if (Constants.currentRoute != '/record-page')
+            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record});
+        },
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: 120,
@@ -213,7 +216,7 @@ class _RecordItem2State extends State<RecordItem2> {
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
-                          ' Shares, ',
+                          ' Shares',
                           style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                       ],

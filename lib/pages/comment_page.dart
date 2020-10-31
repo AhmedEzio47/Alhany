@@ -135,7 +135,6 @@ class _CommentPageState extends State<CommentPage> {
                       style: TextStyle(color: Colors.white),
                       textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
                       controller: _replyController,
-                      autofocus: true,
                       decoration: InputDecoration(
                         hintStyle: TextStyle(color: Colors.white),
                         hintText: language(en: Strings.en_leave_reply, ar: Strings.ar_leave_reply),

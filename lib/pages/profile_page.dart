@@ -167,6 +167,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   child: Container(
                     height: MediaQuery.of(context).size.height,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
                           height: 50,
@@ -295,9 +296,13 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                   style: TextStyle(fontSize: 16, color: Colors.white),
                                 ),
                               )
-                            : Text(
-                                _user?.description ?? '',
-                                style: TextStyle(fontSize: 16, color: Colors.white),
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  _user?.description ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16, color: Colors.white),
+                                ),
                               ),
                         SizedBox(
                           height: 10,
@@ -480,22 +485,27 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   Future _saveEdits() async {
     String validUsername = validateUsername(_usernameController.text);
     final taken = await isUsernameTaken(_usernameController.text);
+    bool isValidUsername = true;
 
     if (taken) {
       // username exists
-      AppUtil.showToast('${_usernameController.text} is already in use. Please choose a different username.');
-      return;
+      if (_usernameController.text != _user.username) {
+        AppUtil.showToast('${_usernameController.text} is already in use. Please choose a different username.');
+      }
+      isValidUsername = false;
     }
     if (validUsername != null) {
-      AppUtil.showToast('Invalid Username!');
-      return;
+      if (_usernameController.text != _user.username) {
+        AppUtil.showToast('Invalid Username!');
+      }
+      isValidUsername = false;
     }
 
     List<String> search = searchList(_nameController.text);
     search.addAll(searchList(_usernameController.text));
 
     await usersRef.document(Constants.currentUserID).updateData({
-      'username': _usernameController.text,
+      'username': isValidUsername ? _usernameController.text : _user.username,
       'name': _nameController.text,
       'description': _descriptionController.text,
       'search': search

@@ -24,10 +24,10 @@ class _ChatsState extends State<Chats> with AutomaticKeepAliveClientMixin, Widge
   void getChats() async {
     List<String> chattersIds = await DatabaseService.getChats();
 
-    chattersIds.forEach((f) async {
-      await loadUserData(f);
+    for (String chatterId in chattersIds) {
+      await loadUserData(chatterId);
       await sortChatItems();
-    });
+    }
 
     setState(() {
       this._chattersIds = chattersIds;

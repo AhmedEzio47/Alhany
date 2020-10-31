@@ -124,7 +124,6 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
         }
 
         if (Message.fromDoc(change.document).sender == widget.otherUid) {
-          //print('made seen');
           makeMessagesSeen();
         }
       });

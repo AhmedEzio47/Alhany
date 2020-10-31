@@ -3,6 +3,8 @@ import 'package:dubsmash/services/auth.dart';
 import 'package:dubsmash/services/auth_provider.dart';
 import 'package:dubsmash/services/route_generator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 void main() {
   runApp(MyApp());

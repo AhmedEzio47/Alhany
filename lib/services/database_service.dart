@@ -246,6 +246,14 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp(),
       'type': type
     });
+
+    await chatsRef.document(otherUserId).collection('conversations').document(Constants.currentUserID).setData({
+      'last_message_timestamp': FieldValue.serverTimestamp(),
+    });
+
+    await chatsRef.document(Constants.currentUserID).collection('conversations').document(otherUserId).setData({
+      'last_message_timestamp': FieldValue.serverTimestamp(),
+    });
   }
 
   static Future<List<Message>> getMessages(String otherUserId) async {
@@ -467,7 +475,6 @@ class DatabaseService {
   }
 
   static deleteReply(String recordId, String commentId, String parentCommentId) async {
-
     DocumentReference replyRef = recordsRef
         .document(recordId)
         .collection('comments')
@@ -475,19 +482,12 @@ class DatabaseService {
         .collection('replies')
         .document(commentId);
 
-    (await replyRef.collection('likes').getDocuments())
-        .documents
-        .forEach((replyLike) {
+    (await replyRef.collection('likes').getDocuments()).documents.forEach((replyLike) {
       replyRef.collection('likes').document(replyLike.documentID).delete();
     });
 
-    (await replyRef.collection('dislikes').getDocuments())
-        .documents
-        .forEach((replyDislike) {
-      replyRef
-          .collection('dislikes')
-          .document(replyDislike.documentID)
-          .delete();
+    (await replyRef.collection('dislikes').getDocuments()).documents.forEach((replyDislike) {
+      replyRef.collection('dislikes').document(replyDislike.documentID).delete();
     });
 
     replyRef.delete();

@@ -91,16 +91,16 @@ class RouteGenerator {
         Constants.currentRoute = settings.name;
         return MaterialPageRoute(
             builder: (_) => RecordPage(
-              record: args['record'],
-            ));
+                  record: args['record'],
+                ));
 
       case '/comment-page':
         Constants.currentRoute = settings.name;
         return MaterialPageRoute(
             builder: (_) => CommentPage(
-              record: args['record'],
-              comment: args['comment'],
-            ));
+                  record: args['record'],
+                  comment: args['comment'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

@@ -319,6 +319,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
                   setState(() {
                     musicPlayer = MusicPlayer(
+                      key: ValueKey(_records[index].id),
                       url: _records[index].audioUrl,
                       backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                       initialDuration: _records[index].duration,
@@ -349,6 +350,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
                       setState(() {
                         musicPlayer = MusicPlayer(
+                          key: ValueKey(_filteredMelodies[index].id),
                           url: _filteredMelodies[index].audioUrl,
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredMelodies[index].name,
@@ -380,6 +382,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
                       setState(() {
                         musicPlayer = MusicPlayer(
+                          key: ValueKey(_melodies[index].id),
                           url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
@@ -415,6 +418,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
                       setState(() {
                         musicPlayer = MusicPlayer(
+                          key: ValueKey(_filteredSongs[index].id),
                           url: _filteredSongs[index].audioUrl,
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredSongs[index].name,
@@ -444,6 +448,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
                       setState(() {
                         musicPlayer = MusicPlayer(
+                          key: ValueKey(_songs[index].id),
                           url: _songs[index].audioUrl,
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _songs[index].name,

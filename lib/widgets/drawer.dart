@@ -1,11 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dubsmash/app_util.dart';
 import 'package:dubsmash/constants/colors.dart';
 import 'package:dubsmash/constants/constants.dart';
 import 'package:dubsmash/constants/strings.dart';
 import 'package:dubsmash/main.dart';
-import 'package:dubsmash/pages/email_change.dart';
 import 'package:dubsmash/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
