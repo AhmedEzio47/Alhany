@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/models/comment_model.dart';
-import 'package:dubsmash/models/melody_model.dart';
-import 'package:dubsmash/models/message_model.dart';
-import 'package:dubsmash/models/record.dart';
-import 'package:dubsmash/models/singer_model.dart';
-import 'package:dubsmash/models/user_model.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/comment_model.dart';
+import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/models/message_model.dart';
+import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/models/user_model.dart';
 
 import '../app_util.dart';
 

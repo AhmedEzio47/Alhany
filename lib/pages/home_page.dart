@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/melody_model.dart';
-import 'package:dubsmash/models/singer_model.dart';
-import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/widgets/cached_image.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {

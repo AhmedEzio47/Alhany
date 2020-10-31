@@ -1,14 +1,14 @@
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/constants/sizes.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/comment_model.dart';
-import 'package:dubsmash/models/record.dart';
-import 'package:dubsmash/models/user_model.dart';
-import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/services/notification_handler.dart';
-import 'package:dubsmash/widgets/custom_modal.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/comment_model.dart';
+import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 
 import 'custom_inkwell.dart';

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/models/user_model.dart';
-import 'package:dubsmash/widgets/music_player.dart';
+import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/widgets/music_player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 

@@ -1,13 +1,13 @@
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/pages/home_page.dart';
-import 'package:dubsmash/pages/melodies_page.dart';
-import 'package:dubsmash/pages/profile_page.dart';
-import 'package:dubsmash/pages/records_page.dart';
-import 'package:dubsmash/pages/singers_page.dart';
-import 'package:dubsmash/pages/star_page.dart';
-import 'package:dubsmash/widgets/curved_navigation_bar.dart';
-import 'package:dubsmash/widgets/drawer.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/pages/home_page.dart';
+import 'package:Alhany/pages/melodies_page.dart';
+import 'package:Alhany/pages/profile_page.dart';
+import 'package:Alhany/pages/records_page.dart';
+import 'package:Alhany/pages/singers_page.dart';
+import 'package:Alhany/pages/star_page.dart';
+import 'package:Alhany/widgets/curved_navigation_bar.dart';
+import 'package:Alhany/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
 class AppPage extends StatefulWidget {

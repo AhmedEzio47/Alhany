@@ -1,6 +1,6 @@
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/message_model.dart';
-import 'package:dubsmash/widgets/cached_image.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/message_model.dart';
+import 'package:Alhany/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../app_util.dart';

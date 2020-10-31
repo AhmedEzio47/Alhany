@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/main.dart';
-import 'package:dubsmash/pages/profile_page.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/main.dart';
+import 'package:Alhany/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
 class BuildDrawer extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dubsmash/constants/strings.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
 class CachedImage extends StatefulWidget {

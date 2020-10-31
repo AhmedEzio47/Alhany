@@ -1,4 +1,4 @@
-const String appName = 'Dubsmash';
+const String appName = 'ألحاني';
 String appTempDirectoryPath;
 
 class Strings {

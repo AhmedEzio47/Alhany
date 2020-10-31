@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/constants.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/constants.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

@@ -1,5 +1,5 @@
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/melody_model.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/melody_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/melody_model.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/melody_model.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 class PaymentService {

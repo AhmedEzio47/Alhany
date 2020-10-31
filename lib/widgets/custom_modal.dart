@@ -1,4 +1,4 @@
-import 'package:dubsmash/constants/strings.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
 class CustomModal extends ModalRoute<void> {

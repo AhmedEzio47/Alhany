@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:dubsmash/constants/colors.dart';
+import 'package:Alhany/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../app_util.dart';

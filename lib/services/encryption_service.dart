@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:aes_crypt/aes_crypt.dart';
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/strings.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:path_provider/path_provider.dart';
 

@@ -1,9 +1,9 @@
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/singer_model.dart';
-import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/widgets/list_items/singer_item.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/widgets/list_items/singer_item.dart';
 import 'package:flutter/material.dart';
 
 class SingersPage extends StatefulWidget {

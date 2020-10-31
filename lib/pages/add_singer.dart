@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:dubsmash/app_util.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/constants/strings.dart';
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:path/path.dart' as path;

@@ -1,4 +1,4 @@
-import 'package:dubsmash/app_util.dart';
+import 'package:Alhany/app_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:html_editor/html_editor.dart';

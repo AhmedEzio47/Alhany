@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:dubsmash/models/melody_model.dart';
-import 'package:dubsmash/services/my_audio_player.dart';
+import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:intl/intl.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:dubsmash/constants/colors.dart';
+import 'package:Alhany/constants/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

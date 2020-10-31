@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dubsmash/constants/colors.dart';
-import 'package:dubsmash/constants/constants.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/models/user_model.dart';
-import 'package:dubsmash/services/auth.dart';
-import 'package:dubsmash/services/auth_provider.dart';
-import 'package:dubsmash/services/database_service.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/services/auth.dart';
+import 'package:Alhany/services/auth_provider.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +76,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                     appName,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20.0,
+                      fontSize: 28.0,
                     ),
                   ),
                 ],
@@ -84,7 +84,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
             ),
             new Container(
               width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 120.0),
+              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 110.0),
               alignment: Alignment.center,
               child: new Row(
                 children: <Widget>[

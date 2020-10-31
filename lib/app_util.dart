@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/services/database_service.dart';
-import 'package:dubsmash/services/encryption_service.dart';
-import 'package:dubsmash/services/notification_handler.dart';
-import 'package:dubsmash/widgets/custom_modal.dart';
-import 'package:dubsmash/widgets/flip_loader.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/encryption_service.dart';
+import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/widgets/custom_modal.dart';
+import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -281,8 +281,7 @@ class AppUtil {
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(
-        timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -310,18 +309,14 @@ class AppUtil {
 
     return time;
   }
+
   static checkIfContainsMention(String text, String recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
-        User user =
-        await DatabaseService.getUserWithUsername(word.substring(1));
+        User user = await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
-            user.id,
-            'New mention',
-            Constants.currentUser.username + ' mentioned you',
-            recordId,
-            'mention');
+            user.id, 'New mention', Constants.currentUser.username + ' mentioned you', recordId, 'mention');
       }
     });
   }

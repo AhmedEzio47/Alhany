@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:dubsmash/constants/strings.dart';
-import 'package:dubsmash/pages/melody_page.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/pages/melody_page.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
 class AudioRecorder {
