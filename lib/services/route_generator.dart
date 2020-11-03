@@ -38,6 +38,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => MelodyPage(
                   melody: args['melody'],
+                  type: args['type'],
                 ));
 
       case '/profile-page':

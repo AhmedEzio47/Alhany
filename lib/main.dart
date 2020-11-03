@@ -4,7 +4,6 @@ import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/route_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:overlay_support/overlay_support.dart';
 
 void main() {
   runApp(MyApp());

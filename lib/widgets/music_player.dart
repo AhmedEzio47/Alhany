@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/services/my_audio_player.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-import 'package:flutter_ffmpeg/media_information.dart';
-import 'package:intl/intl.dart';
-import 'package:audioplayers/audioplayers.dart';
+
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/services/my_audio_player.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 typedef void OnError(Exception exception);
 
@@ -56,9 +56,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
   get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
   get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
-  get durationText => myAudioPlayer.duration != null ? myAudioPlayer.duration.toString().split('.').first : '';
+  get durationText => myAudioPlayer.duration != null
+      ? myAudioPlayer.duration.toString().split('.').first
+      : '';
 
-  get positionText => myAudioPlayer.position != null ? myAudioPlayer.position.toString().split('.').first : '';
+  get positionText => myAudioPlayer.position != null
+      ? myAudioPlayer.position.toString().split('.').first
+      : '';
 
   bool isMuted = false;
 
@@ -77,7 +81,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
 
   void initAudioPlayer() async {
-    myAudioPlayer = MyAudioPlayer(url: widget.url, isLocal: widget.isLocal, onComplete: widget.onComplete);
+    myAudioPlayer = MyAudioPlayer(
+        url: widget.url,
+        isLocal: widget.isLocal,
+        onComplete: widget.onComplete);
     myAudioPlayer.addListener(() {
       if (mounted) {
         setState(() {
@@ -120,7 +127,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
               widget.title != null
                   ? Text(
                       widget.title,
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     )
                   : Container(),
               Row(
@@ -132,7 +142,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         ),
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
-                    child: widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn() : Container(),
+                    child: widget.playBtnPosition == PlayBtnPosition.left
+                        ? playPauseBtn()
+                        : Container(),
                   ),
                   myAudioPlayer.position != null
                       ? Text(
@@ -151,22 +163,29 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     child: SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 5.0,
-                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                          overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape:
+                              RoundSliderOverlayShape(overlayRadius: 16.0),
                         ),
                         child: Slider(
                             activeColor: MyColors.darkPrimaryColor,
                             inactiveColor: Colors.grey.shade300,
-                            value: myAudioPlayer.position?.inMilliseconds?.toDouble() ?? 0.0,
+                            value: myAudioPlayer.position?.inMilliseconds
+                                    ?.toDouble() ??
+                                0.0,
                             onChanged: (double value) {
-                              myAudioPlayer.seek(Duration(seconds: _duration.inMilliseconds ~/ 1000));
+                              myAudioPlayer.seek(Duration(
+                                  seconds: _duration.inMilliseconds ~/ 1000));
 
                               if (!isPlaying) {
                                 play();
                               }
                             },
                             min: 0.0,
-                            max: _duration != null ? _duration?.inMilliseconds?.toDouble() : 1.7976931348623157e+308)),
+                            max: _duration != null
+                                ? _duration?.inMilliseconds?.toDouble()
+                                : 1.7976931348623157e+308)),
                   ),
                   SizedBox(
                     width: 10,
@@ -195,13 +214,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         playPauseBtn(),
-                        SizedBox(
-                          width: 20,
-                        ),
+                        widget.recordBtnVisible
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
                         widget.recordBtnVisible
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {'melody': widget.melody}),
+                                onTap: () => Navigator.of(context).pushNamed(
+                                    '/melody-page',
+                                    arguments: {'melody': widget.melody}),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -213,7 +235,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         color: Colors.black54,
                                         spreadRadius: 2,
                                         blurRadius: 4,
-                                        offset: Offset(0, 2), // changes position of shadow
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
                                       ),
                                     ],
                                   ),
@@ -223,11 +246,50 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                   ),
                                 ),
                               )
+                            : Container(),
+                        widget.recordBtnVisible
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        widget.recordBtnVisible
+                            ? InkWell(
+                                onTap: () => Navigator.of(context).pushNamed(
+                                  '/melody-page',
+                                  arguments: {
+                                    'melody': widget.melody,
+                                    'type': Types.VIDEO
+                                  },
+                                ),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.videocam,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
                             : Container()
                       ],
                     )
                   : Container(),
-              widget.playBtnPosition == PlayBtnPosition.bottom ? SizedBox(height: 10) : Container()
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? SizedBox(height: 10)
+                  : Container()
             ]),
           ),
         ),

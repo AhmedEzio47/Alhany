@@ -41,6 +41,7 @@ dependencies:
   flutter_summernote: ^0.2.0
   html_editor: ^1.0.1
   path_provider:
+  camera: ^0.5.8+11
 
 
 dev_dependencies:

@@ -1,14 +1,12 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'constants/colors.dart';
 import 'constants/constants.dart';
 import 'models/user_model.dart';
@@ -116,7 +115,8 @@ class AppUtil {
   }
 
   static Future<File> pickImageFromGallery() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
+    FilePickerResult result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: [
       'jpg',
       'png',
     ]);
@@ -129,10 +129,12 @@ class AppUtil {
     return null;
   }
 
-  static Future<String> uploadFile(File file, BuildContext context, String path) async {
+  static Future<String> uploadFile(
+      File file, BuildContext context, String path) async {
     if (file == null) return '';
 
-    StorageReference storageReference = FirebaseStorage.instance.ref().child(path);
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
     StorageUploadTask uploadTask;
 
@@ -150,7 +152,8 @@ class AppUtil {
 
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
-    String fileName = await getStorageFileNameFromContentDisposition(contentDisposition);
+    String fileName =
+        await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
@@ -172,7 +175,8 @@ class AppUtil {
     return fileName;
   }
 
-  static Future<String> getStorageFileNameFromContentDisposition(var contentDisposition) async {
+  static Future<String> getStorageFileNameFromContentDisposition(
+      var contentDisposition) async {
     String fileName = contentDisposition
         .split('filename*=utf-8')
         .last
@@ -193,7 +197,8 @@ class AppUtil {
   }
 
   static Future<File> takePhoto() async {
-    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    File image = await ImagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 80);
     return image;
   }
 
@@ -210,7 +215,8 @@ class AppUtil {
     if (timestamp == null) return '';
 
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -252,10 +258,12 @@ class AppUtil {
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil.showToast(language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
+      AppUtil.showToast(
+          language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
       return "Email is Required";
     } else if (!regExp.hasMatch(value)) {
-      AppUtil.showToast(language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
+      AppUtil.showToast(
+          language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
       return "Invalid Email";
     }
     return null;
@@ -281,7 +289,8 @@ class AppUtil {
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -313,12 +322,25 @@ class AppUtil {
   static checkIfContainsMention(String text, String recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
-        User user = await DatabaseService.getUserWithUsername(word.substring(1));
+        User user =
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
-            user.id, 'New mention', Constants.currentUser.username + ' mentioned you', recordId, 'mention');
+            user.id,
+            'New mention',
+            Constants.currentUser.username + ' mentioned you',
+            recordId,
+            'mention');
       }
     });
+  }
+
+  static Future<File> recordVideo(Duration maxDuration) async {
+    File video = await ImagePicker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: maxDuration,
+        preferredCameraDevice: CameraDevice.front);
+    return video;
   }
 }
 
