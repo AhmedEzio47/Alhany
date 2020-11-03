@@ -37,15 +37,11 @@ dependencies:
   stripe_payment: ^1.0.8
   encrypt: ^4.1.0
   aes_crypt: ^0.1.1
-  overlay_support: ^1.0.5
   sqflite: ^1.3.1+1
   flutter_summernote: ^0.2.0
   html_editor: ^1.0.1
   path_provider:
-  music_player:
-    git:
-      url: https://github.com/boyan01/flutter-music-player.git
-      ref: master
+
 
 dev_dependencies:
   flutter_test:
@@ -60,7 +56,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/tracks/
 
   fonts:
     - family: icomoon

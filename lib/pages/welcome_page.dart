@@ -73,7 +73,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    appName,
+                    appName_ar,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28.0,
