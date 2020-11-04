@@ -9,7 +9,7 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/list_items/comment_item.dart';
 import 'package:Alhany/widgets/list_items/comment_item2.dart';
-import 'package:Alhany/widgets/list_items/record_item2.dart';
+import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -124,7 +124,7 @@ class _RecordPageState extends State<RecordPage> {
                   SizedBox(
                     height: 80,
                   ),
-                  RecordItem2(
+                  RecordItem(
                     record: widget.record,
                   ),
                   Container(

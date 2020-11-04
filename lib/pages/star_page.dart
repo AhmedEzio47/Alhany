@@ -10,7 +10,7 @@ import 'package:Alhany/models/record.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/list_items/record_item2.dart';
+import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -327,7 +327,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     _isPlaying = true;
                   });
                 },
-                child: RecordItem2(
+                child: RecordItem(
                   record: _records[index],
                   key: UniqueKey(),
                 ),

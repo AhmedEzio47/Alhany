@@ -16,7 +16,7 @@ import 'package:Alhany/widgets/custom_ovelay.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
-import 'package:Alhany/widgets/list_items/record_item2.dart';
+import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -428,7 +428,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                           _isPlaying = true;
                         });
                       },
-                      child: RecordItem2(
+                      child: RecordItem(
                         record: _records[index],
                         key: UniqueKey(),
                       ),

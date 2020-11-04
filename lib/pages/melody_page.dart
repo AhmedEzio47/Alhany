@@ -61,6 +61,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
   VideoPlayerController _videoController;
 
+  bool _isVideoPlaying = false;
+
   _countDown() {
     const oneSec = const Duration(seconds: 1);
     Timer.periodic(
@@ -397,11 +399,12 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Widget playPauseBtn() {
-    return !_videoController.value.isPlaying
+    return !_isVideoPlaying
         ? InkWell(
             onTap: () => _videoController.value.isPlaying
                 ? null
                 : setState(() {
+                    _isVideoPlaying = true;
                     _videoController.play();
                   }),
             child: Container(
@@ -429,6 +432,7 @@ class _MelodyPageState extends State<MelodyPage> {
         : InkWell(
             onTap: _videoController.value.isPlaying
                 ? () => setState(() {
+                      _isVideoPlaying = false;
                       _videoController.pause();
                     })
                 : null,

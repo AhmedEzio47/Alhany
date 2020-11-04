@@ -10,6 +10,7 @@ import 'package:Alhany/pages/lyrics_editor.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/pages/password_reset.dart';
 import 'package:Alhany/pages/profile_page.dart';
+import 'package:Alhany/pages/record_fullscreen.dart';
 import 'package:Alhany/pages/record_page.dart';
 import 'package:Alhany/pages/root.dart';
 import 'package:Alhany/pages/songs_page.dart';
@@ -93,6 +94,13 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => RecordPage(
                   record: args['record'],
+                ));
+
+      case '/record-fullscreen':
+        return MaterialPageRoute(
+            builder: (_) => RecordFullscreen(
+                  record: args['record'],
+                  singer: args['singer'],
                 ));
 
       case '/comment-page':

@@ -1,3 +1,4 @@
+import 'package:Alhany/services/permissions_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
@@ -11,17 +12,18 @@ import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
-class RecordItem2 extends StatefulWidget {
+class RecordItem extends StatefulWidget {
   final Record record;
 
-  const RecordItem2({Key key, this.record}) : super(key: key);
+  const RecordItem({Key key, this.record}) : super(key: key);
 
   @override
-  _RecordItem2State createState() => _RecordItem2State();
+  _RecordItemState createState() => _RecordItemState();
 }
 
-class _RecordItem2State extends State<RecordItem2> {
+class _RecordItemState extends State<RecordItem> {
   User _singer;
   Melody _melody;
 
@@ -29,10 +31,13 @@ class _RecordItem2State extends State<RecordItem2> {
   bool isLikeEnabled = true;
   var likes = [];
 
+  bool _isVideoPlaying = false;
+
   @override
   void initState() {
     getAuthor();
     getMelody();
+    initVideoPlayer();
     initLikes(widget.record);
     super.initState();
   }
@@ -112,6 +117,15 @@ class _RecordItem2State extends State<RecordItem2> {
     }
   }
 
+  VideoPlayerController _videoController;
+  initVideoPlayer() async {
+    if (!await PermissionsService().hasStoragePermission()) {
+      PermissionsService().requestStoragePermission();
+    }
+    _videoController = VideoPlayerController.network(widget.record.audioUrl);
+    await _videoController.initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -119,11 +133,11 @@ class _RecordItem2State extends State<RecordItem2> {
       child: InkWell(
         onTap: () {
           if (Constants.currentRoute != '/record-page')
-            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record});
+            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record, 'singer': _singer});
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 120,
+          height: 280,
           decoration: BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
@@ -174,19 +188,30 @@ class _RecordItem2State extends State<RecordItem2> {
                   ],
                 ),
               ),
-              Divider(
-                height: 1,
-                thickness: 3,
-                color: MyColors.primaryColor,
+              // MusicPlayer(
+              //   url: widget.record.audioUrl,
+              //   backColor: Colors.transparent,
+              //   btnSize: 26,
+              //   recordBtnVisible: true,
+              //   initialDuration: widget.record.duration,
+              //   playBtnPosition: PlayBtnPosition.left,
+              //   isCompact: true,
+              // ),
+              Stack(
+                children: [
+                  Container(height: 200, child: VideoPlayer(_videoController)),
+                  Positioned.fill(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      child: playPauseBtn(),
+                      alignment: Alignment.center,
+                    ),
+                  ))
+                ],
               ),
-              MusicPlayer(
-                url: widget.record.audioUrl,
-                backColor: Colors.transparent,
-                btnSize: 26,
-                recordBtnVisible: true,
-                initialDuration: widget.record.duration,
-                playBtnPosition: PlayBtnPosition.left,
-                isCompact: true,
+              SizedBox(
+                height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -273,6 +298,34 @@ class _RecordItem2State extends State<RecordItem2> {
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget playPauseBtn() {
+    return InkWell(
+      onTap: () => Navigator.of(context)
+          .pushNamed('/record-fullscreen', arguments: {'record': widget.record, 'singer': _singer}),
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey.shade300,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black54,
+              spreadRadius: 2,
+              blurRadius: 4,
+              offset: Offset(0, 2), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.play_arrow,
+          size: 35,
+          color: MyColors.primaryColor,
         ),
       ),
     );
