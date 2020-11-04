@@ -19,6 +19,7 @@ import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:path/path.dart' as path;
+import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart';
 
 enum Types { VIDEO, AUDIO }
@@ -109,13 +110,15 @@ class _MelodyPageState extends State<MelodyPage> {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     //print("File Duration: ${info.getMediaProperties()['duration']}");
-    _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    _duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     setState(() {
       melodyPath = filePath;
-      mergedFilePath +=
-          '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+      if (widget.type == Types.AUDIO) {
+        mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+      } else {
+        mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new.mp4';
+      }
     });
     Navigator.of(context).pop();
   }
@@ -136,13 +139,11 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService().requestMicrophonePermission(onPermissionDenied: () {
         AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
+            message: 'You must grant this microphone access to be able to use this feature.',
             firstBtnText: 'OK',
             firstFunc: () {
               Navigator.of(context).pop();
@@ -197,13 +198,11 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService().requestMicrophonePermission(onPermissionDenied: () {
         AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
+            message: 'You must grant this microphone access to be able to use this feature.',
             firstBtnText: 'OK',
             firstFunc: () {
               Navigator.of(context).pop();
@@ -238,15 +237,7 @@ class _MelodyPageState extends State<MelodyPage> {
         File(recordingFilePath).deleteSync();
       } catch (e) {}
       cameraController.startVideoRecording(recordingFilePath);
-
-      Navigator.of(context).push(CustomModal(
-          child: AspectRatio(
-              aspectRatio: cameraController.value.aspectRatio,
-              child: CameraPreview(cameraController)),
-          onWillPop: () {
-            saveRecord();
-            Navigator.of(context).pop();
-          }));
+      _recordingTimer();
     } else {}
   }
 
@@ -260,8 +251,7 @@ class _MelodyPageState extends State<MelodyPage> {
           borderRadius: BorderRadius.all(Radius.circular(20)),
           color: Colors.grey,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.4), BlendMode.dstOut),
+            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstOut),
             image: AssetImage(Strings.headphones_alert_bg),
             fit: BoxFit.cover,
           ),
@@ -276,10 +266,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: Text(
                     'For optimal result, please put some headphones.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -293,13 +280,8 @@ class _MelodyPageState extends State<MelodyPage> {
                     style: BorderStyle.solid,
                     width: 1,
                   ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20.0)),
-                  child: Text('OK',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold)),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                  child: Text('OK', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                     print('hey I\'m here');
@@ -317,18 +299,19 @@ class _MelodyPageState extends State<MelodyPage> {
 
   Future saveRecord() async {
     AppUtil.showLoader(context);
-    await myAudioPlayer.stop();
 
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
     });
     MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
+    await myAudioPlayer.stop();
+
     if (widget.type == Types.AUDIO) {
       Recording result = await recorder.stopRecording();
       recordingFilePath = result.path;
     } else {
-      //await cameraController.stopVideoRecording();
+      await cameraController.stopVideoRecording();
     }
     //TODO use in case of need of conversion
 //                          recordingFilePathMp3 +=
@@ -345,16 +328,14 @@ class _MelodyPageState extends State<MelodyPage> {
       success = await flutterFFmpeg.execute(
           "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
     } else {
-      success = await flutterFFmpeg.execute(
-          "-y -i $melodyPath -i $recordingFilePath -map 0:a -map 1:v  -shortest $mergedFilePath");
+      success = await flutterFFmpeg
+          .execute("-y -i $melodyPath -i $recordingFilePath -map 0:a -map 1:v  -shortest $mergedFilePath");
     }
     Navigator.of(context).pop();
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info =
-        await _flutterFFprobe.getMediaInformation(mergedFilePath);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     if (widget.type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
@@ -364,9 +345,7 @@ class _MelodyPageState extends State<MelodyPage> {
         initialDuration: duration,
       );
     } else {
-      _videoController = VideoPlayerController.file(
-        File(mergedFilePath),
-      );
+      await initVideoPlayer();
     }
 
     Navigator.of(context).push(CustomModal(
@@ -380,7 +359,22 @@ class _MelodyPageState extends State<MelodyPage> {
             children: [
               widget.type == Types.AUDIO
                   ? melodyPlayer
-                  : VideoPlayer(_videoController),
+                  : Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: _videoController.value.aspectRatio,
+                          child: VideoPlayer(_videoController),
+                        ),
+                        Positioned.fill(
+                            child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Align(
+                            child: playPauseBtn(),
+                            alignment: Alignment.bottomCenter,
+                          ),
+                        ))
+                      ],
+                    ),
               SizedBox(
                 height: 10,
               ),
@@ -402,21 +396,79 @@ class _MelodyPageState extends State<MelodyPage> {
     print(success == 1 ? 'Failure!' : 'Success!');
   }
 
+  Widget playPauseBtn() {
+    return !_videoController.value.isPlaying
+        ? InkWell(
+            onTap: () => _videoController.value.isPlaying
+                ? null
+                : setState(() {
+                    _videoController.play();
+                  }),
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.play_arrow,
+                size: 35,
+                color: MyColors.primaryColor,
+              ),
+            ),
+          )
+        : InkWell(
+            onTap: _videoController.value.isPlaying
+                ? () => setState(() {
+                      _videoController.pause();
+                    })
+                : null,
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.pause,
+                color: MyColors.primaryColor,
+                size: 35,
+              ),
+            ),
+          );
+  }
+
   submitRecord() async {
     AppUtil.showLoader(context);
 
-    String recordId;
+    String recordId = randomAlphaNumeric(20);
 
-    String url = await AppUtil.uploadFile(File(mergedFilePath), context,
-        'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+    String url = await AppUtil.uploadFile(
+        File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info =
-        await _flutterFFprobe.getMediaInformation(mergedFilePath);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
-    await DatabaseService.saveRecord(widget.melody.id, recordId, url, duration);
+    await DatabaseService.submitRecord(widget.melody.id, recordId, url, duration);
     _deleteFiles();
     Navigator.of(context).pop();
 
@@ -431,6 +483,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initRecorder() async {
     recorder = AudioRecorder();
+  }
+
+  initVideoPlayer() async {
+    if (!await PermissionsService().hasStoragePermission()) {
+      PermissionsService().requestStoragePermission();
+    }
+    _videoController = VideoPlayerController.file(File(mergedFilePath));
+    await _videoController.initialize();
   }
 
   @override
@@ -466,180 +526,208 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          color: MyColors.primaryColor,
-          image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.1), BlendMode.dstATop),
-            image: AssetImage(Strings.default_melody_page_bg),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Column(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        body: recordingStatus == RecordingStatus.Recording && widget.type == Types.VIDEO
+            ? Stack(
                 children: [
-                  SizedBox(
-                    height: 50,
+                  AspectRatio(aspectRatio: cameraController.value.aspectRatio, child: CameraPreview(cameraController)),
+                  Positioned.fill(
+                      child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _recordingTimerText(),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () => saveRecord(),
+                                child: Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.stop,
+                                    size: 35,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            ],
+                          )))
+                ],
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  color: MyColors.primaryColor,
+                  image: DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    image: AssetImage(Strings.default_melody_page_bg),
+                    fit: BoxFit.cover,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 50,
-                      ),
-                      CachedImage(
-                        width: 150,
-                        height: 150,
-                        defaultAssetImage: Strings.default_melody_image,
-                        imageUrl: widget.melody.imageUrl,
-                        imageShape: BoxShape.rectangle,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      widget.melody.levelUrls != null
-                          ? DropdownButton(
-                              dropdownColor: MyColors.lightPrimaryColor,
-                              iconEnabledColor: Colors.white,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              value: Constants.currentMelodyLevel ??
-                                  _dropdownValue,
-                              onChanged: (choice) async {
-                                Constants.currentMelodyLevel = choice;
-                                Navigator.of(context).pushReplacementNamed(
-                                    '/melody-page',
-                                    arguments: {'melody': widget.melody});
-                              },
-                              items: (widget.melody.levelUrls.keys.toList())
-                                  .map<DropdownMenuItem<dynamic>>(
-                                      (dynamic value) {
-                                return DropdownMenuItem<dynamic>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                            )
-                          : SizedBox(
-                              width: 50,
-                            )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    widget.melody.name,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  recordingStatus != RecordingStatus.Recording
-                      ? melodyPlayer
-                      : _recordingTimerText(),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      if (recordingStatus == RecordingStatus.Recording) {
-                        await saveRecord();
-                      } else {
-                        if ((await PermissionsService()
-                                .hasStoragePermission()) &&
-                            (await PermissionsService()
-                                .hasMicrophonePermission())) {
-                          Navigator.of(context).push(CustomModal(
-                            child: _headphonesDialog(),
-                          ));
-                        }
-                        if (!await PermissionsService()
-                            .hasStoragePermission()) {
-                          await PermissionsService().requestStoragePermission();
-                        }
-                        if (!await PermissionsService()
-                            .hasMicrophonePermission()) {
-                          await PermissionsService()
-                              .requestMicrophonePermission();
-                        }
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black54,
-                            spreadRadius: 4,
-                            blurRadius: 6,
-                            offset: Offset(0, 3), // changes position of shadow
+                ),
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 50,
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 50,
+                              ),
+                              CachedImage(
+                                width: 150,
+                                height: 150,
+                                defaultAssetImage: Strings.default_melody_image,
+                                imageUrl: widget.melody.imageUrl,
+                                imageShape: BoxShape.rectangle,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              widget.melody.levelUrls != null
+                                  ? DropdownButton(
+                                      dropdownColor: MyColors.lightPrimaryColor,
+                                      iconEnabledColor: Colors.white,
+                                      style: TextStyle(color: Colors.white, fontSize: 16),
+                                      value: Constants.currentMelodyLevel ?? _dropdownValue,
+                                      onChanged: (choice) async {
+                                        Constants.currentMelodyLevel = choice;
+                                        Navigator.of(context)
+                                            .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody});
+                                      },
+                                      items: (widget.melody.levelUrls.keys.toList())
+                                          .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                                        return DropdownMenuItem<dynamic>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                    )
+                                  : SizedBox(
+                                      width: 50,
+                                    )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            widget.melody.name,
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              if (recordingStatus == RecordingStatus.Recording) {
+                                await saveRecord();
+                              } else {
+                                if ((await PermissionsService().hasStoragePermission()) &&
+                                    (await PermissionsService().hasMicrophonePermission())) {
+                                  Navigator.of(context).push(CustomModal(
+                                    child: _headphonesDialog(),
+                                  ));
+                                }
+                                if (!await PermissionsService().hasStoragePermission()) {
+                                  await PermissionsService().requestStoragePermission();
+                                }
+                                if (!await PermissionsService().hasMicrophonePermission()) {
+                                  await PermissionsService().requestMicrophonePermission();
+                                }
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black54,
+                                    spreadRadius: 4,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(30.0),
+                                child: Icon(
+                                  recordingStatus == RecordingStatus.Recording
+                                      ? Icons.stop
+                                      : widget.type == Types.VIDEO ? Icons.videocam : Icons.mic,
+                                  color: MyColors.primaryColor,
+                                  size: 70,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          )
                         ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(30.0),
-                        child: Icon(
-                          recordingStatus == RecordingStatus.Recording
-                              ? Icons.stop
-                              : widget.type == Types.VIDEO
-                                  ? Icons.videocam
-                                  : Icons.mic,
-                          color: MyColors.primaryColor,
-                          size: 70,
+                    ),
+                    _countDownVisible
+                        ? Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              height: MediaQuery.of(context).size.height,
+                              width: MediaQuery.of(context).size.width,
+                              color: Colors.black45,
+                              alignment: Alignment.center,
+                              child: Container(
+                                color: MyColors.accentColor,
+                                height: 200,
+                                width: MediaQuery.of(context).size.width - 50,
+                                child: Center(
+                                  child: Text(
+                                    _countDownText,
+                                    style: TextStyle(fontSize: 34),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(),
+                    Positioned.fill(
+                        child: Padding(
+                      padding: const EdgeInsets.only(top: 30, left: 10),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          'Views: ${widget.melody.views ?? 0}',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  )
-                ],
-              ),
-            ),
-            _countDownVisible
-                ? Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black45,
-                      alignment: Alignment.center,
-                      child: Container(
-                        color: MyColors.accentColor,
-                        height: 200,
-                        width: MediaQuery.of(context).size.width - 50,
-                        child: Center(
-                          child: Text(
-                            _countDownText,
-                            style: TextStyle(fontSize: 34),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(),
-            Positioned.fill(
-                child: Padding(
-              padding: const EdgeInsets.only(top: 30, left: 10),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  'Views: ${widget.melody.views ?? 0}',
-                  style: TextStyle(color: Colors.white),
+                    ))
+                  ],
                 ),
               ),
-            ))
-          ],
-        ),
       ),
     );
   }
@@ -650,16 +738,20 @@ class _MelodyPageState extends State<MelodyPage> {
     Timer.periodic(
       oneSec,
       (timer) {
-        if (counter == _duration ||
-            recordingStatus == RecordingStatus.Stopped) {
-          timer.cancel();
-          counter = 0;
+        if (widget.type == Types.AUDIO) {
+          if (counter >= _duration || recordingStatus == RecordingStatus.Stopped) {}
+        } else {
+          if (counter >= _duration && recordingStatus == RecordingStatus.Recording) {
+            saveRecord();
+            counter = 0;
+            timer.cancel();
+          }
         }
+
         counter++;
         if (mounted) {
           setState(() {
-            _recordingText =
-                '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
+            _recordingText = '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
           });
         }
       },
@@ -678,13 +770,18 @@ class _MelodyPageState extends State<MelodyPage> {
 
   void _initCamera() async {
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[0], ResolutionPreset.medium,
-        enableAudio: true);
+    cameraController = CameraController(cameras[1], ResolutionPreset.medium, enableAudio: true);
     cameraController.initialize().then((_) {
       if (!mounted) {
         return;
       }
       setState(() {});
     });
+  }
+
+  Future<bool> _onBackPressed() {
+    if (recordingStatus != RecordingStatus.Recording) {
+      Navigator.of(context).pop();
+    }
   }
 }
