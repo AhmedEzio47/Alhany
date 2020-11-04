@@ -1,4 +1,4 @@
-# dubsmash
+# Alhany
 
 A new Flutter application.
 

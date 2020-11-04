@@ -199,7 +199,7 @@ class _RecordItemState extends State<RecordItem> {
               // ),
               Stack(
                 children: [
-                  Container(height: 200, child: VideoPlayer(_videoController)),
+                  Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
                   Positioned.fill(
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(dubsmash LANGUAGES CXX)
+project(Alhany LANGUAGES CXX)
 
-set(BINARY_NAME "dubsmash")
+set(BINARY_NAME "Alhany")
 
 cmake_policy(SET CMP0063 NEW)
 

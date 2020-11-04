@@ -103,7 +103,7 @@ class NotificationHandler {
     configLocalNotification();
 
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        Platform.isAndroid ? 'com.devyat.glitcher' : 'com.devyat.glitcher', 'glitcher', 'your channel description',
+        Platform.isAndroid ? 'com.devyat.Alhany' : 'com.devyat.Alhany', 'Alhany', 'your channel description',
         enableVibration: true, importance: Importance.Max, priority: Priority.High, autoCancel: true);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics =

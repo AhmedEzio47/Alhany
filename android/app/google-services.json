@@ -8,6 +8,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:480329879410:android:7a409c0ade3c5dfe0317eb",
+        "android_client_info": {
+          "package_name": "com.devyat.Alhany"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480329879410-lkriahnchjia0tjlbsu34g46gr4s8d1l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.Alhany",
+            "certificate_hash": "6a8af290b55ac94a7b81f546960aef3d27bf178c"
+          }
+        },
+        {
+          "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1yDkbdl4ePr6TCVynjEgapOyf-6fXCXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:480329879410:android:9c2f979d884054430317eb",
         "android_client_info": {
           "package_name": "com.devyat.dubsmash"

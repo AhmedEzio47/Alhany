@@ -1,4 +1,4 @@
-package com.devyat.dubsmash;
+package com.devyat.Alhany;
 
 import io.flutter.embedding.android.FlutterActivity;
 
