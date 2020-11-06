@@ -1,6 +1,7 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/add_singer.dart';
 import 'package:Alhany/pages/app_page.dart';
+import 'package:Alhany/pages/category_page.dart';
 import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/comment_page.dart';
 import 'package:Alhany/pages/conversation.dart';
@@ -122,6 +123,9 @@ class RouteGenerator {
 
       case '/singers-page':
         return MaterialPageRoute(builder: (_) => SingersPage());
+
+      case '/category-page':
+        return MaterialPageRoute(builder: (_) => CategoryPage(category: args['category'],));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

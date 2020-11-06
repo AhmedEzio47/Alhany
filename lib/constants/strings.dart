@@ -3,19 +3,30 @@ const String appName = 'Alhany';
 String appTempDirectoryPath;
 
 class Strings {
-  static const String default_profile_image = 'assets/images/default_profile.png';
+  static const String default_profile_image =
+      'assets/images/default_profile.png';
   static const String default_cover_image = 'assets/images/default_cover.jpg';
   static const String default_bg = 'assets/images/piano_bg.jpg';
   static const String default_melody_image = 'assets/images/default_melody.jpg';
-  static const String default_melody_page_bg = 'assets/images/default_record_bg.jpg';
-  static const String headphones_alert_bg = 'assets/images/headphones_alert.jpg';
+  static const String default_melody_page_bg =
+      'assets/images/default_record_bg.jpg';
+  static const String headphones_alert_bg =
+      'assets/images/headphones_alert.jpg';
   static const String splash = 'assets/images/splash.jpg';
 
   //Admin ID
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
 
   //Melodies categories
-  static const List<String> melodyCategories = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
+  static const List<String> melodyCategories = [
+    'do',
+    're',
+    'mi',
+    'fa',
+    'sol',
+    'la',
+    'si'
+  ];
 
   //Stripe Payment
   static const String paymentPublishableKey =
@@ -33,6 +44,7 @@ class Strings {
   static const String reply = 'assets/icons/reply.png';
   static const String send = 'assets/icons/send.png';
   static const String send_ar = 'assets/icons/send_ar.png';
+  static const String app_icon = 'assets/icons/music_note.png';
 
   //Translations
   static const en_edit_image = 'Edit Image';

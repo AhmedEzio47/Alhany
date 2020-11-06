@@ -9,6 +9,7 @@ import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
 
 class DownloadsPage extends StatefulWidget {
@@ -65,36 +66,46 @@ class _DownloadsPageState extends State<DownloadsPage> {
                     ),
                     color: MyColors.primaryColor,
                     image: DecorationImage(
-                      colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                      colorFilter: new ColorFilter.mode(
+                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
                       image: AssetImage(Strings.default_bg),
                       fit: BoxFit.cover,
                     ),
                   ),
-                  child: _downloads.length > 0
-                      ? ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: _downloads.length,
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () async {
-                                setState(() {
-                                  _isPlaying = true;
-                                });
-                                playMelody(index);
-                              },
-                              child: MelodyItem(
-                                //Solves confusion between songs and melodies when adding to favourites
-                                key: ValueKey('song_item'),
-                                melody: _downloads[index],
+                  child: Column(
+                    children: [
+                      RegularAppbar(context),
+                      _downloads.length > 0
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: _downloads.length,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () async {
+                                    setState(() {
+                                      _isPlaying = true;
+                                    });
+                                    playMelody(index);
+                                  },
+                                  child: MelodyItem(
+                                    //Solves confusion between songs and melodies when adding to favourites
+                                    key: ValueKey('song_item'),
+                                    melody: _downloads[index],
+                                  ),
+                                );
+                              })
+                          : Padding(
+                              padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.height / 2 -
+                                      40),
+                              child: Text(
+                                'No downloads yet!',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
                               ),
-                            );
-                          })
-                      : Center(
-                          child: Text(
-                            'No downloads yet!',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                        ),
+                            ),
+                    ],
+                  ),
                 ),
               ),
               _isPlaying

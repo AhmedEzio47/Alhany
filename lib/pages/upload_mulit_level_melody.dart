@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
@@ -22,6 +22,25 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
   String _melodyName;
   String _melodyUrl;
   File _image;
+
+  List<String> _singers = [];
+  String _singer;
+
+  getSingers() async {
+    _singers = [];
+    QuerySnapshot singersSnapshot = await singersRef.getDocuments();
+    for (DocumentSnapshot doc in singersSnapshot.documents) {
+      setState(() {
+        _singers.add(doc.data['name']);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    getSingers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +75,22 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                   });
                 },
                 decoration: InputDecoration(hintText: 'Melody name'),
+              ),
+              DropdownButton(
+                hint: Text('Singer'),
+                value: _singer,
+                onChanged: (text) {
+                  setState(() {
+                    _singer = text;
+                  });
+                },
+                items:
+                    (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                  return DropdownMenuItem<dynamic>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -204,7 +239,9 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
   uploadMelody() async {
     if (_melodyName.trim().isEmpty) {
-      AppUtil.showToast(language(en: 'Please choose a name for the melody', ar: 'قم باختيار اسم اللحن'));
+      AppUtil.showToast(language(
+          en: 'Please choose a name for the melody',
+          ar: 'قم باختيار اسم اللحن'));
       return;
     }
 
@@ -217,11 +254,15 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
     for (String key in melodies.keys) {
       String ext = path.extension(melodies[key].path);
-      String url = await AppUtil.uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
+      String url = await AppUtil.uploadFile(
+          melodies[key], context, '/melodies/$id\_$key$ext');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info = await _flutterFFprobe.getMediaInformation(melodies[key].path);
-      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+      MediaInformation info =
+          await _flutterFFprobe.getMediaInformation(melodies[key].path);
+      int duration =
+          double.parse(info.getMediaProperties()['duration'].toString())
+              .toInt();
 
       levelsUrls.putIfAbsent(key, () => url);
       levelsDurations.putIfAbsent(key, () => duration);
@@ -230,7 +271,8 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl =
+          await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     await melodiesRef.document(id).setData({
@@ -239,7 +281,8 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
       'image_url': imageUrl,
       'level_urls': levelsUrls,
       'level_durations': levelsDurations,
-      'author_id': Constants.currentUserID,
+      'author_id': _singer == null ? Constants.currentUserID : null,
+      'singer': _singer,
       'is_song': false,
       'search': searchList(_melodyName),
       'timestamp': FieldValue.serverTimestamp()
