@@ -306,7 +306,7 @@ class _RecordItemState extends State<RecordItem> {
   Widget playPauseBtn() {
     return InkWell(
       onTap: () => Navigator.of(context)
-          .pushNamed('/record-fullscreen', arguments: {'record': widget.record, 'singer': _singer}),
+          .pushNamed('/record-fullscreen', arguments: {'record': widget.record, 'singer': _singer, 'melody': _melody}),
       child: Container(
         height: 40,
         width: 40,

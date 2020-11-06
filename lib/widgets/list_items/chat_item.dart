@@ -69,20 +69,29 @@ class _ChatItemState extends State<ChatItem> {
         ),
         title: Text(
           "${widget.name}",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         subtitle: widget.msg.type == 'text'
             ? Text(
                 "${widget.msg.message}",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.white),
               )
             : Row(
                 children: [
-                  widget.msg.type == 'audio' ? Icon(Icons.audiotrack) : Icon(Icons.image),
-                  widget.msg.type == 'audio' ? Text("Voice massage") : Text("image")
+                  widget.msg.type == 'audio'
+                      ? Icon(Icons.audiotrack, color: Colors.white)
+                      : Icon(Icons.image, color: Colors.white),
+                  widget.msg.type == 'audio'
+                      ? Text(
+                          "Voice massage",
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : Text(
+                          "image",
+                          style: TextStyle(color: Colors.white),
+                        )
                 ],
               ),
         trailing: Column(
@@ -93,6 +102,7 @@ class _ChatItemState extends State<ChatItem> {
               "${AppUtil.formatTimestamp(widget.msg.timestamp)}",
               style: TextStyle(
                 fontWeight: FontWeight.w300,
+                color: Colors.white,
                 fontSize: 11,
               ),
             ),

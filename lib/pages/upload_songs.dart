@@ -27,8 +27,12 @@ class _UploadSongsState extends State<UploadSongs> {
   String _price;
 
   List<String> _singers = [];
+  List<String> _categories = [];
 
   String _singer;
+  String _category;
+
+  TextEditingController _categoryController = TextEditingController();
 
   getSingers() async {
     _singers = [];
@@ -40,9 +44,20 @@ class _UploadSongsState extends State<UploadSongs> {
     }
   }
 
+  getCategories() async {
+    _categories = [];
+    QuerySnapshot categoriesSnapshot = await categoriesRef.getDocuments();
+    for (DocumentSnapshot doc in categoriesSnapshot.documents) {
+      setState(() {
+        _categories.add(doc.data['name']);
+      });
+    }
+  }
+
   @override
   void initState() {
     getSingers();
+    getCategories();
     super.initState();
     setState(() {
       _singer = widget.singer;
@@ -52,6 +67,18 @@ class _UploadSongsState extends State<UploadSongs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: InkWell(
+                onTap: () async {
+                  await addCategory();
+                },
+                child: Center(child: Text('Add Category'))),
+          )
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: MyColors.accentColor,
         onPressed: () async {
@@ -67,7 +94,7 @@ class _UploadSongsState extends State<UploadSongs> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                height: 50,
+                height: 20,
               ),
               Container(
                   height: 180,
@@ -91,12 +118,12 @@ class _UploadSongsState extends State<UploadSongs> {
                 textAlign: TextAlign.center,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      flex: 7,
+                      flex: 8,
                       child: DropdownButton(
                         hint: Text('Singer'),
                         value: _singer,
@@ -106,6 +133,27 @@ class _UploadSongsState extends State<UploadSongs> {
                           });
                         },
                         items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                          return DropdownMenuItem<dynamic>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      flex: 8,
+                      child: DropdownButton(
+                        hint: Text('Category'),
+                        value: _category,
+                        onChanged: (text) {
+                          setState(() {
+                            _category = text;
+                          });
+                        },
+                        items: (_categories).map<DropdownMenuItem<dynamic>>((dynamic value) {
                           return DropdownMenuItem<dynamic>(
                             value: value,
                             child: Text(value),
@@ -200,9 +248,54 @@ class _UploadSongsState extends State<UploadSongs> {
     );
   }
 
+  addCategory() async {
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _categoryController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(hintText: 'New category'),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_categoryController.text.trim().isEmpty) {
+                AppUtil.showToast('Please enter a category');
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              await categoriesRef.add({
+                'name': _categoryController.text,
+                'search': searchList(_categoryController.text),
+              });
+              //AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pop();
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              language(en: Strings.en_add, ar: Strings.ar_add),
+              style: TextStyle(color: Colors.white),
+            ),
+          )
+        ],
+      ),
+    )));
+    getCategories();
+  }
+
   addSinger() {
     Navigator.of(context).pushNamed('/add-singer');
-
     getSingers();
   }
 
@@ -241,6 +334,7 @@ class _UploadSongsState extends State<UploadSongs> {
       'is_song': true,
       'price': _price,
       'singer': _singer,
+      'category': _category,
       'search': _songName != null ? searchList(_songName) : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()

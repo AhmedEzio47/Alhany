@@ -342,7 +342,7 @@ class DatabaseService {
   }
 
   static Future<List<Singer>> getSingers() async {
-    QuerySnapshot singersSnapshot = await singersRef.orderBy('name', descending: false).getDocuments();
+    QuerySnapshot singersSnapshot = await singersRef.orderBy('name', descending: false).limit(10).getDocuments();
     List<Singer> singers = singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
@@ -540,5 +540,25 @@ class DatabaseService {
         .collection('replies')
         .document(replyId)
         .updateData({'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
+  }
+
+  static getCategories() async {
+    QuerySnapshot snapshot = await categoriesRef.getDocuments();
+    List<String> categories = [];
+    for (DocumentSnapshot category in snapshot.documents) {
+      categories.add(category.data['name']);
+    }
+    return categories;
+  }
+
+  static Future<List<Melody>> getSongsByCategory(String category) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .where('category', isEqualTo: category)
+        .limit(10)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
   }
 }

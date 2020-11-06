@@ -15,12 +15,12 @@ class RecordsPage extends StatefulWidget {
   _RecordsPageState createState() => _RecordsPageState();
 }
 
-class _RecordsPageState extends State<RecordsPage> {
+class _RecordsPageState extends State<RecordsPage> with TickerProviderStateMixin {
   Timestamp lastVisiblePostSnapShot;
   ScrollController _melodiesScrollController = ScrollController();
   Color _searchColor = Colors.grey.shade300;
   TextEditingController _searchController = TextEditingController();
-
+  TabController _tabController;
   List<Record> _records = [];
 
   bool _isPlaying = false;
@@ -48,7 +48,7 @@ class _RecordsPageState extends State<RecordsPage> {
   void initState() {
     getRecords();
     super.initState();
-
+    _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
         if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
@@ -85,32 +85,26 @@ class _RecordsPageState extends State<RecordsPage> {
             children: [
               SingleChildScrollView(
                 child: Padding(
-                    padding: const EdgeInsets.only(top: 45),
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        controller: _melodiesScrollController,
-                        itemCount: _records.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                musicPlayer = MusicPlayer(
-                                  url: _records[index].audioUrl,
-                                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                                  btnSize: 35,
-                                  recordBtnVisible: true,
-                                  initialDuration: _records[index].duration,
-                                  playBtnPosition: PlayBtnPosition.left,
-                                );
-                                _isPlaying = true;
-                              });
-                            },
-                            child: RecordItem(
-                              record: _records[index],
-                              key: UniqueKey(),
-                            ),
-                          );
-                        })),
+                    padding: const EdgeInsets.only(top: 70),
+                    child: Column(
+                      children: [
+                        TabBar(
+                            labelColor: MyColors.accentColor,
+                            unselectedLabelColor: Colors.grey,
+                            controller: _tabController,
+                            tabs: [
+                              Tab(
+                                text: language(en: 'Songs', ar: 'الأغاني'),
+                              ),
+                              Tab(
+                                text: language(en: 'Melodies', ar: 'الألحان'),
+                              ),
+                              Tab(
+                                text: language(en: 'Favourites', ar: 'التفضيلات'),
+                              )
+                            ])
+                      ],
+                    )),
               ),
               Positioned.fill(
                 child: Padding(
@@ -139,5 +133,33 @@ class _RecordsPageState extends State<RecordsPage> {
         ),
       ),
     );
+  }
+
+  recordListView() {
+    return ListView.builder(
+        shrinkWrap: true,
+        controller: _melodiesScrollController,
+        itemCount: _records.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              setState(() {
+                musicPlayer = MusicPlayer(
+                  url: _records[index].audioUrl,
+                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                  btnSize: 35,
+                  recordBtnVisible: true,
+                  initialDuration: _records[index].duration,
+                  playBtnPosition: PlayBtnPosition.left,
+                );
+                _isPlaying = true;
+              });
+            },
+            child: RecordItem(
+              record: _records[index],
+              key: UniqueKey(),
+            ),
+          );
+        });
   }
 }

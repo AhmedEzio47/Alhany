@@ -50,6 +50,7 @@ class _MelodyPageState extends State<MelodyPage> {
   String recordingFilePath;
   String melodyPath;
   String mergedFilePath;
+  String imageVideoPath;
 
   FlutterFFmpeg flutterFFmpeg;
 
@@ -356,43 +357,90 @@ class _MelodyPageState extends State<MelodyPage> {
           Navigator.of(context).pop();
         },
         child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              widget.type == Types.AUDIO
-                  ? melodyPlayer
-                  : Stack(
-                      children: [
-                        AspectRatio(
-                          aspectRatio: _videoController.value.aspectRatio,
-                          child: VideoPlayer(_videoController),
-                        ),
-                        Positioned.fill(
-                            child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Align(
-                            child: playPauseBtn(),
-                            alignment: Alignment.bottomCenter,
-                          ),
-                        ))
-                      ],
+          child: widget.type == Types.AUDIO
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    melodyPlayer,
+                    SizedBox(
+                      height: 10,
                     ),
-              SizedBox(
-                height: 10,
-              ),
-              RaisedButton(
-                onPressed: () async {
-                  Navigator.of(context).pop(false);
-                  await submitRecord();
-                },
-                color: MyColors.primaryColor,
-                child: Text(
-                  'Submit',
-                  style: TextStyle(color: Colors.white),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        RaisedButton(
+                          onPressed: imageVideoPath == null
+                              ? () async {
+                                  File image = await AppUtil.pickImageFromGallery();
+                                  AppUtil.showLoader(context);
+                                  setState(() {
+                                    imageVideoPath = '${path.withoutExtension(mergedFilePath)}.mp4';
+                                  });
+                                  success = await flutterFFmpeg.execute(
+                                      "-loop 1 -i ${image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+                                  Navigator.of(context).pop();
+                                }
+                              : null,
+                          color: MyColors.primaryColor,
+                          child: Text(
+                            imageVideoPath == null ? 'Choose Image' : 'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        RaisedButton(
+                          onPressed: () async {
+                            Navigator.of(context).pop(false);
+                            await submitRecord();
+                          },
+                          color: MyColors.primaryColor,
+                          child: Text(
+                            'Submit',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                )
+              : Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: _videoController.value.aspectRatio,
+                      child: VideoPlayer(_videoController),
+                    ),
+                    Positioned.fill(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            playPauseBtn(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            RaisedButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop(false);
+                                await submitRecord();
+                              },
+                              color: MyColors.primaryColor,
+                              child: Text(
+                                'Submit',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.bottomCenter,
+                      ),
+                    )),
+                  ],
                 ),
-              ),
-            ],
-          ),
         )));
 
     print(success == 1 ? 'Failure!' : 'Success!');
@@ -464,12 +512,18 @@ class _MelodyPageState extends State<MelodyPage> {
     AppUtil.showLoader(context);
 
     String recordId = randomAlphaNumeric(20);
-
-    String url = await AppUtil.uploadFile(
-        File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+    String url;
+    if (widget.type == Types.VIDEO) {
+      url = await AppUtil.uploadFile(
+          File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+    } else {
+      url = await AppUtil.uploadFile(
+          File(imageVideoPath), context, 'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
+    }
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    MediaInformation info =
+        await _flutterFFprobe.getMediaInformation(widget.type == Types.VIDEO ? mergedFilePath : imageVideoPath);
     int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     await DatabaseService.submitRecord(widget.melody.id, recordId, url, duration);
@@ -775,12 +829,7 @@ class _MelodyPageState extends State<MelodyPage> {
   void _initCamera() async {
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(cameras[1], ResolutionPreset.medium, enableAudio: true);
-    cameraController.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    });
+    await cameraController.initialize();
   }
 
   Future<bool> _onBackPressed() {

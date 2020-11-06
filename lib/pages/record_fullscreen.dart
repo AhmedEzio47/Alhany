@@ -1,5 +1,11 @@
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record.dart';
 import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/notification_handler.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -8,20 +14,92 @@ import 'dart:math' as math;
 class RecordFullscreen extends StatefulWidget {
   final Record record;
   final User singer;
-  const RecordFullscreen({Key key, this.record, this.singer}) : super(key: key);
+  final Melody melody;
+  const RecordFullscreen({Key key, this.record, this.singer, this.melody}) : super(key: key);
   @override
   _RecordFullscreenState createState() => _RecordFullscreenState();
 }
 
-class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerProviderStateMixin {
-  bool abo = false;
+class _RecordFullscreenState extends State<RecordFullscreen> {
+  bool isLiked = false;
+  bool isLikeEnabled = true;
+  var likes = [];
+
   bool play = true;
   VideoPlayerController _controller;
-  ScrollController _scrollController = ScrollController(initialScrollOffset: 0);
+
+  bool _isFollowing = false;
+
+  isFollowing() async {
+    if (Constants.currentUserID == widget.singer.id) return true;
+
+    DocumentSnapshot snapshot =
+        await usersRef.document(Constants.currentUserID).collection('following').document(widget.singer.id).get();
+    return snapshot.exists;
+  }
+
+  void initLikes(Record record) async {
+    DocumentSnapshot likedSnapshot =
+        await recordsRef.document(record.id).collection('likes')?.document(Constants.currentUserID)?.get();
+
+    //Solves the problem setState() called after dispose()
+    if (mounted) {
+      setState(() {
+        isLiked = likedSnapshot.exists;
+      });
+    }
+  }
+
+  Future<void> likeBtnHandler(Record record) async {
+    setState(() {
+      isLikeEnabled = false;
+    });
+    if (isLiked == true) {
+      await recordsRef.document(record.id).collection('likes').document(Constants.currentUserID).delete();
+
+      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(-1)});
+
+      await NotificationHandler.removeNotification(record.singerId, record.id, 'like');
+      setState(() {
+        isLiked = false;
+        //post.likesCount = likesNo;
+      });
+    } else if (isLiked == false) {
+      await recordsRef
+          .document(record.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(1)});
+
+      setState(() {
+        isLiked = true;
+      });
+
+      await NotificationHandler.sendNotification(
+          record.singerId, 'New Record Like', Constants.currentUser.name + ' likes your post', record.id, 'like');
+    }
+    var recordMeta = await DatabaseService.getRecordMeta(record.id);
+    setState(() {
+      record.likes = recordMeta['likes'];
+      isLikeEnabled = true;
+    });
+  }
+
+  void _goToProfilePage() {
+    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': widget.record.singerId});
+  }
+
+  void _goToMelodyPage() {
+    Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': widget.melody});
+  }
 
   @override
   void initState() {
     super.initState();
+    isFollowing();
+    initLikes(widget.record);
     _controller = VideoPlayerController.network(widget.record.audioUrl)
       ..initialize().then((value) {
         _controller.play();
@@ -82,7 +160,7 @@ class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerPr
                   Padding(
                     padding: EdgeInsets.only(left: 10, bottom: 10),
                     child: Text(
-                      '@spook_clothing',
+                      '@${widget.singer.username}',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -90,21 +168,12 @@ class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerPr
                       padding: EdgeInsets.only(left: 10, bottom: 10),
                       child: Text.rich(
                         TextSpan(children: <TextSpan>[
-                          TextSpan(text: 'Eiffel Tower'),
-                          TextSpan(text: '#foot\n', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: 'Voir la traduction', style: TextStyle(fontSize: 12))
+                          TextSpan(text: '${widget.singer.name}\n', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: 'singed\n', style: TextStyle(fontSize: 12)),
+                          TextSpan(text: widget.melody.name, style: TextStyle(fontWeight: FontWeight.bold))
                         ]),
                         style: TextStyle(color: Colors.white, fontSize: 14),
                       )),
-                  Container(
-                    padding: EdgeInsets.only(left: 10),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.music_note, size: 16, color: Colors.white),
-                        Text('R10 - Oboy', style: TextStyle(color: Colors.white))
-                      ],
-                    ),
-                  )
                 ],
               ),
             ),
@@ -126,23 +195,28 @@ class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerPr
                       height: 50,
                       child: Stack(
                         children: <Widget>[
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.white,
+                          InkWell(
+                            onTap: () => _goToProfilePage(),
                             child: CircleAvatar(
-                              radius: 19,
-                              backgroundColor: Colors.black,
-                              backgroundImage: NetworkImage(widget.singer?.profileImageUrl),
+                              radius: 20,
+                              backgroundColor: Colors.white,
+                              child: CircleAvatar(
+                                radius: 19,
+                                backgroundColor: Colors.black,
+                                backgroundImage: NetworkImage(widget.singer?.profileImageUrl),
+                              ),
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: CircleAvatar(
-                              radius: 10,
-                              backgroundColor: Color(0xfd2c58).withOpacity(1),
-                              child: Center(child: Icon(Icons.add, size: 15, color: Colors.white)),
-                            ),
-                          )
+                          _isFollowing
+                              ? Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: CircleAvatar(
+                                    radius: 10,
+                                    backgroundColor: MyColors.primaryColor.withOpacity(1),
+                                    child: Center(child: Icon(Icons.add, size: 15, color: Colors.white)),
+                                  ),
+                                )
+                              : Container()
                         ],
                       ),
                     ),
@@ -151,22 +225,38 @@ class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerPr
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Icon(Icons.thumb_up, size: 35, color: Colors.white),
-                          Text('427.9K', style: TextStyle(color: Colors.white))
+                          InkWell(
+                            onTap: () async {
+                              if (isLikeEnabled) {
+                                await likeBtnHandler(widget.record);
+                              }
+                            },
+                            child: isLiked
+                                ? Icon(Icons.thumb_up, size: 35, color: MyColors.primaryColor)
+                                : Icon(Icons.thumb_up, size: 35, color: Colors.white),
+                          ),
+                          Text('${widget.record.likes ?? 0}', style: TextStyle(color: Colors.white))
                         ],
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.sms, size: 35, color: Colors.white)),
-                          Text('2051', style: TextStyle(color: Colors.white))
-                        ],
+                    InkWell(
+                      onTap: () {
+                        if (Constants.currentRoute != '/record-page')
+                          Navigator.of(context)
+                              .pushNamed('/record-page', arguments: {'record': widget.record, 'singer': widget.singer});
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(math.pi),
+                                child: Icon(Icons.sms, size: 35, color: Colors.white)),
+                            Text('${widget.record.comments ?? 0}', style: TextStyle(color: Colors.white))
+                          ],
+                        ),
                       ),
                     ),
                     Container(
@@ -187,44 +277,6 @@ class _RecordFullscreenState extends State<RecordFullscreen> with SingleTickerPr
               ),
             ))
       ],
-    );
-  }
-
-  buttonPlus() {
-    return Container(
-      width: 46,
-      height: 30,
-      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)), color: Colors.transparent),
-      child: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 28,
-              height: 30,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)), color: Color(0x2dd3e7).withOpacity(1)),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              width: 28,
-              height: 30,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)), color: Color(0xed316a).withOpacity(1)),
-            ),
-          ),
-          Center(
-            child: Container(
-              width: 28,
-              height: 30,
-              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)), color: Colors.white),
-              child: Center(child: Icon(Icons.add, color: Colors.black)),
-            ),
-          )
-        ],
-      ),
     );
   }
 }

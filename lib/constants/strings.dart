@@ -4,6 +4,7 @@ String appTempDirectoryPath;
 
 class Strings {
   static const String default_profile_image = 'assets/images/default_profile.png';
+  static const String default_cover_image = 'assets/images/default_cover.jpg';
   static const String default_bg = 'assets/images/piano_bg.jpg';
   static const String default_melody_image = 'assets/images/default_melody.jpg';
   static const String default_melody_page_bg = 'assets/images/default_record_bg.jpg';
@@ -60,6 +61,9 @@ class Strings {
 
   static const en_update = 'Update';
   static const ar_update = 'تعديل';
+
+  static const en_add = 'Add';
+  static const ar_add = 'إضافة';
 
   static const en_updated = 'Updated!';
   static const ar_updated = 'تم التعديل';

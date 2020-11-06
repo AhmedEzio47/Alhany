@@ -9,6 +9,7 @@ class Record {
   int likes;
   int comments;
   int shares;
+  int views;
   final Timestamp timestamp;
 
   Record(
@@ -20,6 +21,7 @@ class Record {
       this.likes,
       this.comments,
       this.shares,
+      this.views,
       this.timestamp});
 
   factory Record.fromDoc(DocumentSnapshot doc) {
@@ -32,6 +34,7 @@ class Record {
         likes: doc['likes'],
         comments: doc['comments'],
         shares: doc['shares'],
+        views: doc['views'],
         timestamp: doc['timestamp']);
   }
 }

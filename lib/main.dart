@@ -43,6 +43,7 @@ class _RestartWidgetState extends State<MyApp> {
             primaryColor: MyColors.primaryColor,
             primaryColorDark: MyColors.darkPrimaryColor,
             primaryColorLight: MyColors.lightPrimaryColor,
+            accentColor: MyColors.accentColor,
             brightness: Brightness.light,
           ),
           debugShowCheckedModeBanner: false,

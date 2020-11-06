@@ -78,47 +78,30 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   }
 
   configureTabs() {
-    _tabController =
-        TabController(vsync: this, length: widget.userId == Constants.currentUserID ? 2 : 1, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
 
-    widget.userId == Constants.currentUserID
-        ? _tabs = [
-            Tab(
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(language(en: "Records", ar: 'التسجيلات')),
-                ),
-              ),
-            ),
-            Tab(
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(language(en: "Favourites", ar: 'المفضلات')),
-                ),
-              ),
-            )
-          ]
-        : _tabs = [
-            Tab(
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(language(en: "Records", ar: 'التسجيلات')),
-                ),
-              ),
-            )
-          ];
+    _tabs = [
+      Tab(
+        child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50), border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(language(en: "Records", ar: 'التسجيلات')),
+          ),
+        ),
+      ),
+      Tab(
+        child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50), border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(language(en: "Favourites", ar: 'المفضلات')),
+          ),
+        ),
+      )
+    ];
   }
 
   @override
@@ -520,8 +503,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   Widget _profileImage() {
     return CachedImage(
       imageShape: BoxShape.circle,
-      height: 150,
-      width: 150,
+      height: 100,
+      width: 100,
       imageUrl: _user?.profileImageUrl,
       defaultAssetImage: Strings.default_profile_image,
     );

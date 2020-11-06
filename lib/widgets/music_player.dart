@@ -56,13 +56,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
   get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
-  get durationText => myAudioPlayer.duration != null
-      ? myAudioPlayer.duration.toString().split('.').first
-      : '';
+  get durationText => myAudioPlayer.duration != null ? myAudioPlayer.duration.toString().split('.').first : '';
 
-  get positionText => myAudioPlayer.position != null
-      ? myAudioPlayer.position.toString().split('.').first
-      : '';
+  get positionText => myAudioPlayer.position != null ? myAudioPlayer.position.toString().split('.').first : '';
 
   bool isMuted = false;
 
@@ -81,10 +77,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
 
   void initAudioPlayer() async {
-    myAudioPlayer = MyAudioPlayer(
-        url: widget.url,
-        isLocal: widget.isLocal,
-        onComplete: widget.onComplete);
+    myAudioPlayer = MyAudioPlayer(url: widget.url, isLocal: widget.isLocal, onComplete: widget.onComplete);
     myAudioPlayer.addListener(() {
       if (mounted) {
         setState(() {
@@ -127,10 +120,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               widget.title != null
                   ? Text(
                       widget.title,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                     )
                   : Container(),
               Row(
@@ -142,9 +132,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         ),
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
-                    child: widget.playBtnPosition == PlayBtnPosition.left
-                        ? playPauseBtn()
-                        : Container(),
+                    child: widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn() : Container(),
                   ),
                   myAudioPlayer.position != null
                       ? Text(
@@ -163,29 +151,22 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     child: SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 5.0,
-                          thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                          overlayShape:
-                              RoundSliderOverlayShape(overlayRadius: 16.0),
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
                         ),
                         child: Slider(
                             activeColor: MyColors.darkPrimaryColor,
                             inactiveColor: Colors.grey.shade300,
-                            value: myAudioPlayer.position?.inMilliseconds
-                                    ?.toDouble() ??
-                                0.0,
+                            value: myAudioPlayer.position?.inMilliseconds?.toDouble() ?? 0.0,
                             onChanged: (double value) {
-                              myAudioPlayer.seek(Duration(
-                                  seconds: _duration.inMilliseconds ~/ 1000));
+                              myAudioPlayer.seek(Duration(seconds: value ~/ 1000));
 
                               if (!isPlaying) {
                                 play();
                               }
                             },
                             min: 0.0,
-                            max: _duration != null
-                                ? _duration?.inMilliseconds?.toDouble()
-                                : 1.7976931348623157e+308)),
+                            max: _duration != null ? _duration?.inMilliseconds?.toDouble() : 1.7976931348623157e+308)),
                   ),
                   SizedBox(
                     width: 10,
@@ -221,9 +202,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             : Container(),
                         widget.recordBtnVisible
                             ? InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                    '/melody-page',
-                                    arguments: {'melody': widget.melody}),
+                                onTap: () => Navigator.of(context).pushNamed('/melody-page',
+                                    arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -235,8 +215,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         color: Colors.black54,
                                         spreadRadius: 2,
                                         blurRadius: 4,
-                                        offset: Offset(
-                                            0, 2), // changes position of shadow
+                                        offset: Offset(0, 2), // changes position of shadow
                                       ),
                                     ],
                                   ),
@@ -256,10 +235,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed(
                                   '/melody-page',
-                                  arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.VIDEO
-                                  },
+                                  arguments: {'melody': widget.melody, 'type': Types.VIDEO},
                                 ),
                                 child: Container(
                                   height: widget.btnSize,
@@ -272,8 +248,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         color: Colors.black54,
                                         spreadRadius: 2,
                                         blurRadius: 4,
-                                        offset: Offset(
-                                            0, 2), // changes position of shadow
+                                        offset: Offset(0, 2), // changes position of shadow
                                       ),
                                     ],
                                   ),
@@ -287,9 +262,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       ],
                     )
                   : Container(),
-              widget.playBtnPosition == PlayBtnPosition.bottom
-                  ? SizedBox(height: 10)
-                  : Container()
+              widget.playBtnPosition == PlayBtnPosition.bottom ? SizedBox(height: 10) : Container()
             ]),
           ),
         ),

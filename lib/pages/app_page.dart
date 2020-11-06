@@ -1,5 +1,6 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/home_page.dart';
 import 'package:Alhany/pages/melodies_page.dart';
 import 'package:Alhany/pages/profile_page.dart';
@@ -38,7 +39,7 @@ class _AppPageState extends State<AppPage> {
           items: <Widget>[
             Icon(Icons.star, size: 30),
             Icon(Icons.home, size: 30),
-            Icon(Icons.group, size: 30),
+            Icon(Icons.chat, size: 30),
             Icon(Icons.person, size: 30),
           ],
           onTap: (index) {
@@ -54,8 +55,8 @@ class _AppPageState extends State<AppPage> {
               onPageChanged: _onPageChanged,
               children: [
                 StarPage(),
-                RecordsPage(),
-                SingersPage(),
+                HomePage(),
+                Chats(),
                 ProfilePage(
                   userId: Constants.currentUserID,
                 ),

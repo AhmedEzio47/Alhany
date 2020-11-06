@@ -156,9 +156,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          // if (musicPlayer != null) {
-          //   musicPlayer.stop();
-          // }
           setState(() {
             _isPlaying = false;
             _isSearching = false;
@@ -190,8 +187,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     height: 70,
                   ),
                   CachedImage(
-                    width: 150,
-                    height: 150,
+                    width: 100,
+                    height: 100,
                     imageShape: BoxShape.circle,
                     imageUrl: Constants.startUser?.profileImageUrl,
                     defaultAssetImage: Strings.default_profile_image,

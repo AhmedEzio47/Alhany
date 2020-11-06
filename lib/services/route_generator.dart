@@ -13,6 +13,8 @@ import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/record_fullscreen.dart';
 import 'package:Alhany/pages/record_page.dart';
 import 'package:Alhany/pages/root.dart';
+import 'package:Alhany/pages/singer_page.dart';
+import 'package:Alhany/pages/singers_page.dart';
 import 'package:Alhany/pages/songs_page.dart';
 import 'package:Alhany/pages/upload_mulit_level_melody.dart';
 import 'package:Alhany/pages/upload_single_level_melody.dart';
@@ -69,7 +71,7 @@ class RouteGenerator {
       case '/upload-songs':
         return MaterialPageRoute(
             builder: (_) => UploadSongs(
-                  singer: args['singer'],
+                  singer: args != null ? args['singer'] : null,
                 ));
 
       case '/change-email':
@@ -101,6 +103,7 @@ class RouteGenerator {
             builder: (_) => RecordFullscreen(
                   record: args['record'],
                   singer: args['singer'],
+                  melody: args['melody'],
                 ));
 
       case '/comment-page':
@@ -110,6 +113,15 @@ class RouteGenerator {
                   record: args['record'],
                   comment: args['comment'],
                 ));
+
+      case '/singer-page':
+        return MaterialPageRoute(
+            builder: (_) => SingerPage(
+                  singer: args['singer'],
+                ));
+
+      case '/singers-page':
+        return MaterialPageRoute(builder: (_) => SingersPage());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third
