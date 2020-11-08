@@ -4,7 +4,8 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/comment_model.dart';
-import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -15,12 +16,12 @@ import 'custom_inkwell.dart';
 import 'custom_text.dart';
 
 class CommentBottomSheet {
-  Widget commentOptionIcon(BuildContext context, Record post, Comment comment, Comment parentComment) {
+  Widget commentOptionIcon(BuildContext context, Comment comment, Comment parentComment, {Record record, News news}) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, post, comment, parentComment);
+          _openBottomSheet(context, comment, parentComment, record: record, news: news);
         },
         child: Container(
           width: 25,
@@ -42,7 +43,8 @@ class CommentBottomSheet {
     return ratio;
   }
 
-  void _openBottomSheet(BuildContext context, Record record, Comment comment, Comment parentComment) async {
+  void _openBottomSheet(BuildContext context, Comment comment, Comment parentComment,
+      {Record record, News news}) async {
     User user = await DatabaseService.getUserWithId(
       comment.commenterID,
     );
@@ -62,13 +64,13 @@ class CommentBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _commentOptions(context, isMyComment, record, comment, parentComment, user));
+            child: _commentOptions(context, isMyComment, comment, parentComment, user, record: record, news: news));
       },
     );
   }
 
-  Widget _commentOptions(
-      BuildContext context, bool isMyComment, Record record, Comment comment, Comment parentComment, User user) {
+  Widget _commentOptions(BuildContext context, bool isMyComment, Comment comment, Comment parentComment, User user,
+      {Record record, News news}) {
     return Column(
       children: <Widget>[
         Container(
@@ -93,11 +95,11 @@ class CommentBottomSheet {
                   if (parentComment == null) {
 //                    Navigator.of(context)
 //                        .pushNamed('/edit-comment', arguments: {'record': record, 'user': user, 'comment': comment});
-                    editComment(context, comment, record);
+                    editComment(context, comment, record: record, news: news);
                   } else {
 //                    Navigator.of(context).pushNamed('/edit-comment',
 //                        arguments: {'record': record, 'comment': parentComment, 'reply': comment, 'user': user});
-                    editReply(context, comment, parentComment, record);
+                    editReply(context, comment, parentComment, record: record, news: news);
                   }
                 },
                 isEnable: false,
@@ -112,12 +114,13 @@ class CommentBottomSheet {
                 ),
                 text: 'Delete Comment',
                 onPressed: () async {
-                  await _deleteComment(context, record.id, comment.id, parentComment == null ? null : parentComment.id);
+                  await _deleteComment(context, comment.id, parentComment == null ? null : parentComment.id,
+                      recordId: record.id, newId: news.id);
                   if (parentComment == null) {
                     Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record': record});
                   } else {
-                    Navigator.of(context)
-                        .pushReplacementNamed('/comment-page', arguments: {'record': record, 'comment': parentComment});
+                    Navigator.of(context).pushReplacementNamed('/comment-page',
+                        arguments: {'record': record, 'news': news, 'comment': parentComment});
                   }
                 },
                 isEnable: true,
@@ -157,7 +160,7 @@ class CommentBottomSheet {
 
   TextEditingController _commentController = TextEditingController();
 
-  editComment(BuildContext context, Comment comment, Record record) async {
+  editComment(BuildContext context, Comment comment, {Record record, News news}) async {
     _commentController.text = comment.text;
 
     Navigator.of(context).push(CustomModal(
@@ -186,7 +189,8 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editComment(record.id, comment.id, _commentController.text);
+              await DatabaseService.editComment(comment.id, _commentController.text,
+                  recordId: record.id, newsId: news.id);
               AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record': record});
             },
@@ -201,7 +205,7 @@ class CommentBottomSheet {
     )));
   }
 
-  editReply(BuildContext context, Comment reply, Comment parentComment, Record record) async {
+  editReply(BuildContext context, Comment reply, Comment parentComment, {Record record, News news}) async {
     _commentController.text = reply.text;
 
     Navigator.of(context).push(CustomModal(
@@ -230,10 +234,11 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editReply(record.id, parentComment.id, reply.id, _commentController.text);
+              await DatabaseService.editReply(parentComment.id, reply.id, _commentController.text,
+                  recordId: record.id, newsId: news.id);
               AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
-              Navigator.of(context)
-                  .pushReplacementNamed('/comment-page', arguments: {'record': record, 'comment': parentComment});
+              Navigator.of(context).pushReplacementNamed('/comment-page',
+                  arguments: {'record': record, 'news': news, 'comment': parentComment});
             },
             color: MyColors.primaryColor,
             child: Text(
@@ -322,7 +327,8 @@ class CommentBottomSheet {
     );
   }
 
-  Future _deleteComment(BuildContext context, String recordId, String commentId, String parentCommentId) async {
+  Future _deleteComment(BuildContext context, String commentId, String parentCommentId,
+      {String recordId, String newId}) async {
     await showDialog(
       context: context,
       builder: (context) => Padding(
@@ -344,12 +350,9 @@ class CommentBottomSheet {
             new GestureDetector(
               onTap: () async {
                 if (parentCommentId == null)
-                  await DatabaseService.deleteComment(
-                    recordId,
-                    commentId,
-                  );
+                  await DatabaseService.deleteComment(commentId, recordId: recordId, newsId: newId);
                 else
-                  await DatabaseService.deleteReply(recordId, commentId, parentCommentId);
+                  await DatabaseService.deleteReply(commentId, parentCommentId, recordId: recordId, newsId: newId);
 
                 await NotificationHandler.removeNotification(
                     (await DatabaseService.getRecordWithId(recordId)).singerId, recordId, 'comment');

@@ -2,7 +2,7 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -39,8 +39,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: MyColors.primaryColor,
                 image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(
-                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                   image: AssetImage(Strings.default_bg),
                   fit: BoxFit.cover,
                 ),
@@ -85,6 +84,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     alignment: Alignment.bottomCenter,
                   ))
                 : Container(),
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.only(right: 15.0, top: 40),
+              child: Align(
+                child: Builder(
+                  builder: (context) => InkWell(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/search-page');
+                    },
+                    child: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.topRight,
+              ),
+            ))
           ],
         ),
       ),
@@ -141,10 +158,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       Text(
                         _categories[index],
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: 10,
@@ -155,35 +169,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: ListView.builder(
-                                  itemCount:
-                                      _songs[_categories[index]]?.length + 1,
+                                  itemCount: _songs[_categories[index]]?.length + 1,
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index2) {
-                                    return index2 <
-                                            _songs[_categories[index]]?.length
+                                    return index2 < _songs[_categories[index]]?.length
                                         ? InkWell(
                                             onTap: () {
                                               setState(() {
                                                 musicPlayer = MusicPlayer(
-                                                  title:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.name,
-                                                  key: ValueKey(
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.id),
-                                                  url:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.audioUrl,
-                                                  backColor: MyColors
-                                                      .lightPrimaryColor
-                                                      .withOpacity(.8),
-                                                  initialDuration:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.duration,
+                                                  title: _songs[_categories[index]][index2]?.name,
+                                                  key: ValueKey(_songs[_categories[index]][index2]?.id),
+                                                  url: _songs[_categories[index]][index2]?.audioUrl,
+                                                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                                                  initialDuration: _songs[_categories[index]][index2]?.duration,
                                                 );
                                                 _isPlaying = true;
                                               });
@@ -196,21 +194,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                   CachedImage(
                                                     width: 120,
                                                     height: 120,
-                                                    imageShape:
-                                                        BoxShape.rectangle,
-                                                    imageUrl: _songs[
-                                                            _categories[
-                                                                index]][index2]
-                                                        ?.imageUrl,
-                                                    defaultAssetImage: Strings
-                                                        .default_melody_image,
+                                                    imageShape: BoxShape.rectangle,
+                                                    imageUrl: _songs[_categories[index]][index2]?.imageUrl,
+                                                    defaultAssetImage: Strings.default_melody_image,
                                                   ),
                                                   Text(
-                                                    _songs[_categories[index]]
-                                                            [index2]
-                                                        ?.name,
-                                                    style: TextStyle(
-                                                        color: Colors.white),
+                                                    _songs[_categories[index]][index2]?.name,
+                                                    style: TextStyle(color: Colors.white),
                                                   )
                                                 ],
                                               ),
@@ -218,23 +208,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           )
                                         : InkWell(
                                             onTap: () {
-                                              Navigator.of(context).pushNamed(
-                                                  '/category-page',
-                                                  arguments: {
-                                                    'category':
-                                                        _categories[index]
-                                                  });
+                                              Navigator.of(context).pushNamed('/category-page',
+                                                  arguments: {'category': _categories[index]});
                                             },
                                             child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.all(8.0),
                                               child: Center(
                                                   child: Text(
                                                 'view all',
                                                 style: TextStyle(
-                                                    color: MyColors.accentColor,
-                                                    decoration: TextDecoration
-                                                        .underline),
+                                                    color: MyColors.accentColor, decoration: TextDecoration.underline),
                                               )),
                                             ),
                                           );
@@ -267,15 +250,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (mounted) {
       setState(() {
         _records = records;
-        if (_records.length > 0)
-          this.lastVisiblePostSnapShot = records.last.timestamp;
+        if (_records.length > 0) this.lastVisiblePostSnapShot = records.last.timestamp;
       });
     }
   }
 
   nextRecords() async {
-    List<Record> records =
-        await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
+    List<Record> records = await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
     if (records.length > 0) {
       setState(() {
         records.forEach((element) => _records.add(element));
@@ -316,9 +297,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: Constants.language == 'en'
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.end,
+      crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
         Expanded(
           flex: 1,
@@ -338,8 +317,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       return index < _singers.length
                           ? InkWell(
                               onTap: () {
-                                Navigator.of(context).pushNamed('/singer-page',
-                                    arguments: {'singer': _singers[index]});
+                                Navigator.of(context).pushNamed('/singer-page', arguments: {'singer': _singers[index]});
                               },
                               child: Container(
                                 height: 150,
@@ -351,8 +329,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       height: 120,
                                       imageShape: BoxShape.circle,
                                       imageUrl: _singers[index].imageUrl,
-                                      defaultAssetImage:
-                                          Strings.default_profile_image,
+                                      defaultAssetImage: Strings.default_profile_image,
                                     ),
                                     Text(
                                       _singers[index].name,
@@ -364,17 +341,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             )
                           : InkWell(
                               onTap: () {
-                                Navigator.of(context)
-                                    .pushNamed('/singers-page');
+                                Navigator.of(context).pushNamed('/singers-page');
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Center(
                                     child: Text(
                                   'view all',
-                                  style: TextStyle(
-                                      color: MyColors.accentColor,
-                                      decoration: TextDecoration.underline),
+                                  style: TextStyle(color: MyColors.accentColor, decoration: TextDecoration.underline),
                                 )),
                               ),
                             );
@@ -389,8 +363,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               language(en: 'Latest records', ar: 'آخر المنشورات'),
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -444,13 +417,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >=
-                _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           nextRecords();
-        } else if (_melodiesScrollController.offset <=
-                _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}

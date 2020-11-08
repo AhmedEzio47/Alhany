@@ -3,49 +3,38 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/comment_model.dart';
-import 'package:Alhany/models/record_model.dart';
+import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/list_items/comment_item2.dart';
-import 'package:Alhany/widgets/list_items/record_item.dart';
+import 'package:Alhany/widgets/list_items/news_item.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class RecordPage extends StatefulWidget {
-  final Record record;
+class NewsPage extends StatefulWidget {
+  final News news;
 
-  const RecordPage({Key key, this.record}) : super(key: key);
+  const NewsPage({Key key, this.news}) : super(key: key);
   @override
-  _RecordPageState createState() => _RecordPageState();
+  _NewsPageState createState() => _NewsPageState();
 }
 
-class _RecordPageState extends State<RecordPage> {
+class _NewsPageState extends State<NewsPage> {
   TextEditingController _commentController = TextEditingController();
-  User _singer;
-
-  getSinger() async {
-    User singer = await DatabaseService.getUserWithId(widget.record.singerId);
-    setState(() {
-      _singer = singer;
-    });
-  }
 
   /// Submit Comment to save in firebase database
   void _submitButton() async {
     AppUtil.showLoader(context);
 
     if (_commentController.text.isNotEmpty) {
-      DatabaseService.addComment(
-        _commentController.text,
-        recordId: widget.record.id,
-      );
+      DatabaseService.addComment(_commentController.text, newsId: widget.news.id);
 
-      await NotificationHandler.sendNotification(widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.record.id, 'comment');
+      await NotificationHandler.sendNotification(Constants.startUser.id,
+          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.news.id, 'comment');
 
-      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(_commentController.text, widget.news.id);
+
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
@@ -76,14 +65,14 @@ class _RecordPageState extends State<RecordPage> {
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments = await DatabaseService.getComments(recordId: widget.record.id);
+    List<Comment> comments = await DatabaseService.getComments(newsId: widget.news.id);
     setState(() {
       _comments = comments;
     });
   }
 
   getAllComments() async {
-    List<Comment> comments = await DatabaseService.getAllComments(recordId: widget.record.id);
+    List<Comment> comments = await DatabaseService.getAllComments(newsId: widget.news.id);
     setState(() {
       _comments = comments;
     });
@@ -92,7 +81,6 @@ class _RecordPageState extends State<RecordPage> {
   @override
   void initState() {
     getComments();
-    getSinger();
     super.initState();
   }
 
@@ -137,11 +125,11 @@ class _RecordPageState extends State<RecordPage> {
                     children: [
                       RegularAppbar(context),
                       Text(
-                        (_singer?.name ?? ''),
+                        (Constants.startUser?.name ?? ''),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
-                      RecordItem(
-                        record: widget.record,
+                      NewsItem(
+                        news: widget.news,
                       ),
                       Container(
                         margin: EdgeInsets.only(left: 8, right: 8, top: 8),
@@ -194,7 +182,7 @@ class _RecordPageState extends State<RecordPage> {
                                         //print('commenter: $commenter and comment: $comment');
 
                                         return CommentItem2(
-                                          record: widget.record,
+                                          news: widget.news,
                                           comment: comment,
                                           commenter: commenter,
                                           isReply: false,

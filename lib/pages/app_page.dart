@@ -19,11 +19,11 @@ class AppPage extends StatefulWidget {
 class _AppPageState extends State<AppPage> {
   PageController _pageController;
 
-  int _page = 2;
+  int _page = 1;
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 2);
+    _pageController = PageController(initialPage: 1);
     super.initState();
   }
 

@@ -39,14 +39,17 @@ List<String> searchList(String text) {
 }
 
 class AppUtil {
-  static showAlertDialog(
-      {@required BuildContext context,
-      String heading,
-      String message,
-      String firstBtnText,
-      String secondBtnText,
-      Function firstFunc,
-      Function secondFunc}) {
+  static showAlertDialog({
+    @required BuildContext context,
+    String heading,
+    String message,
+    String firstBtnText,
+    String secondBtnText,
+    String thirdBtnText,
+    Function firstFunc,
+    Function secondFunc,
+    Function thirdFunc,
+  }) {
     showDialog(
         context: context,
         builder: (context) {
@@ -69,6 +72,15 @@ class AppUtil {
                       onPressed: secondFunc,
                       child: Text(
                         secondBtnText,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  : Container(),
+              thirdBtnText != null
+                  ? MaterialButton(
+                      onPressed: thirdFunc,
+                      child: Text(
+                        thirdBtnText,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     )
@@ -114,9 +126,33 @@ class AppUtil {
     return null;
   }
 
+  static Future chooseVideo({bool multiple = false}) async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'mp4',
+          'avi',
+        ],
+        allowMultiple: multiple);
+
+    if (result != null) {
+      if (multiple) {
+        List<File> files = [];
+        result.files.forEach((file) {
+          files.add(File(file.path));
+        });
+        return files;
+      } else {
+        File file = File(result.files.single.path);
+        return file;
+      }
+    }
+
+    return null;
+  }
+
   static Future<File> pickImageFromGallery() async {
-    FilePickerResult result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: [
+    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
       'jpg',
       'png',
     ]);
@@ -129,12 +165,10 @@ class AppUtil {
     return null;
   }
 
-  static Future<String> uploadFile(
-      File file, BuildContext context, String path) async {
+  static Future<String> uploadFile(File file, BuildContext context, String path) async {
     if (file == null) return '';
 
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(path);
+    StorageReference storageReference = FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
     StorageUploadTask uploadTask;
 
@@ -152,8 +186,7 @@ class AppUtil {
 
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
-    String fileName =
-        await getStorageFileNameFromContentDisposition(contentDisposition);
+    String fileName = await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
@@ -175,8 +208,7 @@ class AppUtil {
     return fileName;
   }
 
-  static Future<String> getStorageFileNameFromContentDisposition(
-      var contentDisposition) async {
+  static Future<String> getStorageFileNameFromContentDisposition(var contentDisposition) async {
     String fileName = contentDisposition
         .split('filename*=utf-8')
         .last
@@ -197,8 +229,7 @@ class AppUtil {
   }
 
   static Future<File> takePhoto() async {
-    File image = await ImagePicker.pickImage(
-        source: ImageSource.camera, imageQuality: 80);
+    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: 80);
     return image;
   }
 
@@ -215,8 +246,7 @@ class AppUtil {
     if (timestamp == null) return '';
 
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(
-        timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -258,12 +288,10 @@ class AppUtil {
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil.showToast(
-          language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
+      AppUtil.showToast(language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
       return "Email is Required";
     } else if (!regExp.hasMatch(value)) {
-      AppUtil.showToast(
-          language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
+      AppUtil.showToast(language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
       return "Invalid Email";
     }
     return null;
@@ -289,8 +317,7 @@ class AppUtil {
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(
-        timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -322,24 +349,17 @@ class AppUtil {
   static checkIfContainsMention(String text, String recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
-        User user =
-            await DatabaseService.getUserWithUsername(word.substring(1));
+        User user = await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
-            user.id,
-            'New mention',
-            Constants.currentUser.username + ' mentioned you',
-            recordId,
-            'mention');
+            user.id, 'New mention', Constants.currentUser.username + ' mentioned you', recordId, 'mention');
       }
     });
   }
 
   static Future<File> recordVideo(Duration maxDuration) async {
     File video = await ImagePicker.pickVideo(
-        source: ImageSource.camera,
-        maxDuration: maxDuration,
-        preferredCameraDevice: CameraDevice.front);
+        source: ImageSource.camera, maxDuration: maxDuration, preferredCameraDevice: CameraDevice.front);
     return video;
   }
 }

@@ -2,29 +2,25 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/models/record_model.dart';
-import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
+import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/url_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-class RecordItem extends StatefulWidget {
-  final Record record;
+class NewsItem extends StatefulWidget {
+  final News news;
 
-  const RecordItem({Key key, this.record}) : super(key: key);
-
+  const NewsItem({Key key, this.news}) : super(key: key);
   @override
-  _RecordItemState createState() => _RecordItemState();
+  _NewsItemState createState() => _NewsItemState();
 }
 
-class _RecordItemState extends State<RecordItem> {
-  User _singer;
-  Melody _melody;
-
+class _NewsItemState extends State<NewsItem> {
   bool isLiked = false;
   bool isLikeEnabled = true;
   var likes = [];
@@ -33,79 +29,64 @@ class _RecordItemState extends State<RecordItem> {
 
   @override
   void initState() {
-    getAuthor();
-    getMelody();
-    initVideoPlayer();
-    initLikes(widget.record);
+    if (widget.news.text.length > Sizes.postExcerpt) {
+      firstHalf = widget.news.text.substring(0, Sizes.postExcerpt);
+      secondHalf = widget.news.text.substring(Sizes.postExcerpt, widget.news.text.length);
+    } else {
+      firstHalf = widget.news.text;
+      secondHalf = "";
+    }
+    if (widget.news.type == 'video') {
+      initVideoPlayer();
+    }
+    initLikes(widget.news);
     super.initState();
   }
 
-  getAuthor() async {
-    User author = await DatabaseService.getUserWithId(widget.record.singerId);
-    if (mounted) {
-      setState(() {
-        _singer = author;
-      });
-    }
-  }
-
-  getMelody() async {
-    Melody melody = await DatabaseService.getMelodyWithId(widget.record.melodyId);
-    if (mounted) {
-      setState(() {
-        _melody = melody;
-      });
-    }
-  }
-
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': widget.record.singerId});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': Constants.startUser.id});
   }
 
-  void _goToMelodyPage() {
-    Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': _melody});
-  }
-
-  Future<void> likeBtnHandler(Record record) async {
+  Future<void> likeBtnHandler(News news) async {
     setState(() {
       isLikeEnabled = false;
     });
     if (isLiked == true) {
-      await recordsRef.document(record.id).collection('likes').document(Constants.currentUserID).delete();
+      await newsRef.document(news.id).collection('likes').document(Constants.currentUserID).delete();
 
-      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(-1)});
+      await newsRef.document(news.id).updateData({'likes': FieldValue.increment(-1)});
 
-      await NotificationHandler.removeNotification(record.singerId, record.id, 'like');
+      await NotificationHandler.removeNotification(Constants.startUser.id, news.id, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
     } else if (isLiked == false) {
-      await recordsRef
-          .document(record.id)
+      await newsRef
+          .document(news.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(1)});
+      await newsRef.document(news.id).updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
       });
 
       await NotificationHandler.sendNotification(
-          record.singerId, 'New Record Like', Constants.currentUser.name + ' likes your post', record.id, 'like');
+          Constants.startUser.id, 'New News Like', Constants.currentUser.name + ' likes your post', news.id, 'like');
     }
-    var recordMeta = await DatabaseService.getPostMeta(recordId: record.id);
+    var newsMeta = await DatabaseService.getPostMeta(newsId: news.id);
     setState(() {
-      record.likes = recordMeta['likes'];
+      news.likes = newsMeta['likes'];
       isLikeEnabled = true;
     });
   }
 
-  void initLikes(Record record) async {
+  void initLikes(News news) async {
     DocumentSnapshot likedSnapshot =
-        await recordsRef.document(record.id).collection('likes')?.document(Constants.currentUserID)?.get();
+        await newsRef.document(news.id).collection('likes')?.document(Constants.currentUserID)?.get();
 
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -117,9 +98,13 @@ class _RecordItemState extends State<RecordItem> {
 
   VideoPlayerController _videoController;
   initVideoPlayer() async {
-    _videoController = VideoPlayerController.network(widget.record.audioUrl);
+    _videoController = VideoPlayerController.network(widget.news.contentUrl);
     await _videoController.initialize();
   }
+
+  String firstHalf;
+  String secondHalf;
+  bool flag = true;
 
   @override
   Widget build(BuildContext context) {
@@ -127,12 +112,11 @@ class _RecordItemState extends State<RecordItem> {
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
-          if (Constants.currentRoute != '/record-page')
-            Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.record, 'singer': _singer});
+          Navigator.of(context).pushNamed('/news-page', arguments: {'news': widget.news});
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 280,
+          height: 310,
           decoration: BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
@@ -148,7 +132,7 @@ class _RecordItemState extends State<RecordItem> {
                         height: 25,
                         width: 25,
                         imageShape: BoxShape.circle,
-                        imageUrl: _singer?.profileImageUrl,
+                        imageUrl: Constants.startUser?.profileImageUrl,
                         defaultAssetImage: Strings.default_profile_image,
                       ),
                       onTap: () => _goToProfilePage(),
@@ -158,53 +142,56 @@ class _RecordItemState extends State<RecordItem> {
                     ),
                     InkWell(
                       child: Text(
-                        _singer?.name ?? '',
+                        '${Constants.startUser?.name}: ${widget.news.title}' ?? '',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: MyColors.darkPrimaryColor,
                         ),
                       ),
                       onTap: () => _goToProfilePage(),
                     ),
-                    Text(
-                      ' singed ',
-                      style: TextStyle(
-                        color: Colors.black,
-                      ),
-                    ),
-                    InkWell(
-                      child: Text(
-                        _melody?.name ?? '',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      onTap: () => _goToMelodyPage(),
-                    ),
                   ],
                 ),
               ),
-              // MusicPlayer(
-              //   url: widget.record.audioUrl,
-              //   backColor: Colors.transparent,
-              //   btnSize: 26,
-              //   recordBtnVisible: true,
-              //   initialDuration: widget.record.duration,
-              //   playBtnPosition: PlayBtnPosition.left,
-              //   isCompact: true,
-              // ),
-              Stack(
-                children: [
-                  Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
-                  Positioned.fill(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      child: playPauseBtn(),
-                      alignment: Alignment.center,
+              secondHalf.isEmpty
+                  ? UrlText(
+                      context: context,
+                      text: widget.news.text,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
+                    )
+                  : UrlText(
+                      context: context,
+                      text: flag ? (firstHalf + '...') : (firstHalf + secondHalf),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                     ),
-                  ))
-                ],
+              InkWell(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    secondHalf.isEmpty
+                        ? Text('')
+                        : Text(
+                            flag ? 'Show more' : 'Show less',
+                            style: TextStyle(color: MyColors.darkPrimaryColor),
+                          )
+                  ],
+                ),
+                onTap: () {
+                  setState(() {
+                    flag = !flag;
+                  });
+                },
               ),
+              _content(),
               SizedBox(
                 height: 10,
               ),
@@ -216,7 +203,7 @@ class _RecordItemState extends State<RecordItem> {
                     child: Row(
                       children: [
                         Text(
-                          '${widget.record.likes ?? 0}',
+                          '${widget.news.likes ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -224,7 +211,7 @@ class _RecordItemState extends State<RecordItem> {
                           style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.record.comments ?? 0}',
+                          '${widget.news.comments ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -232,7 +219,7 @@ class _RecordItemState extends State<RecordItem> {
                           style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.record.shares ?? 0}',
+                          '${widget.news.shares ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -249,7 +236,7 @@ class _RecordItemState extends State<RecordItem> {
                         InkWell(
                           onTap: () async {
                             if (isLikeEnabled) {
-                              await likeBtnHandler(widget.record);
+                              await likeBtnHandler(widget.news);
                             }
                           },
                           child: SizedBox(
@@ -300,8 +287,9 @@ class _RecordItemState extends State<RecordItem> {
 
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () => Navigator.of(context)
-          .pushNamed('/post-fullscreen', arguments: {'record': widget.record, 'singer': _singer, 'melody': _melody}),
+      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
+        'news': widget.news,
+      }),
       child: Container(
         height: 40,
         width: 40,
@@ -324,5 +312,43 @@ class _RecordItemState extends State<RecordItem> {
         ),
       ),
     );
+  }
+
+  _content() {
+    switch (widget.news.type) {
+      case 'video':
+        return Stack(
+          children: [
+            Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                child: playPauseBtn(),
+                alignment: Alignment.center,
+              ),
+            ))
+          ],
+        );
+      case 'audio':
+        return MusicPlayer(
+          url: widget.news.contentUrl,
+          backColor: Colors.transparent,
+          btnSize: 26,
+          recordBtnVisible: true,
+          initialDuration: widget.news.duration,
+          playBtnPosition: PlayBtnPosition.left,
+          isCompact: true,
+        );
+      case 'image':
+        return CachedImage(
+          height: 200,
+          imageShape: BoxShape.rectangle,
+          imageUrl: widget.news.contentUrl,
+          defaultAssetImage: Strings.default_cover_image,
+        );
+      default:
+        return Container();
+    }
   }
 }

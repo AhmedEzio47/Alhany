@@ -3,7 +3,8 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/comment_model.dart';
-import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -12,8 +13,9 @@ import 'package:flutter/material.dart';
 
 class CommentPage extends StatefulWidget {
   final Record record;
+  final News news;
   final Comment comment;
-  const CommentPage({Key key, this.record, this.comment}) : super(key: key);
+  const CommentPage({Key key, this.record, this.news, this.comment}) : super(key: key);
 
   @override
   _CommentPageState createState() => _CommentPageState();
@@ -25,12 +27,17 @@ class _CommentPageState extends State<CommentPage> {
     AppUtil.showLoader(context);
 
     if (_replyController.text.isNotEmpty) {
-      DatabaseService.addReply(widget.record.id, widget.comment.id, _replyController.text);
+      DatabaseService.addReply(widget.comment.id, _replyController.text,
+          recordId: widget.record?.id, newsId: widget.news?.id);
 
-      await NotificationHandler.sendNotification(widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post', _replyController.text, widget.record.id, 'comment');
+      await NotificationHandler.sendNotification(
+          widget.record?.singerId ?? Constants.startUser.id,
+          Constants.currentUser.name + ' commented on your post',
+          _replyController.text,
+          widget.record?.id ?? widget.news?.id,
+          'comment');
 
-      await AppUtil.checkIfContainsMention(_replyController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(_replyController.text, widget.record?.id);
 
       _onBackPressed();
     } else {
@@ -59,7 +66,8 @@ class _CommentPageState extends State<CommentPage> {
   List<Comment> _replies = [];
 
   getReplies() async {
-    List<Comment> replies = await DatabaseService.getCommentReplies(widget.record.id, widget.comment.id);
+    List<Comment> replies = await DatabaseService.getCommentReplies(widget.comment.id,
+        recordId: widget.record?.id, newsId: widget.news?.id);
     setState(() {
       _replies = replies;
     });
@@ -121,6 +129,7 @@ class _CommentPageState extends State<CommentPage> {
                     //print('commenter: $commenter and comment: $comment');
                     return CommentItem2(
                       record: widget.record,
+                      news: widget.news,
                       comment: widget.comment,
                       commenter: commenter,
                       isReply: false,
@@ -171,6 +180,7 @@ class _CommentPageState extends State<CommentPage> {
                               //print('commenter: $commenter and comment: $comment');
                               return CommentItem2(
                                 record: widget.record,
+                                news: widget.news,
                                 comment: comment,
                                 commenter: commenter,
                                 parentComment: widget.comment,

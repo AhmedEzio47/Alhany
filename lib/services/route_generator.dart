@@ -9,15 +9,18 @@ import 'package:Alhany/pages/downloads.dart';
 import 'package:Alhany/pages/email_change.dart';
 import 'package:Alhany/pages/lyrics_editor.dart';
 import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/pages/news_page.dart';
 import 'package:Alhany/pages/password_reset.dart';
 import 'package:Alhany/pages/profile_page.dart';
-import 'package:Alhany/pages/record_fullscreen.dart';
+import 'package:Alhany/pages/post_fullscreen.dart';
 import 'package:Alhany/pages/record_page.dart';
 import 'package:Alhany/pages/root.dart';
+import 'package:Alhany/pages/search_page.dart';
 import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/pages/singers_page.dart';
 import 'package:Alhany/pages/songs_page.dart';
 import 'package:Alhany/pages/upload_mulit_level_melody.dart';
+import 'package:Alhany/pages/upload_news.dart';
 import 'package:Alhany/pages/upload_single_level_melody.dart';
 import 'package:Alhany/pages/upload_songs.dart';
 import 'package:Alhany/pages/welcome_page.dart';
@@ -99,10 +102,18 @@ class RouteGenerator {
                   record: args['record'],
                 ));
 
-      case '/record-fullscreen':
+      case '/news-page':
+        Constants.currentRoute = settings.name;
         return MaterialPageRoute(
-            builder: (_) => RecordFullscreen(
+            builder: (_) => NewsPage(
+                  news: args['news'],
+                ));
+
+      case '/post-fullscreen':
+        return MaterialPageRoute(
+            builder: (_) => PostFullscreen(
                   record: args['record'],
+                  news: args['news'],
                   singer: args['singer'],
                   melody: args['melody'],
                 ));
@@ -112,6 +123,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => CommentPage(
                   record: args['record'],
+                  news: args['news'],
                   comment: args['comment'],
                 ));
 
@@ -125,7 +137,16 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => SingersPage());
 
       case '/category-page':
-        return MaterialPageRoute(builder: (_) => CategoryPage(category: args['category'],));
+        return MaterialPageRoute(
+            builder: (_) => CategoryPage(
+                  category: args['category'],
+                ));
+
+      case '/search-page':
+        return MaterialPageRoute(builder: (_) => SearchPage());
+
+      case '/upload-news':
+        return MaterialPageRoute(builder: (_) => UploadNews());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

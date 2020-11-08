@@ -50,8 +50,8 @@ class _CachedImageState extends State<CachedImage> {
               placeholder: (context, loggedInProfileImageURL) => Center(
                   child: Image.asset(
                 defaultAssetImage,
-                height: 80,
-                width: 80,
+                height: height,
+                width: width,
               )),
               errorWidget: (context, loggedInProfileImageURL, error) => Icon(Icons.error),
             )

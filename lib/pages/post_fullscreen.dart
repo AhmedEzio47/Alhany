@@ -1,7 +1,8 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/models/record.dart';
+import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -11,16 +12,17 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:math' as math;
 
-class RecordFullscreen extends StatefulWidget {
+class PostFullscreen extends StatefulWidget {
   final Record record;
+  final News news;
   final User singer;
   final Melody melody;
-  const RecordFullscreen({Key key, this.record, this.singer, this.melody}) : super(key: key);
+  const PostFullscreen({Key key, this.record, this.singer, this.melody, this.news}) : super(key: key);
   @override
-  _RecordFullscreenState createState() => _RecordFullscreenState();
+  _PostFullscreenState createState() => _PostFullscreenState();
 }
 
-class _RecordFullscreenState extends State<RecordFullscreen> {
+class _PostFullscreenState extends State<PostFullscreen> {
   bool isLiked = false;
   bool isLikeEnabled = true;
   var likes = [];
@@ -31,16 +33,25 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
   bool _isFollowing = false;
 
   isFollowing() async {
-    if (Constants.currentUserID == widget.singer.id) return true;
+    if (Constants.currentUserID == widget.singer?.id) return true;
 
     DocumentSnapshot snapshot =
-        await usersRef.document(Constants.currentUserID).collection('following').document(widget.singer.id).get();
+        await usersRef.document(Constants.currentUserID).collection('following').document(widget.singer?.id).get();
     return snapshot.exists;
   }
 
-  void initLikes(Record record) async {
-    DocumentSnapshot likedSnapshot =
-        await recordsRef.document(record.id).collection('likes')?.document(Constants.currentUserID)?.get();
+  void initLikes({Record record, News news}) async {
+    CollectionReference collectionReference;
+    if (record != null) {
+      collectionReference = recordsRef;
+    } else if (news != null) {
+      collectionReference = newsRef;
+    }
+    DocumentSnapshot likedSnapshot = await collectionReference
+        .document(record?.id ?? news?.id)
+        .collection('likes')
+        ?.document(Constants.currentUserID)
+        ?.get();
 
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -50,45 +61,58 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
     }
   }
 
-  Future<void> likeBtnHandler(Record record) async {
+  Future<void> likeBtnHandler({Record record, News news}) async {
     setState(() {
       isLikeEnabled = false;
     });
+    CollectionReference collectionReference;
+    if (record != null) {
+      collectionReference = recordsRef;
+    } else if (news != null) {
+      collectionReference = newsRef;
+    }
     if (isLiked == true) {
-      await recordsRef.document(record.id).collection('likes').document(Constants.currentUserID).delete();
+      await collectionReference
+          .document(record?.id ?? news?.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .delete();
 
-      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(-1)});
+      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(-1)});
 
-      await NotificationHandler.removeNotification(record.singerId, record.id, 'like');
+      await NotificationHandler.removeNotification(
+          record?.singerId ?? Constants.startUser.id, record?.id ?? news?.id, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
     } else if (isLiked == false) {
-      await recordsRef
-          .document(record.id)
+      await collectionReference
+          .document(record?.id ?? news?.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(1)});
+      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          record.singerId, 'New Record Like', Constants.currentUser.name + ' likes your post', record.id, 'like');
+      await NotificationHandler.sendNotification(record?.singerId ?? Constants.startUser.id, 'New Record Like',
+          Constants.currentUser.name + ' likes your post', record?.id ?? news?.id, 'like');
     }
-    var recordMeta = await DatabaseService.getRecordMeta(record.id);
+    var recordMeta = await DatabaseService.getPostMeta(recordId: record?.id, newsId: news?.id);
     setState(() {
-      record.likes = recordMeta['likes'];
+      record?.likes = recordMeta['likes'];
+      news?.likes = recordMeta['likes'];
       isLikeEnabled = true;
     });
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': widget.record.singerId});
+    Navigator.of(context)
+        .pushNamed('/profile-page', arguments: {'user_id': widget.record?.singerId ?? Constants.startUser.id});
   }
 
   void _goToMelodyPage() {
@@ -99,8 +123,8 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
   void initState() {
     super.initState();
     isFollowing();
-    initLikes(widget.record);
-    _controller = VideoPlayerController.network(widget.record.audioUrl)
+    initLikes(record: widget.record, news: widget.news);
+    _controller = VideoPlayerController.network(widget.record?.audioUrl ?? widget.news?.contentUrl)
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
@@ -157,23 +181,27 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, bottom: 10),
-                    child: Text(
-                      '@${widget.singer.username}',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(left: 10, bottom: 10),
-                      child: Text.rich(
-                        TextSpan(children: <TextSpan>[
-                          TextSpan(text: '${widget.singer.name}\n', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: 'singed\n', style: TextStyle(fontSize: 12)),
-                          TextSpan(text: widget.melody.name, style: TextStyle(fontWeight: FontWeight.bold))
-                        ]),
-                        style: TextStyle(color: Colors.white, fontSize: 14),
-                      )),
+                  widget.record != null
+                      ? Padding(
+                          padding: EdgeInsets.only(left: 10, bottom: 10),
+                          child: Text(
+                            '@${widget.singer?.username}',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )
+                      : Container(),
+                  widget.record != null
+                      ? Padding(
+                          padding: EdgeInsets.only(left: 10, bottom: 10),
+                          child: Text.rich(
+                            TextSpan(children: <TextSpan>[
+                              TextSpan(text: '${widget.singer?.name}\n', style: TextStyle(fontWeight: FontWeight.bold)),
+                              TextSpan(text: 'singed\n', style: TextStyle(fontSize: 12)),
+                              TextSpan(text: widget.melody?.name, style: TextStyle(fontWeight: FontWeight.bold))
+                            ]),
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ))
+                      : Container(),
                 ],
               ),
             ),
@@ -203,7 +231,8 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
                               child: CircleAvatar(
                                 radius: 19,
                                 backgroundColor: Colors.black,
-                                backgroundImage: NetworkImage(widget.singer?.profileImageUrl),
+                                backgroundImage:
+                                    NetworkImage(widget.singer?.profileImageUrl ?? Constants.startUser.profileImageUrl),
                               ),
                             ),
                           ),
@@ -228,22 +257,28 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
                           InkWell(
                             onTap: () async {
                               if (isLikeEnabled) {
-                                await likeBtnHandler(widget.record);
+                                await likeBtnHandler(record: widget.record, news: widget.news);
                               }
                             },
                             child: isLiked
                                 ? Icon(Icons.thumb_up, size: 35, color: MyColors.primaryColor)
                                 : Icon(Icons.thumb_up, size: 35, color: Colors.white),
                           ),
-                          Text('${widget.record.likes ?? 0}', style: TextStyle(color: Colors.white))
+                          Text('${widget.record?.likes ?? widget.news?.likes ?? 0}',
+                              style: TextStyle(color: Colors.white))
                         ],
                       ),
                     ),
                     InkWell(
                       onTap: () {
-                        if (Constants.currentRoute != '/record-page')
+                        if (widget.record != null) {
                           Navigator.of(context)
                               .pushNamed('/record-page', arguments: {'record': widget.record, 'singer': widget.singer});
+                        } else {
+                          Navigator.of(context).pushNamed('/news-page', arguments: {
+                            'news': widget.news,
+                          });
+                        }
                       },
                       child: Container(
                         padding: EdgeInsets.only(bottom: 20),
@@ -254,7 +289,8 @@ class _RecordFullscreenState extends State<RecordFullscreen> {
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(math.pi),
                                 child: Icon(Icons.sms, size: 35, color: Colors.white)),
-                            Text('${widget.record.comments ?? 0}', style: TextStyle(color: Colors.white))
+                            Text('${widget.record?.comments ?? widget.news?.comments ?? 0}',
+                                style: TextStyle(color: Colors.white))
                           ],
                         ),
                       ),

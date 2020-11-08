@@ -29,7 +29,7 @@ class Sizes {
 
   static const int maxPostChars = 289;
 
-  static const int postExcerpt = 150; // vertical   offset
+  static const int postExcerpt = 100; // vertical   offset
 
   static double fullWidth(BuildContext context) {
     // print(MediaQuery.of(context).size.width.toString());
