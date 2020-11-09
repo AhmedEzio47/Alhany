@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Melody {
   final String id;
   final String name;
-  final String description;
   final String audioUrl;
   final Map levelUrls;
   final Map levelDurations;
@@ -21,7 +20,6 @@ class Melody {
   Melody(
       {this.id,
       this.name,
-      this.description,
       this.audioUrl,
       this.levelUrls,
       this.levelDurations,
@@ -40,7 +38,6 @@ class Melody {
     return Melody(
         id: doc.documentID,
         name: doc['name'],
-        description: doc['description'] ?? '',
         audioUrl: doc['audio_url'],
         levelUrls: doc['level_urls'],
         levelDurations: doc['level_durations'],
@@ -58,24 +55,23 @@ class Melody {
 
   factory Melody.fromMap(Map<String, dynamic> map) {
     return Melody(
-      id: map['id'],
-      name: map['name'],
-      description: map['description'],
-      authorId: map['author_id'],
-      audioUrl: map['audio_url'],
-      imageUrl: map['image_url'],
-      duration: map['duration'],
-    );
+        id: map['id'],
+        name: map['name'],
+        authorId: map['author_id'],
+        audioUrl: map['audio_url'],
+        imageUrl: map['image_url'],
+        duration: map['duration'],
+        singer: map['singer']);
   }
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       'id': this.id,
       'name': this.name,
-      'description': this.description,
       'author_id': this.authorId,
       'audio_url': this.audioUrl,
       'image_url': this.imageUrl,
+      'singer': this.singer,
       'duration': this.duration,
     };
     return map;

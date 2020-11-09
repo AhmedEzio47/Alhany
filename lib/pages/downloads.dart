@@ -85,7 +85,10 @@ class _DownloadsPageState extends State<DownloadsPage> {
                                     setState(() {
                                       _isPlaying = true;
                                     });
-                                    playMelody(index);
+
+                                    AppUtil.showLoader(context);
+                                    await playMelody(index);
+                                    Navigator.of(context).pop();
                                   },
                                   child: MelodyItem(
                                     //Solves confusion between songs and melodies when adding to favourites
@@ -131,27 +134,23 @@ class _DownloadsPageState extends State<DownloadsPage> {
       await file.delete();
     }
     print('decrypted files deleted');
+    setState(() {
+      Constants.currentRoute = '';
+    });
     Navigator.of(context).pop();
     return false;
   }
 
-  void playMelody(int index) {
-    AppUtil.showLoader(context);
-    // if (musicPlayer != null) {
-    //   setState(() {
-    //     musicPlayer.stop();
-    //   });
-    // }
+  playMelody(int index) async {
     String path = EncryptionService.decryptFile(_downloads[index].audioUrl);
     _decryptedPaths.add(path);
     musicPlayer = MusicPlayer(
+      melody: _downloads[index],
+      initialDuration: _downloads[index].duration,
+      title: _downloads[index].name,
       url: path,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );
-    setState(() {
-      Constants.currentRoute = '/';
-    });
-    Navigator.of(context).pop();
   }
 }

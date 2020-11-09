@@ -1,7 +1,7 @@
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class MelodySqlite {
   static Database db;
@@ -25,14 +25,8 @@ class MelodySqlite {
             author_id text,
             audio_url text,
             image_url text,
-            description text,
-            do text,
-            re text,
-            mi text,
-            fa text,
-            sol text,
-            la text,
-            si text
+            duration integer,
+            singer text
             )
           ''');
       },
@@ -58,14 +52,8 @@ class MelodySqlite {
           'author_id',
           'audio_url',
           'image_url',
-          'description',
-          'do',
-          're',
-          'mi',
-          'fa',
-          'sol',
-          'la',
-          'si'
+          'singer',
+          'duration',
         ],
         where: 'id = ?',
         whereArgs: [id]);
@@ -86,7 +74,8 @@ class MelodySqlite {
     if (db == null || !db.isOpen) {
       await open();
     }
-    return await db.update(tableName, melody.toMap(), where: 'id = ?', whereArgs: [melody.id]);
+    return await db.update(tableName, melody.toMap(),
+        where: 'id = ?', whereArgs: [melody.id]);
   }
 
   static Future<List<Melody>> getDownloads() async {
@@ -99,16 +88,10 @@ class MelodySqlite {
         'id',
         'name',
         'author_id',
+        'singer',
+        'duration',
         'audio_url',
         'image_url',
-        'description',
-        // 'do',
-        // 're',
-        // 'mi',
-        // 'fa',
-        // 'sol',
-        // 'la',
-        // 'si'
       ],
     );
 

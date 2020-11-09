@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/models/melody_model.dart';
@@ -6,18 +9,19 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:math' as math;
 
 class PostFullscreen extends StatefulWidget {
   final Record record;
   final News news;
   final User singer;
   final Melody melody;
-  const PostFullscreen({Key key, this.record, this.singer, this.melody, this.news}) : super(key: key);
+  const PostFullscreen(
+      {Key key, this.record, this.singer, this.melody, this.news})
+      : super(key: key);
   @override
   _PostFullscreenState createState() => _PostFullscreenState();
 }
@@ -35,8 +39,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
   isFollowing() async {
     if (Constants.currentUserID == widget.singer?.id) return true;
 
-    DocumentSnapshot snapshot =
-        await usersRef.document(Constants.currentUserID).collection('following').document(widget.singer?.id).get();
+    DocumentSnapshot snapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .document(widget.singer?.id)
+        .get();
     return snapshot.exists;
   }
 
@@ -78,10 +85,14 @@ class _PostFullscreenState extends State<PostFullscreen> {
           .document(Constants.currentUserID)
           .delete();
 
-      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(-1)});
+      await collectionReference
+          .document(record?.id ?? news?.id)
+          .updateData({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
-          record?.singerId ?? Constants.startUser.id, record?.id ?? news?.id, 'like');
+          record?.singerId ?? Constants.startUser.id,
+          record?.id ?? news?.id,
+          'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -93,16 +104,23 @@ class _PostFullscreenState extends State<PostFullscreen> {
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(1)});
+      await collectionReference
+          .document(record?.id ?? news?.id)
+          .updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(record?.singerId ?? Constants.startUser.id, 'New Record Like',
-          Constants.currentUser.name + ' likes your post', record?.id ?? news?.id, 'like');
+      await NotificationHandler.sendNotification(
+          record?.singerId ?? Constants.startUser.id,
+          'New Record Like',
+          Constants.currentUser.name + ' likes your post',
+          record?.id ?? news?.id,
+          'like');
     }
-    var recordMeta = await DatabaseService.getPostMeta(recordId: record?.id, newsId: news?.id);
+    var recordMeta = await DatabaseService.getPostMeta(
+        recordId: record?.id, newsId: news?.id);
     setState(() {
       record?.likes = recordMeta['likes'];
       news?.likes = recordMeta['likes'];
@@ -111,12 +129,14 @@ class _PostFullscreenState extends State<PostFullscreen> {
   }
 
   void _goToProfilePage() {
-    Navigator.of(context)
-        .pushNamed('/profile-page', arguments: {'user_id': widget.record?.singerId ?? Constants.startUser.id});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {
+      'user_id': widget.record?.singerId ?? Constants.startUser.id
+    });
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': widget.melody});
+    Navigator.of(context)
+        .pushNamed('/melody-page', arguments: {'melody': widget.melody});
   }
 
   @override
@@ -129,7 +149,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
     }
     isFollowing();
     initLikes(record: widget.record, news: widget.news);
-    _controller = VideoPlayerController.network(widget.record?.audioUrl ?? widget.news?.contentUrl)
+    _controller = VideoPlayerController.network(
+        widget.record?.audioUrl ?? widget.news?.contentUrl)
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
@@ -200,9 +221,16 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           padding: EdgeInsets.only(left: 10, bottom: 10),
                           child: Text.rich(
                             TextSpan(children: <TextSpan>[
-                              TextSpan(text: '${widget.singer?.name}\n', style: TextStyle(fontWeight: FontWeight.bold)),
-                              TextSpan(text: 'singed\n', style: TextStyle(fontSize: 12)),
-                              TextSpan(text: widget.melody?.name, style: TextStyle(fontWeight: FontWeight.bold))
+                              TextSpan(
+                                  text: '${widget.singer?.name}\n',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              TextSpan(
+                                  text: 'singed\n',
+                                  style: TextStyle(fontSize: 12)),
+                              TextSpan(
+                                  text: widget.melody?.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold))
                             ]),
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ))
@@ -236,8 +264,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
                               child: CircleAvatar(
                                 radius: 19,
                                 backgroundColor: Colors.black,
-                                backgroundImage:
-                                    NetworkImage(widget.singer?.profileImageUrl ?? Constants.startUser.profileImageUrl),
+                                backgroundImage: NetworkImage(
+                                    widget.singer?.profileImageUrl ??
+                                        Constants.startUser.profileImageUrl),
                               ),
                             ),
                           ),
@@ -246,8 +275,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                   alignment: Alignment.bottomCenter,
                                   child: CircleAvatar(
                                     radius: 10,
-                                    backgroundColor: MyColors.primaryColor.withOpacity(1),
-                                    child: Center(child: Icon(Icons.add, size: 15, color: Colors.white)),
+                                    backgroundColor:
+                                        MyColors.primaryColor.withOpacity(1),
+                                    child: Center(
+                                        child: Icon(Icons.add,
+                                            size: 15, color: Colors.white)),
                                   ),
                                 )
                               : Container()
@@ -262,28 +294,25 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           InkWell(
                             onTap: () async {
                               if (isLikeEnabled) {
-                                await likeBtnHandler(record: widget.record, news: widget.news);
+                                await likeBtnHandler(
+                                    record: widget.record, news: widget.news);
                               }
                             },
                             child: isLiked
-                                ? Icon(Icons.thumb_up, size: 35, color: MyColors.primaryColor)
-                                : Icon(Icons.thumb_up, size: 35, color: Colors.white),
+                                ? Icon(Icons.thumb_up,
+                                    size: 35, color: MyColors.primaryColor)
+                                : Icon(Icons.thumb_up,
+                                    size: 35, color: Colors.white),
                           ),
-                          Text('${widget.record?.likes ?? widget.news?.likes ?? 0}',
+                          Text(
+                              '${widget.record?.likes ?? widget.news?.likes ?? 0}',
                               style: TextStyle(color: Colors.white))
                         ],
                       ),
                     ),
                     InkWell(
                       onTap: () {
-                        if (widget.record != null) {
-                          Navigator.of(context)
-                              .pushNamed('/record-page', arguments: {'record': widget.record, 'singer': widget.singer});
-                        } else {
-                          Navigator.of(context).pushNamed('/news-page', arguments: {
-                            'news': widget.news,
-                          });
-                        }
+                        addComment();
                       },
                       child: Container(
                         padding: EdgeInsets.only(bottom: 20),
@@ -293,8 +322,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
                             Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(math.pi),
-                                child: Icon(Icons.sms, size: 35, color: Colors.white)),
-                            Text('${widget.record?.comments ?? widget.news?.comments ?? 0}',
+                                child: Icon(Icons.sms,
+                                    size: 35, color: Colors.white)),
+                            Text(
+                                '${widget.record?.comments ?? widget.news?.comments ?? 0}',
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),
@@ -308,8 +339,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           Transform(
                               alignment: Alignment.center,
                               transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.remove_red_eye, size: 35, color: Colors.white)),
-                          Text('${widget.record?.views ?? widget.news?.views ?? 0}',
+                              child: Icon(Icons.remove_red_eye,
+                                  size: 35, color: Colors.white)),
+                          Text(
+                              '${widget.record?.views ?? widget.news?.views ?? 0}',
                               style: TextStyle(color: Colors.white))
                         ],
                       ),
@@ -322,7 +355,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           Transform(
                               alignment: Alignment.center,
                               transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.share, size: 35, color: Colors.white)),
+                              child: Icon(Icons.share,
+                                  size: 35, color: Colors.white)),
                           Text('Share', style: TextStyle(color: Colors.white))
                         ],
                       ),
@@ -333,5 +367,56 @@ class _PostFullscreenState extends State<PostFullscreen> {
             ))
       ],
     );
+  }
+
+  TextEditingController _commentController = TextEditingController();
+  addComment() async {
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _commentController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                  hintText: language(en: 'New Comment', ar: 'تعليق جديد')),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_commentController.text.trim().isEmpty) {
+                AppUtil.showToast('Please leave a comment');
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              if (widget.record != null) {
+                await DatabaseService.addComment(_commentController.text,
+                    recordId: widget.record.id);
+              } else if (widget.news != null) {
+                await DatabaseService.addComment(_commentController.text,
+                    recordId: widget.news.id);
+              }
+              AppUtil.showToast(
+                  language(en: 'Comment Added', ar: 'تم إضافة التعليق'));
+              Navigator.of(context).pop();
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              language(en: 'Add Comment', ar: 'إضافة تعليق'),
+              style: TextStyle(color: Colors.white),
+            ),
+          )
+        ],
+      ),
+    )));
   }
 }

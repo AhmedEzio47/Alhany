@@ -34,13 +34,15 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     if (mounted) {
       setState(() {
         _melodies = melodies;
-        if (_melodies.length > 0) this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        if (_melodies.length > 0)
+          this.lastVisiblePostSnapShot = melodies.last.timestamp;
       });
     }
   }
 
   nextMelodies() async {
-    List<Melody> melodies = await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+    List<Melody> melodies =
+        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -65,11 +67,13 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >=
+                _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           if (!_isSearching) nextMelodies();
-        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <=
+                _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -81,123 +85,134 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        onTap: () {
-          setState(() {
-            _isPlaying = false;
-            _isSearching = false;
-          });
-        },
-        child: Stack(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                gradient: new LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black,
-                    MyColors.primaryColor,
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        body: GestureDetector(
+          onTap: () {
+            setState(() {
+              _isPlaying = false;
+              _isSearching = false;
+            });
+          },
+          child: Stack(
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  gradient: new LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      MyColors.primaryColor,
+                    ],
+                  ),
+                  color: MyColors.primaryColor,
+                  image: DecorationImage(
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    image: AssetImage(Strings.default_bg),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 70,
+                    ),
+                    CachedImage(
+                      width: 100,
+                      height: 100,
+                      imageShape: BoxShape.circle,
+                      imageUrl: Constants.startUser?.profileImageUrl,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    TabBar(
+                        onTap: (index) {
+                          setState(() {
+                            _page = index;
+                          });
+                        },
+                        labelColor: MyColors.accentColor,
+                        unselectedLabelColor: Colors.grey,
+                        controller: _tabController,
+                        tabs: [
+                          Tab(
+                            text: language(en: 'Melodies', ar: 'آخر الأعمال'),
+                          ),
+                          Tab(
+                            text: language(en: 'News', ar: 'آخر الأخبار'),
+                          ),
+                        ]),
+                    Expanded(child: _currentPage())
                   ],
                 ),
-                color: MyColors.primaryColor,
-                image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                  image: AssetImage(Strings.default_bg),
-                  fit: BoxFit.cover,
-                ),
               ),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 70,
-                  ),
-                  CachedImage(
-                    width: 100,
-                    height: 100,
-                    imageShape: BoxShape.circle,
-                    imageUrl: Constants.startUser?.profileImageUrl,
-                    defaultAssetImage: Strings.default_profile_image,
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  TabBar(
-                      onTap: (index) {
-                        setState(() {
-                          _page = index;
-                        });
-                      },
-                      labelColor: MyColors.accentColor,
-                      unselectedLabelColor: Colors.grey,
-                      controller: _tabController,
-                      tabs: [
-                        Tab(
-                          text: language(en: 'Melodies', ar: 'آخر الأعمال'),
-                        ),
-                        Tab(
-                          text: language(en: 'News', ar: 'آخر الأخبار'),
-                        ),
-                      ]),
-                  Expanded(child: _currentPage())
-                ],
-              ),
-            ),
-            _isPlaying
-                ? Positioned.fill(
-                    child: Align(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: musicPlayer,
-                    ),
-                    alignment: Alignment.bottomCenter,
-                  ))
-                : Container(),
-            _page == 0 ? _searchBar() : Container(),
-          ],
+              _isPlaying
+                  ? Positioned.fill(
+                      child: Align(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: musicPlayer,
+                      ),
+                      alignment: Alignment.bottomCenter,
+                    ))
+                  : Container(),
+              _page == 0 ? _searchBar() : Container(),
+            ],
+          ),
         ),
+        floatingActionButton: Constants.isAdmin
+            ? FloatingActionButton(
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.add_circle,
+                  color: MyColors.primaryColor,
+                ),
+                onPressed: () async {
+                  AppUtil.showAlertDialog(
+                      context: context,
+                      message: language(
+                          en: 'What do you want to upload?',
+                          ar: 'ما الذي تريد رفعه؟'),
+                      firstBtnText: language(en: 'Melody', ar: 'لحن'),
+                      firstFunc: () async {
+                        Navigator.of(context).pop();
+                        AppUtil.showAlertDialog(
+                            context: context,
+                            message: language(
+                                en: 'Single level or multi-level melody?',
+                                ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
+                            firstBtnText: language(en: 'Single', ar: 'أحادي'),
+                            firstFunc: () async {
+                              Navigator.of(context).pop();
+                              Navigator.of(context)
+                                  .pushNamed('/upload-single-level-melody');
+                            },
+                            secondBtnText: language(
+                                en: 'Multi level', ar: 'متعدد المستويات'),
+                            secondFunc: () async {
+                              Navigator.of(context).pop();
+                              Navigator.of(context)
+                                  .pushNamed('/upload-multi-level-melody');
+                            });
+                      },
+                      thirdBtnText: language(en: 'News', ar: 'خبر'),
+                      thirdFunc: () =>
+                          Navigator.of(context).pushNamed('/upload-news'),
+                      secondBtnText: language(en: 'Song', ar: 'أغنية'),
+                      secondFunc: () async {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed('/upload-songs');
+                      });
+                },
+              )
+            : null,
       ),
-      floatingActionButton: Constants.isAdmin
-          ? FloatingActionButton(
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.add_circle,
-                color: MyColors.primaryColor,
-              ),
-              onPressed: () async {
-                AppUtil.showAlertDialog(
-                    context: context,
-                    message: language(en: 'What do you want to upload?', ar: 'ما الذي تريد رفعه؟'),
-                    firstBtnText: language(en: 'Melody', ar: 'لحن'),
-                    firstFunc: () async {
-                      Navigator.of(context).pop();
-                      AppUtil.showAlertDialog(
-                          context: context,
-                          message: language(
-                              en: 'Single level or multi-level melody?', ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
-                          firstBtnText: language(en: 'Single', ar: 'أحادي'),
-                          firstFunc: () async {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pushNamed('/upload-single-level-melody');
-                          },
-                          secondBtnText: language(en: 'Multi level', ar: 'متعدد المستويات'),
-                          secondFunc: () async {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pushNamed('/upload-multi-level-melody');
-                          });
-                    },
-                    thirdBtnText: language(en: 'News', ar: 'خبر'),
-                    thirdFunc: () => Navigator.of(context).pushNamed('/upload-news'),
-                    secondBtnText: language(en: 'Song', ar: 'أغنية'),
-                    secondFunc: () async {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed('/upload-songs');
-                    });
-              },
-            )
-          : null,
     );
   }
 
@@ -265,7 +280,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_melodies[index].id),
-                          url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
+                          url: _melodies[index].audioUrl ??
+                              _melodies[index].levelUrls.values.elementAt(0),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
                           btnSize: 30,
@@ -351,5 +367,10 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
       ),
       alignment: Alignment.topRight,
     ));
+  }
+
+  Future<bool> _onBackPressed() {
+    /// Navigate back to home page
+    Navigator.of(context).pushReplacementNamed('/app-page');
   }
 }

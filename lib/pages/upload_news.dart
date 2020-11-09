@@ -12,8 +12,8 @@ import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:random_string/random_string.dart';
 import 'package:path/path.dart' as path;
+import 'package:random_string/random_string.dart';
 
 class UploadNews extends StatefulWidget {
   @override
@@ -29,7 +29,6 @@ class _UploadNewsState extends State<UploadNews> {
 
   File _contentFile;
 
-  TextEditingController _titleController = TextEditingController();
   TextEditingController _textController = TextEditingController();
 
   @override
@@ -48,16 +47,6 @@ class _UploadNewsState extends State<UploadNews> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: TextField(
-                controller: _titleController,
-                decoration: InputDecoration(hintText: 'Title'),
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
@@ -114,7 +103,9 @@ class _UploadNewsState extends State<UploadNews> {
             RaisedButton(
               onPressed: isRecording ? _stopAudioRecording : _btnPressed,
               child: Text(
-                isRecording ? 'Stop' : _contentFile == null ? 'Add Content' : 'DONE',
+                isRecording
+                    ? 'Stop'
+                    : _contentFile == null ? 'Add Content' : 'DONE',
                 style: TextStyle(color: Colors.white),
               ),
               color: MyColors.primaryColor,
@@ -193,7 +184,8 @@ class _UploadNewsState extends State<UploadNews> {
   getDuration(String filePath) async {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
-    _duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    _duration =
+        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
   }
 
   _recordVideo() async {
@@ -272,9 +264,9 @@ class _UploadNewsState extends State<UploadNews> {
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String ext = path.extension(_contentFile.path);
-    String url = await AppUtil.uploadFile(_contentFile, context, 'news/$id$ext');
+    String url =
+        await AppUtil.uploadFile(_contentFile, context, 'news/$id$ext');
     await newsRef.document(id).setData({
-      'title': _titleController.text,
       'text': _textController.text,
       'content_url': url,
       'duration': _duration,
