@@ -352,8 +352,16 @@ class DatabaseService {
     await melodiesRef.document(melodyId).updateData({'views': FieldValue.increment(1)});
   }
 
+  static incrementRecordViews(String recordId) async {
+    await recordsRef.document(recordId).updateData({'views': FieldValue.increment(1)});
+  }
+
+  static incrementNewsViews(String newsId) async {
+    await newsRef.document(newsId).updateData({'views': FieldValue.increment(1)});
+  }
+
   static Future<List<Singer>> getSingers() async {
-    QuerySnapshot singersSnapshot = await singersRef.orderBy('name', descending: false).limit(10).getDocuments();
+    QuerySnapshot singersSnapshot = await singersRef.orderBy('name', descending: false).limit(15).getDocuments();
     List<Singer> singers = singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
@@ -666,7 +674,7 @@ class DatabaseService {
     QuerySnapshot songsSnapshot = await melodiesRef
         .where('is_song', isEqualTo: true)
         .where('category', isEqualTo: category)
-        .limit(20)
+        .limit(15)
         .orderBy('timestamp', descending: true)
         .getDocuments();
     List<Melody> songs = songsSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();

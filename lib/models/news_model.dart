@@ -10,6 +10,7 @@ class News {
   int likes;
   int comments;
   int shares;
+  int views;
   final Timestamp timestamp;
 
   News(
@@ -22,6 +23,7 @@ class News {
       this.likes,
       this.comments,
       this.shares,
+      this.views,
       this.timestamp});
 
   factory News.fromDoc(DocumentSnapshot doc) {
@@ -35,6 +37,7 @@ class News {
         likes: doc['likes'],
         comments: doc['comments'],
         shares: doc['shares'],
+        views: doc['views'],
         timestamp: doc['timestamp']);
   }
 }

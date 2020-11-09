@@ -122,6 +122,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.record != null) {
+      DatabaseService.incrementRecordViews(widget.record.id);
+    } else if (widget.news != null) {
+      DatabaseService.incrementNewsViews(widget.news.id);
+    }
     isFollowing();
     initLikes(record: widget.record, news: widget.news);
     _controller = VideoPlayerController.network(widget.record?.audioUrl ?? widget.news?.contentUrl)
@@ -293,6 +298,20 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(math.pi),
+                              child: Icon(Icons.remove_red_eye, size: 35, color: Colors.white)),
+                          Text('${widget.record?.views ?? widget.news?.views ?? 0}',
+                              style: TextStyle(color: Colors.white))
+                        ],
                       ),
                     ),
                     Container(
