@@ -6,8 +6,7 @@ class RegularAppbar extends StatelessWidget {
   Color color;
   double margin;
 
-  RegularAppbar(BuildContext context,
-      {this.color = Colors.white, this.margin = 40}) {
+  RegularAppbar(BuildContext context, {this.color = Colors.white, this.margin = 40}) {
     this.context = context;
   }
   Future<bool> onBackPressed() {
@@ -35,9 +34,12 @@ class RegularAppbar extends StatelessWidget {
                 )),
             InkWell(
                 onTap: onBackPressed,
-                child: Image.asset(
-                  Strings.app_icon,
-                  color: color,
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  // child: Image.asset(
+                  //   Strings.app_icon,
+                  // ),
                 )),
             Padding(
               padding: const EdgeInsets.only(right: padding),

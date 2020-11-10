@@ -7,7 +7,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:Alhany/models/notification_model.dart' as notification;
 import '../app_util.dart';
 
 class DatabaseService {
@@ -404,7 +404,7 @@ class DatabaseService {
     return postMeta;
   }
 
-  static void addComment(String commentText, {String recordId, String newsId}) async {
+  static addComment(String commentText, {String recordId, String newsId}) async {
     CollectionReference collectionReference;
     if (recordId != null) {
       collectionReference = recordsRef;
@@ -697,5 +697,30 @@ class DatabaseService {
     QuerySnapshot snapshot = await newsRef.orderBy('timestamp', descending: true).getDocuments();
     List<News> news = snapshot.documents.map((doc) => News.fromDoc(doc)).toList();
     return news;
+  }
+
+  static Future<List<notification.Notification>> getNotifications() async {
+    QuerySnapshot notificationSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
+        .orderBy('timestamp', descending: true)
+        .limit(20)
+        .getDocuments();
+    List<notification.Notification> notifications =
+        notificationSnapshot.documents.map((doc) => notification.Notification.fromDoc(doc)).toList();
+    return notifications;
+  }
+
+  static Future<List<notification.Notification>> getNextNotifications(Timestamp lastVisibleNotificationSnapShot) async {
+    QuerySnapshot notificationSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisibleNotificationSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<notification.Notification> notifications =
+        notificationSnapshot.documents.map((doc) => notification.Notification.fromDoc(doc)).toList();
+    return notifications;
   }
 }

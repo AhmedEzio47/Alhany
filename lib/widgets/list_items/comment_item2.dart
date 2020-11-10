@@ -282,8 +282,12 @@ class _CommentItem2State extends State<CommentItem2> {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(record?.singerId ?? Constants.startUser.id, 'New Comment Like',
-          Constants.currentUser.username + ' likes your comment', record?.id ?? news?.id, 'like');
+      await NotificationHandler.sendNotification(
+          record?.singerId ?? Constants.startUser.id,
+          'New Comment Like',
+          Constants.currentUser.name + ' likes your comment',
+          record?.id ?? news?.id,
+          record != null ? 'record_like' : 'news_like');
     }
     var commentMeta = await DatabaseService.getCommentMeta(widget.comment.id, recordId: record?.id, newsId: news?.id);
     setState(() {
@@ -370,8 +374,12 @@ class _CommentItem2State extends State<CommentItem2> {
         //post.likesCount = likesNo;
       });
 
-      await NotificationHandler.sendNotification(record?.singerId ?? Constants.startUser.id, 'New Comment Like',
-          Constants.currentUser.username + ' likes your comment', record?.id ?? news?.id, 'like');
+      await NotificationHandler.sendNotification(
+          record?.singerId ?? Constants.startUser.id,
+          'New Comment Like',
+          Constants.currentUser.name + ' likes your comment',
+          record?.id ?? news?.id,
+          record != null ? 'record_like' : 'news_like');
     }
     var replyMeta =
         await DatabaseService.getReplyMeta(parentCommentId, widget.comment.id, recordId: record.id, newsId: news.id);

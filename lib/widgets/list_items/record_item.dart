@@ -93,8 +93,8 @@ class _RecordItemState extends State<RecordItem> {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          record.singerId, 'New Record Like', Constants.currentUser.name + ' likes your post', record.id, 'like');
+      await NotificationHandler.sendNotification(record.singerId, 'New Record Like',
+          Constants.currentUser.name + ' likes your post', record.id, 'record_like');
     }
     var recordMeta = await DatabaseService.getPostMeta(recordId: record.id);
     setState(() {

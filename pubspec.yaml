@@ -42,6 +42,7 @@ dependencies:
   html_editor: ^1.0.1
   path_provider:
   camera: ^0.5.8+11
+  badges: ^1.1.0
 
 
 dev_dependencies:

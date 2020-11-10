@@ -3,12 +3,15 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/home_page.dart';
 import 'package:Alhany/pages/melodies_page.dart';
+import 'package:Alhany/pages/notifications_page.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/records_page.dart';
 import 'package:Alhany/pages/singers_page.dart';
 import 'package:Alhany/pages/star_page.dart';
+import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/curved_navigation_bar.dart';
 import 'package:Alhany/widgets/drawer.dart';
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 
 class AppPage extends StatefulWidget {
@@ -19,11 +22,13 @@ class AppPage extends StatefulWidget {
 class _AppPageState extends State<AppPage> {
   PageController _pageController;
 
-  int _page = 1;
+  int _page = 2;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 1);
+    NotificationHandler.receiveNotification(context, _scaffoldKey);
+    _pageController = PageController(initialPage: 2);
     super.initState();
   }
 
@@ -38,6 +43,23 @@ class _AppPageState extends State<AppPage> {
           color: Colors.white,
           items: <Widget>[
             Icon(Icons.star, size: 30),
+            (Constants.currentUser?.notificationsNumber ?? 0) > 0
+                ? Badge(
+                    badgeColor: MyColors.accentColor,
+                    badgeContent: Text(Constants.currentUser.notificationsNumber < 9
+                        ? Constants.currentUser?.notificationsNumber.toString()
+                        : '+9'),
+                    child: Icon(
+                      Icons.notifications,
+                      size: 30,
+                    ),
+                    toAnimate: true,
+                    animationType: BadgeAnimationType.scale,
+                  )
+                : Icon(
+                    Icons.notifications,
+                    size: 30,
+                  ),
             Icon(Icons.home, size: 30),
             Icon(Icons.chat, size: 30),
             Icon(Icons.person, size: 30),
@@ -55,6 +77,7 @@ class _AppPageState extends State<AppPage> {
               onPageChanged: _onPageChanged,
               children: [
                 StarPage(),
+                NotificationsPage(),
                 HomePage(),
                 Chats(),
                 ProfilePage(
@@ -96,6 +119,9 @@ class _AppPageState extends State<AppPage> {
       setState(() {
         this._page = page;
       });
+      if (page == 1) {
+        NotificationHandler().clearNotificationsNumber();
+      }
     }
   }
 }

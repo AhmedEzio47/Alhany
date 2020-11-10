@@ -28,6 +28,7 @@ enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
   final String url;
+  final List<Melody> melodyList;
   final Color backColor;
   final Function onComplete;
   final bool isLocal;
@@ -42,7 +43,7 @@ class MusicPlayer extends StatefulWidget {
 
   MusicPlayer(
       {Key key,
-      @required this.url,
+      this.url,
       this.backColor,
       this.onComplete,
       this.isLocal = false,
@@ -52,7 +53,8 @@ class MusicPlayer extends StatefulWidget {
       this.initialDuration,
       this.melody,
       this.playBtnPosition = PlayBtnPosition.bottom,
-      this.isCompact = false})
+      this.isCompact = false,
+      this.melodyList})
       : super(key: key);
 
   @override
@@ -67,13 +69,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
   get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
-  get durationText => myAudioPlayer.duration != null
-      ? myAudioPlayer.duration.toString().split('.').first
-      : '';
+  get durationText => myAudioPlayer.duration != null ? myAudioPlayer.duration.toString().split('.').first : '';
 
-  get positionText => myAudioPlayer.position != null
-      ? myAudioPlayer.position.toString().split('.').first
-      : '';
+  get positionText => myAudioPlayer.position != null ? myAudioPlayer.position.toString().split('.').first : '';
 
   bool isMuted = false;
   List<String> choices;
@@ -106,10 +104,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
 
   void initAudioPlayer() async {
-    myAudioPlayer = MyAudioPlayer(
-        url: widget.url,
-        isLocal: widget.isLocal,
-        onComplete: widget.onComplete);
+    List<String> urlList = [];
+    for (Melody melody in widget.melodyList) {
+      urlList.add(melody.audioUrl);
+    }
+    myAudioPlayer =
+        MyAudioPlayer(url: widget.url, urlList: urlList, isLocal: widget.isLocal, onComplete: widget.onComplete);
     myAudioPlayer.addListener(() {
       if (mounted) {
         setState(() {
@@ -120,7 +120,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Future play() async {
-    print('audio url: ${widget.url}');
     myAudioPlayer.play();
   }
 
@@ -152,10 +151,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               widget.title != null
                   ? Text(
                       widget.title,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                     )
                   : Container(),
               Row(
@@ -167,9 +163,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         ),
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
-                    child: widget.playBtnPosition == PlayBtnPosition.left
-                        ? playPauseBtn()
-                        : Container(),
+                    child: widget.playBtnPosition == PlayBtnPosition.left ? playPauseBtn() : Container(),
                   ),
                   myAudioPlayer.position != null
                       ? Text(
@@ -188,29 +182,22 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     child: SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 5.0,
-                          thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                          overlayShape:
-                              RoundSliderOverlayShape(overlayRadius: 16.0),
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
                         ),
                         child: Slider(
                             activeColor: MyColors.darkPrimaryColor,
                             inactiveColor: Colors.grey.shade300,
-                            value: myAudioPlayer.position?.inMilliseconds
-                                    ?.toDouble() ??
-                                0.0,
+                            value: myAudioPlayer.position?.inMilliseconds?.toDouble() ?? 0.0,
                             onChanged: (double value) {
-                              myAudioPlayer
-                                  .seek(Duration(seconds: value ~/ 1000));
+                              myAudioPlayer.seek(Duration(seconds: value ~/ 1000));
 
                               if (!isPlaying) {
                                 play();
                               }
                             },
                             min: 0.0,
-                            max: _duration != null
-                                ? _duration?.inMilliseconds?.toDouble()
-                                : 1.7976931348623157e+308)),
+                            max: _duration != null ? _duration?.inMilliseconds?.toDouble() : 1.7976931348623157e+308)),
                   ),
                   SizedBox(
                     width: 10,
@@ -238,7 +225,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        widget.melodyList != null ? previousBtn() : Container(),
                         playPauseBtn(),
+                        widget.melodyList != null ? nextBtn() : Container(),
                         widget.recordBtnVisible
                             ? SizedBox(
                                 width: 20,
@@ -246,11 +235,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             : Container(),
                         widget.recordBtnVisible
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melody,
-                                  'type': Types.AUDIO
-                                }),
+                                onTap: () => Navigator.of(context).pushNamed('/melody-page',
+                                    arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -262,8 +248,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         color: Colors.black54,
                                         spreadRadius: 2,
                                         blurRadius: 4,
-                                        offset: Offset(
-                                            0, 2), // changes position of shadow
+                                        offset: Offset(0, 2), // changes position of shadow
                                       ),
                                     ],
                                   ),
@@ -283,10 +268,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed(
                                   '/melody-page',
-                                  arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.VIDEO
-                                  },
+                                  arguments: {'melody': widget.melody, 'type': Types.VIDEO},
                                 ),
                                 child: Container(
                                   height: widget.btnSize,
@@ -299,8 +281,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         color: Colors.black54,
                                         spreadRadius: 2,
                                         blurRadius: 4,
-                                        offset: Offset(
-                                            0, 2), // changes position of shadow
+                                        offset: Offset(0, 2), // changes position of shadow
                                       ),
                                     ],
                                   ),
@@ -311,15 +292,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        Constants.currentRoute != '/downloads'
-                            ? downloadOrOptions()
-                            : Container()
+                        Constants.currentRoute != '/downloads' ? downloadOrOptions() : Container()
                       ],
                     )
                   : Container(),
-              widget.playBtnPosition == PlayBtnPosition.bottom
-                  ? SizedBox(height: 10)
-                  : Container()
+              widget.playBtnPosition == PlayBtnPosition.bottom ? SizedBox(height: 10) : Container()
             ]),
           ),
         ),
@@ -493,13 +470,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
     String ext = path.extension(image.path);
 
     if (widget.melody.imageUrl != null) {
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
+      String fileName = await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
       await storageRef.child('/melodies_images/$fileName').delete();
     }
 
-    String url = await AppUtil.uploadFile(
-        image, context, '/melodies_images/${widget.melody.id}$ext');
+    String url = await AppUtil.uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
     await melodiesRef.document(widget.melody.id).updateData({'image_url': url});
     AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }
@@ -539,8 +514,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
-              AppUtil.showToast(
-                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pop();
             },
             color: MyColors.primaryColor,
@@ -563,13 +537,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
           if (widget.melody.imageUrl != null) {
-            String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
+            String fileName = await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
             await storageRef.child('/melodies_images/$fileName').delete();
           }
           if (widget.melody.audioUrl != null) {
-            String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.melody.audioUrl);
+            String fileName = await AppUtil.getStorageFileNameFromUrl(widget.melody.audioUrl);
             if (widget.melody.isSong) {
               await storageRef.child('/songs/$fileName').delete();
             } else {
@@ -616,11 +588,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
     if (widget.melody.price == null || widget.melody.price == '0') {
       token.tokenId = 'free';
     } else {
-      DocumentSnapshot doc = await usersRef
-          .document(Constants.currentUserID)
-          .collection('downloads')
-          .document(widget.melody.id)
-          .get();
+      DocumentSnapshot doc =
+          await usersRef.document(Constants.currentUserID).collection('downloads').document(widget.melody.id).get();
       bool alreadyDownloaded = doc.exists;
       print('alreadyDownloaded: $alreadyDownloaded');
 
@@ -637,12 +606,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
       await AppUtil.createAppDirectory();
       String path;
       if (widget.melody.audioUrl != null) {
-        path =
-            await AppUtil.downloadFile(widget.melody.audioUrl, encrypt: true);
+        path = await AppUtil.downloadFile(widget.melody.audioUrl, encrypt: true);
       } else {
-        path = await AppUtil.downloadFile(
-            widget.melody.levelUrls.values.elementAt(0),
-            encrypt: true);
+        path = await AppUtil.downloadFile(widget.melody.levelUrls.values.elementAt(0), encrypt: true);
       }
 
       Melody melody = Melody(
@@ -652,8 +618,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
           imageUrl: widget.melody.imageUrl,
           name: widget.melody.name,
           audioUrl: path);
-      Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(widget.melody.id);
+      Melody storedMelody = await MelodySqlite.getMelodyWithId(widget.melody.id);
       if (storedMelody == null) {
         await MelodySqlite.insert(melody);
         await usersRef
@@ -668,5 +633,73 @@ class _MusicPlayerState extends State<MusicPlayer> {
         AppUtil.showToast('Already downloaded!');
       }
     }
+  }
+
+  Widget nextBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: InkWell(
+        onTap: () => next(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.skip_next,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  next() {
+    myAudioPlayer.next();
+  }
+
+  previousBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: InkWell(
+        onTap: () => previous(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.skip_previous,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  previous() {
+    myAudioPlayer.prev();
   }
 }

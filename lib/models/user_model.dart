@@ -33,7 +33,7 @@ class User {
         email: doc['email'],
         description: doc['description'] ?? '',
         violations: doc['violations'],
-        notificationsNumber: doc['notifications_number'],
+        notificationsNumber: doc['notificationsNumber'],
         online: doc['online'],
         search: doc['search']);
   }

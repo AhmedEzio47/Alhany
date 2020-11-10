@@ -42,8 +42,12 @@ class _RecordPageState extends State<RecordPage> {
         recordId: widget.record.id,
       );
 
-      await NotificationHandler.sendNotification(widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.record.id, 'comment');
+      await NotificationHandler.sendNotification(
+          widget.record.singerId,
+          Constants.currentUser.name + ' commented on your post',
+          _commentController.text,
+          widget.record.id,
+          'record_comment');
 
       await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
       Constants.currentRoute = '';

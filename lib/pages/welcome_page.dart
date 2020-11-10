@@ -58,28 +58,15 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
         child: new Column(
           children: <Widget>[
             Container(
-              padding: EdgeInsets.only(top: 200.0),
-              child: Center(
-                child: Icon(
-                  Icons.music_note,
-                  color: Colors.white,
-                  size: 40.0,
-                ),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 20.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    appName_ar,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28.0,
-                    ),
-                  ),
-                ],
+              padding: EdgeInsets.only(top: 100.0),
+              child: Container(
+                height: 250,
+                width: 250,
+                // child: Center(
+                //     child: Image.asset(
+                //   'assets/images/splash_icon.png',
+                //   scale: 2,
+                // )),
               ),
             ),
             new Container(
@@ -181,18 +168,22 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
             child: new Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(100.0),
+                  padding: EdgeInsets.all(70.0),
                   child: Center(
-                    child: Icon(
-                      Icons.music_note,
-                      color: MyColors.primaryColor,
-                      size: 50.0,
+                    child: Container(
+                      height: 180,
+                      width: 180,
+                      child: Center(
+                          child: Image.asset(
+                        'assets/images/splash_icon.png',
+                        scale: 2,
+                      )),
                     ),
                   ),
                 ),
                 new Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
+                  margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 0.0),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     border: Border(
@@ -534,18 +525,22 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
             child: new Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(100.0),
+                  padding: EdgeInsets.all(70.0),
                   child: Center(
-                    child: Icon(
-                      Icons.music_note,
-                      color: MyColors.primaryColor,
-                      size: 50.0,
+                    child: Container(
+                      height: 180,
+                      width: 180,
+                      child: Center(
+                          child: Image.asset(
+                        'assets/images/splash_icon.png',
+                        scale: 2,
+                      )),
                     ),
                   ),
                 ),
                 new Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
+                  margin: const EdgeInsets.only(left: 40.0, right: 40.0, top: 0.0),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     border: Border(

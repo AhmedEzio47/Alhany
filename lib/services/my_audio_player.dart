@@ -14,12 +14,15 @@ class MyAudioPlayer with ChangeNotifier {
   Duration position;
 
   final String url;
+  final List<String> urlList;
   final Function onComplete;
   final bool isLocal;
 
-  MyAudioPlayer({@required this.url, this.isLocal = false, this.onComplete}) {
+  MyAudioPlayer({@required this.url, this.urlList, this.isLocal = false, this.onComplete}) {
     initAudioPlayer();
   }
+
+  int _index = 0;
 
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
@@ -36,14 +39,21 @@ class MyAudioPlayer with ChangeNotifier {
       notifyListeners();
       //print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
       if (duration.inMilliseconds - p.inMilliseconds < 200) {
-        stop();
+        if (urlList != null) {
+          play(index: ++_index);
+        } else {
+          stop();
+        }
       }
     };
   }
 
-  Future play() async {
+  Future play({index}) async {
     print('audio url: $url');
-    await advancedPlayer.play(url, isLocal: isLocal);
+    if (index == null) {
+      index = _index;
+    }
+    await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
     playerState = AudioPlayerState.PLAYING;
     notifyListeners();
   }
@@ -68,5 +78,23 @@ class MyAudioPlayer with ChangeNotifier {
   seek(Duration p) {
     advancedPlayer.seek(p);
     notifyListeners();
+  }
+
+  next() {
+    advancedPlayer.stop();
+    if (_index < urlList.length - 1)
+      _index++;
+    else
+      _index = 0;
+    play(index: _index);
+  }
+
+  prev() {
+    advancedPlayer.stop();
+    if (_index > 0)
+      _index--;
+    else
+      _index = urlList.length - 1;
+    play(index: _index);
   }
 }

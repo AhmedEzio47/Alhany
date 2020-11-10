@@ -30,8 +30,12 @@ class _NewsPageState extends State<NewsPage> {
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(_commentController.text, newsId: widget.news.id);
 
-      await NotificationHandler.sendNotification(Constants.startUser.id,
-          Constants.currentUser.name + ' commented on your post', _commentController.text, widget.news.id, 'comment');
+      await NotificationHandler.sendNotification(
+          Constants.startUser.id,
+          Constants.currentUser.name + ' commented on your post',
+          _commentController.text,
+          widget.news.id,
+          'news_comment');
 
       await AppUtil.checkIfContainsMention(_commentController.text, widget.news.id);
 

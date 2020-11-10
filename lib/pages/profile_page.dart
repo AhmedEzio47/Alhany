@@ -27,8 +27,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage>
-    with TickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin {
   bool _editing = false;
 
   TextEditingController _descriptionController = TextEditingController();
@@ -48,6 +47,8 @@ class _ProfilePageState extends State<ProfilePage>
   var _tabs;
 
   bool isFollowing = false;
+
+  ScrollController _scrollController = ScrollController();
 
   getRecords() async {
     List<Record> records = await DatabaseService.getUserRecords(widget.userId);
@@ -82,8 +83,7 @@ class _ProfilePageState extends State<ProfilePage>
       Tab(
         child: Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+              borderRadius: BorderRadius.circular(50), border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
           child: Align(
             alignment: Alignment.center,
             child: Text(language(en: "Records", ar: 'التسجيلات')),
@@ -93,8 +93,7 @@ class _ProfilePageState extends State<ProfilePage>
       Tab(
         child: Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
+              borderRadius: BorderRadius.circular(50), border: Border.all(color: MyColors.darkPrimaryColor, width: 1)),
           child: Align(
             alignment: Alignment.center,
             child: Text(language(en: "Favourites", ar: 'المفضلات')),
@@ -139,8 +138,7 @@ class _ProfilePageState extends State<ProfilePage>
               ),
               color: MyColors.primaryColor,
               image: DecorationImage(
-                colorFilter: new ColorFilter.mode(
-                    Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                 image: AssetImage(Strings.default_bg),
                 fit: BoxFit.cover,
               ),
@@ -184,8 +182,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                 size: 25,
                                                 color: Colors.white,
                                               )
-                                            : Image.asset(Strings.person_remove,
-                                                scale: 1.3),
+                                            : Image.asset(Strings.person_remove, scale: 1.3),
                                       ),
                                     )
                                   : Container(),
@@ -209,11 +206,8 @@ class _ProfilePageState extends State<ProfilePage>
                               widget.userId != Constants.currentUserID
                                   ? InkWell(
                                       onTap: () {
-                                        Navigator.of(context).pushNamed(
-                                            '/conversation',
-                                            arguments: {
-                                              'other_uid': widget.userId
-                                            });
+                                        Navigator.of(context)
+                                            .pushNamed('/conversation', arguments: {'other_uid': widget.userId});
                                       },
                                       child: Container(
                                           margin: EdgeInsets.only(left: 15),
@@ -243,10 +237,8 @@ class _ProfilePageState extends State<ProfilePage>
                                       child: TextField(
                                         controller: _nameController,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                        style:
+                                            TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     SizedBox(
@@ -256,10 +248,8 @@ class _ProfilePageState extends State<ProfilePage>
                                       child: TextField(
                                         controller: _usernameController,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                        style:
+                                            TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -269,20 +259,14 @@ class _ProfilePageState extends State<ProfilePage>
                                   children: [
                                     Text(
                                       _user?.name ?? '',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                                     ),
                                     SizedBox(
                                       width: 5,
                                     ),
                                     Text(
                                       '@${_user?.username ?? ''}',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -291,23 +275,19 @@ class _ProfilePageState extends State<ProfilePage>
                           ),
                           _editing
                               ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                                   child: TextField(
                                     controller: _descriptionController,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.white),
+                                    style: TextStyle(fontSize: 16, color: Colors.white),
                                   ),
                                 )
                               : Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Text(
                                     _user?.description ?? '',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.white),
+                                    style: TextStyle(fontSize: 16, color: Colors.white),
                                   ),
                                 ),
                           SizedBox(
@@ -316,9 +296,7 @@ class _ProfilePageState extends State<ProfilePage>
                           widget.userId == Constants.currentUserID
                               ? RaisedButton(
                                   color: MyColors.accentColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          new BorderRadius.circular(20.0)),
+                                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
                                   onPressed: () async {
                                     setState(() {
                                       _editing = !_editing;
@@ -326,10 +304,8 @@ class _ProfilePageState extends State<ProfilePage>
                                     if (_editing) {
                                       setState(() {
                                         _nameController.text = _user.name;
-                                        _usernameController.text =
-                                            _user.username;
-                                        _descriptionController.text =
-                                            _user.description;
+                                        _usernameController.text = _user.username;
+                                        _descriptionController.text = _user.description;
                                       });
                                     } else {
                                       _saveEdits();
@@ -338,10 +314,8 @@ class _ProfilePageState extends State<ProfilePage>
                                   child: Text(
                                       _editing
                                           ? language(en: 'Save', ar: 'حفظ')
-                                          : language(
-                                              en: 'Edit Profile', ar: 'تعديل'),
-                                      style: TextStyle(
-                                          fontSize: 14, color: Colors.white)),
+                                          : language(en: 'Edit Profile', ar: 'تعديل'),
+                                      style: TextStyle(fontSize: 14, color: Colors.white)),
                                 )
                               : Container(),
                           SizedBox(
@@ -357,8 +331,7 @@ class _ProfilePageState extends State<ProfilePage>
                               unselectedLabelColor: MyColors.lightPrimaryColor,
                               indicatorSize: TabBarIndicatorSize.label,
                               indicator: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: MyColors.darkPrimaryColor),
+                                  borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
                               tabs: _tabs),
                           _currentPage()
                         ],
@@ -423,8 +396,47 @@ class _ProfilePageState extends State<ProfilePage>
   Widget _currentPage() {
     switch (_page) {
       case 0:
-        return Expanded(
-          flex: 8,
+        return Flexible(
+          fit: FlexFit.loose,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: recordsRef.where('singer_id', isEqualTo: _user.id)?.snapshots(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return Center(child: CircularProgressIndicator());
+                default:
+                  return ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _records.length,
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () async {
+                            // if (musicPlayer != null) {
+                            //   musicPlayer.stop();
+                            // }
+                            musicPlayer = MusicPlayer(
+                              url: _records[index].audioUrl,
+                              backColor: Colors.white.withOpacity(.4),
+                            );
+                            setState(() {
+                              _isPlaying = true;
+                            });
+                          },
+                          child: RecordItem(
+                            record: _records[index],
+                            key: UniqueKey(),
+                          ),
+                        );
+                      });
+              }
+            },
+          ),
+        );
+        return Flexible(
+          fit: FlexFit.loose,
           child: _records.length > 0
               ? ListView.builder(
                   itemCount: _records.length,
@@ -504,8 +516,7 @@ class _ProfilePageState extends State<ProfilePage>
     if (taken) {
       // username exists
       if (_usernameController.text != _user.username) {
-        AppUtil.showToast(
-            '${_usernameController.text} is already in use. Please choose a different username.');
+        AppUtil.showToast('${_usernameController.text} is already in use. Please choose a different username.');
       }
       isValidUsername = false;
     }
@@ -557,11 +568,9 @@ class _ProfilePageState extends State<ProfilePage>
     }
     AppUtil.showLoader(context);
 
-    String url = await AppUtil.uploadFile(image, context,
-        'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
-    await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'profile_url': url});
+    String url = await AppUtil.uploadFile(
+        image, context, 'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
+    await usersRef.document(Constants.currentUserID).updateData({'profile_url': url});
     Navigator.of(context).pop();
     await getUser();
     setState(() {
@@ -571,8 +580,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   String validateUsername(String value) {
     String errorMsgUsername;
-    String pattern =
-        r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+    String pattern = r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       AppUtil.showToast(
@@ -596,10 +604,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   Future<bool> isUsernameTaken(String username) async {
-    final QuerySnapshot result = await usersRef
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .getDocuments();
+    final QuerySnapshot result = await usersRef.where('username', isEqualTo: username).limit(1).getDocuments();
     return result.documents.isNotEmpty;
   }
 

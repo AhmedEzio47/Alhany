@@ -35,7 +35,7 @@ class _CommentPageState extends State<CommentPage> {
           Constants.currentUser.name + ' commented on your post',
           _replyController.text,
           widget.record?.id ?? widget.news?.id,
-          'comment');
+          widget.record != null ? 'record_comment' : 'news_comment');
 
       await AppUtil.checkIfContainsMention(_replyController.text, widget.record?.id);
 
