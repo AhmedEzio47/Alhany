@@ -599,9 +599,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
       if (!alreadyDownloaded) {
         //Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentScreen()));
-        // PaymentService.configureStripePayment();
-        // PaymentMethod paymentMethod = await PaymentService.createTokenWithCardForm();
-        // PaymentService.confirmPaymentIntent(paymentMethod, Strings.paymentSecret);
+        PaymentService.configureStripePayment();
+        PaymentMethod paymentMethod = await PaymentService.createTokenWithCardForm();
+        PaymentService.confirmPaymentIntent(paymentMethod, Strings.paymentSecret);
 
         print(token.tokenId);
       } else {

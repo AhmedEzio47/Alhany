@@ -14,13 +14,7 @@ class MelodyItem extends StatefulWidget {
   final bool isRounded;
   final double imageSize;
   final double padding;
-  MelodyItem(
-      {Key key,
-      this.melody,
-      this.context,
-      this.isRounded = true,
-      this.imageSize = 50,
-      this.padding = 8})
+  MelodyItem({Key key, this.melody, this.context, this.isRounded = true, this.imageSize = 50, this.padding = 8})
       : super(key: key);
 
   @override
@@ -58,12 +52,9 @@ class _MelodyItemState extends State<MelodyItem> {
   }
 
   isFavourite() async {
-    bool isFavourite = (await usersRef
-            .document(Constants.currentUserID)
-            .collection('favourites')
-            .document(widget.melody.id)
-            .get())
-        .exists;
+    bool isFavourite =
+        (await usersRef.document(Constants.currentUserID).collection('favourites').document(widget.melody.id).get())
+            .exists;
 
     setState(() {
       _isFavourite = isFavourite;
@@ -90,29 +81,29 @@ class _MelodyItemState extends State<MelodyItem> {
           ),
           title: Text(widget.melody.name),
           subtitle: Text(_author?.name ?? widget.melody.singer ?? ''),
-          trailing: InkWell(
-            onTap: () async {
-              _isFavourite
-                  ? await DatabaseService.deleteMelodyFromFavourites(
-                      widget.melody.id)
-                  : await DatabaseService.addMelodyToFavourites(
-                      widget.melody.id);
+          trailing: widget.melody.isSong
+              ? InkWell(
+                  onTap: () async {
+                    _isFavourite
+                        ? await DatabaseService.deleteMelodyFromFavourites(widget.melody.id)
+                        : await DatabaseService.addMelodyToFavourites(widget.melody.id);
 
-              await isFavourite();
-            },
-            child: Container(
-              width: 80,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    _isFavourite ? Icons.favorite : Icons.favorite_border,
-                    color: MyColors.accentColor,
+                    await isFavourite();
+                  },
+                  child: Container(
+                    width: 80,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          _isFavourite ? Icons.favorite : Icons.favorite_border,
+                          color: MyColors.accentColor,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                )
+              : null,
         ),
       ),
     );

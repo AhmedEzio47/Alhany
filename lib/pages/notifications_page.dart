@@ -25,14 +25,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
-          leading: Builder(
-              builder: (context) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InkWell(
-                      onTap: () => Scaffold.of(context).openDrawer(),
-                      child: Icon(const IconData(58311, fontFamily: 'MaterialIcons')),
-                    ),
-                  )),
           title: Text("Notifications"),
           centerTitle: true,
         ),
