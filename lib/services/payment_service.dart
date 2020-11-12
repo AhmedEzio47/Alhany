@@ -20,14 +20,9 @@ class PaymentService {
   }
 
   static Future<PaymentMethod> createTokenWithCardForm() async {
-    await StripePayment.paymentRequestWithCardForm(CardFormPaymentRequest()).then((paymentMethod) {
-      //AppUtil.showToast('Received ${paymentMethod.id}');
-      //TODO save card details in shared pref
-      // _paymentMethod = paymentMethod;
-      // _creditCard = _paymentMethod.card;
-      return paymentMethod;
-    });
-    return null;
+    PaymentMethod paymentMethod = await StripePayment.paymentRequestWithCardForm(CardFormPaymentRequest());
+    //TODO save card details in shared pref
+    return paymentMethod;
   }
 
   static Future<Token> createTokenWithCard() async {
@@ -42,24 +37,16 @@ class PaymentService {
       testCard,
     );
 
-    PaymentMethod paymentMethod = await StripePayment.createPaymentMethod(
-      PaymentMethodRequest(card: testCard),
-    );
-
-    //await confirmPaymentIntent(paymentMethod);
-    await authenticatePaymentIntent();
-
     return token;
   }
 
-  static confirmPaymentIntent(PaymentMethod paymentMethod) async {
+  static confirmPaymentIntent(PaymentMethod paymentMethod, String clientSecret) async {
     PaymentIntentResult paymentIntentResult = await StripePayment.confirmPaymentIntent(
       PaymentIntent(
-        clientSecret: Strings.paymentSecret,
+        clientSecret: clientSecret,
         paymentMethodId: paymentMethod.id,
       ),
     );
-    //paymentIntentResult = await StripePayment.authenticatePaymentIntent(clientSecret: Strings.paymentSecret);
     return paymentIntentResult;
   }
 

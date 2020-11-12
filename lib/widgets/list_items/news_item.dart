@@ -8,6 +8,7 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:Alhany/widgets/url_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class _NewsItemState extends State<NewsItem> {
   bool isLikeEnabled = true;
   var likes = [];
 
-  bool _isVideoPlaying = false;
+  final number = ValueNotifier(0);
 
   @override
   void initState() {
@@ -154,12 +155,21 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                         Text(
                           '${AppUtil.formatTimestamp(widget.news.timestamp)}' ?? '',
-                          style: TextStyle(
-                            color: Colors.grey.shade300,
-                          ),
+                          style: TextStyle(color: Colors.grey.shade300, fontSize: 12),
                         ),
                       ],
-                    )
+                    ),
+                    Constants.currentUserID == Strings.starId
+                        ? ValueListenableBuilder<int>(
+                            valueListenable: number,
+                            builder: (context, value, child) {
+                              return PostBottomSheet().postOptionIcon(
+                                context,
+                                news: widget.news,
+                              );
+                            },
+                          )
+                        : Container()
                   ],
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/home_page.dart';
 import 'package:Alhany/pages/melodies_page.dart';
@@ -25,11 +26,31 @@ class _AppPageState extends State<AppPage> {
   int _page = 2;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  User _currentUser;
   @override
   void initState() {
+    _currentUser = Constants.currentUser;
     NotificationHandler.receiveNotification(context, _scaffoldKey);
+    userListener();
     _pageController = PageController(initialPage: 2);
     super.initState();
+  }
+
+  userListener() {
+    usersRef.snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        if (mounted) {
+          setState(() {
+            if (change.document.documentID == Constants.currentUserID) {
+              Constants.currentUser = User.fromDoc(change.document);
+              setState(() {
+                _currentUser = Constants.currentUser;
+              });
+            }
+          });
+        }
+      });
+    });
   }
 
   @override
@@ -43,12 +64,11 @@ class _AppPageState extends State<AppPage> {
           color: Colors.white,
           items: <Widget>[
             Icon(Icons.star, size: 30),
-            (Constants.currentUser?.notificationsNumber ?? 0) > 0
+            (_currentUser?.notificationsNumber ?? 0) > 0
                 ? Badge(
                     badgeColor: MyColors.accentColor,
-                    badgeContent: Text(Constants.currentUser.notificationsNumber < 9
-                        ? Constants.currentUser?.notificationsNumber.toString()
-                        : '+9'),
+                    badgeContent: Text(
+                        _currentUser.notificationsNumber < 9 ? _currentUser?.notificationsNumber.toString() : '+9'),
                     child: Icon(
                       Icons.notifications,
                       size: 30,

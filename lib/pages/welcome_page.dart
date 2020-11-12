@@ -920,7 +920,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
             });
         //await auth.signOut();
       } else {
-        //saveToken(); // We don't want to saveToken for non-verified users
+        saveToken(); // We don't want to saveToken for non-verified users
         //AppUtil.showToast('Logged In!');
         Navigator.of(context).pushReplacementNamed('/');
       }

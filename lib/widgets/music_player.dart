@@ -10,6 +10,7 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/payment_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -77,7 +78,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   List<String> choices;
   @override
   void initState() {
-    if (widget.melody.isSong ?? true) {
+    if (widget.melody?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_lyrics, ar: Strings.ar_edit_lyrics),
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -104,9 +105,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
 
   void initAudioPlayer() async {
-    List<String> urlList = [];
-    for (Melody melody in widget.melodyList) {
-      urlList.add(melody.audioUrl);
+    List<String> urlList;
+    if (widget.melodyList != null) {
+      urlList = [];
+      for (Melody melody in widget.melodyList) {
+        urlList.add(melody.audioUrl);
+      }
     }
     myAudioPlayer =
         MyAudioPlayer(url: widget.url, urlList: urlList, isLocal: widget.isLocal, onComplete: widget.onComplete);
@@ -594,7 +598,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
-        token = await PaymentService.nativePayment(widget.melody.price);
+        //Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+        // PaymentService.configureStripePayment();
+        // PaymentMethod paymentMethod = await PaymentService.createTokenWithCardForm();
+        // PaymentService.confirmPaymentIntent(paymentMethod, Strings.paymentSecret);
+
         print(token.tokenId);
       } else {
         token.tokenId = 'already purchased';

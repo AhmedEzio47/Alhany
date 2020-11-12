@@ -8,6 +8,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,14 +22,14 @@ import 'constants/colors.dart';
 import 'constants/constants.dart';
 import 'models/user_model.dart';
 
-// saveToken() async {
-//   String token = await FirebaseMessaging().getToken();
-//   usersRef
-//       .document(Constants.currentUserID)
-//       .collection('tokens')
-//       .document(token)
-//       .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
-// }
+saveToken() async {
+  String token = await FirebaseMessaging().getToken();
+  usersRef
+      .document(Constants.currentUserID)
+      .collection('tokens')
+      .document(token)
+      .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+}
 
 List<String> searchList(String text) {
   List<String> list = [];

@@ -8,7 +8,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
-import 'package:Alhany/widgets/list_items/comment_item2.dart';
+import 'package:Alhany/widgets/list_items/comment_item.dart';
 import 'package:flutter/material.dart';
 
 class CommentPage extends StatefulWidget {

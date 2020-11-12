@@ -44,6 +44,18 @@ class _DownloadsPageState extends State<DownloadsPage> {
     return WillPopScope(
       onWillPop: _onBack,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            setState(() {
+              _isPlaying = true;
+            });
+
+            AppUtil.showLoader(context);
+            await playAllSongs();
+            Navigator.of(context).pop();
+          },
+          child: Icon(Icons.playlist_play),
+        ),
         body: InkWell(
           onTap: () {
             setState(() {
@@ -66,8 +78,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
                     ),
                     color: MyColors.primaryColor,
                     image: DecorationImage(
-                      colorFilter: new ColorFilter.mode(
-                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                      colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                       image: AssetImage(Strings.default_bg),
                       fit: BoxFit.cover,
                     ),
@@ -87,7 +98,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
                                     });
 
                                     AppUtil.showLoader(context);
-                                    await playMelody(index);
+                                    await playSong(index);
                                     Navigator.of(context).pop();
                                   },
                                   child: MelodyItem(
@@ -98,13 +109,10 @@ class _DownloadsPageState extends State<DownloadsPage> {
                                 );
                               })
                           : Padding(
-                              padding: EdgeInsets.only(
-                                  top: MediaQuery.of(context).size.height / 2 -
-                                      40),
+                              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 40),
                               child: Text(
                                 'No downloads yet!',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 18),
+                                style: TextStyle(color: Colors.white, fontSize: 18),
                               ),
                             ),
                     ],
@@ -141,14 +149,33 @@ class _DownloadsPageState extends State<DownloadsPage> {
     return false;
   }
 
-  playMelody(int index) async {
+  playSong(int index) async {
     String path = EncryptionService.decryptFile(_downloads[index].audioUrl);
-    _decryptedPaths.add(path);
+    if (!_decryptedPaths.contains(path)) {
+      _decryptedPaths.add(path);
+    }
     musicPlayer = MusicPlayer(
       melody: _downloads[index],
       initialDuration: _downloads[index].duration,
       title: _downloads[index].name,
       url: path,
+      isLocal: true,
+      backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+    );
+  }
+
+  playAllSongs() {
+    List<Melody> decryptedDownload = [];
+    for (Melody song in _downloads) {
+      String path = EncryptionService.decryptFile(song.audioUrl);
+      if (!_decryptedPaths.contains(path)) {
+        _decryptedPaths.add(path);
+      }
+      decryptedDownload.add(song.copyWith(audioUrl: path));
+    }
+    musicPlayer = MusicPlayer(
+      melodyList: decryptedDownload,
+      initialDuration: decryptedDownload[0].duration,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );

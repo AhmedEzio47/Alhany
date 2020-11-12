@@ -66,12 +66,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             User sender = snapshot.data;
                             return Column(
                               children: <Widget>[
-                                NotificationItem(
-                                  key: ValueKey(notification.id),
-                                  notification: notification,
-                                  image: sender.profileImageUrl,
-                                  senderName: sender.username,
-                                  counter: 0,
+                                InkWell(
+                                  onTap: () => print('lol'),
+                                  child: NotificationItem(
+                                    key: ValueKey(notification.id),
+                                    notification: notification,
+                                    image: sender.profileImageUrl,
+                                    senderName: sender.username,
+                                    counter: 0,
+                                  ),
                                 ),
                                 Divider(height: .5, color: Colors.grey)
                               ],
@@ -81,11 +84,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                 ),
               )
-            : Center(
-                child: Text(
-                'No notifications yet',
-                style: TextStyle(fontSize: 20, color: Colors.grey),
-              )),
+            : Container(
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  color: MyColors.primaryColor,
+                  image: DecorationImage(
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    image: AssetImage(Strings.default_bg),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Center(
+                    child: Text(
+                  'No notifications yet',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                )),
+              ),
         drawer: BuildDrawer(),
       ),
     );

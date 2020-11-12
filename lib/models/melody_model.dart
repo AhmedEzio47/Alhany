@@ -64,6 +64,17 @@ class Melody {
         singer: map['singer']);
   }
 
+  copyWith({audioUrl}) {
+    return Melody(
+      id: this.id,
+      name: this.name,
+      audioUrl: audioUrl,
+      imageUrl: this.imageUrl,
+      duration: this.duration,
+      singer: this.singer,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       'id': this.id,

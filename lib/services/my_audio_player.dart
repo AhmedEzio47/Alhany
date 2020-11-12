@@ -1,8 +1,18 @@
+import 'package:Alhany/services/audio_background_service.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+import 'package:Alhany/constants/constants.dart';
+
+// NOTE: Your entrypoint MUST be a top-level function.
+void _audioPlayerTaskEntrypoint() async {
+  AudioServiceBackground.run(() => AudioPlayerTask(mediaLibrary: mediaLibrary));
+}
+
+List<MediaItem> mediaLibrary = [];
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
@@ -18,16 +28,36 @@ class MyAudioPlayer with ChangeNotifier {
   final Function onComplete;
   final bool isLocal;
 
-  MyAudioPlayer({@required this.url, this.urlList, this.isLocal = false, this.onComplete}) {
+  MyAudioPlayer({this.url, this.urlList, this.isLocal = false, this.onComplete}) {
     initAudioPlayer();
   }
 
-  int _index = 0;
+  int index = 0;
 
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: advancedPlayer);
-
+    if (this.url != null) {
+      mediaLibrary = [
+        MediaItem(
+          album: "Science Friday",
+          title: "A Salute To Head-Scratching Science",
+          artist: "Science Friday and WNYC Studios",
+          artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
+          id: url,
+          duration: duration,
+        )
+      ];
+    }
+    AudioService.start(
+      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
+      androidNotificationChannelName: 'Audio Service Demo',
+      // Enable this if you want the Android service to exit the foreground state on pause.
+      //androidStopForegroundOnPause: true,
+      androidNotificationColor: 0xFF2196f3,
+      androidNotificationIcon: 'mipmap/ic_launcher',
+      androidEnableQueue: true,
+    );
     advancedPlayer.durationHandler = (d) {
       duration = d;
       notifyListeners();
@@ -37,10 +67,9 @@ class MyAudioPlayer with ChangeNotifier {
     advancedPlayer.positionHandler = (p) {
       position = p;
       notifyListeners();
-      //print('d:${duration.inMilliseconds} - p:${p.inMilliseconds}');
       if (duration.inMilliseconds - p.inMilliseconds < 200) {
         if (urlList != null) {
-          play(index: ++_index);
+          play(index: ++this.index);
         } else {
           stop();
         }
@@ -51,7 +80,7 @@ class MyAudioPlayer with ChangeNotifier {
   Future play({index}) async {
     print('audio url: $url');
     if (index == null) {
-      index = _index;
+      index = this.index;
     }
     await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
     playerState = AudioPlayerState.PLAYING;
@@ -82,19 +111,19 @@ class MyAudioPlayer with ChangeNotifier {
 
   next() {
     advancedPlayer.stop();
-    if (_index < urlList.length - 1)
-      _index++;
+    if (this.index < urlList.length - 1)
+      this.index++;
     else
-      _index = 0;
-    play(index: _index);
+      this.index = 0;
+    play(index: this.index);
   }
 
   prev() {
     advancedPlayer.stop();
-    if (_index > 0)
-      _index--;
+    if (this.index > 0)
+      this.index--;
     else
-      _index = urlList.length - 1;
-    play(index: _index);
+      this.index = urlList.length - 1;
+    play(index: this.index);
   }
 }

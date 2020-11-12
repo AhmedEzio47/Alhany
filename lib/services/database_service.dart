@@ -723,4 +723,89 @@ class DatabaseService {
         notificationSnapshot.documents.map((doc) => notification.Notification.fromDoc(doc)).toList();
     return notifications;
   }
+
+  static deletePost({String recordId, String newsId}) async {
+    CollectionReference collectionReference;
+    if (recordId != null) {
+      collectionReference = recordsRef;
+    } else if (newsId != null) {
+      collectionReference = newsRef;
+    }
+
+    CollectionReference commentsRef = collectionReference.document(recordId ?? newsId).collection('comments');
+
+    CollectionReference likesRef = collectionReference.document(recordId ?? newsId).collection('likes');
+
+    CollectionReference dislikesRef = collectionReference.document(recordId ?? newsId).collection('dislikes');
+
+    (await commentsRef.getDocuments()).documents.forEach((comment) async {
+      (await commentsRef.document(comment.documentID).collection('replies').getDocuments())
+          .documents
+          .forEach((reply) async {
+        (await commentsRef
+                .document(comment.documentID)
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('likes')
+                .getDocuments())
+            .documents
+            .forEach((replyLike) {
+          commentsRef
+              .document(comment.documentID)
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('likes')
+              .document(replyLike.documentID)
+              .delete();
+        });
+
+        (await commentsRef
+                .document(comment.documentID)
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('dislikes')
+                .getDocuments())
+            .documents
+            .forEach((replyDislike) {
+          commentsRef
+              .document(comment.documentID)
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('dislikes')
+              .document(replyDislike.documentID)
+              .delete();
+        });
+
+        commentsRef.document(comment.documentID).collection('replies').document(reply.documentID).delete();
+      });
+
+      (await commentsRef.document(comment.documentID).collection('likes').getDocuments())
+          .documents
+          .forEach((commentLike) async {
+        await commentsRef.document(comment.documentID).collection('likes').document(commentLike.documentID).delete();
+      });
+
+      (await commentsRef.document(comment.documentID).collection('dislikes').getDocuments())
+          .documents
+          .forEach((commentDislike) async {
+        await commentsRef
+            .document(comment.documentID)
+            .collection('dislikes')
+            .document(commentDislike.documentID)
+            .delete();
+      });
+
+      await commentsRef.document(comment.documentID).delete();
+    });
+
+    (await likesRef.getDocuments()).documents.forEach((like) async {
+      await likesRef.document(like.documentID).delete();
+    });
+
+    (await dislikesRef.getDocuments()).documents.forEach((dislike) async {
+      await dislikesRef.document(dislike.documentID).delete();
+    });
+
+    await collectionReference.document(recordId ?? newsId).delete();
+  }
 }

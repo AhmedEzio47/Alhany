@@ -31,8 +31,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
   bool _isPlaying = false;
 
   getSongs() async {
-    List<Melody> songs =
-        await DatabaseService.getSongsBySingerName(widget.singer.name);
+    List<Melody> songs = await DatabaseService.getSongsBySingerName(widget.singer.name);
     if (mounted) {
       setState(() {
         _songs = songs;
@@ -41,8 +40,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
   }
 
   getMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getMelodiesBySingerName(widget.singer.name);
+    List<Melody> melodies = await DatabaseService.getMelodiesBySingerName(widget.singer.name);
     if (mounted) {
       setState(() {
         _melodies = melodies;
@@ -80,6 +78,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                   onTap: () async {
                     setState(() {
                       musicPlayer = MusicPlayer(
+                        melody: _songs[index],
                         url: _songs[index].audioUrl,
                         backColor: MyColors.lightPrimaryColor,
                         title: _songs[index].name,
@@ -174,8 +173,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(
-                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -195,15 +193,13 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                           ),
                           Positioned.fill(
                               child: Padding(
-                            padding:
-                                const EdgeInsets.only(left: 16.0, bottom: 16),
+                            padding: const EdgeInsets.only(left: 16.0, bottom: 16),
                             child: Align(
                               alignment: Alignment.bottomLeft,
                               child: CachedImage(
                                 height: 100,
                                 width: 100,
-                                defaultAssetImage:
-                                    Strings.default_profile_image,
+                                defaultAssetImage: Strings.default_profile_image,
                                 imageUrl: widget.singer.imageUrl,
                                 imageShape: BoxShape.circle,
                               ),
@@ -215,15 +211,11 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                               child: Align(
                                 alignment: Alignment.bottomRight,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 16),
+                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                                   color: Colors.black.withOpacity(.6),
                                   child: Text(
                                     widget.singer.name,
-                                    style: TextStyle(
-                                        fontSize: 22,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),

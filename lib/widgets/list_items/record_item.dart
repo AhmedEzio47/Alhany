@@ -8,6 +8,7 @@ import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
+import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -29,7 +30,7 @@ class _RecordItemState extends State<RecordItem> {
   bool isLikeEnabled = true;
   var likes = [];
 
-  bool _isVideoPlaying = false;
+  final number = ValueNotifier(0);
 
   @override
   void initState() {
@@ -75,7 +76,7 @@ class _RecordItemState extends State<RecordItem> {
 
       await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(-1)});
 
-      await NotificationHandler.removeNotification(record.singerId, record.id, 'like');
+      await NotificationHandler.removeNotification(record.singerId, record.id, 'record_like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -180,6 +181,17 @@ class _RecordItemState extends State<RecordItem> {
                       ),
                       onTap: () => _goToMelodyPage(),
                     ),
+                    Constants.currentUserID == widget.record.singerId
+                        ? ValueListenableBuilder<int>(
+                            valueListenable: number,
+                            builder: (context, value, child) {
+                              return PostBottomSheet().postOptionIcon(
+                                context,
+                                record: widget.record,
+                              );
+                            },
+                          )
+                        : Container()
                   ],
                 ),
               ),
