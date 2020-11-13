@@ -25,8 +25,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
+          leading: Text(''),
           title: Text("Notifications"),
-          centerTitle: true,
         ),
         body: _notifications.length > 0
             ? Container(

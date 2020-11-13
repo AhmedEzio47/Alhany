@@ -59,7 +59,7 @@ class _AppPageState extends State<AppPage> {
         drawer: BuildDrawer(),
         bottomNavigationBar: CurvedNavigationBar(
           index: _page,
-          height: 55,
+          height: 65,
           backgroundColor: MyColors.primaryColor,
           color: Colors.white,
           items: <Widget>[

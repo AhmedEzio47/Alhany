@@ -9,7 +9,7 @@ class LyricsEditor extends StatefulWidget {
 }
 
 class _LyricsEditorState extends State<LyricsEditor> {
-  GlobalKey<FlutterSummernoteState> _keyEditor = GlobalKey();
+  GlobalKey<HtmlEditorState> keyEditor = GlobalKey();
 
   @override
   void initState() {
@@ -22,12 +22,12 @@ class _LyricsEditorState extends State<LyricsEditor> {
       appBar: AppBar(
         title: Text('Lyrics Editor'),
       ),
-      body:
-          SingleChildScrollView(child: FlutterSummernote(hint: "Your text here...", key: _keyEditor, customToolbar: """
-            [
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['strikethrough', 'superscript', 'subscript']]
-            ]""")),
+      body: HtmlEditor(
+        hint: "Your text here...",
+        //value: "text content initial, if any",
+        key: keyEditor,
+        height: MediaQuery.of(context).size.height,
+      ),
     );
   }
 }
