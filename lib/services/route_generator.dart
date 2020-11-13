@@ -93,7 +93,10 @@ class RouteGenerator {
                   singer: args['singer'],
                 ));
       case '/lyrics-editor':
-        return MaterialPageRoute(builder: (_) => LyricsEditor());
+        return MaterialPageRoute(
+            builder: (_) => LyricsEditor(
+                  melody: args['melody'],
+                ));
 
       case '/record-page':
         Constants.currentRoute = settings.name;

@@ -462,10 +462,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
         break;
 
       case Strings.ar_edit_lyrics:
-        Navigator.of(context).pushNamed('/lyrics-editor');
+        Navigator.of(context).pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
         break;
       case Strings.ar_edit_lyrics:
-        Navigator.of(context).pushNamed('/lyrics-editor');
+        Navigator.of(context).pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
         break;
     }
   }

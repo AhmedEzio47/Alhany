@@ -1,11 +1,12 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/melody_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:html_editor/html_editor.dart';
 
 class LyricsEditor extends StatefulWidget {
-  final String melody;
+  final Melody melody;
 
   const LyricsEditor({Key key, this.melody}) : super(key: key);
 
@@ -42,6 +43,7 @@ class _LyricsEditorState extends State<LyricsEditor> {
 
   updateLyrics() async {
     final String lyrics = await keyEditor.currentState.getText();
-    melodiesRef.document(widget.melody).updateData({'lyrics': lyrics});
+    melodiesRef.document(widget.melody.id).updateData({'lyrics': lyrics});
+    AppUtil.showToast('Lyrics updated!');
   }
 }

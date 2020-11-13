@@ -235,10 +235,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      // if (musicPlayer != null) {
-                      //   musicPlayer.stop();
-                      // }
-
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_filteredMelodies[index].id),
