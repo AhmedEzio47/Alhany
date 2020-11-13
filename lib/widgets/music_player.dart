@@ -79,6 +79,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   void initState() {
     if (widget.melody?.isSong ?? true) {
+      //aaaa
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
