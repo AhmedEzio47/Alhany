@@ -26,7 +26,7 @@ class _LyricsEditorState extends State<LyricsEditor> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.cloud_upload),
-        onPressed: () async {},
+        onPressed: updateLyrics,
       ),
       appBar: AppBar(
         title: Text('Lyrics Editor'),
