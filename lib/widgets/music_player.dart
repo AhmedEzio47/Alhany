@@ -80,13 +80,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
   void initState() {
     if (widget.melody?.isSong ?? true) {
       choices = [
-        language(en: Strings.en_edit_lyrics, ar: Strings.ar_edit_lyrics),
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
         language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     } else {
       choices = [
+        language(en: Strings.en_edit_lyrics, ar: Strings.ar_edit_lyrics),
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
         language(en: Strings.en_delete, ar: Strings.ar_delete)
