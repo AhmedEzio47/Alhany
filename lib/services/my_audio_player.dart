@@ -70,6 +70,7 @@ class MyAudioPlayer with ChangeNotifier {
       if (duration.inMilliseconds - p.inMilliseconds < 200) {
         if (urlList != null) {
           play(index: ++this.index);
+          notifyListeners();
         } else {
           stop();
         }
@@ -115,6 +116,7 @@ class MyAudioPlayer with ChangeNotifier {
       this.index++;
     else
       this.index = 0;
+    notifyListeners();
     play(index: this.index);
   }
 
@@ -124,6 +126,7 @@ class MyAudioPlayer with ChangeNotifier {
       this.index--;
     else
       this.index = urlList.length - 1;
+    notifyListeners();
     play(index: this.index);
   }
 }

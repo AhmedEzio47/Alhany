@@ -7,6 +7,7 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/payment_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
@@ -76,10 +77,28 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   bool isMuted = false;
   List<String> choices;
+
+  bool _isFavourite = false;
+
+  isFavourite() async {
+    bool isFavourite =
+        (await usersRef.document(Constants.currentUserID).collection('favourites').document(widget.melody?.id).get())
+            .exists;
+
+    setState(() {
+      _isFavourite = isFavourite;
+    });
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    await isFavourite();
+  }
+
   @override
   void initState() {
     if (widget.melody?.isSong ?? true) {
-      //aaaa
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
@@ -153,12 +172,17 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   : SizedBox(
                       height: 5,
                     ),
-              widget.title != null
+              widget.melodyList != null
                   ? Text(
-                      widget.title,
+                      widget.melodyList[myAudioPlayer.index].name,
                       style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                     )
-                  : Container(),
+                  : widget.title != null
+                      ? Text(
+                          widget.title,
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        )
+                      : Container(),
               Row(
                 children: [
                   widget.isCompact
@@ -230,6 +254,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        (widget.melody?.isSong ?? false) ? favouriteBtn() : Container(),
                         widget.melodyList != null ? previousBtn() : Container(),
                         playPauseBtn(),
                         widget.melodyList != null ? nextBtn() : Container(),
@@ -362,6 +387,41 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           );
+  }
+
+  Widget favouriteBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: InkWell(
+        onTap: () async {
+          _isFavourite
+              ? await DatabaseService.deleteMelodyFromFavourites(widget.melody.id)
+              : await DatabaseService.addMelodyToFavourites(widget.melody.id);
+
+          await isFavourite();
+        },
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Icon(
+            _isFavourite ? Icons.favorite : Icons.favorite_border,
+            color: MyColors.accentColor,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget downloadOrOptions() {
