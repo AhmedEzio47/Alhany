@@ -1,3 +1,4 @@
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ class RegularAppbar extends StatelessWidget {
     this.context = context;
   }
   Future<bool> onBackPressed() {
+    Constants.currentRoute = '';
     Navigator.of(context).pop();
   }
 
@@ -32,15 +34,13 @@ class RegularAppbar extends StatelessWidget {
                     color: color,
                   ),
                 )),
-            InkWell(
-                onTap: onBackPressed,
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  // child: Image.asset(
-                  //   Strings.app_icon,
-                  // ),
-                )),
+            Container(
+              height: 40,
+              width: 150,
+              child: Image.asset(
+                Strings.app_bar,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: padding),
               child: Container(

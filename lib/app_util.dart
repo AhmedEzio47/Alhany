@@ -4,6 +4,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants/colors.dart';
@@ -362,6 +364,13 @@ class AppUtil {
     File video = await ImagePicker.pickVideo(
         source: ImageSource.camera, maxDuration: maxDuration, preferredCameraDevice: CameraDevice.front);
     return video;
+  }
+
+  static sharePost(String postText, String imageUrl, {String recordId, String newsId}) async {
+    var postLink = await DynamicLinks.createPostDynamicLink(
+        {'recordId': recordId, 'newsId': newsId, 'text': postText, 'imageUrl': imageUrl});
+    Share.share('Check out: $postText : $postLink');
+    print('Check out: $postText : $postLink');
   }
 }
 

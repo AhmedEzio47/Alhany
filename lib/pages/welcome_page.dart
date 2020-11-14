@@ -60,13 +60,26 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
             Container(
               padding: EdgeInsets.only(top: 100.0),
               child: Container(
-                height: 250,
-                width: 250,
-                // child: Center(
-                //     child: Image.asset(
-                //   'assets/images/splash_icon.png',
-                //   scale: 2,
-                // )),
+                color: Colors.black.withOpacity(.3),
+                height: 170,
+                width: MediaQuery.of(context).size.width,
+                child: Center(
+                    child: Image.asset(
+                  'assets/images/app_art.png',
+                  scale: 1.2,
+                )),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Container(
+                height: 100,
+                width: MediaQuery.of(context).size.width,
+                child: Center(
+                    child: Image.asset(
+                  'assets/images/app_text.png',
+                  scale: 1.4,
+                )),
               ),
             ),
             new Container(

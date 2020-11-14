@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(
-                            height: 50,
+                            height: 80,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -338,6 +338,20 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                       ),
                     ),
                   ),
+                  Positioned.fill(
+                      child: Align(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 35),
+                      child: Container(
+                        height: 40,
+                        width: 150,
+                        child: Image.asset(
+                          Strings.app_bar,
+                        ),
+                      ),
+                    ),
+                    alignment: Alignment.topCenter,
+                  )),
                   _isPlaying
                       ? Positioned.fill(
                           child: Align(

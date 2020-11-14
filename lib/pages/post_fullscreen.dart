@@ -9,9 +9,11 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 
 class PostFullscreen extends StatefulWidget {
@@ -313,17 +315,28 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 50),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.share, size: 35, color: Colors.white)),
-                          Text('Share', style: TextStyle(color: Colors.white))
-                        ],
+                    InkWell(
+                      onTap: () {
+                        if (widget.record != null) {
+                          AppUtil.sharePost('${widget.singer.name} singed ${widget.melody..name}', '',
+                              recordId: widget.record.id, newsId: widget.news.id);
+                        } else {
+                          AppUtil.sharePost('${Constants.startUser.name} post some news', '',
+                              recordId: widget.record.id, newsId: widget.news.id);
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(bottom: 50),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(math.pi),
+                                child: Icon(Icons.share, size: 35, color: Colors.white)),
+                            Text('Share', style: TextStyle(color: Colors.white))
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -94,7 +94,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> with SingleTic
         alignment: Alignment.bottomCenter,
         children: <Widget>[
           Positioned(
-            bottom: -50 - (75.0 - widget.height),
+            bottom: -45 - (75.0 - widget.height),
             left: Directionality.of(context) == TextDirection.rtl ? null : _pos * size.width,
             right: Directionality.of(context) == TextDirection.rtl ? _pos * size.width : null,
             width: size.width / _length,

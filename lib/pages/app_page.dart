@@ -1,5 +1,7 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/home_page.dart';
@@ -9,10 +11,12 @@ import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/records_page.dart';
 import 'package:Alhany/pages/singers_page.dart';
 import 'package:Alhany/pages/star_page.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/curved_navigation_bar.dart';
 import 'package:Alhany/widgets/drawer.dart';
 import 'package:badges/badges.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 
 class AppPage extends StatefulWidget {
@@ -29,11 +33,50 @@ class _AppPageState extends State<AppPage> {
   User _currentUser;
   @override
   void initState() {
+    initDynamicLinks();
     _currentUser = Constants.currentUser;
     NotificationHandler.receiveNotification(context, _scaffoldKey);
     userListener();
     _pageController = PageController(initialPage: 2);
     super.initState();
+  }
+
+  void initDynamicLinks() async {
+    FirebaseDynamicLinks.instance.onLink(onSuccess: (PendingDynamicLinkData dynamicLink) async {
+      final Uri deepLink = dynamicLink?.link;
+
+      if (deepLink != null) {
+        if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
+          Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/record-page', arguments: {'record': record});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
+          User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
+          News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/news-page', arguments: {'news': news});
+        }
+      }
+    }, onError: (OnLinkErrorException e) async {
+      print('onLinkError');
+      print(e.message);
+    });
+
+    final PendingDynamicLinkData data = await FirebaseDynamicLinks.instance.getInitialLink();
+    final Uri deepLink = data?.link;
+
+    if (deepLink != null) {
+      if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
+        Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
+        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record});
+      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
+        User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+        Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
+      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
+        News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
+        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news});
+      }
+    }
   }
 
   userListener() {
@@ -59,7 +102,7 @@ class _AppPageState extends State<AppPage> {
         drawer: BuildDrawer(),
         bottomNavigationBar: CurvedNavigationBar(
           index: _page,
-          height: 65,
+          height: 55,
           backgroundColor: MyColors.primaryColor,
           color: Colors.white,
           items: <Widget>[

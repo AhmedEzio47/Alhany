@@ -11,6 +11,12 @@ class Strings {
   static const String headphones_alert_bg = 'assets/images/headphones_alert.jpg';
   static const String splash = 'assets/images/splash.jpg';
   static const String splash_icon = 'assets/images/splash_icon.png';
+  static const String app_art = 'assets/images/app_art.png';
+  static const String app_text = 'assets/images/app_text.png';
+  static const String app_bar = 'assets/images/logo_appbar.png';
+
+  //App
+  static const String packageName = 'com.devyat.Alhany';
 
   //Admin ID
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';

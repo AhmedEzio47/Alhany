@@ -105,7 +105,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   alignment: Alignment.topRight,
                 ),
-              ))
+              )),
+              Positioned.fill(
+                  child: Align(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 35),
+                  child: Container(
+                    height: 40,
+                    width: 150,
+                    child: Image.asset(
+                      Strings.app_bar,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.topCenter,
+              )),
             ],
           ),
         ),

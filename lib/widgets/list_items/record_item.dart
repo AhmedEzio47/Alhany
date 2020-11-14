@@ -1,3 +1,4 @@
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
@@ -291,11 +292,15 @@ class _RecordItemState extends State<RecordItem> {
                         SizedBox(
                           width: 10,
                         ),
-                        SizedBox(
-                          child: Icon(
-                            Icons.share,
-                            size: Sizes.card_btn_size,
-                            color: Colors.white,
+                        InkWell(
+                          onTap: () => AppUtil.sharePost('${_singer.name} singed ${_melody.name}', '',
+                              recordId: widget.record.id),
+                          child: SizedBox(
+                            child: Icon(
+                              Icons.share,
+                              size: Sizes.card_btn_size,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],

@@ -289,11 +289,15 @@ class _NewsItemState extends State<NewsItem> {
                         SizedBox(
                           width: 10,
                         ),
-                        SizedBox(
-                          child: Icon(
-                            Icons.share,
-                            size: Sizes.card_btn_size,
-                            color: Colors.white,
+                        InkWell(
+                          onTap: () => AppUtil.sharePost('${Constants.startUser.name} post some news', '',
+                              newsId: widget.news.id),
+                          child: SizedBox(
+                            child: Icon(
+                              Icons.share,
+                              size: Sizes.card_btn_size,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],

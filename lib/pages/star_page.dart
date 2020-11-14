@@ -114,7 +114,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 70,
+                      height: 75,
                     ),
                     CachedImage(
                       width: 100,
@@ -147,6 +147,20 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                   ],
                 ),
               ),
+              Positioned.fill(
+                  child: Align(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 35),
+                  child: Container(
+                    height: 40,
+                    width: 150,
+                    child: Image.asset(
+                      Strings.app_bar,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.topCenter,
+              )),
               _isPlaying
                   ? Positioned.fill(
                       child: Align(

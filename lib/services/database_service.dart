@@ -495,6 +495,14 @@ class DatabaseService {
     return Record();
   }
 
+  static Future<News> getNewsWithId(String newsId) async {
+    DocumentSnapshot newsDocSnapshot = await newsRef?.document(newsId)?.get();
+    if (newsDocSnapshot.exists) {
+      return News.fromDoc(newsDocSnapshot);
+    }
+    return News();
+  }
+
   static deleteComment(String commentId, {String recordId, String newsId}) async {
     CollectionReference collectionReference;
     if (recordId != null) {
