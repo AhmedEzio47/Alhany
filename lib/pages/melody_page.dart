@@ -335,8 +335,19 @@ class _MelodyPageState extends State<MelodyPage> {
       success = await flutterFFmpeg.execute(
           "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
     } else {
-      success = await flutterFFmpeg
-          .execute("-y -i $melodyPath -i $recordingFilePath -map 0:a -map 1:v  -shortest $mergedFilePath");
+      //STEP 1: EXTRACT AUDIO FROM VIDEO
+      success = await flutterFFmpeg.execute('-i $recordingFilePath ${appTempDirectoryPath}extracted_audio.mp3');
+      print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
+
+      //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
+      success = await flutterFFmpeg.execute(
+          "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest ${appTempDirectoryPath}final_audio.mp3");
+      print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
+
+      // MERGE VIDEO WITH FINAL AUDIO
+      success = await flutterFFmpeg.execute(
+          "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest $mergedFilePath");
+      print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
     }
     Navigator.of(context).pop();
 
