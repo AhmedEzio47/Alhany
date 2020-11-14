@@ -27,6 +27,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         appBar: AppBar(
           leading: Text(''),
           title: Text("Notifications"),
+          centerTitle: true,
         ),
         body: _notifications.length > 0
             ? Container(

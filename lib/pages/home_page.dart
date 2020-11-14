@@ -11,6 +11,7 @@ import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../app_util.dart';
 
@@ -315,7 +316,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  LinkedScrollControllerGroup _controllers;
   ScrollController _melodiesScrollController = ScrollController();
+  ScrollController _melodiesPageScrollController = ScrollController();
   recordListView() {
     return ListView.builder(
         shrinkWrap: true,
@@ -344,92 +347,99 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _melodiesPage() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          flex: 1,
-          child: SizedBox(
-            height: 10,
-          ),
-        ),
-        Expanded(
-          flex: 5,
-          child: Row(
+    return SingleChildScrollView(
+      controller: _melodiesPageScrollController,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height, // or something simular :)
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: ListView.builder(
-                    itemCount: _singers.length + 1,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return index < _singers.length
-                          ? InkWell(
-                              onTap: () {
-                                Navigator.of(context).pushNamed('/singer-page', arguments: {'singer': _singers[index]});
-                              },
-                              child: Container(
-                                height: 120,
-                                width: 120,
-                                child: Column(
-                                  children: [
-                                    CachedImage(
-                                      width: 90,
-                                      height: 90,
-                                      imageShape: BoxShape.circle,
-                                      imageUrl: _singers[index].imageUrl,
-                                      defaultAssetImage: Strings.default_profile_image,
-                                    ),
-                                    Text(
-                                      _singers[index].name,
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-                          : _singers.length == 15
-                              ? InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).pushNamed('/singers-page');
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
-                                    child: Center(
-                                        child: Container(
-                                      padding: EdgeInsets.all(8),
-                                      color: MyColors.lightPrimaryColor,
-                                      child: Text(
-                                        'VIEW ALL',
-                                        style: TextStyle(
-                                            color: MyColors.darkPrimaryColor, decoration: TextDecoration.underline),
+              Flexible(
+                fit: FlexFit.loose,
+                flex: 2,
+                child: Row(
+                  children: [
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: ListView.builder(
+                          itemCount: _singers.length + 1,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            return index < _singers.length
+                                ? InkWell(
+                                    onTap: () {
+                                      Navigator.of(context).pushNamed('/singer-page', arguments: {'singer': _singers[index]});
+                                    },
+                                    child: Container(
+                                      height: 120,
+                                      width: 120,
+                                      child: Column(
+                                        children: [
+                                          CachedImage(
+                                            width: 100,
+                                            height: 100,
+                                            imageShape: BoxShape.circle,
+                                            imageUrl: _singers[index].imageUrl,
+                                            defaultAssetImage: Strings.default_profile_image,
+                                          ),
+                                          Text(
+                                            _singers[index].name,
+                                            style: TextStyle(color: Colors.white),
+                                          )
+                                        ],
                                       ),
-                                    )),
-                                  ),
-                                )
-                              : Container();
-                    }),
+                                    ),
+                                  )
+                                : _singers.length == 15
+                                    ? InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pushNamed('/singers-page');
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
+                                          child: Center(
+                                              child: Container(
+                                            padding: EdgeInsets.all(8),
+                                            color: MyColors.lightPrimaryColor,
+                                            child: Text(
+                                              'VIEW ALL',
+                                              style: TextStyle(
+                                                  color: MyColors.darkPrimaryColor, decoration: TextDecoration.underline),
+                                            ),
+                                          )),
+                                        ),
+                                      )
+                                    : Container();
+                          }),
+                    ),
+                  ],
+                ),
               ),
+
+              // Flexible(
+              //     fit: FlexFit.tight,flex: 1, child:               Container(
+              //   margin: EdgeInsets.symmetric(horizontal: 0),
+              //   transform: Matrix4.translationValues(0.0, -30.0, 0.0),
+              //   padding: EdgeInsets.symmetric(horizontal: 16),
+              //   color: MyColors.lightPrimaryColor,
+              //   width: MediaQuery.of(context).size.width,
+              //   alignment: Alignment.centerRight,
+              //   child: Text(
+              //     language(en: 'Latest records', ar: 'آخر المنشورات'),
+              //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              //   ),
+              // ),
+              // ),
+              Flexible(
+                  fit: FlexFit.loose,flex: 10, child: recordListView())
             ],
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            color: MyColors.lightPrimaryColor,
-            width: MediaQuery.of(context).size.width,
-            alignment: Alignment.centerRight,
-            child: Text(
-              language(en: 'Latest records', ar: 'آخر المنشورات'),
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-        Expanded(flex: 7, child: recordListView())
-      ],
+      ),
     );
   }
 
@@ -480,19 +490,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
-    _melodiesScrollController
-      ..addListener(() {
-        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
-            !_melodiesScrollController.position.outOfRange) {
-          print('reached the bottom');
-          nextRecords();
-        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
-            !_melodiesScrollController.position.outOfRange) {
-          print("reached the top");
-        } else {}
-      });
+    _controllers = LinkedScrollControllerGroup();
+    _melodiesScrollController = _controllers.addAndGet();
+    _melodiesPageScrollController = _controllers.addAndGet();
     getCategories();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _melodiesScrollController.dispose();
+    _melodiesPageScrollController.dispose();
+    super.dispose();
   }
 
   var currentBackPressTime;
