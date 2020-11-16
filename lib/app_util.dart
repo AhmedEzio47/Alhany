@@ -177,15 +177,13 @@ class AppUtil with ChangeNotifier {
     print('storage path: $path');
     StorageUploadTask uploadTask;
 
+    uploadTask = storageReference.putFile(file);
     uploadTask.events.listen((event) {
       progress = event.snapshot.bytesTransferred.toDouble() / event.snapshot.totalByteCount.toDouble();
       notifyListeners();
     }).onError((error) {
       // do something to handle error
     });
-
-    uploadTask = storageReference.putFile(file);
-
     await uploadTask.onComplete;
     print('File Uploaded');
     String url = await storageReference.getDownloadURL();
