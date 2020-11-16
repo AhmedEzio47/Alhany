@@ -83,7 +83,7 @@ class PostBottomSheet {
             Icons.delete_forever,
             color: MyColors.darkPrimaryColor,
           ),
-          text: 'Delete Comment',
+          text: 'Delete Post',
           onPressed: () async {
             AppUtil.showAlertDialog(
                 context: context,

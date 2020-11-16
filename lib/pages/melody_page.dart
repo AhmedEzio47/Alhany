@@ -657,6 +657,36 @@ class _MelodyPageState extends State<MelodyPage> {
         body: _progressVisible
             ? progressPage()
             : recordingStatus == RecordingStatus.Recording && _type == Types.VIDEO ? videoRecordingPage() : mainPage(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            if (recordingStatus == RecordingStatus.Recording) {
+              await saveRecord();
+            } else {
+              if ((await PermissionsService().hasStoragePermission()) &&
+                  (await PermissionsService().hasMicrophonePermission())) {
+                Navigator.of(context).push(CustomModal(
+                  child: _headphonesDialog(),
+                ));
+              }
+              if (!await PermissionsService().hasStoragePermission()) {
+                await PermissionsService().requestStoragePermission();
+              }
+              if (!await PermissionsService().hasMicrophonePermission()) {
+                await PermissionsService().requestMicrophonePermission();
+              }
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Icon(
+              recordingStatus == RecordingStatus.Recording
+                  ? Icons.stop
+                  : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
+              color: MyColors.primaryColor,
+              size: 30,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -718,6 +748,8 @@ class _MelodyPageState extends State<MelodyPage> {
       child: Stack(
         children: [
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               RegularAppbar(context),
               SizedBox(
@@ -774,62 +806,67 @@ class _MelodyPageState extends State<MelodyPage> {
                 height: 10,
               ),
               recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
-              SingleChildScrollView(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 20),
-                  alignment: Alignment.centerRight,
-                  width: MediaQuery.of(context).size.width,
-                  height: 150,
-                  child: HtmlWidget(
-                    widget.melody.lyrics,
-                    textStyle: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: () async {
-                  if (recordingStatus == RecordingStatus.Recording) {
-                    await saveRecord();
-                  } else {
-                    if ((await PermissionsService().hasStoragePermission()) &&
-                        (await PermissionsService().hasMicrophonePermission())) {
-                      Navigator.of(context).push(CustomModal(
-                        child: _headphonesDialog(),
-                      ));
-                    }
-                    if (!await PermissionsService().hasStoragePermission()) {
-                      await PermissionsService().requestStoragePermission();
-                    }
-                    if (!await PermissionsService().hasMicrophonePermission()) {
-                      await PermissionsService().requestMicrophonePermission();
-                    }
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54,
-                        spreadRadius: 4,
-                        blurRadius: 6,
-                        offset: Offset(0, 3), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Icon(
-                      recordingStatus == RecordingStatus.Recording
-                          ? Icons.stop
-                          : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
-                      color: MyColors.primaryColor,
-                      size: 30,
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: 150,
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: HtmlWidget(
+                      widget.melody.lyrics,
+                      textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      customStylesBuilder: (e) {
+                        return {'text-align': 'center', 'color': 'white', 'line-height': '85%'};
+                      },
                     ),
                   ),
                 ),
               ),
+              // InkWell(
+              //   onTap: () async {
+              //     if (recordingStatus == RecordingStatus.Recording) {
+              //       await saveRecord();
+              //     } else {
+              //       if ((await PermissionsService().hasStoragePermission()) &&
+              //           (await PermissionsService().hasMicrophonePermission())) {
+              //         Navigator.of(context).push(CustomModal(
+              //           child: _headphonesDialog(),
+              //         ));
+              //       }
+              //       if (!await PermissionsService().hasStoragePermission()) {
+              //         await PermissionsService().requestStoragePermission();
+              //       }
+              //       if (!await PermissionsService().hasMicrophonePermission()) {
+              //         await PermissionsService().requestMicrophonePermission();
+              //       }
+              //     }
+              //   },
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       color: Colors.grey.shade300,
+              //       shape: BoxShape.circle,
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: Colors.black54,
+              //           spreadRadius: 4,
+              //           blurRadius: 6,
+              //           offset: Offset(0, 3), // changes position of shadow
+              //         ),
+              //       ],
+              //     ),
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(15.0),
+              //       child: Icon(
+              //         recordingStatus == RecordingStatus.Recording
+              //             ? Icons.stop
+              //             : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
+              //         color: MyColors.primaryColor,
+              //         size: 30,
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 10)
             ],
           ),
