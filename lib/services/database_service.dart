@@ -366,6 +366,16 @@ class DatabaseService {
     return singers;
   }
 
+  static Future<List<Singer>> getNextSingers(String lastVisiblePostSnapShot) async {
+    QuerySnapshot singersSnapshot = await singersRef
+        .orderBy('name', descending: false)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Singer> singers = singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+    return singers;
+  }
+
   static Future<List<Melody>> getSongsBySingerName(String singerName) async {
     QuerySnapshot melodiesSnapshot = await melodiesRef
         .where('is_song', isEqualTo: true)
@@ -377,10 +387,34 @@ class DatabaseService {
     return songs;
   }
 
+  static Future<List<Melody>> getNextSongsBySingerName(String singerName, Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: true)
+        .where('singer', isEqualTo: singerName)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> songs = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return songs;
+  }
+
   static Future<List<Melody>> getMelodiesBySingerName(String singerName) async {
     QuerySnapshot melodiesSnapshot = await melodiesRef
         .where('is_song', isEqualTo: false)
         .where('singer', isEqualTo: singerName)
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<Melody> melodies = melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static Future<List<Melody>> getNextMelodiesBySingerName(String singerName, Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot melodiesSnapshot = await melodiesRef
+        .where('is_song', isEqualTo: false)
+        .where('singer', isEqualTo: singerName)
+        .startAfter([lastVisiblePostSnapShot])
         .limit(20)
         .orderBy('timestamp', descending: true)
         .getDocuments();
@@ -455,6 +489,28 @@ class DatabaseService {
         .document(commentId)
         .collection('replies')
         ?.orderBy('timestamp', descending: true)
+        ?.limit(20)
+        ?.getDocuments();
+    List<Comment> comments = commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
+  }
+
+  static Future<List<Comment>> getNextCommentReplies(String commentId, Timestamp lastVisiblePostSnapShot,
+      {String recordId, String newsId}) async {
+    CollectionReference collectionReference;
+    if (recordId != null) {
+      collectionReference = recordsRef;
+    } else if (newsId != null) {
+      collectionReference = newsRef;
+    }
+
+    QuerySnapshot commentSnapshot = await collectionReference
+        .document(recordId ?? newsId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        ?.orderBy('timestamp', descending: true)
+        ?.startAfter([lastVisiblePostSnapShot])
         ?.limit(20)
         ?.getDocuments();
     List<Comment> comments = commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();

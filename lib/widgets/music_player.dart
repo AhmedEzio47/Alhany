@@ -35,7 +35,6 @@ class MusicPlayer extends StatefulWidget {
   final Function onComplete;
   final bool isLocal;
   final String title;
-  final bool recordBtnVisible;
   final double btnSize;
   final int initialDuration;
   final PlayBtnPosition playBtnPosition;
@@ -50,7 +49,6 @@ class MusicPlayer extends StatefulWidget {
       this.onComplete,
       this.isLocal = false,
       this.title,
-      this.recordBtnVisible = false,
       this.btnSize = 40.0,
       this.initialDuration,
       this.melody,
@@ -258,12 +256,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         widget.melodyList != null ? previousBtn() : Container(),
                         playPauseBtn(),
                         widget.melodyList != null ? nextBtn() : Container(),
-                        widget.recordBtnVisible
+                        (!(widget.melody?.isSong ?? true))
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        widget.recordBtnVisible
+                        (!(widget.melody?.isSong ?? true))
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed('/melody-page',
                                     arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
@@ -289,12 +287,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        widget.recordBtnVisible
+                        (!(widget.melody?.isSong ?? true))
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        widget.recordBtnVisible
+                        (!(widget.melody?.isSong ?? true))
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed(
                                   '/melody-page',
@@ -539,7 +537,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       await storageRef.child('/melodies_images/$fileName').delete();
     }
 
-    String url = await AppUtil.uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
+    String url = await AppUtil().uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
     await melodiesRef.document(widget.melody.id).updateData({'image_url': url});
     AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }

@@ -101,7 +101,6 @@ class _SearchPageState extends State<SearchPage> {
                                       backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                                       title: _results[index].name,
                                       btnSize: 30,
-                                      recordBtnVisible: !(_results[index] as Melody).isSong,
                                       initialDuration: _results[index].duration,
                                       melody: _results[index],
                                     );

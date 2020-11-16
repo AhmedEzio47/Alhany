@@ -582,8 +582,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
     }
     AppUtil.showLoader(context);
 
-    String url = await AppUtil.uploadFile(
-        image, context, 'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
+    String url = await AppUtil()
+        .uploadFile(image, context, 'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
     await usersRef.document(Constants.currentUserID).updateData({'profile_url': url});
     Navigator.of(context).pop();
     await getUser();

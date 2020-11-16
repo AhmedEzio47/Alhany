@@ -313,11 +313,11 @@ class _UploadSongsState extends State<UploadSongs> {
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$ext');
+    String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (songUrl == '') {
@@ -356,7 +356,7 @@ class _UploadSongsState extends State<UploadSongs> {
       String id = randomAlphaNumeric(20);
       String songExt = path.extension(songFile.path);
       String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
-      String songUrl = await AppUtil.uploadFile(songFile, context, '/songs/$id$songExt');
+      String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$songExt');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
       MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);

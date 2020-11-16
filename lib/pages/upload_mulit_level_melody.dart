@@ -84,8 +84,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                     _singer = text;
                   });
                 },
-                items:
-                    (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
                   return DropdownMenuItem<dynamic>(
                     value: value,
                     child: Text(value),
@@ -239,9 +238,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
   uploadMelody() async {
     if (_melodyName.trim().isEmpty) {
-      AppUtil.showToast(language(
-          en: 'Please choose a name for the melody',
-          ar: 'قم باختيار اسم اللحن'));
+      AppUtil.showToast(language(en: 'Please choose a name for the melody', ar: 'قم باختيار اسم اللحن'));
       return;
     }
 
@@ -254,15 +251,11 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
     for (String key in melodies.keys) {
       String ext = path.extension(melodies[key].path);
-      String url = await AppUtil.uploadFile(
-          melodies[key], context, '/melodies/$id\_$key$ext');
+      String url = await AppUtil().uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(melodies[key].path);
-      int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
-              .toInt();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(melodies[key].path);
+      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
       levelsUrls.putIfAbsent(key, () => url);
       levelsDurations.putIfAbsent(key, () => duration);
@@ -271,8 +264,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl =
-          await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     await melodiesRef.document(id).setData({

@@ -41,7 +41,9 @@ List<String> searchList(String text) {
   return list;
 }
 
-class AppUtil {
+class AppUtil with ChangeNotifier {
+  static double progress;
+
   static showAlertDialog({
     @required BuildContext context,
     String heading,
@@ -168,12 +170,19 @@ class AppUtil {
     return null;
   }
 
-  static Future<String> uploadFile(File file, BuildContext context, String path) async {
+  Future<String> uploadFile(File file, BuildContext context, String path) async {
     if (file == null) return '';
 
     StorageReference storageReference = FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
     StorageUploadTask uploadTask;
+
+    uploadTask.events.listen((event) {
+      progress = event.snapshot.bytesTransferred.toDouble() / event.snapshot.totalByteCount.toDouble();
+      notifyListeners();
+    }).onError((error) {
+      // do something to handle error
+    });
 
     uploadTask = storageReference.putFile(file);
 

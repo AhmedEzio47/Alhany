@@ -13,8 +13,7 @@ import 'package:random_string/random_string.dart';
 
 class UploadSingleLevelMelody extends StatefulWidget {
   @override
-  _UploadSingleLevelMelodyState createState() =>
-      _UploadSingleLevelMelodyState();
+  _UploadSingleLevelMelodyState createState() => _UploadSingleLevelMelodyState();
 }
 
 class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
@@ -67,8 +66,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                           child: Image.asset(Strings.default_melody_image))
                       : Image.file(_image)),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
                 child: TextField(
                   textAlign: TextAlign.center,
                   onChanged: (text) {
@@ -87,8 +85,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     _singer = text;
                   });
                 },
-                items:
-                    (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
                   return DropdownMenuItem<dynamic>(
                     value: value,
                     child: Text(value),
@@ -98,9 +95,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    language(
-                        en: Strings.en_choose_melody,
-                        ar: Strings.ar_choose_melody),
+                    language(en: Strings.en_choose_melody, ar: Strings.ar_choose_melody),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -113,8 +108,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration:
-                            BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                     Text(
@@ -127,8 +121,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration:
-                            BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                   ],
@@ -137,9 +130,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    language(
-                        en: Strings.en_choose_melodies,
-                        ar: Strings.ar_choose_melodies),
+                    language(en: Strings.en_choose_melodies, ar: Strings.ar_choose_melodies),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -159,24 +150,19 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
 //    }
     File melodyFile = await AppUtil.chooseAudio();
     String ext = path.extension(melodyFile.path);
-    String fileNameWithoutExtension =
-        path.basenameWithoutExtension(melodyFile.path);
+    String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info =
-        await _flutterFFprobe.getMediaInformation(melodyFile.path);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(melodyFile.path);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String melodyUrl =
-        await AppUtil.uploadFile(melodyFile, context, '/melodies/$id$ext');
+    String melodyUrl = await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl =
-          await AppUtil.uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (melodyUrl == '') {
@@ -193,16 +179,13 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       'author_id': _singer == null ? Constants.currentUserID : null,
       'singer': _singer,
       'is_song': false,
-      'search': _melodyName != null
-          ? searchList(_melodyName)
-          : searchList(fileNameWithoutExtension),
+      'search': _melodyName != null ? searchList(_melodyName) : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
 
     Navigator.of(context).pop();
-    AppUtil.showToast(language(
-        en: Strings.en_melody_uploaded, ar: Strings.ar_melody_uploaded));
+    AppUtil.showToast(language(en: Strings.en_melody_uploaded, ar: Strings.ar_melody_uploaded));
   }
 
   uploadMelodies() async {
@@ -216,16 +199,11 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     for (File melodyFile in melodiesFiles) {
       String id = randomAlphaNumeric(20);
       String melodyExt = path.extension(melodyFile.path);
-      String fileNameWithoutExtension =
-          path.basenameWithoutExtension(melodyFile.path);
-      String melodyUrl = await AppUtil.uploadFile(
-          melodyFile, context, '/melodies/$id$melodyExt');
+      String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
+      String melodyUrl = await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$melodyExt');
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(melodyFile.path);
-      int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
-              .toInt();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(melodyFile.path);
+      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,

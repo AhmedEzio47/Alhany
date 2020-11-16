@@ -12,6 +12,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -34,11 +35,24 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
 
   bool _isPlaying = false;
 
+  Timestamp lastVisiblePostSnapShot;
+
   getSongs() async {
     List<Melody> songs = await DatabaseService.getSongsBySingerName(widget.singer.name);
     if (mounted) {
       setState(() {
         _songs = songs;
+        lastVisiblePostSnapShot = songs.last.timestamp;
+      });
+    }
+  }
+
+  nextSongs() async {
+    List<Melody> songs = await DatabaseService.getNextSongsBySingerName(widget.singer.name, lastVisiblePostSnapShot);
+    if (songs.length > 0) {
+      setState(() {
+        songs.forEach((element) => _songs.add(element));
+        this.lastVisiblePostSnapShot = songs.last.timestamp;
       });
     }
   }
@@ -52,8 +66,42 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
     }
   }
 
+  nextMelodies() async {
+    List<Melody> melodies =
+        await DatabaseService.getNextMelodiesBySingerName(widget.singer.name, lastVisiblePostSnapShot);
+    if (melodies.length > 0) {
+      setState(() {
+        melodies.forEach((element) => _melodies.add(element));
+        this.lastVisiblePostSnapShot = melodies.last.timestamp;
+      });
+    }
+  }
+
   @override
   void initState() {
+    _songsScrollController
+      ..addListener(() {
+        if (_songsScrollController.offset >= _songsScrollController.position.maxScrollExtent &&
+            !_songsScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextSongs();
+        } else if (_songsScrollController.offset <= _songsScrollController.position.minScrollExtent &&
+            !_songsScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
+
+    _melodiesScrollController
+      ..addListener(() {
+        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
+            !_melodiesScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextMelodies();
+        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
+            !_melodiesScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     _tabController = TabController(vsync: this, length: 2, initialIndex: 1);
     super.initState();
   }
@@ -320,7 +368,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
-    String url = await AppUtil.uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
+    String url = await AppUtil().uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
     await singersRef.document(widget.singer.id).updateData({'image_url': url});
     AppUtil.showToast('Image updated!');
   }

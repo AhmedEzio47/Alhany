@@ -4,6 +4,7 @@ class Melody {
   final String id;
   final String name;
   final String audioUrl;
+  final String lyrics;
   final Map levelUrls;
   final Map levelDurations;
   final String imageUrl;
@@ -21,6 +22,7 @@ class Melody {
       {this.id,
       this.name,
       this.audioUrl,
+      this.lyrics,
       this.levelUrls,
       this.levelDurations,
       this.imageUrl,
@@ -39,6 +41,7 @@ class Melody {
         id: doc.documentID,
         name: doc['name'],
         audioUrl: doc['audio_url'],
+        lyrics: doc['lyrics'],
         levelUrls: doc['level_urls'],
         levelDurations: doc['level_durations'],
         imageUrl: doc['image_url'],

@@ -100,7 +100,7 @@ class _SingerItemState extends State<SingerItem> {
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
-    String url = await AppUtil.uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
+    String url = await AppUtil().uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
     await singersRef.document(widget.singer.id).updateData({'image_url': url});
     AppUtil.showToast('Image updated!');
   }

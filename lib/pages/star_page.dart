@@ -256,7 +256,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredMelodies[index].name,
                           btnSize: 30,
-                          recordBtnVisible: true,
                           initialDuration: _filteredMelodies[index].duration,
                           melody: _filteredMelodies[index],
                         );
@@ -284,7 +283,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
                           btnSize: 30,
-                          recordBtnVisible: true,
                           initialDuration: _melodies[index].duration,
                           melody: _melodies[index],
                         );

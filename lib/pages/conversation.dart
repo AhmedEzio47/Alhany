@@ -454,7 +454,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                           Icons.send
                                         ], btnFunctions: [
                                           () async {
-                                            String url = await AppUtil.uploadFile(image, context,
+                                            String url = await AppUtil().uploadFile(image, context,
                                                 'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image.path)}');
 
                                             messageController.clear();
@@ -559,7 +559,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                         Recording result = await recorder.stopRecording();
 
                                         //Storage path is voice_messages/sender_id/receiver_id/file
-                                        _url = await AppUtil.uploadFile(File(result.path), context,
+                                        _url = await AppUtil().uploadFile(File(result.path), context,
                                             'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result.path)}');
 
                                         await DatabaseService.sendMessage(widget.otherUid, 'audio', _url);

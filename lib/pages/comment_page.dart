@@ -9,6 +9,7 @@ import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/list_items/comment_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class CommentPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class CommentPage extends StatefulWidget {
 
 class _CommentPageState extends State<CommentPage> {
   TextEditingController _replyController = TextEditingController();
+  ScrollController _repliesScrollController = ScrollController();
   void _submitButton() async {
     AppUtil.showLoader(context);
 
@@ -64,17 +66,42 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   List<Comment> _replies = [];
+  Timestamp lastVisiblePostSnapShot;
 
   getReplies() async {
     List<Comment> replies = await DatabaseService.getCommentReplies(widget.comment.id,
         recordId: widget.record?.id, newsId: widget.news?.id);
+
     setState(() {
       _replies = replies;
+      this.lastVisiblePostSnapShot = replies.last.timestamp;
     });
+  }
+
+  nextReplies() async {
+    List<Comment> replies = await DatabaseService.getNextCommentReplies(widget.comment.id, lastVisiblePostSnapShot,
+        recordId: widget.record?.id, newsId: widget.news?.id);
+    if (replies.length > 0) {
+      setState(() {
+        replies.forEach((element) => _replies.add(element));
+        this.lastVisiblePostSnapShot = replies.last.timestamp;
+      });
+    }
   }
 
   @override
   void initState() {
+    _repliesScrollController
+      ..addListener(() {
+        if (_repliesScrollController.offset >= _repliesScrollController.position.maxScrollExtent &&
+            !_repliesScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextReplies();
+        } else if (_repliesScrollController.offset <= _repliesScrollController.position.minScrollExtent &&
+            !_repliesScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     getReplies();
     super.initState();
   }
@@ -163,6 +190,7 @@ class _CommentPageState extends State<CommentPage> {
                           color: Colors.transparent,
                         );
                       },
+                      controller: _repliesScrollController,
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       itemCount: _replies.length,

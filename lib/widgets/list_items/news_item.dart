@@ -362,7 +362,6 @@ class _NewsItemState extends State<NewsItem> {
           url: widget.news.contentUrl,
           backColor: Colors.transparent,
           btnSize: 26,
-          recordBtnVisible: true,
           initialDuration: widget.news.duration,
           playBtnPosition: PlayBtnPosition.left,
           isCompact: true,

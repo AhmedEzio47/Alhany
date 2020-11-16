@@ -110,11 +110,11 @@ class _AddSingerPageState extends State<AddSingerPage> {
 
                       if (_singerImage != null) {
                         String ext = path.extension(_singerImage.path);
-                        imageUrl = await AppUtil.uploadFile(_singerImage, context, '/singers_images/$id$ext');
+                        imageUrl = await AppUtil().uploadFile(_singerImage, context, '/singers_images/$id$ext');
                       }
                       if (_coverImage != null) {
                         String ext = path.extension(_coverImage.path);
-                        coverUrl = await AppUtil.uploadFile(_coverImage, context, '/singers_covers/$id$ext');
+                        coverUrl = await AppUtil().uploadFile(_coverImage, context, '/singers_covers/$id$ext');
                       }
 
                       await singersRef.document(id).setData({

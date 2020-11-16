@@ -14,15 +14,41 @@ class SingersPage extends StatefulWidget {
 class _SingersPageState extends State<SingersPage> {
   List<Singer> _singers = [];
 
+  String lastVisiblePostSnapShot;
+
+  ScrollController _singersScrollController;
+
   getSingers() async {
     List<Singer> singers = await DatabaseService.getSingers();
     setState(() {
       _singers = singers;
+      lastVisiblePostSnapShot = singers.last.name;
     });
+  }
+
+  nextSingers() async {
+    List<Singer> singers = await DatabaseService.getNextSingers(lastVisiblePostSnapShot);
+    if (singers.length > 0) {
+      setState(() {
+        singers.forEach((element) => _singers.add(element));
+        this.lastVisiblePostSnapShot = singers.last.name;
+      });
+    }
   }
 
   @override
   void initState() {
+    _singersScrollController
+      ..addListener(() {
+        if (_singersScrollController.offset >= _singersScrollController.position.maxScrollExtent &&
+            !_singersScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextSingers();
+        } else if (_singersScrollController.offset <= _singersScrollController.position.minScrollExtent &&
+            !_singersScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     getSingers();
     super.initState();
   }
@@ -49,6 +75,7 @@ class _SingersPageState extends State<SingersPage> {
                     height: 60,
                   ),
                   ListView.builder(
+                      controller: _singersScrollController,
                       shrinkWrap: true,
                       itemCount: _singers.length,
                       itemBuilder: (context, index) {

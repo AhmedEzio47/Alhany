@@ -317,12 +317,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   LinkedScrollControllerGroup _controllers;
-  ScrollController _melodiesScrollController = ScrollController();
+  ScrollController _recordsScrollController = ScrollController();
   ScrollController _melodiesPageScrollController = ScrollController();
   recordListView() {
     return ListView.builder(
         shrinkWrap: true,
-        controller: _melodiesScrollController,
+        controller: _recordsScrollController,
         itemCount: _records.length,
         itemBuilder: (context, index) {
           return InkWell(
@@ -332,7 +332,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   url: _records[index].audioUrl,
                   backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                   btnSize: 35,
-                  recordBtnVisible: true,
                   initialDuration: _records[index].duration,
                   playBtnPosition: PlayBtnPosition.left,
                 );
@@ -360,7 +359,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               Flexible(
                 fit: FlexFit.loose,
-                flex: 2,
+                flex: 3,
                 child: Row(
                   children: [
                     Flexible(
@@ -372,7 +371,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             return index < _singers.length
                                 ? InkWell(
                                     onTap: () {
-                                      Navigator.of(context).pushNamed('/singer-page', arguments: {'singer': _singers[index]});
+                                      Navigator.of(context)
+                                          .pushNamed('/singer-page', arguments: {'singer': _singers[index]});
                                     },
                                     child: Container(
                                       height: 120,
@@ -408,7 +408,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             child: Text(
                                               'VIEW ALL',
                                               style: TextStyle(
-                                                  color: MyColors.darkPrimaryColor, decoration: TextDecoration.underline),
+                                                  color: MyColors.darkPrimaryColor,
+                                                  decoration: TextDecoration.underline),
                                             ),
                                           )),
                                         ),
@@ -434,8 +435,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               //   ),
               // ),
               // ),
-              Flexible(
-                  fit: FlexFit.loose,flex: 10, child: recordListView())
+              Flexible(fit: FlexFit.loose, flex: 13, child: recordListView())
             ],
           ),
         ),
@@ -491,7 +491,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
-    _melodiesScrollController = _controllers.addAndGet();
+    _recordsScrollController = _controllers.addAndGet();
+
+    _recordsScrollController
+      ..addListener(() {
+        if (_recordsScrollController.offset >= _recordsScrollController.position.maxScrollExtent &&
+            !_recordsScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextRecords();
+        } else if (_recordsScrollController.offset <= _recordsScrollController.position.minScrollExtent &&
+            !_recordsScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     _melodiesPageScrollController = _controllers.addAndGet();
     getCategories();
     super.initState();
@@ -499,7 +511,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _melodiesScrollController.dispose();
+    _recordsScrollController.dispose();
     _melodiesPageScrollController.dispose();
     super.dispose();
   }

@@ -4,7 +4,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class DynamicLinks {
-  static String _urlPrefix = 'https://m.alhani.com/';
+  static String _urlPrefix = 'https://alhany.page.link/';
 
   static Future<Uri> createPostDynamicLink(Map<String, String> args) async {
     var uri;

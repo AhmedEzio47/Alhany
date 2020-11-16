@@ -103,9 +103,7 @@ class _UploadNewsState extends State<UploadNews> {
             RaisedButton(
               onPressed: isRecording ? _stopAudioRecording : _btnPressed,
               child: Text(
-                isRecording
-                    ? 'Stop'
-                    : _contentFile == null ? 'Add Content' : 'DONE',
+                isRecording ? 'Stop' : _contentFile == null ? 'Add Content' : 'DONE',
                 style: TextStyle(color: Colors.white),
               ),
               color: MyColors.primaryColor,
@@ -184,8 +182,7 @@ class _UploadNewsState extends State<UploadNews> {
   getDuration(String filePath) async {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
-    _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    _duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
   }
 
   _recordVideo() async {
@@ -264,8 +261,7 @@ class _UploadNewsState extends State<UploadNews> {
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String ext = path.extension(_contentFile.path);
-    String url =
-        await AppUtil.uploadFile(_contentFile, context, 'news/$id$ext');
+    String url = await AppUtil().uploadFile(_contentFile, context, 'news/$id$ext');
     await newsRef.document(id).setData({
       'text': _textController.text,
       'content_url': url,

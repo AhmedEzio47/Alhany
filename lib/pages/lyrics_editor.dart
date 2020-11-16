@@ -2,7 +2,6 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:html_editor/html_editor.dart';
 
 class LyricsEditor extends StatefulWidget {

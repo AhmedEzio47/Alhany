@@ -19,9 +19,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
+import 'package:flutter_ffmpeg/statistics.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
-import 'package:video_player/video_player.dart';
+import 'package:video_player/video_player.dart' as video_player;
 
 enum Types { VIDEO, AUDIO }
 
@@ -62,11 +64,15 @@ class _MelodyPageState extends State<MelodyPage> {
 
   int _duration;
 
-  VideoPlayerController _videoController;
+  video_player.VideoPlayerController _videoController;
 
   bool _isVideoPlaying = false;
 
   File _image;
+
+  FlutterFFmpegConfig _flutterFFmpegConfig = FlutterFFmpegConfig();
+
+  double _recordingDuration;
 
   _countDown() {
     const oneSec = const Duration(seconds: 1);
@@ -342,6 +348,10 @@ class _MelodyPageState extends State<MelodyPage> {
       //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest ${appTempDirectoryPath}final_audio.mp3");
+      FlutterFFprobe fFprobe = FlutterFFprobe();
+      MediaInformation info = await fFprobe.getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
+      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
       print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
 
       // MERGE VIDEO WITH FINAL AUDIO
@@ -373,63 +383,65 @@ class _MelodyPageState extends State<MelodyPage> {
         },
         child: Container(
           child: _type == Types.AUDIO
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    melodyPlayer,
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        RaisedButton(
-                          onPressed: imageVideoPath == null
-                              ? () async {
-                                  _image = await AppUtil.pickImageFromGallery();
-                                  AppUtil.showLoader(context);
-                                  setState(() {
-                                    imageVideoPath = '${path.withoutExtension(mergedFilePath)}.mp4';
-                                  });
-                                  success = await flutterFFmpeg.execute(
-                                      "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
-                                  Navigator.of(context).pop();
-                                }
-                              : null,
-                          color: MyColors.primaryColor,
-                          child: Text(
-                            imageVideoPath == null ? 'Choose Image' : 'Done',
-                            style: TextStyle(color: Colors.white),
+              ? SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      melodyPlayer,
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          RaisedButton(
+                            onPressed: imageVideoPath == null
+                                ? () async {
+                                    _image = await AppUtil.pickImageFromGallery();
+                                    AppUtil.showLoader(context);
+                                    setState(() {
+                                      imageVideoPath = '${path.withoutExtension(mergedFilePath)}.mp4';
+                                    });
+                                    success = await flutterFFmpeg.execute(
+                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+                                    Navigator.of(context).pop();
+                                  }
+                                : null,
+                            color: MyColors.primaryColor,
+                            child: Text(
+                              imageVideoPath == null ? 'Choose Image' : 'Done',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        RaisedButton(
-                          onPressed: () async {
-                            if (_image == null) {
-                              AppUtil.showToast(language(en: 'Please choose an image', ar: 'من فضلك اختر صورة'));
-                              return;
-                            }
-                            Navigator.of(context).pop(false);
-                            await submitRecord();
-                          },
-                          color: MyColors.primaryColor,
-                          child: Text(
-                            'Submit',
-                            style: TextStyle(color: Colors.white),
+                          SizedBox(
+                            width: 20,
                           ),
-                        )
-                      ],
-                    )
-                  ],
+                          RaisedButton(
+                            onPressed: () async {
+                              if (_image == null) {
+                                AppUtil.showToast(language(en: 'Please choose an image', ar: 'من فضلك اختر صورة'));
+                                return;
+                              }
+                              Navigator.of(context).pop(false);
+                              await submitRecord();
+                            },
+                            color: MyColors.primaryColor,
+                            child: Text(
+                              'Submit',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 )
               : Stack(
                   children: [
                     AspectRatio(
                       aspectRatio: _videoController.value.aspectRatio,
-                      child: VideoPlayer(_videoController),
+                      child: video_player.VideoPlayer(_videoController),
                     ),
                     Positioned.fill(
                         child: Padding(
@@ -463,6 +475,12 @@ class _MelodyPageState extends State<MelodyPage> {
         )));
 
     print(success == 1 ? 'Failure!' : 'Success!');
+  }
+
+  void statisticsCallback(Statistics statistics) {
+    try {
+      print("Progress: ${statistics.time / (_recordingDuration * 10)}%");
+    } catch (ex) {}
   }
 
   Widget playPauseBtn() {
@@ -527,16 +545,26 @@ class _MelodyPageState extends State<MelodyPage> {
           );
   }
 
+  double _progress = 0;
   submitRecord() async {
     AppUtil.showLoader(context);
-
     String recordId = randomAlphaNumeric(20);
     String url;
+    AppUtil appUtil = AppUtil();
+
     if (_type == Types.VIDEO) {
-      url = await AppUtil.uploadFile(
+      url = await appUtil.uploadFile(
           File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
     } else {
-      url = await AppUtil.uploadFile(
+      appUtil.addListener(() {
+        if (mounted) {
+          setState(() {
+            _progress = AppUtil.progress;
+          });
+          print('Progress: $_progress %');
+        }
+      });
+      url = await appUtil.uploadFile(
           File(imageVideoPath), context, 'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
     }
 
@@ -566,7 +594,7 @@ class _MelodyPageState extends State<MelodyPage> {
     if (!await PermissionsService().hasStoragePermission()) {
       PermissionsService().requestStoragePermission();
     }
-    _videoController = VideoPlayerController.file(File(mergedFilePath));
+    _videoController = video_player.VideoPlayerController.file(File(mergedFilePath));
     await _videoController.initialize();
   }
 
@@ -662,114 +690,121 @@ class _MelodyPageState extends State<MelodyPage> {
                 ),
                 child: Stack(
                   children: [
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          RegularAppbar(context),
-                          SizedBox(
-                            height: 20,
+                    Column(
+                      children: [
+                        RegularAppbar(context),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 50,
+                            ),
+                            CachedImage(
+                              width: 100,
+                              height: 100,
+                              defaultAssetImage: Strings.default_melody_image,
+                              imageUrl: widget.melody.imageUrl,
+                              imageShape: BoxShape.rectangle,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            widget.melody.levelUrls != null
+                                ? DropdownButton(
+                                    dropdownColor: MyColors.lightPrimaryColor,
+                                    iconEnabledColor: Colors.white,
+                                    style: TextStyle(color: Colors.white, fontSize: 16),
+                                    value: Constants.currentMelodyLevel ?? _dropdownValue,
+                                    onChanged: (choice) async {
+                                      Constants.currentMelodyLevel = choice;
+                                      Navigator.of(context)
+                                          .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody});
+                                    },
+                                    items: (widget.melody.levelUrls.keys.toList())
+                                        .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                                      return DropdownMenuItem<dynamic>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                  )
+                                : SizedBox(
+                                    width: 50,
+                                  )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          widget.melody.name,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
+                        SingleChildScrollView(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 20),
+                            alignment: Alignment.centerRight,
+                            width: MediaQuery.of(context).size.width,
+                            height: 150,
+                            child: HtmlWidget(
+                              widget.melody.lyrics,
+                              textStyle: TextStyle(fontSize: 16),
+                            ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 50,
-                              ),
-                              CachedImage(
-                                width: 100,
-                                height: 100,
-                                defaultAssetImage: Strings.default_melody_image,
-                                imageUrl: widget.melody.imageUrl,
-                                imageShape: BoxShape.rectangle,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              widget.melody.levelUrls != null
-                                  ? DropdownButton(
-                                      dropdownColor: MyColors.lightPrimaryColor,
-                                      iconEnabledColor: Colors.white,
-                                      style: TextStyle(color: Colors.white, fontSize: 16),
-                                      value: Constants.currentMelodyLevel ?? _dropdownValue,
-                                      onChanged: (choice) async {
-                                        Constants.currentMelodyLevel = choice;
-                                        Navigator.of(context)
-                                            .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody});
-                                      },
-                                      items: (widget.melody.levelUrls.keys.toList())
-                                          .map<DropdownMenuItem<dynamic>>((dynamic value) {
-                                        return DropdownMenuItem<dynamic>(
-                                          value: value,
-                                          child: Text(value),
-                                        );
-                                      }).toList(),
-                                    )
-                                  : SizedBox(
-                                      width: 50,
-                                    )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            widget.melody.name,
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
-                          SizedBox(
-                            height: 120,
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              if (recordingStatus == RecordingStatus.Recording) {
-                                await saveRecord();
-                              } else {
-                                if ((await PermissionsService().hasStoragePermission()) &&
-                                    (await PermissionsService().hasMicrophonePermission())) {
-                                  Navigator.of(context).push(CustomModal(
-                                    child: _headphonesDialog(),
-                                  ));
-                                }
-                                if (!await PermissionsService().hasStoragePermission()) {
-                                  await PermissionsService().requestStoragePermission();
-                                }
-                                if (!await PermissionsService().hasMicrophonePermission()) {
-                                  await PermissionsService().requestMicrophonePermission();
-                                }
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            if (recordingStatus == RecordingStatus.Recording) {
+                              await saveRecord();
+                            } else {
+                              if ((await PermissionsService().hasStoragePermission()) &&
+                                  (await PermissionsService().hasMicrophonePermission())) {
+                                Navigator.of(context).push(CustomModal(
+                                  child: _headphonesDialog(),
+                                ));
                               }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black54,
-                                    spreadRadius: 4,
-                                    blurRadius: 6,
-                                    offset: Offset(0, 3), // changes position of shadow
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Icon(
-                                  recordingStatus == RecordingStatus.Recording
-                                      ? Icons.stop
-                                      : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
-                                  color: MyColors.primaryColor,
-                                  size: 30,
+                              if (!await PermissionsService().hasStoragePermission()) {
+                                await PermissionsService().requestStoragePermission();
+                              }
+                              if (!await PermissionsService().hasMicrophonePermission()) {
+                                await PermissionsService().requestMicrophonePermission();
+                              }
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black54,
+                                  spreadRadius: 4,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3), // changes position of shadow
                                 ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Icon(
+                                recordingStatus == RecordingStatus.Recording
+                                    ? Icons.stop
+                                    : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
+                                color: MyColors.primaryColor,
+                                size: 30,
                               ),
                             ),
                           ),
-                          SizedBox(height: 10)
-                        ],
-                      ),
+                        ),
+                        SizedBox(height: 10)
+                      ],
                     ),
                     _countDownVisible
                         ? Align(
