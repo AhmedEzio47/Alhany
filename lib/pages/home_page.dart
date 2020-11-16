@@ -25,6 +25,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _page = 0;
   bool _isPlaying = false;
 
+  PageController _pageController;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -42,7 +44,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -58,8 +61,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             setState(() {
                               _page = index;
                             });
+                            _pageController.animateToPage(
+                              index,
+                              duration: Duration(milliseconds: 800),
+                              curve: Curves.easeOut,
+                            );
                           },
-                          labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          labelStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                           labelColor: MyColors.accentColor,
                           unselectedLabelColor: Colors.grey,
                           controller: _tabController,
@@ -74,7 +83,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               text: language(en: 'Favourites', ar: 'المفضلات'),
                             )
                           ]),
-                      Expanded(child: _currentPage())
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _tabController.index = index;
+                              _page = index;
+                            });
+                            _currentPage();
+                          },
+                          children: [
+                            _songsPage(),
+                            _melodiesPage(),
+                            _favouritesPage()
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -147,14 +172,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     switch (_page) {
       case 0:
         getCategories();
-        return _songsPage();
+        break;
       case 1:
         getSingers();
         getRecords();
-        return _melodiesPage();
+        break;
       case 2:
         getFavourites();
-        return _favouritesPage();
+        break;
     }
   }
 
@@ -185,7 +210,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         itemBuilder: (context, index) {
           return (_songs[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  margin: EdgeInsets.only(left: 8),
                   height: 215,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
@@ -194,7 +219,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       Text(
                         _categories[index],
-                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         height: 10,
@@ -206,67 +234,113 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: ListView.builder(
-                                  itemCount: _songs[_categories[index]]?.length + 1,
+                                  itemCount:
+                                      _songs[_categories[index]]?.length + 1,
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index2) {
-                                    return index2 < _songs[_categories[index]]?.length
+                                    return index2 <
+                                            _songs[_categories[index]]?.length
                                         ? InkWell(
                                             onTap: () {
                                               setState(() {
                                                 musicPlayer = MusicPlayer(
-                                                  melody: _songs[_categories[index]][index2],
-                                                  title: _songs[_categories[index]][index2]?.name,
-                                                  key: ValueKey(_songs[_categories[index]][index2]?.id),
-                                                  url: _songs[_categories[index]][index2]?.audioUrl,
-                                                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                                                  initialDuration: _songs[_categories[index]][index2]?.duration,
+                                                  melody:
+                                                      _songs[_categories[index]]
+                                                          [index2],
+                                                  title:
+                                                      _songs[_categories[index]]
+                                                              [index2]
+                                                          ?.name,
+                                                  key: ValueKey(
+                                                      _songs[_categories[index]]
+                                                              [index2]
+                                                          ?.id),
+                                                  url:
+                                                      _songs[_categories[index]]
+                                                              [index2]
+                                                          ?.audioUrl,
+                                                  backColor: MyColors
+                                                      .lightPrimaryColor
+                                                      .withOpacity(.8),
+                                                  initialDuration:
+                                                      _songs[_categories[index]]
+                                                              [index2]
+                                                          ?.duration,
                                                 );
                                                 _isPlaying = true;
                                               });
                                             },
                                             child: Container(
                                               height: 150,
-                                              width: 150,
+                                              width: 135,
                                               child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   CachedImage(
                                                     width: 120,
                                                     height: 120,
-                                                    imageShape: BoxShape.rectangle,
-                                                    imageUrl: _songs[_categories[index]][index2]?.imageUrl,
-                                                    defaultAssetImage: Strings.default_melody_image,
+                                                    imageShape:
+                                                        BoxShape.rectangle,
+                                                    imageUrl: _songs[
+                                                            _categories[
+                                                                index]][index2]
+                                                        ?.imageUrl,
+                                                    defaultAssetImage: Strings
+                                                        .default_melody_image,
                                                   ),
                                                   Text(
-                                                    _songs[_categories[index]][index2]?.name,
-                                                    style: TextStyle(color: Colors.white),
+                                                    _songs[_categories[index]]
+                                                            [index2]
+                                                        ?.name,
+                                                    style: TextStyle(
+                                                        color: Colors.white),
                                                   ),
                                                   Text(
-                                                    _songs[_categories[index]][index2]?.singer,
-                                                    style: TextStyle(color: Colors.grey.shade400),
+                                                    _songs[_categories[index]]
+                                                            [index2]
+                                                        ?.singer,
+                                                    style: TextStyle(
+                                                        color: Colors
+                                                            .grey.shade400),
                                                   )
                                                 ],
                                               ),
                                             ),
                                           )
-                                        : _songs[_categories[index]]?.length == 15
+                                        : _songs[_categories[index]]?.length ==
+                                                15
                                             ? InkWell(
                                                 onTap: () {
-                                                  Navigator.of(context).pushNamed('/category-page',
-                                                      arguments: {'category': _categories[index]});
+                                                  Navigator.of(context)
+                                                      .pushNamed(
+                                                          '/category-page',
+                                                          arguments: {
+                                                        'category':
+                                                            _categories[index]
+                                                      });
                                                 },
                                                 child: Padding(
-                                                  padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 46),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 8.0,
+                                                          left: 8.0,
+                                                          bottom: 46),
                                                   child: Center(
                                                       child: Container(
                                                     padding: EdgeInsets.all(8),
-                                                    color: MyColors.lightPrimaryColor,
+                                                    color: MyColors
+                                                        .lightPrimaryColor,
                                                     child: Text(
                                                       'VIEW ALL',
                                                       style: TextStyle(
-                                                          color: MyColors.darkPrimaryColor,
-                                                          decoration: TextDecoration.underline),
+                                                          color: MyColors
+                                                              .darkPrimaryColor,
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline),
                                                     ),
                                                   )),
                                                 ),
@@ -301,13 +375,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (mounted) {
       setState(() {
         _records = records;
-        if (_records.length > 0) this.lastVisiblePostSnapShot = records.last.timestamp;
+        if (_records.length > 0)
+          this.lastVisiblePostSnapShot = records.last.timestamp;
       });
     }
   }
 
   nextRecords() async {
-    List<Record> records = await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
+    List<Record> records =
+        await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
     if (records.length > 0) {
       setState(() {
         records.forEach((element) => _records.add(element));
@@ -355,11 +431,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment: Constants.language == 'en'
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
             children: [
               Flexible(
                 fit: FlexFit.loose,
-                flex: 3,
+                flex: 5,
                 child: Row(
                   children: [
                     Flexible(
@@ -371,8 +449,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             return index < _singers.length
                                 ? InkWell(
                                     onTap: () {
-                                      Navigator.of(context)
-                                          .pushNamed('/singer-page', arguments: {'singer': _singers[index]});
+                                      Navigator.of(context).pushNamed(
+                                          '/singer-page',
+                                          arguments: {
+                                            'singer': _singers[index]
+                                          });
                                     },
                                     child: Container(
                                       height: 120,
@@ -384,11 +465,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             height: 100,
                                             imageShape: BoxShape.circle,
                                             imageUrl: _singers[index].imageUrl,
-                                            defaultAssetImage: Strings.default_profile_image,
+                                            defaultAssetImage:
+                                                Strings.default_profile_image,
                                           ),
                                           Text(
                                             _singers[index].name,
-                                            style: TextStyle(color: Colors.white),
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           )
                                         ],
                                       ),
@@ -397,10 +480,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 : _singers.length == 15
                                     ? InkWell(
                                         onTap: () {
-                                          Navigator.of(context).pushNamed('/singers-page');
+                                          Navigator.of(context)
+                                              .pushNamed('/singers-page');
                                         },
                                         child: Padding(
-                                          padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
+                                          padding: const EdgeInsets.only(
+                                              right: 8.0,
+                                              left: 8.0,
+                                              bottom: 70),
                                           child: Center(
                                               child: Container(
                                             padding: EdgeInsets.all(8),
@@ -408,8 +495,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             child: Text(
                                               'VIEW ALL',
                                               style: TextStyle(
-                                                  color: MyColors.darkPrimaryColor,
-                                                  decoration: TextDecoration.underline),
+                                                  color:
+                                                      MyColors.darkPrimaryColor,
+                                                  decoration:
+                                                      TextDecoration.underline),
                                             ),
                                           )),
                                         ),
@@ -435,7 +524,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               //   ),
               // ),
               // ),
-              Flexible(fit: FlexFit.loose, flex: 13, child: recordListView())
+              Flexible(fit: FlexFit.loose, flex: 17, child: recordListView())
             ],
           ),
         ),
@@ -489,17 +578,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    _pageController = PageController(
+      initialPage: 0,
+    );
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
 
     _recordsScrollController
       ..addListener(() {
-        if (_recordsScrollController.offset >= _recordsScrollController.position.maxScrollExtent &&
+        if (_recordsScrollController.offset >=
+                _recordsScrollController.position.maxScrollExtent &&
             !_recordsScrollController.position.outOfRange) {
           print('reached the bottom');
           nextRecords();
-        } else if (_recordsScrollController.offset <= _recordsScrollController.position.minScrollExtent &&
+        } else if (_recordsScrollController.offset <=
+                _recordsScrollController.position.minScrollExtent &&
             !_recordsScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -519,7 +613,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   var currentBackPressTime;
   Future<bool> _onBackPressed() {
     DateTime now = DateTime.now();
-    if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 2)) {
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > Duration(seconds: 2)) {
       currentBackPressTime = now;
       AppUtil.showToast('Press back again to exit');
       return Future.value(false);

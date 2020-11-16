@@ -49,7 +49,8 @@ class _RecordPageState extends State<RecordPage> {
           widget.record.id,
           'record_comment');
 
-      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(
+          _commentController.text, widget.record.id);
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
@@ -80,14 +81,16 @@ class _RecordPageState extends State<RecordPage> {
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments = await DatabaseService.getComments(recordId: widget.record.id);
+    List<Comment> comments =
+        await DatabaseService.getComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
   }
 
   getAllComments() async {
-    List<Comment> comments = await DatabaseService.getAllComments(recordId: widget.record.id);
+    List<Comment> comments =
+        await DatabaseService.getAllComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
@@ -127,7 +130,8 @@ class _RecordPageState extends State<RecordPage> {
           decoration: BoxDecoration(
             color: MyColors.primaryColor,
             image: DecorationImage(
-              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              colorFilter: new ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
               image: AssetImage(Strings.default_bg),
               fit: BoxFit.cover,
             ),
@@ -140,28 +144,33 @@ class _RecordPageState extends State<RecordPage> {
                   child: Column(
                     children: [
                       RegularAppbar(context),
-                      Text(
-                        (_singer?.name ?? ''),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
                       RecordItem(
                         record: widget.record,
                       ),
                       Container(
                         margin: EdgeInsets.only(left: 8, right: 8, top: 8),
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30.0),
+                            color: MyColors.lightPrimaryColor),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: TextField(
                               style: TextStyle(color: Colors.white),
-                              textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                              textAlign: Constants.language == 'ar'
+                                  ? TextAlign.right
+                                  : TextAlign.left,
                               controller: _commentController,
                               decoration: InputDecoration(
                                 hintStyle: TextStyle(color: Colors.white),
-                                hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
-                                suffix: Constants.language == 'en' ? sendBtn() : null,
-                                prefix: Constants.language == 'ar' ? sendBtn() : null,
+                                hintText: language(
+                                    en: Strings.en_leave_comment,
+                                    ar: Strings.ar_leave_comment),
+                                suffix: Constants.language == 'en'
+                                    ? sendBtn()
+                                    : null,
+                                prefix: Constants.language == 'ar'
+                                    ? sendBtn()
+                                    : null,
                               )),
                         ),
                       ),
@@ -190,7 +199,8 @@ class _RecordPageState extends State<RecordPage> {
                                       future: DatabaseService.getUserWithId(
                                         comment.commenterID,
                                       ),
-                                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                      builder: (BuildContext context,
+                                          AsyncSnapshot snapshot) {
                                         if (!snapshot.hasData) {
                                           return SizedBox.shrink();
                                         }
@@ -217,7 +227,9 @@ class _RecordPageState extends State<RecordPage> {
                                                 child: Text(
                                               'show all',
                                               style: TextStyle(
-                                                  color: MyColors.accentColor, decoration: TextDecoration.underline),
+                                                  color: MyColors.accentColor,
+                                                  decoration:
+                                                      TextDecoration.underline),
                                             )),
                                           ),
                                         )

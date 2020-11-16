@@ -157,7 +157,8 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> pickImageFromGallery() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: [
+    FilePickerResult result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: [
       'jpg',
       'png',
     ]);
@@ -170,16 +171,19 @@ class AppUtil with ChangeNotifier {
     return null;
   }
 
-  Future<String> uploadFile(File file, BuildContext context, String path) async {
+  Future<String> uploadFile(
+      File file, BuildContext context, String path) async {
     if (file == null) return '';
 
-    StorageReference storageReference = FirebaseStorage.instance.ref().child(path);
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
     StorageUploadTask uploadTask;
 
     uploadTask = storageReference.putFile(file);
     uploadTask.events.listen((event) {
-      progress = event.snapshot.bytesTransferred.toDouble() / event.snapshot.totalByteCount.toDouble();
+      progress = event.snapshot.bytesTransferred.toDouble() /
+          event.snapshot.totalByteCount.toDouble();
       notifyListeners();
     }).onError((error) {
       // do something to handle error
@@ -196,7 +200,8 @@ class AppUtil with ChangeNotifier {
 
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
-    String fileName = await getStorageFileNameFromContentDisposition(contentDisposition);
+    String fileName =
+        await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
@@ -218,7 +223,8 @@ class AppUtil with ChangeNotifier {
     return fileName;
   }
 
-  static Future<String> getStorageFileNameFromContentDisposition(var contentDisposition) async {
+  static Future<String> getStorageFileNameFromContentDisposition(
+      var contentDisposition) async {
     String fileName = contentDisposition
         .split('filename*=utf-8')
         .last
@@ -239,7 +245,8 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> takePhoto() async {
-    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    File image = await ImagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 80);
     return image;
   }
 
@@ -256,7 +263,8 @@ class AppUtil with ChangeNotifier {
     if (timestamp == null) return '';
 
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -264,7 +272,7 @@ class AppUtil with ChangeNotifier {
       time = 'now';
     } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
       if (diff.inMinutes == 1) {
-        time = 'A minute ago';
+        time = 'a minute ago';
       } else {
         time = diff.inMinutes.toString() + ' minutes ago';
       }
@@ -276,13 +284,13 @@ class AppUtil with ChangeNotifier {
       }
     } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
-        time = 'Yesterday';
+        time = 'yesterday';
       } else {
-        time = diff.inDays.toString() + ' DAYS AGO';
+        time = diff.inDays.toString() + ' days ago';
       }
     } else {
       if (diff.inDays == 7) {
-        time = 'A WEEK AGO';
+        time = 'a week ago';
       } else {
         /// Show in Format => 21-05-2019 10:59 AM
         final df = new DateFormat('dd-MM-yyyy hh:mm a');
@@ -298,10 +306,12 @@ class AppUtil with ChangeNotifier {
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil.showToast(language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
+      AppUtil.showToast(
+          language(en: "Email is Required", ar: 'يجب إدخال البريد الالكتروني'));
       return "Email is Required";
     } else if (!regExp.hasMatch(value)) {
-      AppUtil.showToast(language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
+      AppUtil.showToast(
+          language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
       return "Invalid Email";
     }
     return null;
@@ -327,7 +337,8 @@ class AppUtil with ChangeNotifier {
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -359,23 +370,35 @@ class AppUtil with ChangeNotifier {
   static checkIfContainsMention(String text, String recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
-        User user = await DatabaseService.getUserWithUsername(word.substring(1));
+        User user =
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
-            user.id, 'New mention', Constants.currentUser.username + ' mentioned you', recordId, 'mention');
+            user.id,
+            'New mention',
+            Constants.currentUser.username + ' mentioned you',
+            recordId,
+            'mention');
       }
     });
   }
 
   static Future<File> recordVideo(Duration maxDuration) async {
     File video = await ImagePicker.pickVideo(
-        source: ImageSource.camera, maxDuration: maxDuration, preferredCameraDevice: CameraDevice.front);
+        source: ImageSource.camera,
+        maxDuration: maxDuration,
+        preferredCameraDevice: CameraDevice.front);
     return video;
   }
 
-  static sharePost(String postText, String imageUrl, {String recordId, String newsId}) async {
-    var postLink = await DynamicLinks.createPostDynamicLink(
-        {'recordId': recordId, 'newsId': newsId, 'text': postText, 'imageUrl': imageUrl});
+  static sharePost(String postText, String imageUrl,
+      {String recordId, String newsId}) async {
+    var postLink = await DynamicLinks.createPostDynamicLink({
+      'recordId': recordId,
+      'newsId': newsId,
+      'text': postText,
+      'imageUrl': imageUrl
+    });
     Share.share('Check out: $postText : $postLink');
     print('Check out: $postText : $postLink');
   }
