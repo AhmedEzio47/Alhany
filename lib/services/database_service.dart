@@ -144,7 +144,7 @@ class DatabaseService {
   }
 
   static Future<List<Record>> getRecords() async {
-    QuerySnapshot recordsSnapshot = await recordsRef.orderBy('timestamp', descending: true).getDocuments();
+    QuerySnapshot recordsSnapshot = await recordsRef.limit(20).orderBy('timestamp', descending: true).getDocuments();
     List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
@@ -892,5 +892,39 @@ class DatabaseService {
     });
 
     await collectionReference.document(recordId ?? newsId).delete();
+  }
+
+  static Future<List<User>> getUsers() async {
+    QuerySnapshot usersSnapshot = await usersRef.orderBy('name', descending: true).getDocuments();
+    List<User> users = usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+    return users;
+  }
+
+  static deleteMelody(Melody melody) async {
+    if (melody.imageUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(melody.imageUrl);
+      await storageRef.child('/melodies_images/$fileName').delete();
+    }
+    if (melody.audioUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(melody.audioUrl);
+      if (melody.isSong) {
+        await storageRef.child('/songs/$fileName').delete();
+      } else {
+        await storageRef.child('/melodies/$fileName').delete();
+      }
+    }
+    if (melody.levelUrls != null) {
+      for (String url in melody.levelUrls.values) {
+        String fileName = await AppUtil.getStorageFileNameFromUrl(url);
+
+        await storageRef.child('/melodies/$fileName').delete();
+      }
+    }
+    await melodiesRef.document(melody.id).delete();
+    List<User> users = await getUsers();
+    for (User user in users) {
+      await usersRef.document(user.id).collection('favourites').document(melody.id).delete();
+      await usersRef.document(user.id).collection('downloads').document(melody.id).delete();
+    }
   }
 }
