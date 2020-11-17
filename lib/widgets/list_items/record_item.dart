@@ -175,7 +175,7 @@ class _RecordItemState extends State<RecordItem> {
                               children: [
                                 InkWell(
                                   child: Text(_singer?.name ?? '',
-                                      style: TextStyle(color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold)),
+                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                                   onTap: () => _goToProfilePage(),
                                 ),
                                 Text(
@@ -186,14 +186,16 @@ class _RecordItemState extends State<RecordItem> {
                                 ),
                                 InkWell(
                                   child: Text(_melody?.name ?? '',
-                                      style: TextStyle(color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold)),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      )),
                                   onTap: () => _goToMelodyPage(),
                                 ),
                               ],
                             ),
                             Text(
                               '${AppUtil.formatTimestamp(widget.record.timestamp)}' ?? '',
-                              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+                              style: TextStyle(color: Colors.grey.shade300, fontSize: 12),
                             ),
                           ],
                         ),

@@ -277,7 +277,7 @@ class AppUtil with ChangeNotifier {
       }
     } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
-        time = 'yesterday';
+        time = 'a day ago';
       } else {
         time = diff.inDays.toString() + ' days ago';
       }
