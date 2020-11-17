@@ -137,7 +137,8 @@ class PostBottomSheet {
               await DatabaseService.editComment(comment.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
               AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
-              Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record': record});
+              Navigator.of(context)
+                  .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
             },
             color: MyColors.primaryColor,
             child: Text(

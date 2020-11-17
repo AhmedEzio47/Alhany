@@ -59,15 +59,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             User sender = snapshot.data;
                             return Column(
                               children: <Widget>[
-                                InkWell(
-                                  onTap: () => print('lol'),
-                                  child: NotificationItem(
-                                    key: ValueKey(notification.id),
-                                    notification: notification,
-                                    image: sender.profileImageUrl,
-                                    senderName: sender.username,
-                                    counter: 0,
-                                  ),
+                                NotificationItem(
+                                  key: ValueKey(notification.id),
+                                  notification: notification,
+                                  image: sender.profileImageUrl,
+                                  senderName: sender.username,
+                                  counter: 0,
                                 ),
                                 Divider(height: .5, color: Colors.grey)
                               ],

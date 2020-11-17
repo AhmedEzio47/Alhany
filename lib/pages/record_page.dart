@@ -12,11 +12,12 @@ import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 class RecordPage extends StatefulWidget {
   final Record record;
-
-  const RecordPage({Key key, this.record}) : super(key: key);
+  final bool isVideoVisible;
+  const RecordPage({Key key, this.record, this.isVideoVisible = true}) : super(key: key);
   @override
   _RecordPageState createState() => _RecordPageState();
 }
@@ -49,8 +50,7 @@ class _RecordPageState extends State<RecordPage> {
           widget.record.id,
           'record_comment');
 
-      await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
@@ -81,23 +81,27 @@ class _RecordPageState extends State<RecordPage> {
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments =
-        await DatabaseService.getComments(recordId: widget.record.id);
+    List<Comment> comments = await DatabaseService.getComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
   }
 
   getAllComments() async {
-    List<Comment> comments =
-        await DatabaseService.getAllComments(recordId: widget.record.id);
+    List<Comment> comments = await DatabaseService.getAllComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
   }
 
+  LinkedScrollControllerGroup _controllers;
+  ScrollController _commentsScrollController = ScrollController();
+  ScrollController _pageScrollController = ScrollController();
   @override
   void initState() {
+    _controllers = LinkedScrollControllerGroup();
+    _commentsScrollController = _controllers.addAndGet();
+    _pageScrollController = _controllers.addAndGet();
     getComments();
     getSinger();
     super.initState();
@@ -130,8 +134,7 @@ class _RecordPageState extends State<RecordPage> {
           decoration: BoxDecoration(
             color: MyColors.primaryColor,
             image: DecorationImage(
-              colorFilter: new ColorFilter.mode(
-                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
               image: AssetImage(Strings.default_bg),
               fit: BoxFit.cover,
             ),
@@ -139,47 +142,21 @@ class _RecordPageState extends State<RecordPage> {
           child: Stack(
             children: [
               SingleChildScrollView(
+                controller: _pageScrollController,
                 child: Container(
                   height: MediaQuery.of(context).size.height,
                   child: Column(
                     children: [
                       RegularAppbar(context),
-                      RecordItem(
-                        record: widget.record,
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 8, right: 8, top: 8),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30.0),
-                            color: MyColors.lightPrimaryColor),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: TextField(
-                              style: TextStyle(color: Colors.white),
-                              textAlign: Constants.language == 'ar'
-                                  ? TextAlign.right
-                                  : TextAlign.left,
-                              controller: _commentController,
-                              decoration: InputDecoration(
-                                hintStyle: TextStyle(color: Colors.white),
-                                hintText: language(
-                                    en: Strings.en_leave_comment,
-                                    ar: Strings.ar_leave_comment),
-                                suffix: Constants.language == 'en'
-                                    ? sendBtn()
-                                    : null,
-                                prefix: Constants.language == 'ar'
-                                    ? sendBtn()
-                                    : null,
-                              )),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
+                      widget.isVideoVisible
+                          ? RecordItem(
+                              record: widget.record,
+                            )
+                          : Container(),
                       Expanded(
                         flex: 5,
                         child: ListView.separated(
+                            controller: _commentsScrollController,
                             separatorBuilder: (context, index) {
                               return Divider(
                                 height: 2,
@@ -199,8 +176,7 @@ class _RecordPageState extends State<RecordPage> {
                                       future: DatabaseService.getUserWithId(
                                         comment.commenterID,
                                       ),
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot snapshot) {
+                                      builder: (BuildContext context, AsyncSnapshot snapshot) {
                                         if (!snapshot.hasData) {
                                           return SizedBox.shrink();
                                         }
@@ -227,14 +203,33 @@ class _RecordPageState extends State<RecordPage> {
                                                 child: Text(
                                               'show all',
                                               style: TextStyle(
-                                                  color: MyColors.accentColor,
-                                                  decoration:
-                                                      TextDecoration.underline),
+                                                  color: MyColors.accentColor, decoration: TextDecoration.underline),
                                             )),
                                           ),
                                         )
                                       : Container();
                             }),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: TextField(
+                                style: TextStyle(color: Colors.white),
+                                textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                                controller: _commentController,
+                                decoration: InputDecoration(
+                                  hintStyle: TextStyle(color: Colors.white),
+                                  hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
+                                  suffix: Constants.language == 'en' ? sendBtn() : null,
+                                  prefix: Constants.language == 'ar' ? sendBtn() : null,
+                                )),
+                          ),
+                        ),
                       )
                     ],
                   ),
@@ -245,6 +240,13 @@ class _RecordPageState extends State<RecordPage> {
         ),
       ),
     );
+  }
+
+  @override
+  dispose() {
+    _pageScrollController.dispose();
+    _commentsScrollController.dispose();
+    super.dispose();
   }
 
   Future<bool> _onBackPressed() {

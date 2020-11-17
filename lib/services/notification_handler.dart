@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/constants.dart';
@@ -63,6 +65,22 @@ class NotificationHandler {
 
       case 'follow':
         Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': objectId});
+        break;
+      case 'news_like':
+        News news = await DatabaseService.getNewsWithId(objectId);
+        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
+        break;
+      case 'news_comment':
+        News news = await DatabaseService.getNewsWithId(objectId);
+        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
+        break;
+      case 'record_like':
+        Record record = await DatabaseService.getRecordWithId(objectId);
+        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
+        break;
+      case 'record_comment':
+        Record record = await DatabaseService.getRecordWithId(objectId);
+        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
         break;
     }
   }

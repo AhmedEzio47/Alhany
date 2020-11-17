@@ -23,12 +23,7 @@ class _NotificationItemState extends State<NotificationItem> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: _buildItem(widget.notification),
-      onTap: () {
-        Navigator.of(context).pushNamed('/record-page', arguments: {'record': widget.notification.objectId});
-      },
-    );
+    return _buildItem(widget.notification);
   }
 
   _buildItem(notification_model.Notification notification) {

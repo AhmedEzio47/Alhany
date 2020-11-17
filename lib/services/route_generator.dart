@@ -103,6 +103,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => RecordPage(
                   record: args['record'],
+                  isVideoVisible: args['is_video_visible'],
                 ));
 
       case '/news-page':

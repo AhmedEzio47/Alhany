@@ -45,13 +45,13 @@ class _AppPageState extends State<AppPage> {
       if (deepLink != null) {
         if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
           Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
-          Navigator.of(context).pushNamed('/record-page', arguments: {'record': record});
+          Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
         } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
           User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
           Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
         } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
           News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
-          Navigator.of(context).pushNamed('/news-page', arguments: {'news': news});
+          Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
         }
       }
     }, onError: (OnLinkErrorException e) async {
@@ -65,13 +65,13 @@ class _AppPageState extends State<AppPage> {
     if (deepLink != null) {
       if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
         Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
-        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record});
+        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
       } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
         User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
         Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
       } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
         News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
-        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news});
+        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
       }
     }
   }

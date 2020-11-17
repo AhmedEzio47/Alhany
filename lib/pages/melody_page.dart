@@ -126,14 +126,12 @@ class _MelodyPageState extends State<MelodyPage> {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     //print("File Duration: ${info.getMediaProperties()['duration']}");
-    _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    _duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     setState(() {
       melodyPath = filePath;
       if (_type == Types.AUDIO) {
-        mergedFilePath +=
-            '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+        mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
       } else {
         mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new.mp4';
       }
@@ -157,13 +155,11 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService().requestMicrophonePermission(onPermissionDenied: () {
         AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
+            message: 'You must grant this microphone access to be able to use this feature.',
             firstBtnText: 'OK',
             firstFunc: () {
               Navigator.of(context).pop();
@@ -218,13 +214,11 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService().requestMicrophonePermission(onPermissionDenied: () {
         AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
+            message: 'You must grant this microphone access to be able to use this feature.',
             firstBtnText: 'OK',
             firstFunc: () {
               Navigator.of(context).pop();
@@ -273,8 +267,7 @@ class _MelodyPageState extends State<MelodyPage> {
           borderRadius: BorderRadius.all(Radius.circular(20)),
           color: Colors.grey,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(
-                Colors.black.withOpacity(0.4), BlendMode.dstOut),
+            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstOut),
             image: AssetImage(Strings.headphones_alert_bg),
             fit: BoxFit.cover,
           ),
@@ -289,10 +282,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: Text(
                     'For optimal result, please put some headphones.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -306,13 +296,8 @@ class _MelodyPageState extends State<MelodyPage> {
                     style: BorderStyle.solid,
                     width: 1,
                   ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20.0)),
-                  child: Text('OK',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold)),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                  child: Text('OK', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                     print('hey I\'m here');
@@ -360,16 +345,14 @@ class _MelodyPageState extends State<MelodyPage> {
           "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
     } else {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
-      success = await flutterFFmpeg.execute(
-          '-i $recordingFilePath ${appTempDirectoryPath}extracted_audio.mp3');
+      success = await flutterFFmpeg.execute('-i $recordingFilePath ${appTempDirectoryPath}extracted_audio.mp3');
       print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
 
       //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest ${appTempDirectoryPath}final_audio.mp3");
       FlutterFFprobe fFprobe = FlutterFFprobe();
-      MediaInformation info = await fFprobe
-          .getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
+      MediaInformation info = await fFprobe.getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
       print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
@@ -387,10 +370,8 @@ class _MelodyPageState extends State<MelodyPage> {
     }
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info =
-        await _flutterFFprobe.getMediaInformation(mergedFilePath);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
@@ -425,12 +406,10 @@ class _MelodyPageState extends State<MelodyPage> {
                           RaisedButton(
                             onPressed: imageVideoPath == null
                                 ? () async {
-                                    _image =
-                                        await AppUtil.pickImageFromGallery();
+                                    _image = await AppUtil.pickImageFromGallery();
                                     AppUtil.showLoader(context);
                                     setState(() {
-                                      imageVideoPath =
-                                          '${path.withoutExtension(mergedFilePath)}.mp4';
+                                      imageVideoPath = '${path.withoutExtension(mergedFilePath)}.mp4';
                                     });
                                     success = await flutterFFmpeg.execute(
                                         "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
@@ -449,9 +428,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           RaisedButton(
                             onPressed: () async {
                               if (_image == null) {
-                                AppUtil.showToast(language(
-                                    en: 'Please choose an image',
-                                    ar: 'من فضلك اختر صورة'));
+                                AppUtil.showToast(language(en: 'Please choose an image', ar: 'من فضلك اختر صورة'));
                                 return;
                               }
                               Navigator.of(context).pop(false);
@@ -597,24 +574,22 @@ class _MelodyPageState extends State<MelodyPage> {
       }
     });
     if (_type == Types.VIDEO) {
-      url = await appUtil.uploadFile(File(mergedFilePath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+      url = await appUtil.uploadFile(
+          File(mergedFilePath), context, 'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
     } else {
-      url = await appUtil.uploadFile(File(imageVideoPath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
+      url = await appUtil.uploadFile(
+          File(imageVideoPath), context, 'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
     }
     setState(() {
       _progressVisible = false;
     });
     AppUtil.showLoader(context);
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(
-        _type == Types.VIDEO ? mergedFilePath : imageVideoPath);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info =
+        await _flutterFFprobe.getMediaInformation(_type == Types.VIDEO ? mergedFilePath : imageVideoPath);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
-    await DatabaseService.submitRecord(
-        widget.melody.id, recordId, url, duration);
+    await DatabaseService.submitRecord(widget.melody.id, recordId, url, duration);
     _deleteFiles();
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -636,8 +611,7 @@ class _MelodyPageState extends State<MelodyPage> {
     if (!await PermissionsService().hasStoragePermission()) {
       PermissionsService().requestStoragePermission();
     }
-    _videoController =
-        video_player.VideoPlayerController.file(File(mergedFilePath));
+    _videoController = video_player.VideoPlayerController.file(File(mergedFilePath));
     await _videoController.initialize();
   }
 
@@ -665,6 +639,12 @@ class _MelodyPageState extends State<MelodyPage> {
     super.initState();
   }
 
+  @override
+  dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
   initMelodyPlayer(String url) async {
     setState(() {
       melodyPlayer = new MusicPlayer(
@@ -682,10 +662,7 @@ class _MelodyPageState extends State<MelodyPage> {
       child: Scaffold(
         body: _progressVisible
             ? progressPage()
-            : recordingStatus == RecordingStatus.Recording &&
-                    _type == Types.VIDEO
-                ? videoRecordingPage()
-                : mainPage(),
+            : recordingStatus == RecordingStatus.Recording && _type == Types.VIDEO ? videoRecordingPage() : mainPage(),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             if (recordingStatus == RecordingStatus.Recording) {
@@ -720,9 +697,7 @@ class _MelodyPageState extends State<MelodyPage> {
   Widget videoRecordingPage() {
     return Stack(
       children: [
-        AspectRatio(
-            aspectRatio: cameraController.value.aspectRatio,
-            child: CameraPreview(cameraController)),
+        AspectRatio(aspectRatio: cameraController.value.aspectRatio, child: CameraPreview(cameraController)),
         Positioned.fill(
             child: Align(
                 alignment: Alignment.bottomCenter,
@@ -746,8 +721,7 @@ class _MelodyPageState extends State<MelodyPage> {
                               color: Colors.black54,
                               spreadRadius: 2,
                               blurRadius: 4,
-                              offset:
-                                  Offset(0, 2), // changes position of shadow
+                              offset: Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
@@ -769,8 +743,7 @@ class _MelodyPageState extends State<MelodyPage> {
       decoration: BoxDecoration(
         color: MyColors.primaryColor,
         image: DecorationImage(
-          colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage(Strings.default_melody_page_bg),
           fit: BoxFit.cover,
         ),
@@ -809,12 +782,11 @@ class _MelodyPageState extends State<MelodyPage> {
                           value: Constants.currentMelodyLevel ?? _dropdownValue,
                           onChanged: (choice) async {
                             Constants.currentMelodyLevel = choice;
-                            Navigator.of(context).pushReplacementNamed(
-                                '/melody-page',
-                                arguments: {'melody': widget.melody});
+                            Navigator.of(context)
+                                .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody});
                           },
-                          items: (widget.melody.levelUrls.keys.toList())
-                              .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                          items:
+                              (widget.melody.levelUrls.keys.toList()).map<DropdownMenuItem<dynamic>>((dynamic value) {
                             return DropdownMenuItem<dynamic>(
                               value: value,
                               child: Text(value),
@@ -831,17 +803,12 @@ class _MelodyPageState extends State<MelodyPage> {
               ),
               Text(
                 widget.melody.name,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               SizedBox(
                 height: 10,
               ),
-              recordingStatus != RecordingStatus.Recording
-                  ? melodyPlayer
-                  : _recordingTimerText(),
+              recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 alignment: Alignment.center,
@@ -851,14 +818,9 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: Center(
                     child: HtmlWidget(
                       widget.melody.lyrics,
-                      textStyle:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       customStylesBuilder: (e) {
-                        return {
-                          'text-align': 'center',
-                          'color': 'white',
-                          'line-height': '85%'
-                        };
+                        return {'text-align': 'center', 'color': 'white', 'line-height': '85%'};
                       },
                     ),
                   ),
@@ -982,8 +944,7 @@ class _MelodyPageState extends State<MelodyPage> {
       decoration: BoxDecoration(
         color: MyColors.primaryColor,
         image: DecorationImage(
-          colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage(Strings.default_melody_page_bg),
           fit: BoxFit.cover,
         ),
@@ -1027,11 +988,9 @@ class _MelodyPageState extends State<MelodyPage> {
       oneSec,
       (timer) {
         if (_type == Types.AUDIO) {
-          if (counter >= _duration ||
-              recordingStatus == RecordingStatus.Stopped) {}
+          if (counter >= _duration || recordingStatus == RecordingStatus.Stopped) {}
         } else {
-          if (counter >= _duration &&
-              recordingStatus == RecordingStatus.Recording) {
+          if (counter >= _duration && recordingStatus == RecordingStatus.Recording) {
             saveRecord();
             counter = 0;
             timer.cancel();
@@ -1041,8 +1000,7 @@ class _MelodyPageState extends State<MelodyPage> {
         counter++;
         if (mounted) {
           setState(() {
-            _recordingText =
-                '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
+            _recordingText = '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
           });
         }
       },
@@ -1061,8 +1019,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   void _initCamera() async {
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.medium,
-        enableAudio: true);
+    cameraController = CameraController(cameras[1], ResolutionPreset.medium, enableAudio: true);
     await cameraController.initialize();
   }
 

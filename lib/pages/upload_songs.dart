@@ -341,6 +341,7 @@ class _UploadSongsState extends State<UploadSongs> {
     });
 
     Navigator.of(context).pop();
+    Navigator.of(context).pop();
     AppUtil.showToast('Song uploaded!');
   }
 
@@ -374,6 +375,7 @@ class _UploadSongsState extends State<UploadSongs> {
       });
     }
     AppUtil.showToast('Songs uploaded!');
+    Navigator.of(context).pop();
     Navigator.of(context).pop();
   }
 }

@@ -42,6 +42,12 @@ class _RecordItemState extends State<RecordItem> {
     super.initState();
   }
 
+  @override
+  dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
   getAuthor() async {
     User author = await DatabaseService.getUserWithId(widget.record.singerId);
     if (mounted) {
@@ -52,8 +58,7 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   getMelody() async {
-    Melody melody =
-        await DatabaseService.getMelodyWithId(widget.record.melodyId);
+    Melody melody = await DatabaseService.getMelodyWithId(widget.record.melodyId);
     if (mounted) {
       setState(() {
         _melody = melody;
@@ -62,13 +67,11 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': widget.record.singerId});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': widget.record.singerId});
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context)
-        .pushNamed('/melody-page', arguments: {'melody': _melody});
+    Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': _melody});
   }
 
   Future<void> likeBtnHandler(Record record) async {
@@ -76,18 +79,11 @@ class _RecordItemState extends State<RecordItem> {
       isLikeEnabled = false;
     });
     if (isLiked == true) {
-      await recordsRef
-          .document(record.id)
-          .collection('likes')
-          .document(Constants.currentUserID)
-          .delete();
+      await recordsRef.document(record.id).collection('likes').document(Constants.currentUserID).delete();
 
-      await recordsRef
-          .document(record.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(-1)});
 
-      await NotificationHandler.removeNotification(
-          record.singerId, record.id, 'record_like');
+      await NotificationHandler.removeNotification(record.singerId, record.id, 'record_like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -99,20 +95,14 @@ class _RecordItemState extends State<RecordItem> {
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await recordsRef
-          .document(record.id)
-          .updateData({'likes': FieldValue.increment(1)});
+      await recordsRef.document(record.id).updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          record.singerId,
-          'New Record Like',
-          Constants.currentUser.name + ' likes your post',
-          record.id,
-          'record_like');
+      await NotificationHandler.sendNotification(record.singerId, 'New Record Like',
+          Constants.currentUser.name + ' likes your post', record.id, 'record_like');
     }
     var recordMeta = await DatabaseService.getPostMeta(recordId: record.id);
     setState(() {
@@ -122,11 +112,8 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void initLikes(Record record) async {
-    DocumentSnapshot likedSnapshot = await recordsRef
-        .document(record.id)
-        .collection('likes')
-        ?.document(Constants.currentUserID)
-        ?.get();
+    DocumentSnapshot likedSnapshot =
+        await recordsRef.document(record.id).collection('likes')?.document(Constants.currentUserID)?.get();
 
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -150,11 +137,11 @@ class _RecordItemState extends State<RecordItem> {
         onTap: () {
           if (Constants.currentRoute != '/record-page')
             Navigator.of(context).pushNamed('/record-page',
-                arguments: {'record': widget.record, 'singer': _singer});
+                arguments: {'record': widget.record, 'singer': _singer, 'is_video_visible': true});
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 280,
+          height: 290,
           decoration: BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
@@ -181,29 +168,34 @@ class _RecordItemState extends State<RecordItem> {
                         SizedBox(
                           width: 10,
                         ),
-                        InkWell(
-                          child: Text(
-                            _singer?.name ?? '',
-                            style: TextStyle(
-                              color: Colors.white,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                InkWell(
+                                  child: Text(_singer?.name ?? '',
+                                      style: TextStyle(color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold)),
+                                  onTap: () => _goToProfilePage(),
+                                ),
+                                Text(
+                                  ' singed ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                InkWell(
+                                  child: Text(_melody?.name ?? '',
+                                      style: TextStyle(color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold)),
+                                  onTap: () => _goToMelodyPage(),
+                                ),
+                              ],
                             ),
-                          ),
-                          onTap: () => _goToProfilePage(),
-                        ),
-                        Text(
-                          ' singed ',
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        InkWell(
-                          child: Text(
-                            _melody?.name ?? '',
-                            style: TextStyle(
-                              color: Colors.white,
+                            Text(
+                              '${AppUtil.formatTimestamp(widget.record.timestamp)}' ?? '',
+                              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
                             ),
-                          ),
-                          onTap: () => _goToMelodyPage(),
+                          ],
                         ),
                       ],
                     ),
@@ -232,11 +224,7 @@ class _RecordItemState extends State<RecordItem> {
               // ),
               Stack(
                 children: [
-                  Container(
-                      height: 200,
-                      child: _videoController != null
-                          ? VideoPlayer(_videoController)
-                          : Container()),
+                  Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
                   Positioned.fill(
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -263,8 +251,7 @@ class _RecordItemState extends State<RecordItem> {
                         ),
                         Text(
                           ' Likes, ',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.record.comments ?? 0}',
@@ -272,8 +259,7 @@ class _RecordItemState extends State<RecordItem> {
                         ),
                         Text(
                           '  Comments, ',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.record.shares ?? 0}',
@@ -281,8 +267,7 @@ class _RecordItemState extends State<RecordItem> {
                         ),
                         Text(
                           ' Shares',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                       ],
                     ),
@@ -325,8 +310,7 @@ class _RecordItemState extends State<RecordItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () => AppUtil.sharePost(
-                              '${_singer.name} singed ${_melody.name}', '',
+                          onTap: () => AppUtil.sharePost('${_singer.name} singed ${_melody.name}', '',
                               recordId: widget.record.id),
                           child: SizedBox(
                             child: Icon(
@@ -350,12 +334,8 @@ class _RecordItemState extends State<RecordItem> {
 
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen',
-          arguments: {
-            'record': widget.record,
-            'singer': _singer,
-            'melody': _melody
-          }),
+      onTap: () => Navigator.of(context)
+          .pushNamed('/post-fullscreen', arguments: {'record': widget.record, 'singer': _singer, 'melody': _melody}),
       child: Container(
         height: 40,
         width: 40,

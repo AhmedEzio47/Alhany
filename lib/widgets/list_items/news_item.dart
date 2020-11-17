@@ -33,8 +33,7 @@ class _NewsItemState extends State<NewsItem> {
   void initState() {
     if (widget.news.text.length > Sizes.postExcerpt) {
       firstHalf = widget.news.text.substring(0, Sizes.postExcerpt);
-      secondHalf = widget.news.text
-          .substring(Sizes.postExcerpt, widget.news.text.length);
+      secondHalf = widget.news.text.substring(Sizes.postExcerpt, widget.news.text.length);
     } else {
       firstHalf = widget.news.text;
       secondHalf = "";
@@ -47,8 +46,7 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': Constants.startUser.id});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': Constants.startUser.id});
   }
 
   Future<void> likeBtnHandler(News news) async {
@@ -56,18 +54,11 @@ class _NewsItemState extends State<NewsItem> {
       isLikeEnabled = false;
     });
     if (isLiked == true) {
-      await newsRef
-          .document(news.id)
-          .collection('likes')
-          .document(Constants.currentUserID)
-          .delete();
+      await newsRef.document(news.id).collection('likes').document(Constants.currentUserID).delete();
 
-      await newsRef
-          .document(news.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+      await newsRef.document(news.id).updateData({'likes': FieldValue.increment(-1)});
 
-      await NotificationHandler.removeNotification(
-          Constants.startUser.id, news.id, 'like');
+      await NotificationHandler.removeNotification(Constants.startUser.id, news.id, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -79,20 +70,14 @@ class _NewsItemState extends State<NewsItem> {
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await newsRef
-          .document(news.id)
-          .updateData({'likes': FieldValue.increment(1)});
+      await newsRef.document(news.id).updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          Constants.startUser.id,
-          'New News Like',
-          Constants.currentUser.name + ' likes your post',
-          news.id,
-          'new_like');
+      await NotificationHandler.sendNotification(Constants.startUser.id, 'New News Like',
+          Constants.currentUser.name + ' likes your post', news.id, 'news_like');
     }
     var newsMeta = await DatabaseService.getPostMeta(newsId: news.id);
     setState(() {
@@ -102,11 +87,8 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   void initLikes(News news) async {
-    DocumentSnapshot likedSnapshot = await newsRef
-        .document(news.id)
-        .collection('likes')
-        ?.document(Constants.currentUserID)
-        ?.get();
+    DocumentSnapshot likedSnapshot =
+        await newsRef.document(news.id).collection('likes')?.document(Constants.currentUserID)?.get();
 
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -132,8 +114,7 @@ class _NewsItemState extends State<NewsItem> {
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
-          Navigator.of(context)
-              .pushNamed('/news-page', arguments: {'news': widget.news});
+          Navigator.of(context).pushNamed('/news-page', arguments: {'news': widget.news, 'is_video_visible': true});
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -170,17 +151,13 @@ class _NewsItemState extends State<NewsItem> {
                             InkWell(
                               child: Text(
                                 '${Constants.startUser?.name}' ?? '',
-                                style: TextStyle(
-                                    color: MyColors.darkPrimaryColor,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold),
                               ),
                               onTap: () => _goToProfilePage(),
                             ),
                             Text(
-                              '${AppUtil.formatTimestamp(widget.news.timestamp)}' ??
-                                  '',
-                              style: TextStyle(
-                                  color: Colors.grey.shade400, fontSize: 12),
+                              '${AppUtil.formatTimestamp(widget.news.timestamp)}' ?? '',
+                              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
                             ),
                           ],
                         ),
@@ -210,21 +187,17 @@ class _NewsItemState extends State<NewsItem> {
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),
-                          urlStyle: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.w400),
+                          urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                         )
                       : UrlText(
                           context: context,
-                          text: flag
-                              ? (firstHalf + '...')
-                              : (firstHalf + secondHalf),
+                          text: flag ? (firstHalf + '...') : (firstHalf + secondHalf),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),
-                          urlStyle: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.w400),
+                          urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                         )
                   : Container(),
               InkWell(
@@ -262,8 +235,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                         Text(
                           ' Likes, ',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.news.comments ?? 0}',
@@ -271,8 +243,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                         Text(
                           '  Comments, ',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.news.shares ?? 0}',
@@ -280,8 +251,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                         Text(
                           ' Shares',
-                          style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                          style: TextStyle(color: MyColors.primaryColor, fontSize: 12),
                         ),
                       ],
                     ),
@@ -324,8 +294,7 @@ class _NewsItemState extends State<NewsItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () => AppUtil.sharePost(
-                              '${Constants.startUser.name} post some news', '',
+                          onTap: () => AppUtil.sharePost('${Constants.startUser.name} post some news', '',
                               newsId: widget.news.id),
                           child: SizedBox(
                             child: Icon(
@@ -347,10 +316,17 @@ class _NewsItemState extends State<NewsItem> {
     );
   }
 
+  @override
+  dispose() {
+    if (_videoController != null) {
+      _videoController.dispose();
+    }
+    super.dispose();
+  }
+
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () =>
-          Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
+      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
         'news': widget.news,
       }),
       child: Container(
@@ -382,11 +358,7 @@ class _NewsItemState extends State<NewsItem> {
       case 'video':
         return Stack(
           children: [
-            Container(
-                height: 200,
-                child: _videoController != null
-                    ? VideoPlayer(_videoController)
-                    : Container()),
+            Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
             Positioned.fill(
                 child: Padding(
               padding: const EdgeInsets.all(8.0),

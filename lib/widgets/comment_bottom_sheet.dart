@@ -117,7 +117,8 @@ class CommentBottomSheet {
                   await _deleteComment(context, comment.id, parentComment == null ? null : parentComment.id,
                       recordId: record.id, newId: news.id);
                   if (parentComment == null) {
-                    Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record': record});
+                    Navigator.of(context)
+                        .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
                   } else {
                     Navigator.of(context).pushReplacementNamed('/comment-page',
                         arguments: {'record': record, 'news': news, 'comment': parentComment});
@@ -192,7 +193,8 @@ class CommentBottomSheet {
               await DatabaseService.editComment(comment.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
               AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
-              Navigator.of(context).pushReplacementNamed('/record-page', arguments: {'record': record});
+              Navigator.of(context)
+                  .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
             },
             color: MyColors.primaryColor,
             child: Text(
