@@ -6,11 +6,15 @@ class RegularAppbar extends StatelessWidget {
   BuildContext context;
   Color color;
   double margin;
+  Future<bool> Function() onBackPressed;
 
-  RegularAppbar(BuildContext context, {this.color = Colors.white, this.margin = 40}) {
+  RegularAppbar(BuildContext context, {this.color = Colors.white, this.margin = 40, this.onBackPressed}) {
     this.context = context;
+    if (onBackPressed == null) {
+      onBackPressed = _onBackPressed;
+    }
   }
-  Future<bool> onBackPressed() {
+  Future<bool> _onBackPressed() {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
   }

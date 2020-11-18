@@ -375,6 +375,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
+        key: ValueKey('preview'),
         url: mergedFilePath,
         isLocal: true,
         backColor: MyColors.primaryColor,
@@ -385,9 +386,12 @@ class _MelodyPageState extends State<MelodyPage> {
     }
 
     Navigator.of(context).push(CustomModal(
-        onWillPop: () {
-          _deleteFiles();
+        onWillPop: () async {
+          await _deleteFiles();
           Navigator.of(context).pop();
+          Navigator.of(context).pop();
+          Navigator.of(context)
+              .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody, 'type': widget.type});
         },
         child: Container(
           child: _type == Types.AUDIO
@@ -592,7 +596,8 @@ class _MelodyPageState extends State<MelodyPage> {
     await DatabaseService.submitRecord(widget.melody.id, recordId, url, duration);
     _deleteFiles();
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
+    Navigator.of(context)
+        .pushReplacementNamed('/melody-page', arguments: {'melody': widget.melody, 'type': widget.type});
 
     AppUtil.showToast('Submitted!');
   }
@@ -641,13 +646,16 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   dispose() {
-    _videoController.dispose();
+    if (_videoController != null) {
+      _videoController.dispose();
+    }
     super.dispose();
   }
 
   initMelodyPlayer(String url) async {
     setState(() {
       melodyPlayer = new MusicPlayer(
+        key: ValueKey('main'),
         url: url,
         backColor: Colors.transparent,
         initialDuration: widget.melody.duration,
@@ -751,10 +759,15 @@ class _MelodyPageState extends State<MelodyPage> {
       child: Stack(
         children: [
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              RegularAppbar(context),
+              Align(
+                  alignment: Alignment.topCenter,
+                  child: RegularAppbar(
+                    context,
+                    onBackPressed: _onBackPressed,
+                  )),
               SizedBox(
                 height: 20,
               ),
@@ -813,7 +826,7 @@ class _MelodyPageState extends State<MelodyPage> {
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
-                height: 150,
+                height: 220,
                 child: SingleChildScrollView(
                   child: Center(
                     child: HtmlWidget(

@@ -176,6 +176,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                   onTap: () async {
                     setState(() {
                       musicPlayer = MusicPlayer(
+                        melody: _melodies[index],
                         url: _melodies[index].audioUrl,
                         backColor: MyColors.lightPrimaryColor,
                         title: _melodies[index].name,
