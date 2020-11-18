@@ -1,12 +1,10 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/list_items/singer_item.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -18,31 +16,31 @@ class CategoryPage extends StatefulWidget {
 }
 
 class _CategoryPageState extends State<CategoryPage> {
-  List<Melody> _songs = [];
+  List<Singer> _singers = [];
   ScrollController _songsScrollController = ScrollController();
-  Timestamp lastVisiblePostSnapShot;
+  String lastVisiblePostSnapShot;
 
   bool _isPlaying = false;
 
-  getSongs() async {
-    List<Melody> songs =
-        await DatabaseService.getSongsByCategory(widget.category);
+  getSingers() async {
+    List<Singer> songs =
+        await DatabaseService.getSingersByCategory(widget.category);
     if (mounted) {
       setState(() {
-        _songs = songs;
-        if (_songs.length > 0)
-          this.lastVisiblePostSnapShot = _songs.last.timestamp;
+        _singers = songs;
+        if (_singers.length > 0)
+          this.lastVisiblePostSnapShot = _singers.last.name;
       });
     }
   }
 
-  nextSongs() async {
-    List<Melody> songs =
-        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
-    if (songs.length > 0) {
+  nextSingers() async {
+    List<Singer> singers = await DatabaseService.getNextSingersByCategory(
+        widget.category, lastVisiblePostSnapShot);
+    if (singers.length > 0) {
       setState(() {
-        songs.forEach((element) => _songs.add(element));
-        this.lastVisiblePostSnapShot = songs.last.timestamp;
+        singers.forEach((element) => _singers.add(element));
+        this.lastVisiblePostSnapShot = singers.last.name;
       });
     }
   }
@@ -54,26 +52,16 @@ class _CategoryPageState extends State<CategoryPage> {
           child: ListView.builder(
               shrinkWrap: true,
               controller: _songsScrollController,
-              itemCount: _songs.length,
+              itemCount: _singers.length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () async {
-                    setState(() {
-                      musicPlayer = MusicPlayer(
-                        url: _songs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _songs[index].name,
-                        initialDuration: _songs[index].duration,
-                      );
-                      _isPlaying = true;
-                    });
+                    Navigator.of(context).pushNamed('/singer-page',
+                        arguments: {'singer': _singers[index]});
                   },
-                  child: MelodyItem(
-                    padding: 8,
-                    imageSize: 40,
-                    isRounded: true,
+                  child: SingerItem(
                     key: ValueKey('song_item'),
-                    melody: _songs[index],
+                    singer: _singers[index],
                   ),
                 );
               }),
@@ -94,14 +82,14 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   void initState() {
-    getSongs();
+    getSingers();
     _songsScrollController
       ..addListener(() {
         if (_songsScrollController.offset >=
                 _songsScrollController.position.maxScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print('reached the bottom');
-          nextSongs();
+          nextSingers();
         } else if (_songsScrollController.offset <=
                 _songsScrollController.position.minScrollExtent &&
             !_songsScrollController.position.outOfRange) {

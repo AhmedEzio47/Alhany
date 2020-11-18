@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   List<String> _categories = [];
-  Map<String, List<Melody>> _songs = {};
+  Map<String, List<Singer>> _categorySingers = {};
   getCategories() async {
     List<String> categories = await DatabaseService.getCategories();
     if (mounted) {
@@ -193,10 +193,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       });
     }
     for (String category in categories) {
-      List<Melody> songs = await DatabaseService.getSongsByCategory(category);
+      List<Singer> singers =
+          await DatabaseService.getSingersByCategory(category);
       if (mounted) {
         setState(() {
-          _songs.putIfAbsent(category, () => songs);
+          _categorySingers.putIfAbsent(category, () => singers);
         });
       }
     }
@@ -208,7 +209,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         shrinkWrap: true,
         itemCount: _categories?.length,
         itemBuilder: (context, index) {
-          return (_songs[_categories[index]]?.length ?? 0) > 0
+          return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
                   margin: EdgeInsets.only(left: 8),
                   height: 215,
@@ -235,40 +236,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Expanded(
                               child: ListView.builder(
                                   itemCount:
-                                      _songs[_categories[index]]?.length + 1,
+                                      _categorySingers[_categories[index]]
+                                              ?.length +
+                                          1,
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (context, index2) {
                                     return index2 <
-                                            _songs[_categories[index]]?.length
+                                            _categorySingers[_categories[index]]
+                                                ?.length
                                         ? InkWell(
                                             onTap: () {
-                                              setState(() {
-                                                musicPlayer = MusicPlayer(
-                                                  melody:
-                                                      _songs[_categories[index]]
-                                                          [index2],
-                                                  title:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.name,
-                                                  key: ValueKey(
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.id),
-                                                  url:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.audioUrl,
-                                                  backColor: MyColors
-                                                      .lightPrimaryColor
-                                                      .withOpacity(.8),
-                                                  initialDuration:
-                                                      _songs[_categories[index]]
-                                                              [index2]
-                                                          ?.duration,
-                                                );
-                                                _isPlaying = true;
-                                              });
+                                              Navigator.of(context).pushNamed(
+                                                  '/singer-page',
+                                                  arguments: {
+                                                    'singer': _categorySingers[
+                                                            _categories[index]]
+                                                        [index2]
+                                                  });
                                             },
                                             child: Container(
                                               height: 150,
@@ -284,33 +268,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                     height: 120,
                                                     imageShape:
                                                         BoxShape.rectangle,
-                                                    imageUrl: _songs[
+                                                    imageUrl: _categorySingers[
                                                             _categories[
                                                                 index]][index2]
                                                         ?.imageUrl,
                                                     defaultAssetImage: Strings
-                                                        .default_melody_image,
+                                                        .default_profile_image,
                                                   ),
                                                   Text(
-                                                    _songs[_categories[index]]
-                                                            [index2]
+                                                    _categorySingers[
+                                                            _categories[
+                                                                index]][index2]
                                                         ?.name,
                                                     style: TextStyle(
                                                         color: Colors.white),
                                                   ),
-                                                  Text(
-                                                    _songs[_categories[index]]
-                                                            [index2]
-                                                        ?.singer,
-                                                    style: TextStyle(
-                                                        color: Colors
-                                                            .grey.shade400),
-                                                  )
                                                 ],
                                               ),
                                             ),
                                           )
-                                        : _songs[_categories[index]]?.length ==
+                                        : _categorySingers[_categories[index]]
+                                                    ?.length ==
                                                 15
                                             ? InkWell(
                                                 onTap: () {
