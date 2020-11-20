@@ -103,9 +103,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   }
 
   LinkedScrollControllerGroup _controllers;
-  ScrollController _recordsScrollController = ScrollController();
-  ScrollController _favouritesScrollController = ScrollController();
-  ScrollController _mainScrollController = ScrollController();
+  ScrollController _recordsScrollController;
+  ScrollController _favouritesScrollController;
+  ScrollController _mainScrollController;
 
   @override
   void initState() {
