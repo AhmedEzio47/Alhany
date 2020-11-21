@@ -118,12 +118,13 @@ class _NewsItemState extends State<NewsItem> {
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 310,
+          height: widget.news.text != null && widget.news.text.isNotEmpty ? 320 : 305,
           decoration: BoxDecoration(
             borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -179,25 +180,31 @@ class _NewsItemState extends State<NewsItem> {
               ),
               widget.news.text != null && widget.news.text.isNotEmpty
                   ? secondHalf.isEmpty
-                      ? UrlText(
-                          context: context,
-                          text: widget.news.text,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: UrlText(
+                            context: context,
+                            text: widget.news.text,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                           ),
-                          urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                         )
-                      : UrlText(
-                          context: context,
-                          text: flag ? (firstHalf + '...') : (firstHalf + secondHalf),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: UrlText(
+                            context: context,
+                            text: flag ? (firstHalf + '...') : (firstHalf + secondHalf),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                           ),
-                          urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
                         )
                   : Container(),
               InkWell(

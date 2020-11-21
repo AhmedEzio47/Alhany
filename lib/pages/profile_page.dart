@@ -174,13 +174,13 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                       ),
                       alignment: Alignment.topCenter,
                     ),
-                    SingleChildScrollView(
-                      controller: _mainScrollController,
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height - 150,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: CustomScrollView(controller: _mainScrollController, slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate([
                             SizedBox(
                               height: 20,
                             ),
@@ -323,36 +323,44 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                               height: 10,
                             ),
                             widget.userId == Constants.currentUserID
-                                ? RaisedButton(
-                                    color: MyColors.accentColor,
-                                    shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
-                                    onPressed: () async {
-                                      setState(() {
-                                        _editing = !_editing;
-                                      });
-                                      if (_editing) {
+                                ? Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 145),
+                                    child: RaisedButton(
+                                      color: MyColors.accentColor,
+                                      shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                                      onPressed: () async {
                                         setState(() {
-                                          _nameController.text = _user.name;
-                                          _usernameController.text = _user.username;
-                                          _descriptionController.text = _user.description;
+                                          _editing = !_editing;
                                         });
-                                      } else {
-                                        _saveEdits();
-                                      }
-                                    },
-                                    child: Text(
-                                        _editing
-                                            ? language(en: 'Save', ar: 'حفظ')
-                                            : language(en: 'Edit Profile', ar: 'تعديل'),
-                                        style: TextStyle(fontSize: 14, color: Colors.white)),
+                                        if (_editing) {
+                                          setState(() {
+                                            _nameController.text = _user.name;
+                                            _usernameController.text = _user.username;
+                                            _descriptionController.text = _user.description;
+                                          });
+                                        } else {
+                                          _saveEdits();
+                                        }
+                                      },
+                                      child: Text(
+                                          _editing
+                                              ? language(en: 'Save', ar: 'حفظ')
+                                              : language(en: 'Edit Profile', ar: 'تعديل'),
+                                          style: TextStyle(fontSize: 14, color: Colors.white)),
+                                    ),
                                   )
                                 : Container(),
                             SizedBox(
                               height: 10,
                             ),
+                          ]),
+                        ),
+                        SliverList(
+                          delegate: SliverChildListDelegate([
                             TabBar(
                                 onTap: (index) {
                                   setState(() {
+                                    //_isPlaying = false;
                                     _page = index;
                                   });
                                 },
@@ -363,9 +371,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                     borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
                                 tabs: _tabs),
                             _currentPage()
-                          ],
+                          ]),
                         ),
-                      ),
+                      ]),
                     ),
                   ],
                 ),
@@ -441,80 +449,77 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   Widget _currentPage() {
     switch (_page) {
       case 0:
-        return Flexible(
-          fit: FlexFit.loose,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: recordsRef.where('singer_id', isEqualTo: _user?.id)?.snapshots(),
-            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Center(child: CircularProgressIndicator());
-                default:
-                  return ListView.builder(
-                      controller: _recordsScrollController,
-                      itemCount: _records.length,
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () async {
-                            // if (musicPlayer != null) {
-                            //   musicPlayer.stop();
-                            // }
-                            musicPlayer = MusicPlayer(
-                              url: _records[index].audioUrl,
-                              backColor: Colors.white.withOpacity(.4),
-                            );
-                            setState(() {
-                              _isPlaying = true;
-                            });
-                          },
-                          child: RecordItem(
-                            record: _records[index],
-                            key: UniqueKey(),
-                          ),
-                        );
-                      });
-              }
-            },
-          ),
+        return StreamBuilder<QuerySnapshot>(
+          stream: recordsRef.where('singer_id', isEqualTo: _user?.id)?.snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Center(child: CircularProgressIndicator());
+              default:
+                return ListView.builder(
+                    controller: _recordsScrollController,
+                    itemCount: _records.length,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () async {
+                          // if (musicPlayer != null) {
+                          //   musicPlayer.stop();
+                          // }
+                          musicPlayer = MusicPlayer(
+                            url: _records[index].audioUrl,
+                            backColor: Colors.white.withOpacity(.4),
+                          );
+                          setState(() {
+                            _isPlaying = true;
+                          });
+                        },
+                        child: RecordItem(
+                          record: _records[index],
+                          key: UniqueKey(),
+                        ),
+                      );
+                    });
+            }
+          },
         );
       case 1:
         getFavourites();
-        return Expanded(
-          flex: 8,
-          child: _favourites.length > 0
-              ? ListView.builder(
-                  controller: _favouritesScrollController,
-                  shrinkWrap: true,
-                  itemCount: _favourites.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        // if (musicPlayer != null) {
-                        //   musicPlayer.stop();
-                        // }
-                        musicPlayer = MusicPlayer(
-                          url: _favourites[index].audioUrl,
-                          backColor: Colors.white.withOpacity(.4),
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
+        return _favourites.length > 0
+            ? ListView.builder(
+                controller: _favouritesScrollController,
+                shrinkWrap: true,
+                itemCount: _favourites.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {
+                      // if (musicPlayer != null) {
+                      //   musicPlayer.stop();
+                      // }
+                      musicPlayer = MusicPlayer(
                         melody: _favourites[index],
-                      ),
-                    );
-                  })
-              : Center(
-                  child: Text(
-                    language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
-                    style: TextStyle(color: Colors.white),
-                  ),
+                        title: _favourites[index].name,
+                        initialDuration: _favourites[index].duration,
+                        url: _favourites[index].audioUrl,
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                      );
+                      setState(() {
+                        _isPlaying = true;
+                      });
+                    },
+                    child: MelodyItem(
+                      melody: _favourites[index],
+                    ),
+                  );
+                })
+            : Center(
+                child: Text(
+                  language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
+                  style: TextStyle(color: Colors.white),
                 ),
-        );
+              );
         break;
 
       default:

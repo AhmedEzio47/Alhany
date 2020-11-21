@@ -58,6 +58,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       TabBar(
                           onTap: (index) {
                             setState(() {
+                              //_isPlaying = false;
                               _page = index;
                             });
                             _pageController.animateToPage(

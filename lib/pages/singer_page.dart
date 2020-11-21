@@ -118,94 +118,76 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
   }
 
   _songsPage() {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          child: ListView.builder(
-              shrinkWrap: true,
-              controller: _songsScrollController,
-              itemCount: _songs.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    setState(() {
-                      musicPlayer = MusicPlayer(
-                        melody: _songs[index],
-                        url: _songs[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _songs[index].name,
-                        initialDuration: _songs[index].duration,
-                      );
-                      _isPlaying = true;
-                    });
-                  },
-                  child: MelodyItem(
-                    padding: 0,
-                    imageSize: 40,
-                    isRounded: false,
-                    key: ValueKey('song_item'),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: ListView.builder(
+          primary: false,
+          shrinkWrap: true,
+          controller: _songsScrollController,
+          itemCount: _songs.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () async {
+                setState(() {
+                  musicPlayer = MusicPlayer(
                     melody: _songs[index],
-                  ),
-                );
-              }),
-        ),
-        _isPlaying
-            ? Positioned.fill(
-                child: Align(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: musicPlayer,
+                    url: _songs[index].audioUrl,
+                    backColor: MyColors.lightPrimaryColor,
+                    title: _songs[index].name,
+                    initialDuration: _songs[index].duration,
+                  );
+                  _isPlaying = true;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                child: MelodyItem(
+                  padding: 0,
+                  imageSize: 40,
+                  isRounded: false,
+                  key: ValueKey('song_item'),
+                  melody: _songs[index],
                 ),
-                alignment: Alignment.bottomCenter,
-              ))
-            : Container(),
-      ],
+              ),
+            );
+          }),
     );
   }
 
   _melodiesPage() {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          child: ListView.builder(
-              shrinkWrap: true,
-              controller: _melodiesScrollController,
-              itemCount: _melodies.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    setState(() {
-                      musicPlayer = MusicPlayer(
-                        melody: _melodies[index],
-                        url: _melodies[index].audioUrl,
-                        backColor: MyColors.lightPrimaryColor,
-                        title: _melodies[index].name,
-                        initialDuration: _melodies[index].duration,
-                      );
-                      _isPlaying = true;
-                    });
-                  },
-                  child: MelodyItem(
-                    padding: 0,
-                    imageSize: 40,
-                    isRounded: false,
-                    key: ValueKey('melody_item'),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: ListView.builder(
+          primary: false,
+          shrinkWrap: true,
+          controller: _melodiesScrollController,
+          itemCount: _melodies.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () async {
+                setState(() {
+                  musicPlayer = MusicPlayer(
                     melody: _melodies[index],
-                  ),
-                );
-              }),
-        ),
-        _isPlaying
-            ? Positioned.fill(
-                child: Align(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: musicPlayer,
+                    url: _melodies[index].audioUrl,
+                    backColor: MyColors.lightPrimaryColor,
+                    title: _melodies[index].name,
+                    initialDuration: _melodies[index].duration,
+                  );
+                  _isPlaying = true;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                child: MelodyItem(
+                  padding: 0,
+                  imageSize: 40,
+                  isRounded: false,
+                  key: ValueKey('melody_item'),
+                  melody: _melodies[index],
                 ),
-                alignment: Alignment.bottomCenter,
-              ))
-            : Container(),
-      ],
+              ),
+            );
+          }),
     );
   }
 
@@ -231,70 +213,76 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                     fit: BoxFit.cover,
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 200,
-                      child: Stack(
-                        children: [
-                          CachedImage(
-                            height: 200,
-                            width: MediaQuery.of(context).size.width,
-                            defaultAssetImage: Strings.default_cover_image,
-                            imageUrl: widget.singer.coverUrl,
-                            imageShape: BoxShape.rectangle,
-                          ),
-                          Positioned.fill(
-                              child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0, bottom: 16),
-                            child: Align(
-                              alignment: Alignment.bottomLeft,
-                              child: CachedImage(
-                                height: 100,
-                                width: 100,
-                                defaultAssetImage: Strings.default_profile_image,
-                                imageUrl: widget.singer.imageUrl,
-                                imageShape: BoxShape.circle,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildListDelegate([
+                        Container(
+                          height: 200,
+                          child: Stack(
+                            children: [
+                              CachedImage(
+                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                defaultAssetImage: Strings.default_cover_image,
+                                imageUrl: widget.singer.coverUrl,
+                                imageShape: BoxShape.rectangle,
                               ),
-                            ),
-                          )),
-                          Positioned.fill(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-                                  color: Colors.black.withOpacity(.6),
-                                  child: Text(
-                                    widget.singer.name,
-                                    style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+                              Positioned.fill(
+                                  child: Padding(
+                                padding: const EdgeInsets.only(left: 16.0, bottom: 16),
+                                child: Align(
+                                  alignment: Alignment.bottomLeft,
+                                  child: CachedImage(
+                                    height: 100,
+                                    width: 100,
+                                    defaultAssetImage: Strings.default_profile_image,
+                                    imageUrl: widget.singer.imageUrl,
+                                    imageShape: BoxShape.circle,
                                   ),
                                 ),
+                              )),
+                              Positioned.fill(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                                      color: Colors.black.withOpacity(.6),
+                                      child: Text(
+                                        widget.singer.name,
+                                        style:
+                                            TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        TabBar(
+                            onTap: (index) {
+                              setState(() {
+                                //_isPlaying = false;
+                                _page = index;
+                              });
+                            },
+                            labelColor: MyColors.accentColor,
+                            unselectedLabelColor: Colors.grey,
+                            controller: _tabController,
+                            tabs: [
+                              Tab(
+                                text: language(en: 'Melodies', ar: 'الألحان'),
                               ),
-                            ),
-                          )
-                        ],
-                      ),
+                              Tab(
+                                text: language(en: 'Songs', ar: 'الأغاني'),
+                              ),
+                            ]),
+                        _currentPage()
+                      ]),
                     ),
-                    TabBar(
-                        onTap: (index) {
-                          setState(() {
-                            _page = index;
-                          });
-                        },
-                        labelColor: MyColors.accentColor,
-                        unselectedLabelColor: Colors.grey,
-                        controller: _tabController,
-                        tabs: [
-                          Tab(
-                            text: language(en: 'Melodies', ar: 'الألحان'),
-                          ),
-                          Tab(
-                            text: language(en: 'Songs', ar: 'الأغاني'),
-                          ),
-                        ]),
-                    Expanded(child: _currentPage())
                   ],
                 ),
               ),
@@ -334,7 +322,17 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                       },
                     ),
                   ))
-                : Container
+                : Container(),
+            _isPlaying
+                ? Positioned.fill(
+                    child: Align(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: musicPlayer,
+                    ),
+                    alignment: Alignment.bottomCenter,
+                  ))
+                : Container(),
           ],
         ),
       ),

@@ -130,66 +130,75 @@ class _NewsPageState extends State<NewsPage> {
                   child: Column(
                     children: [
                       RegularAppbar(context),
-                      widget.isVideoVisible
-                          ? NewsItem(
-                              news: widget.news,
-                            )
-                          : Container(),
                       Expanded(
-                        flex: 5,
-                        child: ListView.separated(
-                            separatorBuilder: (context, index) {
-                              return Divider(
-                                height: 2,
-                                thickness: 2,
-                                color: Colors.transparent,
-                              );
-                            },
-                            shrinkWrap: true,
-                            itemCount: _comments.length + 1,
-                            itemBuilder: (context, index) {
-                              Comment comment = Comment();
-                              if (index < _comments.length) {
-                                comment = _comments[index];
-                              }
-                              return index < _comments.length
-                                  ? FutureBuilder(
-                                      future: DatabaseService.getUserWithId(
-                                        comment.commenterID,
-                                      ),
-                                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return SizedBox.shrink();
-                                        }
-                                        User commenter = snapshot.data;
-                                        //print('commenter: $commenter and comment: $comment');
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                widget.isVideoVisible
+                                    ? NewsItem(
+                                        news: widget.news,
+                                      )
+                                    : Container(),
+                                ListView.separated(
+                                    separatorBuilder: (context, index) {
+                                      return Divider(
+                                        height: 2,
+                                        thickness: 2,
+                                        color: Colors.transparent,
+                                      );
+                                    },
+                                    shrinkWrap: true,
+                                    primary: false,
+                                    itemCount: _comments.length + 1,
+                                    itemBuilder: (context, index) {
+                                      Comment comment = Comment();
+                                      if (index < _comments.length) {
+                                        comment = _comments[index];
+                                      }
+                                      return index < _comments.length
+                                          ? FutureBuilder(
+                                              future: DatabaseService.getUserWithId(
+                                                comment.commenterID,
+                                              ),
+                                              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                                if (!snapshot.hasData) {
+                                                  return SizedBox.shrink();
+                                                }
+                                                User commenter = snapshot.data;
+                                                //print('commenter: $commenter and comment: $comment');
 
-                                        return CommentItem2(
-                                          news: widget.news,
-                                          comment: comment,
-                                          commenter: commenter,
-                                          isReply: false,
-                                        );
-                                      })
-                                  : _comments.length > 20
-                                      ? InkWell(
-                                          onTap: () async {
-                                            AppUtil.showLoader(context);
-                                            await getAllComments();
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Center(
-                                                child: Text(
-                                              'show all',
-                                              style: TextStyle(
-                                                  color: MyColors.accentColor, decoration: TextDecoration.underline),
-                                            )),
-                                          ),
-                                        )
-                                      : Container();
-                            }),
+                                                return CommentItem2(
+                                                  news: widget.news,
+                                                  comment: comment,
+                                                  commenter: commenter,
+                                                  isReply: false,
+                                                );
+                                              })
+                                          : _comments.length > 20
+                                              ? InkWell(
+                                                  onTap: () async {
+                                                    AppUtil.showLoader(context);
+                                                    await getAllComments();
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Center(
+                                                        child: Text(
+                                                      'show all',
+                                                      style: TextStyle(
+                                                          color: MyColors.accentColor,
+                                                          decoration: TextDecoration.underline),
+                                                    )),
+                                                  ),
+                                                )
+                                              : Container();
+                                    }),
+                              ]),
+                            ),
+                          ],
+                        ),
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,

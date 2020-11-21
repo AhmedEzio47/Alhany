@@ -29,6 +29,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   List<Melody> _melodies = [];
   List<Melody> _filteredMelodies = [];
+
+  ScrollController _scrollController = ScrollController();
   getMelodies() async {
     List<Melody> melodies = await DatabaseService.getMelodies();
     if (mounted) {
@@ -113,54 +115,73 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 ),
                 child: Column(
                   children: [
+                    Align(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 35),
+                        height: 40,
+                        width: 150,
+                        child: Image.asset(
+                          Strings.app_bar,
+                        ),
+                      ),
+                      alignment: Alignment.topCenter,
+                    ),
                     SizedBox(
-                      height: 75,
+                      height: 10,
                     ),
-                    CachedImage(
-                      width: 100,
-                      height: 100,
-                      imageShape: BoxShape.circle,
-                      imageUrl: Constants.startUser?.profileImageUrl,
-                      defaultAssetImage: Strings.default_profile_image,
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    TabBar(
-                        onTap: (index) {
-                          setState(() {
-                            _page = index;
-                          });
-                        },
-                        labelColor: MyColors.accentColor,
-                        unselectedLabelColor: Colors.grey,
-                        controller: _tabController,
-                        tabs: [
-                          Tab(
-                            text: language(en: 'Melodies', ar: 'آخر الأعمال'),
+                    Expanded(
+                      child: CustomScrollView(
+                        controller: _scrollController,
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                margin: EdgeInsets.symmetric(horizontal: 155),
+                                child: CachedImage(
+                                  width: 100,
+                                  height: 100,
+                                  imageShape: BoxShape.circle,
+                                  imageUrl: Constants.startUser?.profileImageUrl,
+                                  defaultAssetImage: Strings.default_profile_image,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
+                            ]),
                           ),
-                          Tab(
-                            text: language(en: 'News', ar: 'آخر الأخبار'),
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              TabBar(
+                                  onTap: (index) {
+                                    setState(() {
+                                      //_isPlaying = false;
+                                      _page = index;
+                                    });
+                                  },
+                                  labelColor: MyColors.accentColor,
+                                  unselectedLabelColor: Colors.grey,
+                                  controller: _tabController,
+                                  tabs: [
+                                    Tab(
+                                      text: language(en: 'Melodies', ar: 'آخر الأعمال'),
+                                    ),
+                                    Tab(
+                                      text: language(en: 'News', ar: 'آخر الأخبار'),
+                                    ),
+                                  ]),
+                              _currentPage()
+                            ]),
                           ),
-                        ]),
-                    Expanded(child: _currentPage())
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Positioned.fill(
-                  child: Align(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 35),
-                  child: Container(
-                    height: 40,
-                    width: 150,
-                    child: Image.asset(
-                      Strings.app_bar,
-                    ),
-                  ),
-                ),
-                alignment: Alignment.topCenter,
-              )),
               _isPlaying
                   ? Positioned.fill(
                       child: Align(
@@ -233,6 +254,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
       case 1:
         getNews();
         return ListView.builder(
+            primary: false,
             shrinkWrap: true,
             itemCount: _news.length,
             itemBuilder: (context, index) {
@@ -244,6 +266,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
         return _isSearching
             ? ListView.builder(
                 shrinkWrap: true,
+                primary: false,
                 controller: _melodiesScrollController,
                 itemCount: _filteredMelodies.length,
                 itemBuilder: (context, index) {
@@ -271,6 +294,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 })
             : ListView.builder(
                 shrinkWrap: true,
+                primary: false,
                 controller: _melodiesScrollController,
                 itemCount: _melodies.length,
                 itemBuilder: (context, index) {
