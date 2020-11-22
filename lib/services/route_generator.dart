@@ -11,6 +11,7 @@ import 'package:Alhany/pages/lyrics_editor.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/pages/news_page.dart';
 import 'package:Alhany/pages/password_reset.dart';
+import 'package:Alhany/pages/payment_home.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/post_fullscreen.dart';
 import 'package:Alhany/pages/record_page.dart';
@@ -151,6 +152,12 @@ class RouteGenerator {
 
       case '/upload-news':
         return MaterialPageRoute(builder: (_) => UploadNews());
+
+      case '/payment-home':
+        return MaterialPageRoute(
+            builder: (_) => PaymentHomePage(
+                  amount: args['amount'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

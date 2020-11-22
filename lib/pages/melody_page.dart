@@ -659,6 +659,7 @@ class _MelodyPageState extends State<MelodyPage> {
         url: url,
         backColor: Colors.transparent,
         initialDuration: widget.melody.duration,
+        melody: widget.melody,
       );
     });
   }

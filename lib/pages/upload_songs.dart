@@ -4,6 +4,8 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -25,20 +27,24 @@ class _UploadSongsState extends State<UploadSongs> {
 
   String _price;
 
-  List<String> _singers = [];
+  List<String> _singersNames = [];
+  List<Singer> _singers = [];
   //List<String> _categories = [];
 
-  String _singer;
+  String _singerName;
+  Singer _singer;
   //String _category;
 
   TextEditingController _categoryController = TextEditingController();
 
   getSingers() async {
-    _singers = [];
+    _singersNames = [];
     QuerySnapshot singersSnapshot = await singersRef.getDocuments();
     for (DocumentSnapshot doc in singersSnapshot.documents) {
+      Singer singer = Singer.fromDoc(doc);
       setState(() {
-        _singers.add(doc.data['name']);
+        _singers.add(singer);
+        _singersNames.add(doc.data['name']);
       });
     }
   }
@@ -59,7 +65,7 @@ class _UploadSongsState extends State<UploadSongs> {
     //getCategories();
     super.initState();
     setState(() {
-      _singer = widget.singer;
+      _singerName = widget.singer;
     });
   }
 
@@ -125,14 +131,15 @@ class _UploadSongsState extends State<UploadSongs> {
                       flex: 7,
                       child: DropdownButton(
                         hint: Text('Singer'),
-                        value: _singer,
-                        onChanged: (text) {
+                        value: _singerName,
+                        onChanged: (text) async {
+                          Singer singer = await DatabaseService.getSingerWithName(text);
                           setState(() {
-                            _singer = text;
+                            _singer = singer;
+                            _singerName = text;
                           });
                         },
-                        items: (_singers)
-                            .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                        items: (_singersNames).map<DropdownMenuItem<dynamic>>((dynamic value) {
                           return DropdownMenuItem<dynamic>(
                             value: value,
                             child: Text(value),
@@ -183,8 +190,7 @@ class _UploadSongsState extends State<UploadSongs> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: TextField(
@@ -214,8 +220,7 @@ class _UploadSongsState extends State<UploadSongs> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration:
-                            BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                     Text(
@@ -228,8 +233,7 @@ class _UploadSongsState extends State<UploadSongs> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration:
-                            BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                   ],
@@ -309,23 +313,18 @@ class _UploadSongsState extends State<UploadSongs> {
 //    }
     File songFile = await AppUtil.chooseAudio();
     String ext = path.extension(songFile.path);
-    String fileNameWithoutExtension =
-        path.basenameWithoutExtension(songFile.path);
+    String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info =
-        await _flutterFFprobe.getMediaInformation(songFile.path);
-    int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
+    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String songUrl =
-        await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
+    String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil()
-          .uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (songUrl == '') {
@@ -341,11 +340,9 @@ class _UploadSongsState extends State<UploadSongs> {
       'image_url': imageUrl,
       'is_song': true,
       'price': _price,
-      'singer': _singer,
+      'singer': _singerName,
 //      'category': _category,
-      'search': _songName != null
-          ? searchList(_songName)
-          : searchList(fileNameWithoutExtension),
+      'search': _songName != null ? searchList(_songName) : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
@@ -366,24 +363,19 @@ class _UploadSongsState extends State<UploadSongs> {
     for (File songFile in songFiles) {
       String id = randomAlphaNumeric(20);
       String songExt = path.extension(songFile.path);
-      String fileNameWithoutExtension =
-          path.basenameWithoutExtension(songFile.path);
-      String songUrl =
-          await AppUtil().uploadFile(songFile, context, '/songs/$id$songExt');
+      String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+      String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$songExt');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(songFile.path);
-      int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
-              .toInt();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
+      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
         'is_song': true,
         'price': _price,
-        'singer': _singer,
+        'singer': _singerName,
         'duration': duration,
         'search': searchList(fileNameWithoutExtension),
         'timestamp': FieldValue.serverTimestamp()

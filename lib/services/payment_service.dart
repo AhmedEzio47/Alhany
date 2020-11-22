@@ -1,25 +1,43 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/melody_model.dart';
 import 'package:stripe_payment/stripe_payment.dart';
+import 'package:http/http.dart' as http;
+
+class StripeTransactionResponse {
+  String message;
+  bool success;
+  StripeTransactionResponse({this.message, this.success});
+}
 
 class PaymentService {
-  static Future<Source> createPaymentSource() async {
-    await StripePayment.createSourceWithParams(SourceParams(
-      type: 'ideal',
-      amount: 2102,
-      currency: 'eur',
-      returnURL: 'example://stripe-redirect',
-    )).then((source) {
-      //AppUtil.showToast('Received ${source.sourceId}');
-      return source;
-    });
-    return null;
+  static String apiBase = 'https://api.stripe.com//v1';
+  static String paymentApiUrl = '$apiBase/payment_intents';
+  static Map<String, String> headers = {
+    'Authorization': 'Bearer ${Strings.paymentSecret}',
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
+
+  static Future<StripeTransactionResponse> payViaCreditCard({String amount, String currency}) async {
+    try {
+      PaymentMethod paymentMethod = await _paymentRequestWithCardForm();
+      var paymentIntentMap = await _createPaymentIntent(amount, currency);
+      PaymentIntent paymentIntent =
+          PaymentIntent(clientSecret: paymentIntentMap['client_secret'], paymentMethodId: paymentMethod.id);
+      PaymentIntentResult result = await _confirmPaymentIntent(paymentIntent);
+      if (result.status == 'succeeded') {
+        return StripeTransactionResponse(message: 'Transaction successful', success: true);
+      } else {
+        return StripeTransactionResponse(message: 'Transaction failed', success: false);
+      }
+    } catch (error) {
+      return StripeTransactionResponse(message: 'Transaction failed', success: false);
+    }
   }
 
-  static Future<PaymentMethod> createTokenWithCardForm() async {
+  static Future<PaymentMethod> _paymentRequestWithCardForm() async {
     PaymentMethod paymentMethod = await StripePayment.paymentRequestWithCardForm(CardFormPaymentRequest());
     //TODO save card details in shared pref
     return paymentMethod;
@@ -40,51 +58,56 @@ class PaymentService {
     return token;
   }
 
-  static confirmPaymentIntent(PaymentMethod paymentMethod, String clientSecret) async {
-    PaymentIntentResult paymentIntentResult = await StripePayment.confirmPaymentIntent(
-      PaymentIntent(
-        clientSecret: clientSecret,
-        paymentMethodId: paymentMethod.id,
-      ),
-    );
+  static Future<Map<String, dynamic>> _createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {'amount': amount, 'currency': currency, 'payment_method_types[]': 'card'};
+      var response = await http.post(paymentApiUrl, body: body, headers: headers);
+      return jsonDecode(response.body);
+    } catch (error) {
+      print(error.toString());
+    }
+    return null;
+  }
+
+  static Future<PaymentIntentResult> _confirmPaymentIntent(PaymentIntent paymentIntent) async {
+    PaymentIntentResult paymentIntentResult = await StripePayment.confirmPaymentIntent(paymentIntent);
     return paymentIntentResult;
   }
 
-  static authenticatePaymentIntent() async {
-    PaymentIntentResult paymentIntentResult =
-        await StripePayment.authenticatePaymentIntent(clientSecret: Strings.paymentSecret);
-    //paymentIntentResult = await StripePayment.authenticatePaymentIntent(clientSecret: Strings.paymentSecret);
-    return paymentIntentResult;
-  }
-
-  static Future<Token> nativePayment(String price, {var controller}) async {
+  static Future<StripeTransactionResponse> nativePayment(String amount, songName, {var controller}) async {
     if (Platform.isIOS) {
       controller.jumpTo(450);
     }
-    Token token = await StripePayment.paymentRequestWithNativePay(
-      androidPayOptions: AndroidPayPaymentRequest(
-        totalPrice: price,
-        currencyCode: "USD",
-      ),
-      applePayOptions: ApplePayPaymentOptions(
-        countryCode: 'DE',
-        currencyCode: 'USD',
-        items: [
-          ApplePayItem(
-            label: 'Test',
-            amount: '1',
-          )
-        ],
-      ),
-    );
-    if (token != null) {
-      StripePayment.completeNativePayRequest();
-      AppUtil.showToast('Payment Complete!');
+    try {
+      Token token = await StripePayment.paymentRequestWithNativePay(
+        androidPayOptions: AndroidPayPaymentRequest(
+          totalPrice: amount,
+          currencyCode: "USD",
+        ),
+        applePayOptions: ApplePayPaymentOptions(
+          countryCode: 'DE',
+          currencyCode: 'USD',
+          items: [
+            ApplePayItem(
+              label: songName,
+              amount: '1',
+            )
+          ],
+        ),
+      );
+      if (token != null) {
+        StripePayment.completeNativePayRequest();
+        AppUtil.showToast('Payment Complete!');
+      }
+      await StripePayment.completeNativePayRequest();
+    } catch (error) {
+      print(error.toString());
+      return StripeTransactionResponse(success: false, message: 'Transaction failed');
     }
-    return token;
+    return StripeTransactionResponse(success: true, message: 'Transaction succeeded');
   }
 
-  static configureStripePayment() {
+  static initPayment() {
     StripePayment.setOptions(StripeOptions(
         publishableKey: Strings.paymentPublishableKey,
         merchantId: Strings.merchantId, //YOUR_MERCHANT_ID

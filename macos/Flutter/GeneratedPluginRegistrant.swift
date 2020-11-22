@@ -8,6 +8,7 @@ import Foundation
 import audio_service
 import audio_session
 import audioplayers
+import cloud_functions
 import firebase_core
 import firebase_storage
 import just_audio
@@ -19,6 +20,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AudioServicePlugin.register(with: registry.registrar(forPlugin: "AudioServicePlugin"))
   AudioSessionPlugin.register(with: registry.registrar(forPlugin: "AudioSessionPlugin"))
   AudioplayersPlugin.register(with: registry.registrar(forPlugin: "AudioplayersPlugin"))
+  CloudFunctionsPlugin.register(with: registry.registrar(forPlugin: "CloudFunctionsPlugin"))
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
   FLTFirebaseStoragePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseStoragePlugin"))
   JustAudioPlugin.register(with: registry.registrar(forPlugin: "JustAudioPlugin"))

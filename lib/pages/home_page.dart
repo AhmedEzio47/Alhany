@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
                   margin: EdgeInsets.only(left: 8),
-                  height: 215,
+                  height: 171,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,15 +236,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                   arguments: {'singer': _categorySingers[_categories[index]][index2]});
                                             },
                                             child: Container(
-                                              height: 150,
-                                              width: 135,
+                                              height: 110,
+                                              width: 110,
                                               child: Column(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                 children: [
                                                   CachedImage(
-                                                    width: 120,
-                                                    height: 120,
+                                                    width: 100,
+                                                    height: 100,
                                                     imageShape: BoxShape.circle,
                                                     imageUrl: _categorySingers[_categories[index]][index2]?.imageUrl,
                                                     defaultAssetImage: Strings.default_profile_image,

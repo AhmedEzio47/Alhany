@@ -463,7 +463,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Image.asset(
-                                                  'assets/images/google.png',
+                                                  Strings.google,
                                                   height: 25,
                                                   width: 25,
                                                 ),

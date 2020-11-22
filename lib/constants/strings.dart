@@ -41,6 +41,8 @@ class Strings {
   static const String send = 'assets/icons/send.png';
   static const String send_ar = 'assets/icons/send_ar.png';
   static const String app_icon = 'assets/icons/app_icon.png';
+  static const String apple = 'assets/icons/apple.png';
+  static const String google = 'assets/icons/google.png';
 
   //Translations
   static const en_edit_image = 'Edit Image';

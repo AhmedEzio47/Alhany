@@ -467,7 +467,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           )
-        : widget.melody.isSong ?? true
+        : widget.melody?.isSong ?? true
             ? Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: InkWell(
@@ -624,10 +624,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentScreen()));
-        PaymentService.configureStripePayment();
-        PaymentMethod paymentMethod = await PaymentService.createTokenWithCardForm();
-        PaymentService.confirmPaymentIntent(paymentMethod, Strings.paymentSecret);
+        Navigator.of(context).pushNamed('/payment-home', arguments: {'amount': widget.melody.price});
 
         print(token.tokenId);
       } else {

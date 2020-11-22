@@ -35,7 +35,7 @@ class _MelodyItemState extends State<MelodyItem> {
       getAuthor();
     }
     super.initState();
-    PaymentService.configureStripePayment();
+    PaymentService.initPayment();
   }
 
   @override

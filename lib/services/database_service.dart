@@ -925,4 +925,10 @@ class DatabaseService {
       await usersRef.document(user.id).collection('downloads').document(melody.id).delete();
     }
   }
+
+  static getSingerWithName(String name) async {
+    QuerySnapshot singerSnapshot = await singersRef.where('name', isEqualTo: name).getDocuments();
+    List<Singer> singers = singerSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+    return singers;
+  }
 }
