@@ -184,6 +184,8 @@ class _AddSingerPageState extends State<AddSingerPage> {
                         'category': _category,
                         'image_url': imageUrl,
                         'cover_url': coverUrl,
+                        'songs': 0,
+                        'melodies': 0,
                         'search': searchList(_singerController.text),
                       });
                       AppUtil.showToast('Singer added');

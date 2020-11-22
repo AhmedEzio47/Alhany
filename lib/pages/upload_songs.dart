@@ -28,7 +28,6 @@ class _UploadSongsState extends State<UploadSongs> {
   String _price;
 
   List<String> _singersNames = [];
-  List<Singer> _singers = [];
   //List<String> _categories = [];
 
   String _singerName;
@@ -41,9 +40,7 @@ class _UploadSongsState extends State<UploadSongs> {
     _singersNames = [];
     QuerySnapshot singersSnapshot = await singersRef.getDocuments();
     for (DocumentSnapshot doc in singersSnapshot.documents) {
-      Singer singer = Singer.fromDoc(doc);
       setState(() {
-        _singers.add(singer);
         _singersNames.add(doc.data['name']);
       });
     }
@@ -133,13 +130,15 @@ class _UploadSongsState extends State<UploadSongs> {
                         hint: Text('Singer'),
                         value: _singerName,
                         onChanged: (text) async {
-                          Singer singer = await DatabaseService.getSingerWithName(text);
+                          Singer singer =
+                              await DatabaseService.getSingerWithName(text);
                           setState(() {
                             _singer = singer;
                             _singerName = text;
                           });
                         },
-                        items: (_singersNames).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                        items: (_singersNames)
+                            .map<DropdownMenuItem<dynamic>>((dynamic value) {
                           return DropdownMenuItem<dynamic>(
                             value: value,
                             child: Text(value),
@@ -190,7 +189,8 @@ class _UploadSongsState extends State<UploadSongs> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: TextField(
@@ -220,7 +220,8 @@ class _UploadSongsState extends State<UploadSongs> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration:
+                            BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                     Text(
@@ -233,7 +234,8 @@ class _UploadSongsState extends State<UploadSongs> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration:
+                            BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                   ],
@@ -313,18 +315,23 @@ class _UploadSongsState extends State<UploadSongs> {
 //    }
     File songFile = await AppUtil.chooseAudio();
     String ext = path.extension(songFile.path);
-    String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
+    String fileNameWithoutExtension =
+        path.basenameWithoutExtension(songFile.path);
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
-    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info =
+        await _flutterFFprobe.getMediaInformation(songFile.path);
+    int duration =
+        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
+    String songUrl =
+        await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil()
+          .uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (songUrl == '') {
@@ -342,10 +349,15 @@ class _UploadSongsState extends State<UploadSongs> {
       'price': _price,
       'singer': _singerName,
 //      'category': _category,
-      'search': _songName != null ? searchList(_songName) : searchList(fileNameWithoutExtension),
+      'search': _songName != null
+          ? searchList(_songName)
+          : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
+    await singersRef
+        .document(_singer.id)
+        .updateData({'songs': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -363,12 +375,17 @@ class _UploadSongsState extends State<UploadSongs> {
     for (File songFile in songFiles) {
       String id = randomAlphaNumeric(20);
       String songExt = path.extension(songFile.path);
-      String fileNameWithoutExtension = path.basenameWithoutExtension(songFile.path);
-      String songUrl = await AppUtil().uploadFile(songFile, context, '/songs/$id$songExt');
+      String fileNameWithoutExtension =
+          path.basenameWithoutExtension(songFile.path);
+      String songUrl =
+          await AppUtil().uploadFile(songFile, context, '/songs/$id$songExt');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info = await _flutterFFprobe.getMediaInformation(songFile.path);
-      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+      MediaInformation info =
+          await _flutterFFprobe.getMediaInformation(songFile.path);
+      int duration =
+          double.parse(info.getMediaProperties()['duration'].toString())
+              .toInt();
 
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
@@ -381,6 +398,9 @@ class _UploadSongsState extends State<UploadSongs> {
         'timestamp': FieldValue.serverTimestamp()
       });
     }
+    await singersRef
+        .document(_singer.id)
+        .updateData({'songs': FieldValue.increment(songFiles.length)});
     AppUtil.showToast('Songs uploaded!');
     Navigator.of(context).pop();
     Navigator.of(context).pop();

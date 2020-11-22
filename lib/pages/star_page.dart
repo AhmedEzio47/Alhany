@@ -36,13 +36,15 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     if (mounted) {
       setState(() {
         _melodies = melodies;
-        if (_melodies.length > 0) this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        if (_melodies.length > 0)
+          this.lastVisiblePostSnapShot = melodies.last.timestamp;
       });
     }
   }
 
   nextMelodies() async {
-    List<Melody> melodies = await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+    List<Melody> melodies =
+        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -67,11 +69,13 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >=
+                _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           if (!_isSearching) nextMelodies();
-        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <=
+                _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -108,7 +112,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -139,13 +144,18 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                 height: 10,
                               ),
                               Container(
-                                margin: EdgeInsets.symmetric(horizontal: 155),
+                                margin: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width -
+                                            232),
                                 child: CachedImage(
                                   width: 100,
                                   height: 100,
                                   imageShape: BoxShape.circle,
-                                  imageUrl: Constants.startUser?.profileImageUrl,
-                                  defaultAssetImage: Strings.default_profile_image,
+                                  imageUrl:
+                                      Constants.startUser?.profileImageUrl,
+                                  defaultAssetImage:
+                                      Strings.default_profile_image,
                                 ),
                               ),
                               SizedBox(
@@ -167,10 +177,12 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                   controller: _tabController,
                                   tabs: [
                                     Tab(
-                                      text: language(en: 'Melodies', ar: 'آخر الأعمال'),
+                                      text: language(
+                                          en: 'Melodies', ar: 'آخر الأعمال'),
                                     ),
                                     Tab(
-                                      text: language(en: 'News', ar: 'آخر الأخبار'),
+                                      text: language(
+                                          en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
                               _currentPage()
@@ -206,27 +218,34 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 onPressed: () async {
                   AppUtil.showAlertDialog(
                       context: context,
-                      message: language(en: 'What do you want to upload?', ar: 'ما الذي تريد رفعه؟'),
+                      message: language(
+                          en: 'What do you want to upload?',
+                          ar: 'ما الذي تريد رفعه؟'),
                       firstBtnText: language(en: 'Melody', ar: 'لحن'),
                       firstFunc: () async {
                         Navigator.of(context).pop();
                         AppUtil.showAlertDialog(
                             context: context,
                             message: language(
-                                en: 'Single level or multi-level melody?', ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
+                                en: 'Single level or multi-level melody?',
+                                ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
                             firstBtnText: language(en: 'Single', ar: 'أحادي'),
                             firstFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/upload-single-level-melody');
+                              Navigator.of(context)
+                                  .pushNamed('/upload-single-level-melody');
                             },
-                            secondBtnText: language(en: 'Multi level', ar: 'متعدد المستويات'),
+                            secondBtnText: language(
+                                en: 'Multi level', ar: 'متعدد المستويات'),
                             secondFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/upload-multi-level-melody');
+                              Navigator.of(context)
+                                  .pushNamed('/upload-multi-level-melody');
                             });
                       },
                       thirdBtnText: language(en: 'News', ar: 'خبر'),
-                      thirdFunc: () => Navigator.of(context).pushNamed('/upload-news'),
+                      thirdFunc: () =>
+                          Navigator.of(context).pushNamed('/upload-news'),
                       secondBtnText: language(en: 'Song', ar: 'أغنية'),
                       secondFunc: () async {
                         Navigator.of(context).pop();
@@ -303,7 +322,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_melodies[index].id),
-                          url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
+                          url: _melodies[index].audioUrl ??
+                              _melodies[index].levelUrls.values.elementAt(0),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
                           btnSize: 30,

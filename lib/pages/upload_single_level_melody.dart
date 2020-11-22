@@ -4,6 +4,8 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -13,22 +15,26 @@ import 'package:random_string/random_string.dart';
 
 class UploadSingleLevelMelody extends StatefulWidget {
   @override
-  _UploadSingleLevelMelodyState createState() => _UploadSingleLevelMelodyState();
+  _UploadSingleLevelMelodyState createState() =>
+      _UploadSingleLevelMelodyState();
 }
 
 class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
   String _melodyName;
   File _image;
 
-  List<String> _singers = [];
-  String _singer;
+  List<String> _singersNames = [];
+  List<Singer> _singers = [];
+
+  String _singerName;
+  Singer _singer;
 
   getSingers() async {
-    _singers = [];
+    _singersNames = [];
     QuerySnapshot singersSnapshot = await singersRef.getDocuments();
     for (DocumentSnapshot doc in singersSnapshot.documents) {
       setState(() {
-        _singers.add(doc.data['name']);
+        _singersNames.add(doc.data['name']);
       });
     }
   }
@@ -66,7 +72,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                           child: Image.asset(Strings.default_melody_image))
                       : Image.file(_image)),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
                 child: TextField(
                   textAlign: TextAlign.center,
                   onChanged: (text) {
@@ -79,13 +86,16 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               ),
               DropdownButton(
                 hint: Text('Singer'),
-                value: _singer,
-                onChanged: (text) {
+                value: _singerName,
+                onChanged: (text) async {
+                  Singer singer = await DatabaseService.getSingerWithName(text);
                   setState(() {
-                    _singer = text;
+                    _singer = singer;
+                    _singerName = text;
                   });
                 },
-                items: (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                items: (_singersNames)
+                    .map<DropdownMenuItem<dynamic>>((dynamic value) {
                   return DropdownMenuItem<dynamic>(
                     value: value,
                     child: Text(value),
@@ -95,7 +105,9 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    language(en: Strings.en_choose_melody, ar: Strings.ar_choose_melody),
+                    language(
+                        en: Strings.en_choose_melody,
+                        ar: Strings.ar_choose_melody),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -108,7 +120,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration:
+                            BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                     Text(
@@ -121,7 +134,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     new Expanded(
                       child: new Container(
                         margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(border: Border.all(width: 0.25)),
+                        decoration:
+                            BoxDecoration(border: Border.all(width: 0.25)),
                       ),
                     ),
                   ],
@@ -130,7 +144,9 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
               RaisedButton(
                   color: MyColors.primaryColor,
                   child: Text(
-                    language(en: Strings.en_choose_melodies, ar: Strings.ar_choose_melodies),
+                    language(
+                        en: Strings.en_choose_melodies,
+                        ar: Strings.ar_choose_melodies),
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
@@ -150,19 +166,24 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
 //    }
     File melodyFile = await AppUtil.chooseAudio();
     String ext = path.extension(melodyFile.path);
-    String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
+    String fileNameWithoutExtension =
+        path.basenameWithoutExtension(melodyFile.path);
 
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(melodyFile.path);
-    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    MediaInformation info =
+        await _flutterFFprobe.getMediaInformation(melodyFile.path);
+    int duration =
+        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String melodyUrl = await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$ext');
+    String melodyUrl =
+        await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$ext');
     String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image.path);
-      imageUrl = await AppUtil().uploadFile(_image, context, '/melodies_images/$id$ext');
+      imageUrl = await AppUtil()
+          .uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (melodyUrl == '') {
@@ -176,16 +197,22 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       'name': _melodyName ?? fileNameWithoutExtension,
       'audio_url': melodyUrl,
       'image_url': imageUrl,
-      'author_id': _singer == null ? Constants.currentUserID : null,
-      'singer': _singer,
+      'author_id': _singerName == null ? Constants.currentUserID : null,
+      'singer': _singerName,
       'is_song': false,
-      'search': _melodyName != null ? searchList(_melodyName) : searchList(fileNameWithoutExtension),
+      'search': _melodyName != null
+          ? searchList(_melodyName)
+          : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
+    await singersRef
+        .document(_singer.id)
+        .updateData({'melodies': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
-    AppUtil.showToast(language(en: Strings.en_melody_uploaded, ar: Strings.ar_melody_uploaded));
+    AppUtil.showToast(language(
+        en: Strings.en_melody_uploaded, ar: Strings.ar_melody_uploaded));
   }
 
   uploadMelodies() async {
@@ -199,22 +226,30 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     for (File melodyFile in melodiesFiles) {
       String id = randomAlphaNumeric(20);
       String melodyExt = path.extension(melodyFile.path);
-      String fileNameWithoutExtension = path.basenameWithoutExtension(melodyFile.path);
-      String melodyUrl = await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$melodyExt');
+      String fileNameWithoutExtension =
+          path.basenameWithoutExtension(melodyFile.path);
+      String melodyUrl = await AppUtil()
+          .uploadFile(melodyFile, context, '/melodies/$id$melodyExt');
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info = await _flutterFFprobe.getMediaInformation(melodyFile.path);
-      int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+      MediaInformation info =
+          await _flutterFFprobe.getMediaInformation(melodyFile.path);
+      int duration =
+          double.parse(info.getMediaProperties()['duration'].toString())
+              .toInt();
 
       await melodiesRef.document(id).setData({
         'name': fileNameWithoutExtension,
         'audio_url': melodyUrl,
-        'author_id': _singer == null ? Constants.currentUserID : null,
-        'singer': _singer,
+        'author_id': _singerName == null ? Constants.currentUserID : null,
+        'singer': _singerName,
         'is_song': false,
         'search': searchList(fileNameWithoutExtension),
         'duration': duration,
         'timestamp': FieldValue.serverTimestamp()
       });
+      await singersRef
+          .document(_singer.id)
+          .updateData({'melodies': FieldValue.increment(melodiesFiles.length)});
     }
     AppUtil.showToast(language(en: 'Melodies uploaded!', ar: 'تم رفع الألحان'));
     Navigator.of(context).pop();

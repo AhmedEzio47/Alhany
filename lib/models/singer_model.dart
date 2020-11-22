@@ -6,6 +6,8 @@ class Singer {
   final String category;
   final String imageUrl;
   final String coverUrl;
+  final int songs;
+  final int melodies;
   final List search;
 
   Singer(
@@ -14,6 +16,8 @@ class Singer {
       this.category,
       this.imageUrl,
       this.coverUrl,
+      this.songs,
+      this.melodies,
       this.search});
 
   factory Singer.fromDoc(DocumentSnapshot doc) {
@@ -23,6 +27,8 @@ class Singer {
         category: doc['category'],
         imageUrl: doc['image_url'],
         coverUrl: doc['cover_url'],
+        songs: doc['songs'],
+        melodies: doc['melodies'],
         search: doc['search']);
   }
 }
