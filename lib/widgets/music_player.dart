@@ -6,6 +6,7 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
@@ -604,6 +605,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
           await DatabaseService.deleteMelody(widget.melody);
+          Singer singer = await DatabaseService.getSingerWithName(widget.melody.singer);
+          if (widget.melody.isSong) {
+            await singersRef.document(singer.id).updateData({'songs': FieldValue.increment(-1)});
+          } else {
+            await singersRef.document(singer.id).updateData({'melodies': FieldValue.increment(-1)});
+          }
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();
         },

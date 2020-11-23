@@ -2,6 +2,7 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/list_items/singer_item.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
@@ -23,20 +24,17 @@ class _CategoryPageState extends State<CategoryPage> {
   bool _isPlaying = false;
 
   getSingers() async {
-    List<Singer> songs =
-        await DatabaseService.getSingersByCategory(widget.category);
+    List<Singer> songs = await DatabaseService.getSingersByCategory(widget.category);
     if (mounted) {
       setState(() {
         _singers = songs;
-        if (_singers.length > 0)
-          this.lastVisiblePostSnapShot = _singers.last.name;
+        if (_singers.length > 0) this.lastVisiblePostSnapShot = _singers.last.name;
       });
     }
   }
 
   nextSingers() async {
-    List<Singer> singers = await DatabaseService.getNextSingersByCategory(
-        widget.category, lastVisiblePostSnapShot);
+    List<Singer> singers = await DatabaseService.getNextSingersByCategory(widget.category, lastVisiblePostSnapShot);
     if (singers.length > 0) {
       setState(() {
         singers.forEach((element) => _singers.add(element));
@@ -57,7 +55,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 return InkWell(
                   onTap: () async {
                     Navigator.of(context).pushNamed('/singer-page',
-                        arguments: {'singer': _singers[index]});
+                        arguments: {'singer': _singers[index], 'data_type': DataTypes.SONGS});
                   },
                   child: SingerItem(
                     key: ValueKey('song_item'),
@@ -85,13 +83,11 @@ class _CategoryPageState extends State<CategoryPage> {
     getSingers();
     _songsScrollController
       ..addListener(() {
-        if (_songsScrollController.offset >=
-                _songsScrollController.position.maxScrollExtent &&
+        if (_songsScrollController.offset >= _songsScrollController.position.maxScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print('reached the bottom');
           nextSingers();
-        } else if (_songsScrollController.offset <=
-                _songsScrollController.position.minScrollExtent &&
+        } else if (_songsScrollController.offset <= _songsScrollController.position.minScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -116,8 +112,7 @@ class _CategoryPageState extends State<CategoryPage> {
               decoration: BoxDecoration(
                 color: MyColors.primaryColor,
                 image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(
-                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                   image: AssetImage(Strings.default_bg),
                   fit: BoxFit.cover,
                 ),

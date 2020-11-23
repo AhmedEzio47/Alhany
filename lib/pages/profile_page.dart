@@ -222,7 +222,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                         child: CustomOverlay(
                                           child: _profileImage(),
                                           shape: BoxShape.circle,
-                                          size: 150,
+                                          size: 100,
                                           icon: Icon(
                                             Icons.photo_camera,
                                             color: Colors.black87,

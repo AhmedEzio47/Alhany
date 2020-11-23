@@ -111,7 +111,7 @@ class _NewsItemState extends State<NewsItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
           Navigator.of(context).pushNamed('/news-page', arguments: {'news': widget.news, 'is_video_visible': true});
@@ -120,7 +120,6 @@ class _NewsItemState extends State<NewsItem> {
           width: MediaQuery.of(context).size.width,
           height: widget.news.text != null && widget.news.text.isNotEmpty ? 320 : 305,
           decoration: BoxDecoration(
-            borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
           ),
           child: Column(

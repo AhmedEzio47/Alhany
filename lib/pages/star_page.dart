@@ -4,11 +4,13 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
+import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -31,20 +33,27 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
   List<Melody> _filteredMelodies = [];
 
   ScrollController _scrollController = ScrollController();
+
+  List<SlideImage> _slideImages = [];
   getMelodies() async {
     List<Melody> melodies = await DatabaseService.getMelodies();
     if (mounted) {
       setState(() {
         _melodies = melodies;
-        if (_melodies.length > 0)
-          this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        if (_melodies.length > 0) this.lastVisiblePostSnapShot = melodies.last.timestamp;
       });
     }
   }
 
+  getSlideImages() async {
+    List<SlideImage> slideImages = await DatabaseService.getSlideImages();
+    setState(() {
+      _slideImages = slideImages;
+    });
+  }
+
   nextMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+    List<Melody> melodies = await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -64,18 +73,17 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    getSlideImages();
     getMelodies();
     super.initState();
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >=
-                _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           if (!_isSearching) nextMelodies();
-        } else if (_melodiesScrollController.offset <=
-                _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -112,8 +120,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(
-                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -123,7 +130,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                     Align(
                       child: Container(
                         margin: const EdgeInsets.only(top: 35),
-                        height: 40,
+                        height: 35,
                         width: 150,
                         child: Image.asset(
                           Strings.app_bar,
@@ -140,26 +147,64 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                         slivers: [
                           SliverList(
                             delegate: SliverChildListDelegate([
+                              _slideImages.length > 0
+                                  ? InkWell(
+                                      onTap: Constants.isAdmin
+                                          ? () {
+                                              Navigator.of(context).pushNamed('/slide-images');
+                                            }
+                                          : null,
+                                      child: CarouselSlider.builder(
+                                        options: CarouselOptions(
+                                          height: 200.0,
+                                          autoPlay: true,
+                                          autoPlayInterval: Duration(seconds: 3),
+                                          enlargeCenterPage: true,
+                                        ),
+                                        itemCount: _slideImages.length,
+                                        itemBuilder: (BuildContext context, int index) => CachedImage(
+                                          imageUrl: _slideImages[index]?.url,
+                                          height: 200,
+                                          imageShape: BoxShape.rectangle,
+                                          width: MediaQuery.of(context).size.width,
+                                          defaultAssetImage: Strings.default_cover_image,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
                               SizedBox(
                                 height: 10,
                               ),
-                              Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal:
-                                        MediaQuery.of(context).size.width -
-                                            232),
-                                child: CachedImage(
-                                  width: 100,
-                                  height: 100,
-                                  imageShape: BoxShape.circle,
-                                  imageUrl:
-                                      Constants.startUser?.profileImageUrl,
-                                  defaultAssetImage:
-                                      Strings.default_profile_image,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 30,
+                              Constants.isAdmin
+                                  ? Center(
+                                      child: InkWell(
+                                          onTap: () => Navigator.of(context).pushNamed('/slide-images'),
+                                          child: Text(
+                                            'Edit Slide show images',
+                                            style: TextStyle(color: Colors.white, decoration: TextDecoration.underline),
+                                          )),
+                                    )
+                                  : Container(),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  CachedImage(
+                                    width: 60,
+                                    height: 60,
+                                    imageShape: BoxShape.circle,
+                                    imageUrl: Constants.startUser?.profileImageUrl,
+                                    defaultAssetImage: Strings.default_profile_image,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    Constants.startUser?.name,
+                                    style: TextStyle(color: Colors.white, fontSize: 16),
+                                  )
+                                ],
                               ),
                             ]),
                           ),
@@ -177,12 +222,10 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                   controller: _tabController,
                                   tabs: [
                                     Tab(
-                                      text: language(
-                                          en: 'Melodies', ar: 'آخر الأعمال'),
+                                      text: language(en: 'Melodies', ar: 'آخر الأعمال'),
                                     ),
                                     Tab(
-                                      text: language(
-                                          en: 'News', ar: 'آخر الأخبار'),
+                                      text: language(en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
                               _currentPage()
@@ -218,34 +261,27 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                 onPressed: () async {
                   AppUtil.showAlertDialog(
                       context: context,
-                      message: language(
-                          en: 'What do you want to upload?',
-                          ar: 'ما الذي تريد رفعه؟'),
+                      message: language(en: 'What do you want to upload?', ar: 'ما الذي تريد رفعه؟'),
                       firstBtnText: language(en: 'Melody', ar: 'لحن'),
                       firstFunc: () async {
                         Navigator.of(context).pop();
                         AppUtil.showAlertDialog(
                             context: context,
                             message: language(
-                                en: 'Single level or multi-level melody?',
-                                ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
+                                en: 'Single level or multi-level melody?', ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
                             firstBtnText: language(en: 'Single', ar: 'أحادي'),
                             firstFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context)
-                                  .pushNamed('/upload-single-level-melody');
+                              Navigator.of(context).pushNamed('/upload-single-level-melody');
                             },
-                            secondBtnText: language(
-                                en: 'Multi level', ar: 'متعدد المستويات'),
+                            secondBtnText: language(en: 'Multi level', ar: 'متعدد المستويات'),
                             secondFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context)
-                                  .pushNamed('/upload-multi-level-melody');
+                              Navigator.of(context).pushNamed('/upload-multi-level-melody');
                             });
                       },
                       thirdBtnText: language(en: 'News', ar: 'خبر'),
-                      thirdFunc: () =>
-                          Navigator.of(context).pushNamed('/upload-news'),
+                      thirdFunc: () => Navigator.of(context).pushNamed('/upload-news'),
                       secondBtnText: language(en: 'Song', ar: 'أغنية'),
                       secondFunc: () async {
                         Navigator.of(context).pop();
@@ -322,8 +358,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_melodies[index].id),
-                          url: _melodies[index].audioUrl ??
-                              _melodies[index].levelUrls.values.elementAt(0),
+                          url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
                           btnSize: 30,

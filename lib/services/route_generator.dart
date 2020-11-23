@@ -19,6 +19,7 @@ import 'package:Alhany/pages/root.dart';
 import 'package:Alhany/pages/search_page.dart';
 import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/pages/singers_page.dart';
+import 'package:Alhany/pages/slide_images.dart';
 import 'package:Alhany/pages/songs_page.dart';
 import 'package:Alhany/pages/upload_mulit_level_melody.dart';
 import 'package:Alhany/pages/upload_news.dart';
@@ -136,6 +137,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => SingerPage(
                   singer: args['singer'],
+                  dataType: args['data_type'],
                 ));
 
       case '/singers-page':
@@ -158,6 +160,9 @@ class RouteGenerator {
             builder: (_) => PaymentHomePage(
                   amount: args['amount'],
                 ));
+
+      case '/slide-images':
+        return MaterialPageRoute(builder: (_) => SlideImages());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

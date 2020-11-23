@@ -132,7 +132,7 @@ class _RecordItemState extends State<RecordItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
           if (Constants.currentRoute != '/record-page')
@@ -143,7 +143,6 @@ class _RecordItemState extends State<RecordItem> {
           width: MediaQuery.of(context).size.width,
           height: 290,
           decoration: BoxDecoration(
-            borderRadius: new BorderRadius.circular(10.0),
             color: Colors.white.withOpacity(.4),
           ),
           child: Column(

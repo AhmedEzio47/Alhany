@@ -15,6 +15,7 @@ final chatsRef = firestore.collection('chats');
 final singersRef = firestore.collection('singers');
 final categoriesRef = firestore.collection('categories');
 final newsRef = firestore.collection('news');
+final slideImagesRef = firestore.collection('slide_images');
 
 MusicPlayer musicPlayer;
 

@@ -16,10 +16,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
+enum DataTypes { SONGS, MELODIES }
+
 class SingerPage extends StatefulWidget {
   final Singer singer;
+  final DataTypes dataType;
 
-  const SingerPage({Key key, this.singer}) : super(key: key);
+  const SingerPage({Key key, this.singer, this.dataType}) : super(key: key);
 
   @override
   _SingerPageState createState() => _SingerPageState();
@@ -27,7 +30,7 @@ class SingerPage extends StatefulWidget {
 
 class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
   TabController _tabController;
-  int _page = 1;
+  int _page;
   ScrollController _songsScrollController = ScrollController();
   ScrollController _melodiesScrollController = ScrollController();
   List<Melody> _songs = [];
@@ -79,6 +82,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    widget.dataType == DataTypes.SONGS ? _page = 1 : _page = 0;
     _songsScrollController
       ..addListener(() {
         if (_songsScrollController.offset >= _songsScrollController.position.maxScrollExtent &&
@@ -262,24 +266,26 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
-                        TabBar(
-                            onTap: (index) {
-                              setState(() {
-                                //_isPlaying = false;
-                                _page = index;
-                              });
-                            },
-                            labelColor: MyColors.accentColor,
-                            unselectedLabelColor: Colors.grey,
-                            controller: _tabController,
-                            tabs: [
-                              Tab(
-                                text: language(en: 'Melodies', ar: 'الألحان'),
-                              ),
-                              Tab(
-                                text: language(en: 'Songs', ar: 'الأغاني'),
-                              ),
-                            ]),
+                        widget.dataType == null
+                            ? TabBar(
+                                onTap: (index) {
+                                  setState(() {
+                                    //_isPlaying = false;
+                                    _page = index;
+                                  });
+                                },
+                                labelColor: MyColors.accentColor,
+                                unselectedLabelColor: Colors.grey,
+                                controller: _tabController,
+                                tabs: [
+                                    Tab(
+                                      text: language(en: 'Melodies', ar: 'الألحان'),
+                                    ),
+                                    Tab(
+                                      text: language(en: 'Songs', ar: 'الأغاني'),
+                                    ),
+                                  ])
+                            : Container(),
                         _currentPage()
                       ]),
                     ),
