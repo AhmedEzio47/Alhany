@@ -362,94 +362,90 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       controller: _melodiesPageScrollController,
       child: SizedBox(
         height: MediaQuery.of(context).size.height, // or something simular :)
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
-                flex: 5,
-                child: Row(
-                  children: [
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: ListView.builder(
-                          itemCount: _singers.length + 1,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            return index < _singers.length
-                                ? InkWell(
-                                    onTap: () {
-                                      Navigator.of(context).pushNamed('/singer-page',
-                                          arguments: {'singer': _singers[index], 'data_type': DataTypes.MELODIES});
-                                    },
-                                    child: Container(
-                                      height: 120,
-                                      width: 120,
-                                      child: Column(
-                                        children: [
-                                          CachedImage(
-                                            width: 100,
-                                            height: 100,
-                                            imageShape: BoxShape.circle,
-                                            imageUrl: _singers[index].imageUrl,
-                                            defaultAssetImage: Strings.default_profile_image,
-                                          ),
-                                          Text(
-                                            _singers[index].name,
-                                            style: TextStyle(color: Colors.white),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : _singers.length == 15
-                                    ? InkWell(
-                                        onTap: () {
-                                          Navigator.of(context).pushNamed('/singers-page');
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
-                                          child: Center(
-                                              child: Container(
-                                            padding: EdgeInsets.all(8),
-                                            color: MyColors.lightPrimaryColor,
-                                            child: Text(
-                                              'VIEW ALL',
-                                              style: TextStyle(
-                                                  color: MyColors.darkPrimaryColor,
-                                                  decoration: TextDecoration.underline),
-                                            ),
-                                          )),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              flex: 4,
+              child: Row(
+                children: [
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: ListView.builder(
+                        itemCount: _singers.length + 1,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return index < _singers.length
+                              ? InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).pushNamed('/singer-page',
+                                        arguments: {'singer': _singers[index], 'data_type': DataTypes.MELODIES});
+                                  },
+                                  child: Container(
+                                    height: 120,
+                                    width: 120,
+                                    child: Column(
+                                      children: [
+                                        CachedImage(
+                                          width: 100,
+                                          height: 100,
+                                          imageShape: BoxShape.circle,
+                                          imageUrl: _singers[index].imageUrl,
+                                          defaultAssetImage: Strings.default_profile_image,
                                         ),
-                                      )
-                                    : Container();
-                          }),
-                    ),
-                  ],
-                ),
+                                        Text(
+                                          _singers[index].name,
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : _singers.length == 15
+                                  ? InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed('/singers-page');
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
+                                        child: Center(
+                                            child: Container(
+                                          padding: EdgeInsets.all(8),
+                                          color: MyColors.lightPrimaryColor,
+                                          child: Text(
+                                            'VIEW ALL',
+                                            style: TextStyle(
+                                                color: MyColors.darkPrimaryColor, decoration: TextDecoration.underline),
+                                          ),
+                                        )),
+                                      ),
+                                    )
+                                  : Container();
+                        }),
+                  ),
+                ],
               ),
+            ),
 
-              // Flexible(
-              //     fit: FlexFit.tight,flex: 1, child:               Container(
-              //   margin: EdgeInsets.symmetric(horizontal: 0),
-              //   transform: Matrix4.translationValues(0.0, -30.0, 0.0),
-              //   padding: EdgeInsets.symmetric(horizontal: 16),
-              //   color: MyColors.lightPrimaryColor,
-              //   width: MediaQuery.of(context).size.width,
-              //   alignment: Alignment.centerRight,
-              //   child: Text(
-              //     language(en: 'Latest records', ar: 'آخر المنشورات'),
-              //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              //   ),
-              // ),
-              // ),
-              Flexible(fit: FlexFit.loose, flex: 17, child: recordListView())
-            ],
-          ),
+            // Flexible(
+            //     fit: FlexFit.tight,flex: 1, child:               Container(
+            //   margin: EdgeInsets.symmetric(horizontal: 0),
+            //   transform: Matrix4.translationValues(0.0, -30.0, 0.0),
+            //   padding: EdgeInsets.symmetric(horizontal: 16),
+            //   color: MyColors.lightPrimaryColor,
+            //   width: MediaQuery.of(context).size.width,
+            //   alignment: Alignment.centerRight,
+            //   child: Text(
+            //     language(en: 'Latest records', ar: 'آخر المنشورات'),
+            //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            //   ),
+            // ),
+            // ),
+            Flexible(fit: FlexFit.loose, flex: 18, child: recordListView())
+          ],
         ),
       ),
     );
