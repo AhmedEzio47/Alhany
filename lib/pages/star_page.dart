@@ -156,6 +156,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                           : null,
                                       child: CarouselSlider.builder(
                                         options: CarouselOptions(
+                                          viewportFraction: 1,
                                           height: 200.0,
                                           autoPlay: true,
                                           autoPlayInterval: Duration(seconds: 3),
@@ -186,23 +187,24 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                     )
                                   : Container(),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SizedBox(
-                                    width: 10,
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: CachedImage(
+                                      width: 60,
+                                      height: 60,
+                                      imageShape: BoxShape.circle,
+                                      imageUrl: Constants.startUser?.profileImageUrl,
+                                      defaultAssetImage: Strings.default_profile_image,
+                                    ),
                                   ),
-                                  CachedImage(
-                                    width: 60,
-                                    height: 60,
-                                    imageShape: BoxShape.circle,
-                                    imageUrl: Constants.startUser?.profileImageUrl,
-                                    defaultAssetImage: Strings.default_profile_image,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    Constants.startUser?.name,
-                                    style: TextStyle(color: Colors.white, fontSize: 16),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Text(
+                                      Constants.startUser?.name,
+                                      style: TextStyle(color: Colors.white, fontSize: 16),
+                                    ),
                                   )
                                 ],
                               ),
