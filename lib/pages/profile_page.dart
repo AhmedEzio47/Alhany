@@ -370,7 +370,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                 indicator: BoxDecoration(
                                     borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
                                 tabs: _tabs),
-                            _currentPage()
+                            MediaQuery.removePadding(
+                                context: context,
+                                removeTop: true,child: _currentPage())
                           ]),
                         ),
                       ]),

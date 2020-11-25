@@ -83,17 +83,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               text: language(en: 'Favourites', ar: 'المفضلات'),
                             )
                           ]),
-                      Expanded(
-                        child: PageView(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _tabController.index = index;
-                              _page = index;
-                            });
-                            _currentPage();
-                          },
-                          children: [_songsPage(), _melodiesPage(), _favouritesPage()],
+                      MediaQuery.removePadding(
+                        context: context,
+                        removeTop: true,
+                        child: Expanded(
+                          child: PageView(
+                            controller: _pageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _tabController.index = index;
+                                _page = index;
+                              });
+                              _currentPage();
+                            },
+                            children: [_songsPage(), _melodiesPage(), _favouritesPage()],
+                          ),
                         ),
                       )
                     ],
@@ -375,6 +379,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 children: [
                   Flexible(
                     fit: FlexFit.tight,
+                    flex: 2,
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       color: Colors.black26,
@@ -450,7 +455,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             //   ),
             // ),
             // ),
-            Expanded(child: recordListView())
+            Flexible(fit: FlexFit.loose, flex: 8, child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,child: recordListView()))
           ],
         ),
       ),

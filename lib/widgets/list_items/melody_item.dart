@@ -14,7 +14,7 @@ class MelodyItem extends StatefulWidget {
   final bool isRounded;
   final double imageSize;
   final double padding;
-  MelodyItem({Key key, this.melody, this.context, this.isRounded = true, this.imageSize = 50, this.padding = 8})
+  MelodyItem({Key key, this.melody, this.context, this.isRounded = true, this.imageSize = 50, this.padding = 4.0})
       : super(key: key);
 
   @override

@@ -230,7 +230,9 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                       text: language(en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
-                              _currentPage()
+                              MediaQuery.removePadding(
+                                  context: context,
+                                  removeTop: true,child: _currentPage())
                             ]),
                           ),
                         ],
