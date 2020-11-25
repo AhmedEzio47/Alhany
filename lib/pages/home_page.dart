@@ -206,19 +206,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  margin: EdgeInsets.only(left: 8),
-                  height: 171,
+                  height: 180,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text(
-                        _categories[index],
-                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 10,
+                      Center(
+                        child: Text(
+                          _categories[index],
+                          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
                       ),
                       Expanded(
                         child: Row(
@@ -226,65 +224,69 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: ListView.builder(
-                                  itemCount: _categorySingers[_categories[index]]?.length + 1,
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index2) {
-                                    return index2 < _categorySingers[_categories[index]]?.length
-                                        ? InkWell(
-                                            onTap: () {
-                                              Navigator.of(context).pushNamed('/singer-page', arguments: {
-                                                'singer': _categorySingers[_categories[index]][index2],
-                                                'data_type': DataTypes.SONGS
-                                              });
-                                            },
-                                            child: Container(
-                                              height: 110,
-                                              width: 110,
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                children: [
-                                                  CachedImage(
-                                                    width: 100,
-                                                    height: 100,
-                                                    imageShape: BoxShape.circle,
-                                                    imageUrl: _categorySingers[_categories[index]][index2]?.imageUrl,
-                                                    defaultAssetImage: Strings.default_profile_image,
-                                                  ),
-                                                  Text(
-                                                    _categorySingers[_categories[index]][index2]?.name,
-                                                    style: TextStyle(
-                                                      color: Colors.grey.shade300,
+                              child: Container(
+                                padding: EdgeInsets.only(top: 8),
+                                color: Colors.black26,
+                                child: ListView.builder(
+                                    itemCount: _categorySingers[_categories[index]]?.length + 1,
+                                    scrollDirection: Axis.horizontal,
+                                    itemBuilder: (context, index2) {
+                                      return index2 < _categorySingers[_categories[index]]?.length
+                                          ? InkWell(
+                                              onTap: () {
+                                                Navigator.of(context).pushNamed('/singer-page', arguments: {
+                                                  'singer': _categorySingers[_categories[index]][index2],
+                                                  'data_type': DataTypes.SONGS
+                                                });
+                                              },
+                                              child: Container(
+                                                height: 110,
+                                                width: 110,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    CachedImage(
+                                                      width: 100,
+                                                      height: 100,
+                                                      imageShape: BoxShape.circle,
+                                                      imageUrl: _categorySingers[_categories[index]][index2]?.imageUrl,
+                                                      defaultAssetImage: Strings.default_profile_image,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : _categorySingers[_categories[index]]?.length == 15
-                                            ? InkWell(
-                                                onTap: () {
-                                                  Navigator.of(context).pushNamed('/category-page',
-                                                      arguments: {'category': _categories[index]});
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 46),
-                                                  child: Center(
-                                                      child: Container(
-                                                    padding: EdgeInsets.all(8),
-                                                    color: MyColors.lightPrimaryColor,
-                                                    child: Text(
-                                                      'VIEW ALL',
+                                                    Text(
+                                                      _categorySingers[_categories[index]][index2]?.name,
                                                       style: TextStyle(
-                                                          color: MyColors.darkPrimaryColor,
-                                                          decoration: TextDecoration.underline),
+                                                        color: Colors.grey.shade300,
+                                                      ),
                                                     ),
-                                                  )),
+                                                  ],
                                                 ),
-                                              )
-                                            : Container();
-                                  }),
+                                              ),
+                                            )
+                                          : _categorySingers[_categories[index]]?.length == 15
+                                              ? InkWell(
+                                                  onTap: () {
+                                                    Navigator.of(context).pushNamed('/category-page',
+                                                        arguments: {'category': _categories[index]});
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 46),
+                                                    child: Center(
+                                                        child: Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      color: MyColors.lightPrimaryColor,
+                                                      child: Text(
+                                                        'VIEW ALL',
+                                                        style: TextStyle(
+                                                            color: MyColors.darkPrimaryColor,
+                                                            decoration: TextDecoration.underline),
+                                                      ),
+                                                    )),
+                                                  ),
+                                                )
+                                              : Container();
+                                    }),
+                              ),
                             ),
                           ],
                         ),
@@ -369,7 +371,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: [
             Flexible(
               fit: FlexFit.tight,
-              flex: 4,
+              flex: 5,
               child: Row(
                 children: [
                   Flexible(

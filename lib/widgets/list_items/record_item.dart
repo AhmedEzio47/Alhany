@@ -173,8 +173,11 @@ class _RecordItemState extends State<RecordItem> {
                             Row(
                               children: [
                                 InkWell(
-                                  child: Text(_singer?.name ?? '',
-                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Text(_singer?.name ?? '',
+                                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                                  ),
                                   onTap: () => _goToProfilePage(),
                                 ),
                                 Text(
@@ -311,7 +314,7 @@ class _RecordItemState extends State<RecordItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () => AppUtil.sharePost('${_singer.name} singed ${_melody.name}', '',
+                          onTap: () => AppUtil.sharePost(' ${_singer.name} singed ${_melody.name} ', '',
                               recordId: widget.record.id),
                           child: SizedBox(
                             child: Icon(
