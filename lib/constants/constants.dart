@@ -42,4 +42,7 @@ class Constants {
   static String language;
 
   static bool isFacebookOrGoogleUser;
+
+  static double musicVolume = .8;
+  static double voiceVolume = 3.5;
 }

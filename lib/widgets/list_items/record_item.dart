@@ -171,13 +171,11 @@ class _RecordItemState extends State<RecordItem> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 InkWell(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                    child: Text(_singer?.name ?? '',
-                                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                                  ),
+                                  child: Text(_singer?.name ?? '',
+                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                                   onTap: () => _goToProfilePage(),
                                 ),
                                 Text(

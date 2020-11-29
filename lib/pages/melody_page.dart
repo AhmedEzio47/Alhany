@@ -321,12 +321,16 @@ class _MelodyPageState extends State<MelodyPage> {
 //                              : 'Conversion Success!');
     int success;
     if (_type == Types.AUDIO) {
-      success = await flutterFFmpeg
-          .execute("-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}stereo_audio.wav");
+      success = await flutterFFmpeg.execute(
+          "-i $recordingFilePath -ac 2 -filter:a \"volume=${Constants.voiceVolume}\" ${appTempDirectoryPath}stereo_audio.wav");
       print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
 
       success = await flutterFFmpeg.execute(
-          "-y -i ${appTempDirectoryPath}stereo_audio.wav -i $melodyPath -filter_complex amerge=inputs=2 -shortest $mergedFilePath");
+          "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
+      print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
+
+      success = await flutterFFmpeg.execute(
+          "-y -i ${appTempDirectoryPath}stereo_audio.wav -i ${appTempDirectoryPath}decreased_music.mp3 -filter_complex amerge=inputs=2 -shortest $mergedFilePath");
       print(success == 1 ? 'Failure!' : 'Success!');
     } else {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
