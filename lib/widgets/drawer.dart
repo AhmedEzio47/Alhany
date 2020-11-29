@@ -6,6 +6,7 @@ import 'package:Alhany/main.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BuildDrawer extends StatefulWidget {
   @override
@@ -75,25 +76,27 @@ class _BuildDrawerState extends State<BuildDrawer> {
               color: MyColors.primaryColor,
             ),
           ),
-          ListTile(
-            onTap: () async {
-              try {
-                Navigator.of(context).pushNamed('/change-email');
-              } catch (e) {
-                print('Sign out: $e');
-              }
-            },
-            title: Text(
-              language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
-              style: TextStyle(
-                color: MyColors.primaryColor,
-              ),
-            ),
-            leading: Icon(
-              Icons.alternate_email,
-              color: MyColors.primaryColor,
-            ),
-          ),
+          (!Constants.isFacebookOrGoogleUser) ?? false
+              ? ListTile(
+                  onTap: () async {
+                    try {
+                      Navigator.of(context).pushNamed('/change-email');
+                    } catch (e) {
+                      print('Sign out: $e');
+                    }
+                  },
+                  title: Text(
+                    language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
+                    style: TextStyle(
+                      color: MyColors.primaryColor,
+                    ),
+                  ),
+                  leading: Icon(
+                    Icons.alternate_email,
+                    color: MyColors.primaryColor,
+                  ),
+                )
+              : Container(),
           ListTile(
             onTap: () async {
               await AppUtil.switchLanguage();
@@ -131,6 +134,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
                   Constants.currentUser = null;
                   authStatus = AuthStatus.NOT_LOGGED_IN;
                 });
+
                 print('Now, authStatus = $authStatus');
                 Navigator.of(context).pushReplacementNamed('/');
                 //moveUserTo(context: context, widget: LoginPage());

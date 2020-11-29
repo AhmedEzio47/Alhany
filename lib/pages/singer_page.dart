@@ -176,6 +176,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
                     backColor: MyColors.lightPrimaryColor,
                     title: _melodies[index].name,
                     initialDuration: _melodies[index].duration,
+                    isRecordBtnVisible: true,
                   );
                   _isPlaying = true;
                 });

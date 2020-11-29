@@ -39,6 +39,7 @@ class MusicPlayer extends StatefulWidget {
   final int initialDuration;
   final PlayBtnPosition playBtnPosition;
   final bool isCompact;
+  final bool isRecordBtnVisible;
 
   final Melody melody;
 
@@ -54,7 +55,8 @@ class MusicPlayer extends StatefulWidget {
       this.melody,
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
-      this.melodyList})
+      this.melodyList,
+      this.isRecordBtnVisible = false})
       : super(key: key);
 
   @override
@@ -256,12 +258,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         widget.melodyList != null ? previousBtn() : Container(),
                         playPauseBtn(),
                         widget.melodyList != null ? nextBtn() : Container(),
-                        (!(widget.melody?.isSong ?? true))
+                        (!(widget.melody?.isSong ?? true) && widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true))
+                        (!(widget.melody?.isSong ?? true) && widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed('/melody-page',
                                     arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
@@ -287,12 +289,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true))
+                        (!(widget.melody?.isSong ?? true) && widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true))
+                        (!(widget.melody?.isSong ?? true) && widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => Navigator.of(context).pushNamed(
                                   '/melody-page',
@@ -452,7 +454,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 onCanceled: () {
                   print('You have not chosen anything');
                 },
-                tooltip: 'This is tooltip',
                 onSelected: _select,
                 itemBuilder: (BuildContext context) {
                   return choices.map((String choice) {
@@ -631,7 +632,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
-        Navigator.of(context).pushNamed('/payment-home', arguments: {'amount': widget.melody.price});
+        final success =
+            await Navigator.of(context).pushNamed('/payment-home', arguments: {'amount': widget.melody.price});
+        if (success) {
+          usersRef
+              .document(Constants.currentUserID)
+              .collection('downloads')
+              .document(widget.melody.id)
+              .setData({'timestamp': FieldValue.serverTimestamp()});
+        }
+        token.tokenId = 'purchased';
 
         print(token.tokenId);
       } else {
@@ -666,9 +676,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
             .setData({'timestamp': FieldValue.serverTimestamp()});
         Navigator.of(context).pop();
         AppUtil.showToast('Downloaded!');
+        Navigator.of(context).pushNamed('/downloads');
       } else {
         Navigator.of(context).pop();
         AppUtil.showToast('Already downloaded!');
+        Navigator.of(context).pushNamed('/downloads');
       }
     }
   }

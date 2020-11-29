@@ -34,7 +34,6 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
 
   ScrollController _scrollController = ScrollController();
 
-  List<SlideImage> _slideImages = [];
   getMelodies() async {
     List<Melody> melodies = await DatabaseService.getMelodies();
     if (mounted) {
@@ -45,8 +44,9 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     }
   }
 
+  List<SlideImage> _slideImages = [];
   getSlideImages() async {
-    List<SlideImage> slideImages = await DatabaseService.getSlideImages();
+    List<SlideImage> slideImages = await DatabaseService.getSlideImages('صفحة الفنان');
     setState(() {
       _slideImages = slideImages;
     });
@@ -148,28 +148,21 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           SliverList(
                             delegate: SliverChildListDelegate([
                               _slideImages.length > 0
-                                  ? InkWell(
-                                      onTap: Constants.isAdmin
-                                          ? () {
-                                              Navigator.of(context).pushNamed('/slide-images');
-                                            }
-                                          : null,
-                                      child: CarouselSlider.builder(
-                                        options: CarouselOptions(
-                                          viewportFraction: 1,
-                                          height: 200.0,
-                                          autoPlay: true,
-                                          autoPlayInterval: Duration(seconds: 3),
-                                          enlargeCenterPage: true,
-                                        ),
-                                        itemCount: _slideImages.length,
-                                        itemBuilder: (BuildContext context, int index) => CachedImage(
-                                          imageUrl: _slideImages[index]?.url,
-                                          height: 200,
-                                          imageShape: BoxShape.rectangle,
-                                          width: MediaQuery.of(context).size.width,
-                                          defaultAssetImage: Strings.default_cover_image,
-                                        ),
+                                  ? CarouselSlider.builder(
+                                      options: CarouselOptions(
+                                        viewportFraction: 1,
+                                        height: 200.0,
+                                        autoPlay: true,
+                                        autoPlayInterval: Duration(seconds: 3),
+                                        enlargeCenterPage: true,
+                                      ),
+                                      itemCount: _slideImages.length,
+                                      itemBuilder: (BuildContext context, int index) => CachedImage(
+                                        imageUrl: _slideImages[index]?.url,
+                                        height: 200,
+                                        imageShape: BoxShape.rectangle,
+                                        width: MediaQuery.of(context).size.width,
+                                        defaultAssetImage: Strings.default_cover_image,
                                       ),
                                     )
                                   : Container(),
@@ -230,9 +223,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                       text: language(en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
-                              MediaQuery.removePadding(
-                                  context: context,
-                                  removeTop: true,child: _currentPage())
+                              MediaQuery.removePadding(context: context, removeTop: true, child: _currentPage())
                             ]),
                           ),
                         ],
@@ -340,6 +331,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           btnSize: 30,
                           initialDuration: _filteredMelodies[index].duration,
                           melody: _filteredMelodies[index],
+                          isRecordBtnVisible: true,
                         );
                         _isPlaying = true;
                       });
@@ -368,6 +360,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                           btnSize: 30,
                           initialDuration: _melodies[index].duration,
                           melody: _melodies[index],
+                          isRecordBtnVisible: true,
                         );
                         _isPlaying = true;
                       });

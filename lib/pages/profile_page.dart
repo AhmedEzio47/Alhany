@@ -6,6 +6,7 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
+import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -14,6 +15,7 @@ import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,6 +50,14 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   var _tabs;
 
   bool isFollowing = false;
+
+  List<SlideImage> _slideImages = [];
+  getSlideImages() async {
+    List<SlideImage> slideImages = await DatabaseService.getSlideImages('الصفحة الشخصية');
+    setState(() {
+      _slideImages = slideImages;
+    });
+  }
 
   getRecords() async {
     List<Record> records = await DatabaseService.getUserRecords(widget.userId);
@@ -109,6 +119,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   @override
   void initState() {
+    getSlideImages();
     checkIfUserIsFollowed();
     configureTabs();
     getRecords();
@@ -181,175 +192,245 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                       child: CustomScrollView(controller: _mainScrollController, slivers: [
                         SliverList(
                           delegate: SliverChildListDelegate([
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                widget.userId != Constants.currentUserID
-                                    ? InkWell(
-                                        onTap: isFollowing
-                                            ? () {
-                                                unfollowUser();
-                                              }
-                                            : () {
-                                                followUser();
-                                              },
-                                        child: Container(
-                                          margin: EdgeInsets.only(right: 15),
-                                          height: 40,
-                                          width: 40,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: MyColors.accentColor,
-                                          ),
-                                          child: !isFollowing
-                                              ? Icon(
-                                                  Icons.person_add,
-                                                  size: 25,
-                                                  color: Colors.white,
-                                                )
-                                              : Image.asset(Strings.person_remove, scale: 1.3),
-                                        ),
-                                      )
-                                    : Container(),
-                                _editing
-                                    ? InkWell(
-                                        onTap: () async {
-                                          _updateProfileImage();
-                                        },
-                                        child: CustomOverlay(
-                                          child: _profileImage(),
-                                          shape: BoxShape.circle,
-                                          size: 100,
-                                          icon: Icon(
-                                            Icons.photo_camera,
-                                            color: Colors.black87,
-                                            size: 35,
-                                          ),
-                                        ),
-                                      )
-                                    : _profileImage(),
-                                widget.userId != Constants.currentUserID
-                                    ? InkWell(
-                                        onTap: () {
-                                          Navigator.of(context)
-                                              .pushNamed('/conversation', arguments: {'other_uid': widget.userId});
-                                        },
-                                        child: Container(
-                                            margin: EdgeInsets.only(left: 15),
-                                            height: 40,
-                                            width: 40,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: MyColors.accentColor,
-                                            ),
-                                            child: Icon(
-                                              Icons.chat_bubble_outline,
-                                              size: 23,
-                                              color: Colors.white,
-                                            )),
-                                      )
-                                    : Container(),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            _editing
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _nameController,
-                                          textAlign: TextAlign.center,
-                                          style:
-                                              TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _usernameController,
-                                          textAlign: TextAlign.center,
-                                          style:
-                                              TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _user?.name ?? '',
-                                        style:
-                                            TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                        '@${_user?.username ?? ''}',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            _editing
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                    child: TextField(
-                                      controller: _descriptionController,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
+                            _slideImages.length > 0
+                                ? CarouselSlider.builder(
+                                    options: CarouselOptions(
+                                      viewportFraction: 1,
+                                      height: 200.0,
+                                      autoPlay: true,
+                                      autoPlayInterval: Duration(seconds: 3),
+                                      enlargeCenterPage: true,
                                     ),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Text(
-                                      _user?.description ?? '',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
-                                    ),
-                                  ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            widget.userId == Constants.currentUserID
-                                ? Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 145),
-                                    child: RaisedButton(
-                                      color: MyColors.accentColor,
-                                      shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
-                                      onPressed: () async {
-                                        setState(() {
-                                          _editing = !_editing;
-                                        });
-                                        if (_editing) {
-                                          setState(() {
-                                            _nameController.text = _user.name;
-                                            _usernameController.text = _user.username;
-                                            _descriptionController.text = _user.description;
-                                          });
-                                        } else {
-                                          _saveEdits();
-                                        }
-                                      },
-                                      child: Text(
-                                          _editing
-                                              ? language(en: 'Save', ar: 'حفظ')
-                                              : language(en: 'Edit Profile', ar: 'تعديل'),
-                                          style: TextStyle(fontSize: 14, color: Colors.white)),
+                                    itemCount: _slideImages.length,
+                                    itemBuilder: (BuildContext context, int index) => CachedImage(
+                                      imageUrl: _slideImages[index]?.url,
+                                      height: 200,
+                                      imageShape: BoxShape.rectangle,
+                                      width: MediaQuery.of(context).size.width,
+                                      defaultAssetImage: Strings.default_cover_image,
                                     ),
                                   )
                                 : Container(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: _editing
+                                      ? InkWell(
+                                          onTap: () async {
+                                            _updateProfileImage();
+                                          },
+                                          child: CustomOverlay(
+                                            child: _profileImage(),
+                                            shape: BoxShape.circle,
+                                            size: 60,
+                                            icon: Icon(
+                                              Icons.photo_camera,
+                                              color: Colors.black87,
+                                              size: 25,
+                                            ),
+                                          ),
+                                        )
+                                      : _profileImage(),
+                                ),
+                                widget.userId != Constants.currentUserID
+                                    ? Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: isFollowing
+                                                ? () {
+                                                    unfollowUser();
+                                                  }
+                                                : () {
+                                                    followUser();
+                                                  },
+                                            child: Container(
+                                              margin: EdgeInsets.only(right: 15),
+                                              height: 40,
+                                              width: 40,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: MyColors.accentColor,
+                                              ),
+                                              child: !isFollowing
+                                                  ? Icon(
+                                                      Icons.person_add,
+                                                      size: 25,
+                                                      color: Colors.white,
+                                                    )
+                                                  : Image.asset(Strings.person_remove, scale: 1.3),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              Navigator.of(context)
+                                                  .pushNamed('/conversation', arguments: {'other_uid': widget.userId});
+                                            },
+                                            child: Container(
+                                                margin: EdgeInsets.only(left: 15),
+                                                height: 40,
+                                                width: 40,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: MyColors.accentColor,
+                                                ),
+                                                child: Icon(
+                                                  Icons.chat_bubble_outline,
+                                                  size: 23,
+                                                  color: Colors.white,
+                                                )),
+                                          )
+                                        ],
+                                      )
+                                    : Container(
+                                        child: RaisedButton(
+                                          color: MyColors.accentColor,
+                                          shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                                          onPressed: () async {
+                                            setState(() {
+                                              _editing = !_editing;
+                                            });
+                                            if (_editing) {
+                                              setState(() {
+                                                _nameController.text = _user.name;
+                                                _usernameController.text = _user.username;
+                                                _descriptionController.text = _user.description;
+                                              });
+                                            } else {
+                                              _saveEdits();
+                                            }
+                                          },
+                                          child: Text(
+                                              _editing
+                                                  ? language(en: 'Save', ar: 'حفظ')
+                                                  : language(en: 'Edit Profile', ar: 'تعديل'),
+                                              style: TextStyle(fontSize: 14, color: Colors.white)),
+                                        ),
+                                      ),
+                                // widget.userId != Constants.currentUserID
+                                //     ? InkWell(
+                                //         onTap: () {
+                                //           Navigator.of(context)
+                                //               .pushNamed('/conversation', arguments: {'other_uid': widget.userId});
+                                //         },
+                                //         child: Container(
+                                //             margin: EdgeInsets.only(left: 15),
+                                //             height: 40,
+                                //             width: 40,
+                                //             decoration: BoxDecoration(
+                                //               shape: BoxShape.circle,
+                                //               color: MyColors.accentColor,
+                                //             ),
+                                //             child: Icon(
+                                //               Icons.chat_bubble_outline,
+                                //               size: 23,
+                                //               color: Colors.white,
+                                //             )),
+                                //       )
+                                //     : Container(),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: _editing
+                                      ? Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              height: 30,
+                                              width: 120,
+                                              child: TextField(
+                                                controller: _nameController,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                            Container(
+                                              height: 30,
+                                              width: 120,
+                                              child: TextField(
+                                                controller: _usernameController,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              _user?.name ?? '',
+                                              style: TextStyle(
+                                                  fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              '@${_user?.username ?? ''}',
+                                              style: TextStyle(
+                                                  fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ],
+                            ),
+
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            // _editing
+                            //     ? Padding(
+                            //         padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            //         child: TextField(
+                            //           controller: _descriptionController,
+                            //           textAlign: TextAlign.center,
+                            //           style: TextStyle(fontSize: 16, color: Colors.white),
+                            //         ),
+                            //       )
+                            //     : Padding(
+                            //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            //         child: Text(
+                            //           _user?.description ?? '',
+                            //           textAlign: TextAlign.center,
+                            //           style: TextStyle(fontSize: 16, color: Colors.white),
+                            //         ),
+                            //       ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            // widget.userId == Constants.currentUserID
+                            //     ? Container(
+                            //         margin: EdgeInsets.symmetric(horizontal: 145),
+                            //         child: RaisedButton(
+                            //           color: MyColors.accentColor,
+                            //           shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                            //           onPressed: () async {
+                            //             setState(() {
+                            //               _editing = !_editing;
+                            //             });
+                            //             if (_editing) {
+                            //               setState(() {
+                            //                 _nameController.text = _user.name;
+                            //                 _usernameController.text = _user.username;
+                            //                 _descriptionController.text = _user.description;
+                            //               });
+                            //             } else {
+                            //               _saveEdits();
+                            //             }
+                            //           },
+                            //           child: Text(
+                            //               _editing
+                            //                   ? language(en: 'Save', ar: 'حفظ')
+                            //                   : language(en: 'Edit Profile', ar: 'تعديل'),
+                            //               style: TextStyle(fontSize: 14, color: Colors.white)),
+                            //         ),
+                            //       )
+                            //     : Container(),
                             SizedBox(
                               height: 10,
                             ),
@@ -370,9 +451,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                 indicator: BoxDecoration(
                                     borderRadius: BorderRadius.circular(50), color: MyColors.darkPrimaryColor),
                                 tabs: _tabs),
-                            MediaQuery.removePadding(
-                                context: context,
-                                removeTop: true,child: _currentPage())
+                            MediaQuery.removePadding(context: context, removeTop: true, child: _currentPage())
                           ]),
                         ),
                       ]),
@@ -567,8 +646,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   Widget _profileImage() {
     return CachedImage(
       imageShape: BoxShape.circle,
-      height: 100,
-      width: 100,
+      height: 60,
+      width: 60,
       imageUrl: _user?.profileImageUrl,
       defaultAssetImage: Strings.default_profile_image,
     );

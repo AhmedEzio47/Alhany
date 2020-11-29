@@ -9,6 +9,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,7 @@ saveToken() async {
 }
 
 List<String> searchList(String text) {
+  if (text == null || text.isEmpty) return null;
   List<String> list = [];
   for (int i = 1; i <= text.length; i++) {
     list.add(text.substring(0, i).toLowerCase());
@@ -99,7 +101,7 @@ class AppUtil with ChangeNotifier {
   static showToast(String message) {
     Fluttertoast.showToast(
         msg: message,
-        toastLength: Toast.LENGTH_SHORT,
+        toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: MyColors.accentColor,
@@ -379,6 +381,20 @@ class AppUtil with ChangeNotifier {
         {'recordId': recordId, 'newsId': newsId, 'text': postText, 'imageUrl': imageUrl});
     Share.share('Check out: $postText : $postLink');
     print('Check out: $postText : $postLink');
+  }
+
+  static setUserVariablesByFirebaseUser(FirebaseUser user) async {
+    User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
+
+    User star = await DatabaseService.getUserWithId(Strings.starId);
+
+    Constants.currentUser = loggedInUser;
+    Constants.currentFirebaseUser = user;
+    Constants.currentUserID = user?.uid;
+    authStatus = AuthStatus.LOGGED_IN;
+    Constants.startUser = star;
+    Constants.isAdmin = (Constants.currentUserID == Strings.starId);
+    Constants.isFacebookOrGoogleUser = false;
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/services/payment_service.dart';
 import 'package:flutter/material.dart';
@@ -100,15 +101,18 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
     switch (index) {
       case 0:
         StripeTransactionResponse response =
-            await PaymentService.payViaCreditCard(amount: widget.amount * 100, currency: 'USD');
+            await PaymentService.payViaCreditCard(context, amount: widget.amount, currency: 'USD');
         AppUtil.showToast(response.message);
+        Navigator.of(context).pop(response.success);
         break;
       case 1:
         StripeTransactionResponse response = await PaymentService.nativePayment(
-          widget.amount * 100,
+          context,
+          widget.amount,
           'Songs Name',
         );
         AppUtil.showToast(response.message);
+        Navigator.of(context).pop(response.success);
         break;
     }
   }

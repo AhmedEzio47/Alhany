@@ -140,16 +140,6 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   void _recordAudio() async {
-    if (await PermissionsService().hasStoragePermission()) {
-      await AppUtil.createAppDirectory();
-      recordingFilePath = appTempDirectoryPath;
-      melodyPath = appTempDirectoryPath;
-      mergedFilePath = appTempDirectoryPath;
-
-      await _downloadMelody();
-    } else {
-      await PermissionsService().requestStoragePermission();
-    }
     if (await PermissionsService().hasMicrophonePermission()) {
       setState(() {
         isMicrophoneGranted = true;
@@ -199,16 +189,6 @@ class _MelodyPageState extends State<MelodyPage> {
   CameraController cameraController;
 
   void _recordVideo() async {
-    if (await PermissionsService().hasStoragePermission()) {
-      await AppUtil.createAppDirectory();
-      recordingFilePath = appTempDirectoryPath;
-      melodyPath = appTempDirectoryPath;
-      mergedFilePath = appTempDirectoryPath;
-
-      await _downloadMelody();
-    } else {
-      await PermissionsService().requestStoragePermission();
-    }
     if (await PermissionsService().hasMicrophonePermission()) {
       setState(() {
         isMicrophoneGranted = true;
@@ -341,16 +321,22 @@ class _MelodyPageState extends State<MelodyPage> {
 //                              : 'Conversion Success!');
     int success;
     if (_type == Types.AUDIO) {
+      success = await flutterFFmpeg
+          .execute("-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}stereo_audio.wav");
+      print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
+
       success = await flutterFFmpeg.execute(
-          "-y -i $recordingFilePath -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest $mergedFilePath");
+          "-y -i ${appTempDirectoryPath}stereo_audio.wav -i $melodyPath -filter_complex amerge=inputs=2 -shortest $mergedFilePath");
+      print(success == 1 ? 'Failure!' : 'Success!');
     } else {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
-      success = await flutterFFmpeg.execute('-i $recordingFilePath ${appTempDirectoryPath}extracted_audio.mp3');
+      success = await flutterFFmpeg
+          .execute('-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}extracted_audio.mp3');
       print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
 
       //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
       success = await flutterFFmpeg.execute(
-          "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex \"[0][1]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a]\" -map \"[a]\" -shortest ${appTempDirectoryPath}final_audio.mp3");
+          "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex amerge=inputs=2 -shortest ${appTempDirectoryPath}final_audio.mp3");
       FlutterFFprobe fFprobe = FlutterFFprobe();
       MediaInformation info = await fFprobe.getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
@@ -368,10 +354,14 @@ class _MelodyPageState extends State<MelodyPage> {
         _progressVisible = false;
       });
     }
-
-    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
-    int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    int duration;
+    try {
+      final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+      MediaInformation info = await _flutterFFprobe.getMediaInformation(mergedFilePath);
+      duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    } catch (error) {
+      duration = 0;
+    }
 
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
@@ -609,6 +599,8 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   initRecorder() async {
+    await AppUtil.createAppDirectory();
+    recordingFilePath = appTempDirectoryPath;
     recorder = AudioRecorder();
   }
 
@@ -657,6 +649,7 @@ class _MelodyPageState extends State<MelodyPage> {
       melodyPlayer = new MusicPlayer(
         key: ValueKey('main'),
         url: url,
+        isRecordBtnVisible: false,
         backColor: Colors.transparent,
         initialDuration: widget.melody.duration,
         melody: widget.melody,
@@ -672,33 +665,41 @@ class _MelodyPageState extends State<MelodyPage> {
         body: _progressVisible
             ? progressPage()
             : recordingStatus == RecordingStatus.Recording && _type == Types.VIDEO ? videoRecordingPage() : mainPage(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            if (recordingStatus == RecordingStatus.Recording) {
-              await saveRecord();
-            } else {
-              if ((await PermissionsService().hasStoragePermission()) &&
-                  (await PermissionsService().hasMicrophonePermission())) {
-                Navigator.of(context).push(CustomModal(
-                  child: _headphonesDialog(),
-                ));
-              }
-              if (!await PermissionsService().hasStoragePermission()) {
-                await PermissionsService().requestStoragePermission();
-              }
-              if (!await PermissionsService().hasMicrophonePermission()) {
-                await PermissionsService().requestMicrophonePermission();
-              }
-            }
-          },
-          child: Icon(
-            recordingStatus == RecordingStatus.Recording
-                ? Icons.stop
-                : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
+        floatingActionButton: !_progressVisible
+            ? FloatingActionButton(
+                onPressed: () async {
+                  if (recordingStatus == RecordingStatus.Recording) {
+                    await saveRecord();
+                  } else {
+                    if ((await PermissionsService().hasStoragePermission()) &&
+                        (await PermissionsService().hasMicrophonePermission())) {
+                      await AppUtil.createAppDirectory();
+                      recordingFilePath = appTempDirectoryPath;
+                      melodyPath = appTempDirectoryPath;
+                      mergedFilePath = appTempDirectoryPath;
+                      await _downloadMelody();
+
+                      Navigator.of(context).push(CustomModal(
+                        child: _headphonesDialog(),
+                      ));
+                    }
+                    if (!await PermissionsService().hasStoragePermission()) {
+                      await PermissionsService().requestStoragePermission();
+                    }
+                    if (!await PermissionsService().hasMicrophonePermission()) {
+                      await PermissionsService().requestMicrophonePermission();
+                    }
+                  }
+                },
+                child: Icon(
+                  recordingStatus == RecordingStatus.Recording
+                      ? Icons.stop
+                      : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -707,42 +708,6 @@ class _MelodyPageState extends State<MelodyPage> {
     return Stack(
       children: [
         AspectRatio(aspectRatio: cameraController.value.aspectRatio, child: CameraPreview(cameraController)),
-        Positioned.fill(
-            child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _recordingTimerText(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    InkWell(
-                      onTap: () => saveRecord(),
-                      child: Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black54,
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset: Offset(0, 2), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.stop,
-                          size: 35,
-                          color: MyColors.primaryColor,
-                        ),
-                      ),
-                    )
-                  ],
-                ))),
       ],
     );
   }
@@ -823,19 +788,20 @@ class _MelodyPageState extends State<MelodyPage> {
                 height: 10,
               ),
               recordingStatus != RecordingStatus.Recording ? melodyPlayer : _recordingTimerText(),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                alignment: Alignment.center,
-                width: MediaQuery.of(context).size.width,
-                height: 220,
-                child: SingleChildScrollView(
-                  child: Center(
-                    child: HtmlWidget(
-                      widget.melody.lyrics,
-                      textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      customStylesBuilder: (e) {
-                        return {'text-align': 'center', 'color': 'white', 'line-height': '85%'};
-                      },
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: HtmlWidget(
+                        widget.melody.lyrics,
+                        textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        customStylesBuilder: (e) {
+                          return {'text-align': 'center', 'color': 'white', 'line-height': '85%'};
+                        },
+                      ),
                     ),
                   ),
                 ),

@@ -948,8 +948,8 @@ class DatabaseService {
     return singers[0];
   }
 
-  static Future<List<SlideImage>> getSlideImages() async {
-    QuerySnapshot slideImagesSnapshot = await slideImagesRef.getDocuments();
+  static Future<List<SlideImage>> getSlideImages(String page) async {
+    QuerySnapshot slideImagesSnapshot = await slideImagesRef.where('page', isEqualTo: page).getDocuments();
     List<SlideImage> slideImages = slideImagesSnapshot.documents.map((doc) => SlideImage.fromDoc(doc)).toList();
     return slideImages;
   }

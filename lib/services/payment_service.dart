@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,12 +22,14 @@ class PaymentService {
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 
-  static Future<StripeTransactionResponse> payViaCreditCard({String amount, String currency}) async {
+  static Future<StripeTransactionResponse> payViaCreditCard(BuildContext context,
+      {String amount, String currency}) async {
     try {
       PaymentMethod paymentMethod = await _paymentRequestWithCardForm();
-      var paymentIntentMap = await _createPaymentIntent(amount, currency);
+      var paymentIntentMap = await _createPaymentIntent((double.parse(amount) * 100).toStringAsFixed(0), currency);
       PaymentIntent paymentIntent =
           PaymentIntent(clientSecret: paymentIntentMap['client_secret'], paymentMethodId: paymentMethod.id);
+
       PaymentIntentResult result = await _confirmPaymentIntent(paymentIntent);
       if (result.status == 'succeeded') {
         return StripeTransactionResponse(message: 'Transaction successful', success: true);
@@ -74,34 +78,45 @@ class PaymentService {
     return paymentIntentResult;
   }
 
-  static Future<StripeTransactionResponse> nativePayment(String amount, songName, {var controller}) async {
+  static Future<StripeTransactionResponse> nativePayment(BuildContext context, String amount, songName,
+      {var controller}) async {
     if (Platform.isIOS) {
       controller.jumpTo(450);
     }
     try {
       Token token = await StripePayment.paymentRequestWithNativePay(
         androidPayOptions: AndroidPayPaymentRequest(
-          totalPrice: amount,
+          totalPrice: (double.parse(amount) * 100).toStringAsFixed(2),
           currencyCode: "USD",
         ),
         applePayOptions: ApplePayPaymentOptions(
-          countryCode: 'DE',
           currencyCode: 'USD',
           items: [
             ApplePayItem(
               label: songName,
-              amount: '1',
+              amount: (double.parse(amount) * 100).toStringAsFixed(2),
             )
           ],
         ),
       );
       if (token != null) {
-        StripePayment.completeNativePayRequest();
-        AppUtil.showToast('Payment Complete!');
+        await StripePayment.completeNativePayRequest();
+        // await AppUtil.showAlertDialog(
+        //     context: context,
+        //     message: 'You\'re going to pay $amount USD, continue?',
+        //     firstBtnText: 'Yes',
+        //     firstFunc: () async {
+        //       StripePayment.completeNativePayRequest();
+        //       AppUtil.showToast('Payment Complete!');
+        //     },
+        //     secondBtnText: 'No',
+        //     secondFunc: () => Navigator.of(context).pop());
       }
-      await StripePayment.completeNativePayRequest();
+      //await StripePayment.completeNativePayRequest();
     } catch (error) {
-      print(error.toString());
+      print((error as PlatformException).message.toString());
+      print((error as PlatformException).code.toString());
+      print((error as PlatformException).details.toString());
       return StripeTransactionResponse(success: false, message: 'Transaction failed');
     }
     return StripeTransactionResponse(success: true, message: 'Transaction succeeded');

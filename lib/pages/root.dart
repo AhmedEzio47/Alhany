@@ -13,6 +13,7 @@ import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -76,21 +77,10 @@ class _RootPageState extends State<RootPage> {
   Future authAssignment() async {
     FirebaseUser user = await Auth().getCurrentUser();
 
-    if (user?.uid != null && user.isEmailVerified && ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
-      User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
-
-      User star = await DatabaseService.getUserWithId(Strings.starId);
-      //AppUtil.createAppDirectory();
-
+    if (user?.uid != null && ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
+      AppUtil.setUserVariablesByFirebaseUser(user);
       setState(() {
-        Constants.currentUser = loggedInUser;
-        Constants.currentFirebaseUser = user;
-        Constants.currentUserID = user?.uid;
         _authStatus = AuthStatus.LOGGED_IN;
-        authStatus = AuthStatus.LOGGED_IN;
-        Constants.startUser = star;
-
-        Constants.isAdmin = (Constants.currentUserID == Strings.starId);
       });
     } else if (user?.uid != null && !(user.isEmailVerified)) {
       print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');

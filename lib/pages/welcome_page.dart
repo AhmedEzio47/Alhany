@@ -9,6 +9,7 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -384,14 +385,48 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                     borderRadius: new BorderRadius.circular(30.0),
                                   ),
                                   color: Color(0Xff3B5998),
-                                  onPressed: () => {},
+                                  onPressed: () async {},
                                   child: new Container(
                                     child: new Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
                                         new Expanded(
                                           child: new FlatButton(
-                                            onPressed: () => {},
+                                            onPressed: () async {
+                                              print('trying to login with fb');
+                                              FirebaseUser user = await signInWithFacebook();
+                                              if (user != null) {
+                                                await AppUtil.setUserVariablesByFirebaseUser(user);
+                                                if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
+                                                  String username = await _createUsername();
+                                                  await DatabaseService.addUserToDatabase(
+                                                      user.uid, _emailController.text, _nameController.text, username);
+                                                  //await user.sendEmailVerification();
+                                                }
+                                                // if (!user.isEmailVerified) {
+                                                //   AppUtil.showAlertDialog(
+                                                //       context: context,
+                                                //       message: language(
+                                                //           en: 'Please check your mail for the verification email',
+                                                //           ar: 'رجاءا قم بالتفعيل عبر بريدك'),
+                                                //       firstBtnText: language(en: 'OK', ar: 'تم'),
+                                                //       firstFunc: () => Navigator.of(context).pop(),
+                                                //       secondBtnText: language(en: 'Resend', ar: 'إعادة إرسال'),
+                                                //       secondFunc: () async {
+                                                //         Navigator.of(context).pop();
+                                                //         await user.sendEmailVerification();
+                                                //       });
+                                                //   //await auth.signOut();
+                                                // } else {
+                                                //   saveToken(); // We don't want to saveToken for non-verified users
+                                                //   //AppUtil.showToast('Logged In!');
+                                                //   Navigator.of(context).pushReplacementNamed('/');
+                                                //   return;
+                                                // }
+                                                saveToken();
+                                                Navigator.of(context).pushReplacementNamed('/');
+                                              }
+                                            },
                                             padding: EdgeInsets.only(
                                               top: 10.0,
                                               bottom: 10.0,
@@ -443,12 +478,36 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                           child: new FlatButton(
                                             onPressed: () async {
                                               FirebaseUser user = await signInWithGoogle();
-                                              if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
-                                                String username = await _createUsername();
-                                                await DatabaseService.addUserToDatabase(
-                                                    _userId, user.email, null, username);
-                                                Navigator.of(context).pushReplacementNamed('/');
-                                              } else {
+                                              if (user != null) {
+                                                await AppUtil.setUserVariablesByFirebaseUser(user);
+                                                if ((await DatabaseService.getUserWithId(user.uid)).id == null) {
+                                                  String username = await _createUsername();
+                                                  await DatabaseService.addUserToDatabase(
+                                                      user.uid, _emailController.text, _nameController.text, username);
+                                                  //await user.sendEmailVerification();
+                                                }
+                                                // if (!user.isEmailVerified) {
+                                                //   Navigator.of(context).pop();
+                                                //   AppUtil.showAlertDialog(
+                                                //       context: context,
+                                                //       message: language(
+                                                //           en: 'Please check your mail for the verification email',
+                                                //           ar: 'رجاءا قم بالتفعيل عبر بريدك'),
+                                                //       firstBtnText: language(en: 'OK', ar: 'تم'),
+                                                //       firstFunc: () => Navigator.of(context).pop(),
+                                                //       secondBtnText: language(en: 'Resend', ar: 'إعادة إرسال'),
+                                                //       secondFunc: () async {
+                                                //         Navigator.of(context).pop();
+                                                //         await user.sendEmailVerification();
+                                                //       });
+                                                //   //await auth.signOut();
+                                                // } else {
+                                                //   saveToken(); // We don't want to saveToken for non-verified users
+                                                //   //AppUtil.showToast('Logged In!');
+                                                //   Navigator.of(context).pushReplacementNamed('/');
+                                                //   return;
+                                                // }
+                                                saveToken();
                                                 Navigator.of(context).pushReplacementNamed('/');
                                               }
                                             },
@@ -799,7 +858,6 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
     );
   }
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   PageController _pageController = new PageController(initialPage: 1, viewportFraction: 1.0);
@@ -956,6 +1014,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
   }
 
   Future<FirebaseUser> signInWithGoogle() async {
+    final BaseAuth auth = AuthProvider.of(context).auth;
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
       AppUtil.showToast(language(
@@ -968,15 +1027,52 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final AuthResult authResult = await _auth.signInWithCredential(credential);
-    final FirebaseUser user = authResult.user;
-
+    final FirebaseUser user = await auth.signInWithCredential(credential);
+    setState(() {
+      _nameController.text = user.displayName;
+      _emailController.text = user.email;
+    });
     assert(!user.isAnonymous);
     assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await _auth.currentUser();
+    final FirebaseUser currentUser = await auth.getCurrentUser();
     assert(user.uid == currentUser.uid);
 
+    return user;
+  }
+
+  Future<FirebaseUser> signInWithFacebook() async {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
+    final FacebookLoginResult result =
+        await FacebookLogin().logIn(permissions: [FacebookPermission.email, FacebookPermission.publicProfile]);
+    FirebaseUser user;
+
+    switch (result.status) {
+      case FacebookLoginStatus.Success:
+        FacebookAccessToken facebookAccessToken = result.accessToken;
+        final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: facebookAccessToken.token);
+        user = await auth.signInWithCredential(credential);
+
+        print('${user.displayName} signed in');
+        setState(() {
+          _nameController.text = user.displayName;
+          _emailController.text = user.email;
+        });
+        print('${user.photoUrl} FACEBOOK PHOTO');
+        assert(!user.isAnonymous);
+        assert(await user.getIdToken() != null);
+
+        final FirebaseUser currentUser = await auth.getCurrentUser();
+        assert(user.uid == currentUser.uid);
+        break;
+      case FacebookLoginStatus.Cancel:
+        print('Cancelled');
+        break;
+      case FacebookLoginStatus.Error:
+        print('Facebook login Error');
+        break;
+    }
     return user;
   }
 

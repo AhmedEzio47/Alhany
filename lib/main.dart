@@ -38,7 +38,7 @@ class _RestartWidgetState extends State<MyApp> {
       child: AuthProvider(
         auth: Auth(),
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Alhani',
           theme: ThemeData(
             primaryColor: MyColors.primaryColor,
             primaryColorDark: MyColors.darkPrimaryColor,

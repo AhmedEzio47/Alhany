@@ -40,4 +40,6 @@ class Constants {
   static String currentRoute;
 
   static String language;
+
+  static bool isFacebookOrGoogleUser;
 }

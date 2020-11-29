@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "480329879410-lkriahnchjia0tjlbsu34g46gr4s8d1l.apps.googleusercontent.com",
+          "client_id": "480329879410-22djh1m8mj8aab97nq7u2d2q2doqn00r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.devyat.Alhany",
-            "certificate_hash": "6a8af290b55ac94a7b81f546960aef3d27bf178c"
+            "certificate_hash": "9709bea382ec3c092b33bedf6af588b5a3795d0d"
           }
         },
         {
