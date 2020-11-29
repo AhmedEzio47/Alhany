@@ -174,16 +174,39 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
               children: [
                 Column(
                   children: [
-                    Align(
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 35),
-                        height: 40,
-                        width: 150,
-                        child: Image.asset(
-                          Strings.app_bar,
+                    Row(
+                      mainAxisAlignment: _user?.id != Constants.currentUserID
+                          ? MainAxisAlignment.spaceBetween
+                          : MainAxisAlignment.center,
+                      children: [
+                        _user?.id != Constants.currentUserID
+                            ? Align(
+                                child: Container(
+                                    margin: const EdgeInsets.only(top: 35),
+                                    height: 35,
+                                    width: 35,
+                                    child: Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                    )),
+                                alignment: Alignment.topLeft,
+                              )
+                            : Container(),
+                        Align(
+                          child: Container(
+                            margin: EdgeInsets.only(top: 35),
+                            height: 40,
+                            width: 150,
+                            child: Image.asset(
+                              Strings.app_bar,
+                            ),
+                          ),
+                          alignment: Alignment.topCenter,
                         ),
-                      ),
-                      alignment: Alignment.topCenter,
+                        Container(
+                          width: _user?.id != Constants.currentUserID ? 35 : 0,
+                        )
+                      ],
                     ),
                     SizedBox(
                       height: 10,
