@@ -64,9 +64,14 @@
             <key>CFBundleURLName</key>
             <string>3ds.stripesdk.io</string>
             <key>CFBundleURLSchemes</key>
+            <string>fb806139416850397</string>
             <array>
                 <string>stripesdk</string>
             </array>
+            <key>FacebookAppID</key>
+            <string>806139416850397</string>
+            <key>FacebookDisplayName</key>
+            <string>Alhani</string>
             </dict>
         </array>
     <key>CFBundleURLTypes</key>
