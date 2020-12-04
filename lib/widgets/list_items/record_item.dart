@@ -12,7 +12,6 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 class RecordItem extends StatefulWidget {
   final Record record;
@@ -37,14 +36,12 @@ class _RecordItemState extends State<RecordItem> {
   void initState() {
     getAuthor();
     getMelody();
-    initVideoPlayer();
     initLikes(widget.record);
     super.initState();
   }
 
   @override
   dispose() {
-    _videoController.dispose();
     super.dispose();
   }
 
@@ -121,12 +118,6 @@ class _RecordItemState extends State<RecordItem> {
         isLiked = likedSnapshot.exists;
       });
     }
-  }
-
-  VideoPlayerController _videoController;
-  initVideoPlayer() async {
-    _videoController = VideoPlayerController.network(widget.record.url);
-    await _videoController.initialize();
   }
 
   @override
@@ -245,7 +236,19 @@ class _RecordItemState extends State<RecordItem> {
                                 ))
                               ],
                             )
-                          : Container()),
+                          : Stack(
+                              children: [
+                                Image.asset(
+                                  Strings.default_cover_image,
+                                  height: 200,
+                                ),
+                                Positioned.fill(
+                                    child: Align(
+                                  child: playBtn(),
+                                  alignment: Alignment.center,
+                                ))
+                              ],
+                            )),
                   Positioned.fill(
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),
