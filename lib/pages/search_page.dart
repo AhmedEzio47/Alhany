@@ -97,7 +97,7 @@ class _SearchPageState extends State<SearchPage> {
                                   setState(() {
                                     musicPlayer = MusicPlayer(
                                       key: ValueKey(_results[index].id),
-                                      url: _results[index].audioUrl,
+                                      url: _results[index].url,
                                       backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                                       title: _results[index].name,
                                       btnSize: 30,

@@ -43,6 +43,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               Container(
                 decoration: BoxDecoration(
+                  gradient: new LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      MyColors.primaryColor,
+                    ],
+                  ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
                     colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
@@ -347,7 +355,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             onTap: () {
               setState(() {
                 musicPlayer = MusicPlayer(
-                  url: _records[index].audioUrl,
+                  url: _records[index].url,
                   backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                   btnSize: 35,
                   initialDuration: _records[index].duration,
@@ -455,9 +463,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             //   ),
             // ),
             // ),
-            Flexible(fit: FlexFit.loose, flex: 8, child: MediaQuery.removePadding(
-                context: context,
-                removeTop: true,child: recordListView()))
+            Flexible(
+                fit: FlexFit.loose,
+                flex: 8,
+                child: MediaQuery.removePadding(context: context, removeTop: true, child: recordListView()))
           ],
         ),
       ),
