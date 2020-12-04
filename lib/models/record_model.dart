@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Record {
   final String id;
-  final String audioUrl;
+  final String url;
+  final String thumbnailUrl;
   final String singerId;
   final String melodyId;
   final int duration;
@@ -14,7 +15,8 @@ class Record {
 
   Record(
       {this.id,
-      this.audioUrl,
+      this.url,
+      this.thumbnailUrl,
       this.singerId,
       this.melodyId,
       this.duration,
@@ -27,7 +29,8 @@ class Record {
   factory Record.fromDoc(DocumentSnapshot doc) {
     return Record(
         id: doc.documentID,
-        audioUrl: doc['audio_url'],
+        url: doc['audio_url'],
+        thumbnailUrl: doc['thumbnail_url'],
         singerId: doc['singer_id'],
         melodyId: doc['melody_id'],
         duration: doc['duration'],

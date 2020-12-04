@@ -573,7 +573,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                           //   musicPlayer.stop();
                           // }
                           musicPlayer = MusicPlayer(
-                            url: _records[index].audioUrl,
+                            url: _records[index].url,
                             backColor: Colors.white.withOpacity(.4),
                           );
                           setState(() {

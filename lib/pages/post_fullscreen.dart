@@ -145,7 +145,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
     } else if (widget.news != null) {
       DatabaseService.incrementNewsViews(widget.news.id);
     }
-    initVideoPlayer(_record?.audioUrl ?? widget.news?.contentUrl);
+    initVideoPlayer(_record?.url ?? widget.news?.contentUrl);
     setState(() {
       _singer = widget.singer;
     });
@@ -193,7 +193,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       _record = record;
                     });
                     DatabaseService.incrementRecordViews(_record.id);
-                    initVideoPlayer(_record.audioUrl);
+                    initVideoPlayer(_record.url);
                     getSinger();
                     isFollowing();
                     initLikes(record: _record, news: widget.news);

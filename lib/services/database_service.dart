@@ -206,9 +206,10 @@ class DatabaseService {
     await usersRef.document(Constants.currentUserID).collection('favourites').document(melodyId).delete();
   }
 
-  static submitRecord(String melodyId, String recordId, String url, int duration) async {
+  static submitRecord(String melodyId, String recordId, String url, String thumbnailUrl, int duration) async {
     await recordsRef.document(recordId).setData({
       'audio_url': url,
+      'thumbnail_url': thumbnailUrl,
       'singer_id': Constants.currentUserID,
       'melody_id': melodyId,
       'duration': duration,

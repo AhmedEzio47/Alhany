@@ -125,7 +125,7 @@ class _RecordItemState extends State<RecordItem> {
 
   VideoPlayerController _videoController;
   initVideoPlayer() async {
-    _videoController = VideoPlayerController.network(widget.record.audioUrl);
+    _videoController = VideoPlayerController.network(widget.record.url);
     await _videoController.initialize();
   }
 
@@ -226,7 +226,26 @@ class _RecordItemState extends State<RecordItem> {
               // ),
               Stack(
                 children: [
-                  Container(height: 200, child: _videoController != null ? VideoPlayer(_videoController) : Container()),
+                  Container(
+                      height: 200,
+                      child: widget.record.thumbnailUrl != null
+                          ? Stack(
+                              children: [
+                                CachedImage(
+                                  height: 200,
+                                  width: MediaQuery.of(context).size.width,
+                                  imageShape: BoxShape.rectangle,
+                                  imageUrl: widget.record.thumbnailUrl,
+                                  defaultAssetImage: Strings.default_cover_image,
+                                ),
+                                Positioned.fill(
+                                    child: Align(
+                                  child: playBtn(),
+                                  alignment: Alignment.center,
+                                ))
+                              ],
+                            )
+                          : Container()),
                   Positioned.fill(
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -356,6 +375,34 @@ class _RecordItemState extends State<RecordItem> {
         child: Icon(
           Icons.play_arrow,
           size: 35,
+          color: MyColors.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  playBtn() {
+    return InkWell(
+      onTap: () => Navigator.of(context)
+          .pushNamed('/post-fullscreen', arguments: {'record': widget.record, 'singer': _singer, 'melody': _melody}),
+      child: Container(
+        height: 35,
+        width: 35,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey.shade300,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black54,
+              spreadRadius: 2,
+              blurRadius: 4,
+              offset: Offset(0, 2), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.play_arrow,
+          size: 30,
           color: MyColors.primaryColor,
         ),
       ),

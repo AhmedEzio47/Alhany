@@ -354,6 +354,10 @@ class _MelodyPageState extends State<MelodyPage> {
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest $mergedFilePath");
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
+
+      success = await flutterFFmpeg
+          .execute("-y -i $mergedFilePath -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");
+      print(success == 1 ? 'THUMBNAIL Failure!' : 'THUMBNAIL Success!');
       setState(() {
         _progressVisible = false;
       });
@@ -561,7 +565,7 @@ class _MelodyPageState extends State<MelodyPage> {
       _progressVisible = true;
     });
     String recordId = randomAlphaNumeric(20);
-    String url;
+    String url, thumbnailUrl;
     AppUtil appUtil = AppUtil();
     appUtil.addListener(() {
       if (mounted) {
@@ -578,6 +582,14 @@ class _MelodyPageState extends State<MelodyPage> {
       url = await appUtil.uploadFile(
           File(imageVideoPath), context, 'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
     }
+    if (_type == Types.VIDEO) {
+      thumbnailUrl = await appUtil.uploadFile(File('${appTempDirectoryPath}thumbnail.png'), context,
+          'records_thumbnails/${widget.melody.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
+    } else {
+      thumbnailUrl = await appUtil.uploadFile(
+          File(_image.path), context, 'records_thumbnails/${widget.melody.id}/$recordId${path.extension(_image.path)}');
+    }
+
     setState(() {
       _progressVisible = false;
     });
@@ -587,7 +599,7 @@ class _MelodyPageState extends State<MelodyPage> {
         await _flutterFFprobe.getMediaInformation(_type == Types.VIDEO ? mergedFilePath : imageVideoPath);
     int duration = double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
-    await DatabaseService.submitRecord(widget.melody.id, recordId, url, duration);
+    await DatabaseService.submitRecord(widget.melody.id, recordId, url, thumbnailUrl, duration);
     _deleteFiles();
     Navigator.of(context).pop();
     Navigator.of(context)
@@ -720,6 +732,14 @@ class _MelodyPageState extends State<MelodyPage> {
     return Container(
       decoration: BoxDecoration(
         color: MyColors.primaryColor,
+        gradient: new LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black,
+            MyColors.primaryColor,
+          ],
+        ),
         image: DecorationImage(
           colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           image: AssetImage(Strings.default_melody_page_bg),

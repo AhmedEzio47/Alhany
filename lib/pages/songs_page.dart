@@ -59,6 +59,14 @@ class _SongsPageState extends State<SongsPage> {
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
+                  gradient: new LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      MyColors.primaryColor,
+                    ],
+                  ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
                     colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
