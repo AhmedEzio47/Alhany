@@ -1,3 +1,4 @@
+import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -69,28 +70,28 @@ class _ChatItemState extends State<ChatItem> {
         ),
         title: Text(
           "${widget.name}",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: MyColors.textLightColor),
         ),
         subtitle: widget.msg.type == 'text'
             ? Text(
                 "${widget.msg.message}",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: MyColors.textLightColor),
               )
             : Row(
                 children: [
                   widget.msg.type == 'audio'
-                      ? Icon(Icons.audiotrack, color: Colors.white)
-                      : Icon(Icons.image, color: Colors.white),
+                      ? Icon(Icons.audiotrack, color: MyColors.iconLightColor)
+                      : Icon(Icons.image, color: MyColors.iconLightColor),
                   widget.msg.type == 'audio'
                       ? Text(
                           "Voice massage",
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
                           "image",
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         )
                 ],
               ),
@@ -102,7 +103,7 @@ class _ChatItemState extends State<ChatItem> {
               "${AppUtil.formatTimestamp(widget.msg.timestamp)}",
               style: TextStyle(
                 fontWeight: FontWeight.w300,
-                color: Colors.white,
+                color: MyColors.textLightColor,
                 fontSize: 11,
               ),
             ),
@@ -124,7 +125,7 @@ class _ChatItemState extends State<ChatItem> {
                       child: Text(
                         "${widget.counter}",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: MyColors.textLightColor,
                           fontSize: 10,
                         ),
                         textAlign: TextAlign.center,

@@ -262,7 +262,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: Text(
                     'For optimal result, please put some headphones.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, color: MyColors.textDarkColor, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -277,7 +277,7 @@ class _MelodyPageState extends State<MelodyPage> {
                     width: 1,
                   ),
                   shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
-                  child: Text('OK', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: Text('OK', style: TextStyle(fontSize: 16, color: MyColors.textDarkColor, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                     print('hey I\'m here');
@@ -421,7 +421,7 @@ class _MelodyPageState extends State<MelodyPage> {
                             color: MyColors.primaryColor,
                             child: Text(
                               imageVideoPath == null ? 'Choose Image' : 'Done',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: MyColors.textLightColor),
                             ),
                           ),
                           SizedBox(
@@ -439,7 +439,7 @@ class _MelodyPageState extends State<MelodyPage> {
                             color: MyColors.primaryColor,
                             child: Text(
                               'Submit',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: MyColors.textLightColor),
                             ),
                           )
                         ],
@@ -472,7 +472,7 @@ class _MelodyPageState extends State<MelodyPage> {
                               color: MyColors.primaryColor,
                               child: Text(
                                 'Submit',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: MyColors.textLightColor),
                               ),
                             ),
                           ],
@@ -711,7 +711,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   recordingStatus == RecordingStatus.Recording
                       ? Icons.stop
                       : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
-                  color: Colors.white,
+                  color: MyColors.iconLightColor,
                   size: 30,
                 ),
               )
@@ -780,8 +780,8 @@ class _MelodyPageState extends State<MelodyPage> {
                   widget.melody.levelUrls != null
                       ? DropdownButton(
                           dropdownColor: MyColors.lightPrimaryColor,
-                          iconEnabledColor: Colors.white,
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          iconEnabledColor: MyColors.iconLightColor,
+                          style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
                           value: Constants.currentMelodyLevel ?? _dropdownValue,
                           onChanged: (choice) async {
                             Constants.currentMelodyLevel = choice;
@@ -806,7 +806,7 @@ class _MelodyPageState extends State<MelodyPage> {
               ),
               Text(
                 widget.melody.name,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MyColors.textLightColor),
               ),
               SizedBox(
                 height: 10,
@@ -906,7 +906,7 @@ class _MelodyPageState extends State<MelodyPage> {
               alignment: Alignment.topLeft,
               child: Text(
                 'Views: ${widget.melody.views ?? 0}',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: MyColors.textLightColor),
               ),
             ),
           )),
@@ -917,8 +917,8 @@ class _MelodyPageState extends State<MelodyPage> {
               alignment: Alignment.topRight,
               child: DropdownButton(
                 dropdownColor: MyColors.lightPrimaryColor,
-                iconEnabledColor: Colors.white,
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                iconEnabledColor: MyColors.iconLightColor,
+                style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
                 value: _type,
                 items: [
                   DropdownMenuItem(
@@ -971,14 +971,14 @@ class _MelodyPageState extends State<MelodyPage> {
           ),
           Text(
             '${(_progress * 100).toStringAsFixed(2)}%',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: MyColors.textLightColor),
           ),
           SizedBox(
             height: 15,
           ),
           Text(
             'Please wait this may take some time.',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: MyColors.textLightColor),
           )
         ],
       ),
@@ -1016,7 +1016,7 @@ class _MelodyPageState extends State<MelodyPage> {
       margin: EdgeInsets.all(20),
       child: Text(
         _recordingText,
-        style: TextStyle(fontSize: 20, color: Colors.white),
+        style: TextStyle(fontSize: 20, color: MyColors.textLightColor),
       ),
     );
   }

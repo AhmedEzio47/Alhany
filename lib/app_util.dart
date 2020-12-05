@@ -105,7 +105,7 @@ class AppUtil with ChangeNotifier {
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: MyColors.accentColor,
-        textColor: Colors.white,
+        textColor: MyColors.textLightColor,
         fontSize: 16.0);
   }
 
@@ -250,7 +250,7 @@ class AppUtil with ChangeNotifier {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
             loaderBackground: MyColors.primaryColor,
-            iconColor: Colors.white,
+            iconColor: MyColors.iconLightColor,
             icon: Icons.music_note,
             animationType: "full_flip")));
   }

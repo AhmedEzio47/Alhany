@@ -168,7 +168,7 @@ class _ChatsState extends State<Chats>
                     : Center(
                         child: Text(
                         'No chats yet',
-                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                        style: TextStyle(fontSize: 20, color: MyColors.textInactiveColor),
                       )),
               ),
             ),
@@ -180,18 +180,18 @@ class _ChatsState extends State<Chats>
                 child: TextField(
                   cursorColor: Colors.white,
                   controller: _searchController,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: MyColors.textLightColor),
                   decoration: InputDecoration(
                       prefixIcon: Icon(
                         Icons.search,
                         size: 28.0,
-                        color: Colors.white,
+                        color: MyColors.iconLightColor,
                       ),
                       suffixIcon: _searching
                           ? IconButton(
                               icon: Icon(
                                 Icons.close,
-                                color: Colors.white,
+                                color: MyColors.iconLightColor,
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -199,7 +199,7 @@ class _ChatsState extends State<Chats>
                           : null,
                       hintText: 'Search',
                       hintStyle: TextStyle(
-                        color: Colors.white,
+                        color: MyColors.textLightColor,
                       )),
                   onChanged: (text) {
                     _filteredChats = [];

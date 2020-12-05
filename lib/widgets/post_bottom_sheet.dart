@@ -143,7 +143,7 @@ class PostBottomSheet {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_update, ar: Strings.ar_update),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: MyColors.textLightColor),
             ),
           )
         ],
@@ -189,7 +189,7 @@ class PostBottomSheet {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_update, ar: Strings.ar_update),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: MyColors.textLightColor),
             ),
           )
         ],

@@ -134,7 +134,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               child: Text(
                                 widget.replyText,
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: MyColors.textDarkColor,
                                   fontSize: 10,
                                 ),
                                 maxLines: 2,
@@ -154,7 +154,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                         ? Text(
                             widget.message,
                             style: TextStyle(
-                              color: widget.isMe ? Colors.white : Colors.black,
+                              color: widget.isMe ? MyColors.textLightColor : MyColors.textDarkColor,
                             ),
                           )
                         : Container(
@@ -162,7 +162,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             child: Text(
                               widget.message,
                               style: TextStyle(
-                                color: widget.isMe ? Colors.white : Colors.black,
+                                color: widget.isMe ? MyColors.textLightColor : MyColors.textDarkColor,
                               ),
                             ),
                           )
@@ -209,7 +209,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           child: Text(
             widget.time,
             style: TextStyle(
-              color: Colors.white,
+              color: MyColors.textLightColor,
               fontSize: 10.0,
             ),
           ),

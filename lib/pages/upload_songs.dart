@@ -208,7 +208,7 @@ class _UploadSongsState extends State<UploadSongs> {
                   color: MyColors.primaryColor,
                   child: Text(
                     'Upload Song',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: MyColors.textLightColor),
                   ),
                   onPressed: () async {
                     await uploadSong();
@@ -245,7 +245,7 @@ class _UploadSongsState extends State<UploadSongs> {
                   color: MyColors.primaryColor,
                   child: Text(
                     'Upload Multiple Songs',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: MyColors.textLightColor),
                   ),
                   onPressed: () async {
                     await uploadSongs();

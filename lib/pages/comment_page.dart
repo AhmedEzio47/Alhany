@@ -168,11 +168,11 @@ class _CommentPageState extends State<CommentPage> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextField(
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: MyColors.textLightColor),
                       textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
                       controller: _replyController,
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.white),
+                        hintStyle: TextStyle(color: MyColors.textLightColor),
                         hintText: language(en: Strings.en_leave_reply, ar: Strings.ar_leave_reply),
                         suffix: Constants.language == 'en' ? sendBtn() : null,
                         prefix: Constants.language == 'ar' ? sendBtn() : null,

@@ -105,7 +105,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['do'] == null ? 'Choose DO' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();
@@ -123,7 +123,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['re'] == null ? 'Choose RE' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();
@@ -141,7 +141,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['mi'] == null ? 'Choose MI' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();
@@ -159,7 +159,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['fa'] == null ? 'Choose FA' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();
@@ -177,7 +177,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['sol'] == null ? 'Choose SOL' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();
@@ -195,7 +195,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                       color: MyColors.primaryColor,
                       child: Text(
                         melodies['la'] == null ? 'Choose LA' : 'DONE',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                       onPressed: () async {
                         File melodyFile = await AppUtil.chooseAudio();

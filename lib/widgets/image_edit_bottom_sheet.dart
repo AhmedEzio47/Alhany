@@ -62,7 +62,7 @@ class ImageEditBottomSheet {
             context,
             Icon(
               Icons.camera_alt,
-              color: Colors.white,
+              color: MyColors.iconLightColor,
             ),
             text: 'Camera', onPressed: () {
           source = ImageSource.camera;
@@ -76,7 +76,7 @@ class ImageEditBottomSheet {
             context,
             Icon(
               Icons.image,
-              color: Colors.white,
+              color: MyColors.iconLightColor,
             ),
             text: 'Gallery', onPressed: () async {
           source = ImageSource.gallery;
@@ -108,7 +108,7 @@ class ImageEditBottomSheet {
               Text(
                 text,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: MyColors.textLightColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),

@@ -194,7 +194,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                     color: MyColors.primaryColor,
                     child: Text(
                       'Add Singer',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: MyColors.textLightColor),
                     ),
                   )
                 ],
@@ -243,7 +243,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_add, ar: Strings.ar_add),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: MyColors.textLightColor),
             ),
           )
         ],

@@ -64,7 +64,7 @@ class _SingerItemState extends State<SingerItem> {
                       value: choice,
                       child: Text(
                         choice,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                     );
                   }).toList();
@@ -145,7 +145,7 @@ class _SingerItemState extends State<SingerItem> {
             color: MyColors.primaryColor,
             child: Text(
               'Update',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: MyColors.textLightColor),
             ),
           )
         ],

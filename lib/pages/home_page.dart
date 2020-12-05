@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       },
                       child: Icon(
                         Icons.search,
-                        color: Colors.white,
+                        color: MyColors.iconLightColor,
                       ),
                     ),
                   ),
@@ -227,7 +227,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Center(
                         child: Text(
                           _categories[index],
-                          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: MyColors.textLightColor, fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Expanded(
@@ -415,7 +415,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           ),
                                           Text(
                                             _singers[index].name,
-                                            style: TextStyle(color: Colors.white),
+                                            style: TextStyle(color: MyColors.textLightColor),
                                           )
                                         ],
                                       ),
@@ -514,7 +514,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         : Center(
             child: Text(
             language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: MyColors.textLightColor),
           ));
   }
 

@@ -175,7 +175,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                           onTap: () => Navigator.of(context).pushNamed('/slide-images'),
                                           child: Text(
                                             'Edit Slide show images',
-                                            style: TextStyle(color: Colors.white, decoration: TextDecoration.underline),
+                                            style: TextStyle(color: MyColors.textLightColor, decoration: TextDecoration.underline),
                                           )),
                                     )
                                   : Container(),
@@ -196,7 +196,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
                                       Constants.startUser?.name,
-                                      style: TextStyle(color: Colors.white, fontSize: 16),
+                                      style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
                                     ),
                                   )
                                 ],

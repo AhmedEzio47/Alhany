@@ -166,13 +166,13 @@ class _RecordItemState extends State<RecordItem> {
                               children: [
                                 InkWell(
                                   child: Text(_singer?.name ?? '',
-                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                                      style: TextStyle(color: MyColors.textDarkColor, fontWeight: FontWeight.bold)),
                                   onTap: () => _goToProfilePage(),
                                 ),
                                 Text(
                                   ' singed ',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: MyColors.textLightColor,
                                   ),
                                 ),
                                 InkWell(

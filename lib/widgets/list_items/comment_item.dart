@@ -90,7 +90,7 @@ class _CommentItem2State extends State<CommentItem2> {
                             text: TextSpan(
                               style: TextStyle(
                                 fontSize: 15.0,
-                                color: Colors.white,
+                                color: MyColors.textLightColor,
                               ),
                               children: <TextSpan>[
                                 TextSpan(

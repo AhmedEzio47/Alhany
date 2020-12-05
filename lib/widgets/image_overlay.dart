@@ -55,7 +55,7 @@ List<Widget> btnList(List<IconData> btnIcons, List<Function> btnFunctions) {
     btnList.add(IconButton(
       icon: Icon(
         btnIcons[i],
-        color: Colors.white,
+        color: MyColors.iconLightColor,
       ),
       onPressed: btnFunctions[i],
     ));

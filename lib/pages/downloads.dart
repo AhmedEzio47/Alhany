@@ -112,7 +112,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
                               padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 40),
                               child: Text(
                                 'No downloads yet!',
-                                style: TextStyle(color: Colors.white, fontSize: 18),
+                                style: TextStyle(color: MyColors.textLightColor, fontSize: 18),
                               ),
                             ),
                     ],

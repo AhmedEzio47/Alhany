@@ -175,12 +175,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
               widget.melodyList != null
                   ? Text(
                       widget.melodyList[myAudioPlayer.index].name,
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: MyColors.textLightColor, fontSize: 16, fontWeight: FontWeight.bold),
                     )
                   : widget.title != null
                       ? Text(
                           widget.title,
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: MyColors.textLightColor, fontSize: 16, fontWeight: FontWeight.bold),
                         )
                       : Container(),
               Row(
@@ -197,11 +197,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   myAudioPlayer.position != null
                       ? Text(
                           '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
                           '0:0',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         ),
                   SizedBox(
                     width: 10,
@@ -234,11 +234,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   myAudioPlayer.duration != null
                       ? Text(
                           '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
                           '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: MyColors.textLightColor),
                         ),
                   SizedBox(
                     width: 10,
@@ -461,7 +461,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       value: choice,
                       child: Text(
                         choice,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
                     );
                   }).toList();
@@ -589,7 +589,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_update, ar: Strings.ar_update),
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: MyColors.textLightColor),
             ),
           )
         ],

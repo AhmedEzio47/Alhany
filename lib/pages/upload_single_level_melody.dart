@@ -108,7 +108,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     language(
                         en: Strings.en_choose_melody,
                         ar: Strings.ar_choose_melody),
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: MyColors.textLightColor),
                   ),
                   onPressed: () async {
                     await uploadMelody();
@@ -147,7 +147,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                     language(
                         en: Strings.en_choose_melodies,
                         ar: Strings.ar_choose_melodies),
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: MyColors.textLightColor),
                   ),
                   onPressed: () async {
                     await uploadMelodies();

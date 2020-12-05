@@ -89,7 +89,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
                 onChanged: (value) {
                   isPassword ? _password = value : isEmail ? _email = value : _confirm = value;
                 },
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: MyColors.textDarkColor),
                 obscureText: isPassword,
                 decoration: InputDecoration(
                   prefixIcon: Container(
@@ -176,7 +176,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
                 colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
         child: Text(
           language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
-          style: TextStyle(fontSize: 20, color: Colors.white),
+          style: TextStyle(fontSize: 20, color: MyColors.textLightColor),
         ),
       ),
     );
@@ -193,7 +193,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.arrow_back, color: Colors.white),
+              child: Icon(Icons.arrow_back, color: MyColors.iconLightColor),
             ),
           ],
         ),

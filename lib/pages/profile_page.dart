@@ -187,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                     width: 35,
                                     child: Icon(
                                       Icons.arrow_back,
-                                      color: Colors.white,
+                                      color: MyColors.iconLightColor,
                                     )),
                                 alignment: Alignment.topLeft,
                               )
@@ -283,7 +283,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                   ? Icon(
                                                       Icons.person_add,
                                                       size: 25,
-                                                      color: Colors.white,
+                                                      color: MyColors.iconLightColor,
                                                     )
                                                   : Image.asset(Strings.person_remove, scale: 1.3),
                                             ),
@@ -304,7 +304,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                 child: Icon(
                                                   Icons.chat_bubble_outline,
                                                   size: 23,
-                                                  color: Colors.white,
+                                                  color: MyColors.iconLightColor,
                                                 )),
                                           )
                                         ],
@@ -331,7 +331,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                               _editing
                                                   ? language(en: 'Save', ar: 'حفظ')
                                                   : language(en: 'Edit Profile', ar: 'تعديل'),
-                                              style: TextStyle(fontSize: 14, color: Colors.white)),
+                                              style: TextStyle(fontSize: 14, color: MyColors.textLightColor)),
                                         ),
                                       ),
                                 // widget.userId != Constants.currentUserID
@@ -369,7 +369,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                 controller: _nameController,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                                                    fontSize: 20, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                             Container(
@@ -379,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                 controller: _usernameController,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+                                                    fontSize: 14, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ],
@@ -390,12 +390,12 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                             Text(
                                               _user?.name ?? '',
                                               style: TextStyle(
-                                                  fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  fontSize: 20, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
                                             ),
                                             Text(
                                               '@${_user?.username ?? ''}',
                                               style: TextStyle(
-                                                  fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+                                                  fontSize: 14, color: MyColors.textInactiveColor, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -621,7 +621,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
             : Center(
                 child: Text(
                   language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: MyColors.textLightColor),
                 ),
               );
         break;

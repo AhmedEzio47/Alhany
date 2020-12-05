@@ -119,7 +119,7 @@ class _SongsPageState extends State<SongsPage> {
                 child: Align(
                   child: Text(
                     widget.singer.name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MyColors.textLightColor),
                   ),
                   alignment: Alignment.topCenter,
                 ),

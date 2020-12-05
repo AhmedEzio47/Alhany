@@ -92,7 +92,7 @@ class _SingersPageState extends State<SingersPage> {
                 child: Align(
                   child: Text(
                     language(en: 'Singers', ar: 'المطربون'),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MyColors.textLightColor),
                   ),
                   alignment: Alignment.topCenter,
                 ),

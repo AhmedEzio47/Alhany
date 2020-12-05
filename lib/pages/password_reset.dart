@@ -86,10 +86,10 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       child: Icon(
                         Icons.mail_outline,
                         size: 30,
-                        color: Colors.grey.shade400,
+                        color: MyColors.iconInactiveColor,
                       )),
                   hintText: 'johndoe@example.com',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
+                  hintStyle: TextStyle(color: MyColors.textInactiveColor, fontSize: 18),
                   border: InputBorder.none,
                 )),
           )
@@ -136,7 +136,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
         child: Text(
           language(en: 'Reset Password', ar: 'استعادة كلمة المرور'),
-          style: TextStyle(fontSize: 20, color: Colors.white),
+          style: TextStyle(fontSize: 20, color: MyColors.textLightColor),
         ),
       ),
     );
@@ -153,7 +153,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.arrow_back, color: Colors.white),
+              child: Icon(Icons.arrow_back, color: MyColors.iconLightColor),
             ),
           ],
         ),
