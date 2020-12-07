@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Alhany/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 

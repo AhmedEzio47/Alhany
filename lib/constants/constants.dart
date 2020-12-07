@@ -45,4 +45,6 @@ class Constants {
 
   static double musicVolume = .8;
   static double voiceVolume = 3.5;
+
+  static int endPositionOffsetInMilliSeconds = 600;
 }

@@ -66,8 +66,23 @@ class MyAudioPlayer with ChangeNotifier {
 
     advancedPlayer.positionHandler = (p) {
       position = p;
+      print('P:${p.inMilliseconds}');
+      print('D:${duration.inMilliseconds}');
       notifyListeners();
-      if (duration.inMilliseconds - p.inMilliseconds < 200) {
+
+      if (duration.inMilliseconds - p.inMilliseconds < Constants.endPositionOffsetInMilliSeconds) {
+        stop();
+        if (urlList != null) {
+          if (this.index < urlList.length - 1)
+            this.index++;
+          else
+            this.index = 0;
+          play(index: this.index);
+          notifyListeners();
+        } else {
+          stop();
+        }
+      } else if (duration.inMilliseconds - p.inMilliseconds == 0) {
         if (urlList != null) {
           if (this.index < urlList.length - 1)
             this.index++;
