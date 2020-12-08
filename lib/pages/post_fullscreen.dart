@@ -374,11 +374,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
                     InkWell(
                       onTap: () {
                         if (_record != null) {
-                          AppUtil.sharePost('${widget.singer.name} singed ${widget.melody..name}', '',
-                              recordId: _record.id, newsId: widget.news.id);
+                          AppUtil.sharePost('${widget.singer.name} singed ${widget.melody?.name}', '',
+                              recordId: _record.id, newsId: widget.news?.id);
                         } else {
                           AppUtil.sharePost('${Constants.startUser.name} post some news', '',
-                              recordId: _record.id, newsId: widget.news.id);
+                              recordId: _record?.id, newsId: widget.news?.id);
                         }
                       },
                       child: Container(
