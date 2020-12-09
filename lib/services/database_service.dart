@@ -174,7 +174,7 @@ class DatabaseService {
         .limit(1)
         .getDocuments();
     List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
-    return records[0];
+    return records.length > 0 ? records[0] : null;
   }
 
   static Future<Record> getPrevRecord(Timestamp lastVisiblePostSnapShot) async {
@@ -184,7 +184,7 @@ class DatabaseService {
         .limit(1)
         .getDocuments();
     List<Record> records = recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
-    return records[0];
+    return records.length > 0 ? records[0] : null;
   }
 
   static getUserRecords(String userId) async {
