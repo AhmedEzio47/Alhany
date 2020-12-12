@@ -18,7 +18,7 @@ class PaymentService {
   static String apiBase = 'https://api.stripe.com//v1';
   static String paymentApiUrl = '$apiBase/payment_intents';
   static Map<String, String> headers = {
-    'Authorization': 'Bearer ${Strings.paymentSecret}',
+    'Authorization': 'Bearer ${Strings.stripeSecret}',
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 
@@ -124,8 +124,8 @@ class PaymentService {
 
   static initPayment() {
     StripePayment.setOptions(StripeOptions(
-        publishableKey: Strings.paymentPublishableKey,
+        publishableKey: Strings.stripePublishableKey,
         merchantId: Strings.merchantId, //YOUR_MERCHANT_ID
-        androidPayMode: 'test'));
+        androidPayMode: 'live'));
   }
 }

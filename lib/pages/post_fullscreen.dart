@@ -13,6 +13,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:video_player/video_player.dart';
 
 class PostFullscreen extends StatefulWidget {
@@ -143,18 +144,19 @@ class _PostFullscreenState extends State<PostFullscreen> {
     super.initState();
     _pageController.addListener(() {
       print(_pageController.position.userScrollDirection.toString());
-      if (_pageController.position.userScrollDirection != _scrollDirection){
+      if (_pageController.position.userScrollDirection != _scrollDirection) {
         print('direction changed');
         setState(() {
           _scrollable = true;
         });
       }
       if (_pageController.position.userScrollDirection == ScrollDirection.forward) {
-        print('swiped up');
-      } else {
         print('swiped down');
+      } else {
+        print('swiped up');
       }
 
+      _scrollDirection = _pageController.position.userScrollDirection;
     });
     _next = widget.record;
     _previous = widget.record;
@@ -194,50 +196,72 @@ class _PostFullscreenState extends State<PostFullscreen> {
     _controller.pause();
     _controller.dispose();
   }
+
   Record _next, _previous;
+  DragStartDetails startVerticalDragDetails;
+  DragUpdateDetails updateVerticalDragDetails;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
           widget.record != null
-              ? PageView.builder(
-                  controller: _pageController,
-                  physics: !_scrollable?
-                    ClampingScrollPhysics() : null,
-                  onPageChanged: (index) async {
-                    Record record, next,previous;
-                    if (index > _page) {
-                      record = await DatabaseService.getNextRecord(_record.timestamp);
-                      next = await DatabaseService.getNextRecord(record.timestamp);
-
-                    } else {
-                      record = await DatabaseService.getPrevRecord(_record.timestamp);
-                      previous = await DatabaseService.getPrevRecord(record.timestamp);
-                    }
-                    if((next == null && _scrollDirection == ScrollDirection.reverse) || (previous == null && _scrollDirection == ScrollDirection.forward)){
+              ? SimpleGestureDetector(
+                  onVerticalSwipe: (SwipeDirection swipeDirection) {
+                    if (swipeDirection == SwipeDirection.up && _scrollDirection == ScrollDirection.forward) {
                       setState(() {
-                        _scrollable = false;
+                        _scrollable = true;
                       });
+                      _pageController.animateToPage(_page + 1,
+                          duration: Duration(milliseconds: 800), curve: Curves.easeOut);
+                      print('Swipe up');
+                    } else if (swipeDirection == SwipeDirection.down && _scrollDirection == ScrollDirection.reverse) {
+                      setState(() {
+                        _scrollable = true;
+                      });
+                      _pageController.animateToPage(_page - 1,
+                          duration: Duration(milliseconds: 800), curve: Curves.easeOut);
+                      print('Swipe down');
                     }
-                    setState(() {
-                      _record = record;
-                      _next = next;
-                      _previous = previous;
-                    });
-                    DatabaseService.incrementRecordViews(_record.id);
-                    initVideoPlayer(_record.url);
-                    getSinger();
-                    isFollowing();
-                    initLikes(record: _record, news: widget.news);
-                    setState(() {
-                      _page = index;
-                    });
                   },
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (context, index) {
-                    return fullscreen();
-                  })
+                  child: PageView.builder(
+                      controller: _pageController,
+                      physics: !_scrollable ? NeverScrollableScrollPhysics() : null,
+                      onPageChanged: (index) async {
+                        Record record, next, previous;
+                        if (index > _page) {
+                          record = await DatabaseService.getNextRecord(_record.timestamp);
+                          next = await DatabaseService.getNextRecord(record.timestamp);
+                        } else {
+                          record = await DatabaseService.getPrevRecord(_record.timestamp);
+                          previous = await DatabaseService.getPrevRecord(record.timestamp);
+                        }
+                        if ((next == null && _scrollDirection == ScrollDirection.reverse) ||
+                            (previous == null && _scrollDirection == ScrollDirection.forward)) {
+                          setState(() {
+                            _scrollable = false;
+                          });
+                        }
+                        setState(() {
+                          _record = record;
+                          _next = next;
+                          _previous = previous;
+                        });
+                        DatabaseService.incrementRecordViews(_record.id);
+                        initVideoPlayer(_record.url);
+                        getSinger();
+                        isFollowing();
+                        initLikes(record: _record, news: widget.news);
+                        setState(() {
+                          _page = index;
+                        });
+                      },
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        return fullscreen();
+                      }),
+                )
               : fullscreen(),
         ],
       ),

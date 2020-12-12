@@ -81,7 +81,7 @@ class _MelodyItemState extends State<MelodyItem> {
           ),
           title: Text(widget.melody.name),
           subtitle: Text(_author?.name ?? widget.melody.singer ?? ''),
-          trailing: widget.melody.isSong
+          trailing: widget.melody?.isSong ?? false
               ? InkWell(
                   onTap: () async {
                     _isFavourite

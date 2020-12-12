@@ -25,12 +25,11 @@ class Strings {
   static const List<String> melodyCategories = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
 
   //Stripe Payment
-  static const String paymentPublishableKey =
-      "pk_test_51HeoJlKcQzB5OdSOSFKB5rf0v6micyHbExBXYogHRcSbqoMP0LUWuPjs3ojQz9mQBMnLyY6S5ZIpWKsNwxGc43l800htm1GfEw";
-  static const String paymentSecret =
-      'sk_test_51HeoJlKcQzB5OdSOt6U9dHeE0AycFD0go3mogovD0SDtBWNIxesy5p5R414Z8dPiIDkPS88ecWhtIKqibOiyW9XA00em5I6n1c';
+  static const String stripePublishableKey = "pk_live_5FXfeoysTRHWhu3PV2mRLVSi00JgLi7Zyt";
+  static const String stripeSecret =
+      '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';
   // static const merchantId = "05674331101508648233";
-  static const merchantId = "Test";
+  static const merchantId = "Live";
 
   //File encryption key
   static const encryption_key = 'Zjssy8Zsn38cjDSldzZDamfJ381xDgPm';
