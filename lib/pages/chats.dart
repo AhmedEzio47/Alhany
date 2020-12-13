@@ -13,8 +13,7 @@ class Chats extends StatefulWidget {
   _ChatsState createState() => _ChatsState();
 }
 
-class _ChatsState extends State<Chats>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+class _ChatsState extends State<Chats> with WidgetsBindingObserver {
   List<String> _chattersIds = [];
 
   bool _searching = false;
@@ -112,8 +111,7 @@ class _ChatsState extends State<Chats>
   }
 
   void updateOnlineUserState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
       DatabaseService.makeUserOffline();
     } else if (state == AppLifecycleState.resumed) {
       DatabaseService.makeUserOnline();
@@ -122,7 +120,7 @@ class _ChatsState extends State<Chats>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    build(context);
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -132,8 +130,7 @@ class _ChatsState extends State<Chats>
               decoration: BoxDecoration(
                 color: MyColors.primaryColor,
                 image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(
-                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
                   image: AssetImage(Strings.default_bg),
                   fit: BoxFit.cover,
                 ),
@@ -153,8 +150,7 @@ class _ChatsState extends State<Chats>
                             ),
                           );
                         },
-                        itemCount:
-                            !_searching ? _chats.length : _filteredChats.length,
+                        itemCount: !_searching ? _chats.length : _filteredChats.length,
                         itemBuilder: !_searching
                             ? (BuildContext context, int index) {
                                 ChatItem chat = _chats[index];
@@ -213,9 +209,7 @@ class _ChatsState extends State<Chats>
                       });
                     }
                     _chats.forEach((chatItem) {
-                      if (chatItem.name
-                          .toLowerCase()
-                          .contains(text.toLowerCase())) {
+                      if (chatItem.name.toLowerCase().contains(text.toLowerCase())) {
                         setState(() {
                           _filteredChats.add(chatItem);
                         });

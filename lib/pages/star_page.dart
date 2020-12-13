@@ -19,7 +19,7 @@ class StarPage extends StatefulWidget {
   _StarPageState createState() => _StarPageState();
 }
 
-class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
+class _StarPageState extends State<StarPage> {
   ScrollController _melodiesScrollController = ScrollController();
   TabController _tabController;
   int _page = 0;
@@ -76,7 +76,7 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
     getSlideImages();
     getMelodies();
     super.initState();
-    _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
+    _tabController = TabController(length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
         if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
@@ -175,7 +175,8 @@ class _StarPageState extends State<StarPage> with TickerProviderStateMixin {
                                           onTap: () => Navigator.of(context).pushNamed('/slide-images'),
                                           child: Text(
                                             'Edit Slide show images',
-                                            style: TextStyle(color: MyColors.textLightColor, decoration: TextDecoration.underline),
+                                            style: TextStyle(
+                                                color: MyColors.textLightColor, decoration: TextDecoration.underline),
                                           )),
                                     )
                                   : Container(),

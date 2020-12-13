@@ -19,16 +19,10 @@ class FlipLoader extends StatefulWidget {
 
   @override
   _FlipLoaderState createState() => _FlipLoaderState(
-      this.loaderBackground,
-      this.iconColor,
-      this.icon,
-      this.animationType,
-      this.shape,
-      this.rotateIcon);
+      this.loaderBackground, this.iconColor, this.icon, this.animationType, this.shape, this.rotateIcon);
 }
 
-class _FlipLoaderState extends State<FlipLoader>
-    with SingleTickerProviderStateMixin {
+class _FlipLoaderState extends State<FlipLoader> {
   AnimationController controller;
   Animation<double> rotationHorizontal;
   Animation<double> rotationVertical;
@@ -40,8 +34,7 @@ class _FlipLoaderState extends State<FlipLoader>
   String shape;
   bool rotateIcon;
 
-  _FlipLoaderState(this.loaderColor, this.iconColor, this.icon,
-      this.animationType, this.shape, this.rotateIcon);
+  _FlipLoaderState(this.loaderColor, this.iconColor, this.icon, this.animationType, this.shape, this.rotateIcon);
 
   @override
   void initState() {
@@ -91,34 +84,24 @@ class _FlipLoaderState extends State<FlipLoader>
 
     switch (type) {
       case "half_flip":
-        animCtrl = AnimationController(
-            duration: const Duration(milliseconds: 4000), vsync: this);
+        animCtrl = AnimationController(duration: const Duration(milliseconds: 4000));
 
         // Horizontal animation
-        this.rotationHorizontal = Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-                parent: animCtrl,
-                curve: Interval(0.0, 0.50, curve: Curves.linear)));
+        this.rotationHorizontal = Tween<double>(begin: 0.0, end: 1.0)
+            .animate(CurvedAnimation(parent: animCtrl, curve: Interval(0.0, 0.50, curve: Curves.linear)));
 
         // Vertical animation
-        this.rotationVertical = Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-                parent: animCtrl,
-                curve: Interval(0.50, 1.0, curve: Curves.linear)));
+        this.rotationVertical = Tween<double>(begin: 0.0, end: 1.0)
+            .animate(CurvedAnimation(parent: animCtrl, curve: Interval(0.50, 1.0, curve: Curves.linear)));
         break;
       case "full_flip":
       default:
-        animCtrl = AnimationController(
-            duration: const Duration(milliseconds: 2000), vsync: this);
+        animCtrl = AnimationController(duration: const Duration(milliseconds: 2000));
 
-        this.rotationHorizontal = Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-                parent: animCtrl,
-                curve: Interval(0.0, 0.50, curve: Curves.linear)));
-        this.rotationVertical = Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-                parent: animCtrl,
-                curve: Interval(0.50, 1.0, curve: Curves.linear)));
+        this.rotationHorizontal = Tween<double>(begin: 0.0, end: 1.0)
+            .animate(CurvedAnimation(parent: animCtrl, curve: Interval(0.0, 0.50, curve: Curves.linear)));
+        this.rotationVertical = Tween<double>(begin: 0.0, end: 1.0)
+            .animate(CurvedAnimation(parent: animCtrl, curve: Interval(0.50, 1.0, curve: Curves.linear)));
         break;
     }
 
@@ -147,20 +130,15 @@ class _FlipLoaderState extends State<FlipLoader>
             alignment: Alignment.center,
             child: Container(
                 decoration: BoxDecoration(
-                  shape:
-                      shape == "circle" ? BoxShape.circle : BoxShape.rectangle,
-                  borderRadius: shape == "circle"
-                      ? null
-                      : new BorderRadius.all(const Radius.circular(8.0)),
+                  shape: shape == "circle" ? BoxShape.circle : BoxShape.rectangle,
+                  borderRadius: shape == "circle" ? null : new BorderRadius.all(const Radius.circular(8.0)),
                   color: loaderColor,
                 ),
                 width: 40.0,
                 height: 40.0,
                 child: rotateIcon == true
                     ? new RotationTransition(
-                        turns: rotationHorizontal.value == 1.0
-                            ? rotationVertical
-                            : rotationHorizontal,
+                        turns: rotationHorizontal.value == 1.0 ? rotationVertical : rotationHorizontal,
                         child: new Center(
                           child: Icon(
                             icon,
@@ -196,9 +174,7 @@ class _FlipLoaderState extends State<FlipLoader>
             child: Container(
               decoration: BoxDecoration(
                 shape: shape == "circle" ? BoxShape.circle : BoxShape.rectangle,
-                borderRadius: shape == "circle"
-                    ? null
-                    : new BorderRadius.all(const Radius.circular(8.0)),
+                borderRadius: shape == "circle" ? null : new BorderRadius.all(const Radius.circular(8.0)),
                 color: loaderColor,
               ),
               width: 40.0,

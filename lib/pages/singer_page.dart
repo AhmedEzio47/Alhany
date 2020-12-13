@@ -28,7 +28,7 @@ class SingerPage extends StatefulWidget {
   _SingerPageState createState() => _SingerPageState();
 }
 
-class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
+class _SingerPageState extends State<SingerPage> {
   TabController _tabController;
   int _page;
   ScrollController _songsScrollController = ScrollController();
@@ -106,7 +106,7 @@ class _SingerPageState extends State<SingerPage> with TickerProviderStateMixin {
           print("reached the top");
         } else {}
       });
-    _tabController = TabController(vsync: this, length: 2, initialIndex: 1);
+    _tabController = TabController(length: 2, initialIndex: 1);
     super.initState();
   }
 

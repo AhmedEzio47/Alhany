@@ -30,7 +30,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage> {
   bool _editing = false;
 
   TextEditingController _descriptionController = TextEditingController();
@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   }
 
   configureTabs() {
-    _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
+    _tabController = TabController(length: 2, initialIndex: 0);
 
     _tabs = [
       Tab(
@@ -369,7 +369,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                 controller: _nameController,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    fontSize: 20, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
+                                                    fontSize: 20,
+                                                    color: MyColors.textLightColor,
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                             Container(
@@ -379,7 +381,9 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                                 controller: _usernameController,
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    fontSize: 14, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
+                                                    fontSize: 14,
+                                                    color: MyColors.textLightColor,
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ],
@@ -390,12 +394,16 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                                             Text(
                                               _user?.name ?? '',
                                               style: TextStyle(
-                                                  fontSize: 20, color: MyColors.textLightColor, fontWeight: FontWeight.bold),
+                                                  fontSize: 20,
+                                                  color: MyColors.textLightColor,
+                                                  fontWeight: FontWeight.bold),
                                             ),
                                             Text(
                                               '@${_user?.username ?? ''}',
                                               style: TextStyle(
-                                                  fontSize: 14, color: MyColors.textInactiveColor, fontWeight: FontWeight.bold),
+                                                  fontSize: 14,
+                                                  color: MyColors.textInactiveColor,
+                                                  fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),

@@ -21,7 +21,7 @@ class WelcomePage extends StatefulWidget {
   _WelcomePageState createState() => new _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin {
+class _WelcomePageState extends State<WelcomePage> {
   String _errorMsgEmail = '';
 
   final FocusNode myFocusNodePassword = FocusNode();
@@ -442,7 +442,8 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                                 Text(
                                                   "FACEBOOK",
                                                   textAlign: TextAlign.center,
-                                                  style: TextStyle(color: MyColors.textLightColor, fontWeight: FontWeight.bold),
+                                                  style: TextStyle(
+                                                      color: MyColors.textLightColor, fontWeight: FontWeight.bold),
                                                 ),
                                               ],
                                             ),
@@ -529,7 +530,8 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                                 Text(
                                                   "GOOGLE",
                                                   textAlign: TextAlign.left,
-                                                  style: TextStyle(color: MyColors.textLightColor, fontWeight: FontWeight.bold),
+                                                  style: TextStyle(
+                                                      color: MyColors.textLightColor, fontWeight: FontWeight.bold),
                                                 ),
                                               ],
                                             ),

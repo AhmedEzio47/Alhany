@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   TabController _tabController;
   int _page = 0;
   bool _isPlaying = false;
@@ -523,7 +523,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _pageController = PageController(
       initialPage: 0,
     );
-    _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
+    _tabController = TabController(length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
 
