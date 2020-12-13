@@ -51,7 +51,7 @@ class _RootPageState extends State<RootPage> {
       body: Container(
         color: MyColors.primaryColor,
         alignment: Alignment.center,
-        child: Center(
+        child: Center(//
             child: FlipLoader(
                 loaderBackground: Colors.white,
                 iconColor: MyColors.primaryColor,
