@@ -692,6 +692,13 @@ class _HomePageState extends State<HomePage>
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
+              List<Singer> singers =
+                  await DatabaseService.getSingersByCategory(category.name);
+              for (Singer singer in singers) {
+                await singersRef
+                    .document(singer.id)
+                    .updateData({'category': _categoryController.text});
+              }
               await categoriesRef.document(category.id).updateData({
                 'name': _categoryController.text,
                 'search': searchList(_categoryController.text),
