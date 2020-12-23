@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage>
 
   PageController _pageController;
 
-  var _categoryController;
+  TextEditingController _categoryController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +203,7 @@ class _HomePageState extends State<HomePage>
   }
 
   List<Category> _categories = [];
-  Map<String, List<Singer>> _categorySingers = {};
+  Map<Category, List<Singer>> _categorySingers = {};
   getCategories() async {
     List<Category> categories = await DatabaseService.getCategories();
     if (mounted) {
@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage>
           await DatabaseService.getSingersByCategory(category.name);
       if (mounted) {
         setState(() {
-          _categorySingers.putIfAbsent(category.name, () => singers);
+          _categorySingers.putIfAbsent(category, () => singers);
         });
       }
     }
@@ -238,6 +238,7 @@ class _HomePageState extends State<HomePage>
                     children: [
                       Constants.isAdmin
                           ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   _categories[index].name,
@@ -247,10 +248,16 @@ class _HomePageState extends State<HomePage>
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(
-                                  width: 10,
+                                  width: 5,
                                 ),
                                 IconButton(
-                                    icon: Icon(Icons.edit), onPressed: () {})
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: MyColors.iconLightColor,
+                                    ),
+                                    onPressed: () async {
+                                      await editCategory(_categories[index]);
+                                    })
                               ],
                             )
                           : Center(
@@ -657,7 +664,7 @@ class _HomePageState extends State<HomePage>
 
   editCategory(Category category) async {
     setState(() {
-      _categoryController.text = category;
+      _categoryController.text = category.name;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -691,6 +698,7 @@ class _HomePageState extends State<HomePage>
               });
               AppUtil.showToast('Name Updated');
               Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/');
             },
             color: MyColors.primaryColor,
             child: Text(
