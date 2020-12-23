@@ -36,7 +36,7 @@ class CurvedNavigationBar extends StatefulWidget {
   CurvedNavigationBarState createState() => CurvedNavigationBarState();
 }
 
-class CurvedNavigationBarState extends State<CurvedNavigationBar> {
+class CurvedNavigationBarState extends State<CurvedNavigationBar> with SingleTickerProviderStateMixin{
   double _startingPos;
   int _endingIndex = 0;
   double _pos;
@@ -52,7 +52,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
     _length = widget.items.length;
     _pos = widget.index / _length;
     _startingPos = widget.index / _length;
-    _animationController = AnimationController(value: _pos);
+    _animationController = AnimationController(vsync:this, value: _pos);
     _animationController.addListener(() {
       setState(() {
         _pos = _animationController.value;

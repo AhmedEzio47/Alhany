@@ -22,7 +22,7 @@ class FlipLoader extends StatefulWidget {
       this.loaderBackground, this.iconColor, this.icon, this.animationType, this.shape, this.rotateIcon);
 }
 
-class _FlipLoaderState extends State<FlipLoader> {
+class _FlipLoaderState extends State<FlipLoader> with SingleTickerProviderStateMixin{
   AnimationController controller;
   Animation<double> rotationHorizontal;
   Animation<double> rotationVertical;
@@ -96,7 +96,7 @@ class _FlipLoaderState extends State<FlipLoader> {
         break;
       case "full_flip":
       default:
-        animCtrl = AnimationController(duration: const Duration(milliseconds: 2000));
+        animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 2000));
 
         this.rotationHorizontal = Tween<double>(begin: 0.0, end: 1.0)
             .animate(CurvedAnimation(parent: animCtrl, curve: Interval(0.0, 0.50, curve: Curves.linear)));

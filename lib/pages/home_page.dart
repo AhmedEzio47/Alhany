@@ -1,11 +1,13 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/category_model.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
+import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
@@ -21,12 +23,15 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   TabController _tabController;
   int _page = 0;
   bool _isPlaying = false;
 
   PageController _pageController;
+
+  var _categoryController;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +58,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -76,7 +82,8 @@ class _HomePageState extends State<HomePage> {
                               curve: Curves.easeOut,
                             );
                           },
-                          labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          labelStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                           labelColor: MyColors.accentColor,
                           unselectedLabelColor: Colors.grey,
                           controller: _tabController,
@@ -104,7 +111,11 @@ class _HomePageState extends State<HomePage> {
                               });
                               _currentPage();
                             },
-                            children: [_songsPage(), _melodiesPage(), _favouritesPage()],
+                            children: [
+                              _songsPage(),
+                              _melodiesPage(),
+                              _favouritesPage()
+                            ],
                           ),
                         ),
                       )
@@ -191,20 +202,21 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<String> _categories = [];
+  List<Category> _categories = [];
   Map<String, List<Singer>> _categorySingers = {};
   getCategories() async {
-    List<String> categories = await DatabaseService.getCategories();
+    List<Category> categories = await DatabaseService.getCategories();
     if (mounted) {
       setState(() {
         _categories = categories;
       });
     }
-    for (String category in categories) {
-      List<Singer> singers = await DatabaseService.getSingersByCategory(category);
+    for (Category category in categories) {
+      List<Singer> singers =
+          await DatabaseService.getSingersByCategory(category.name);
       if (mounted) {
         setState(() {
-          _categorySingers.putIfAbsent(category, () => singers);
+          _categorySingers.putIfAbsent(category.name, () => singers);
         });
       }
     }
@@ -224,12 +236,32 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Center(
-                        child: Text(
-                          _categories[index],
-                          style: TextStyle(color: MyColors.textLightColor, fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                      Constants.isAdmin
+                          ? Row(
+                              children: [
+                                Text(
+                                  _categories[index].name,
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                IconButton(
+                                    icon: Icon(Icons.edit), onPressed: () {})
+                              ],
+                            )
+                          : Center(
+                              child: Text(
+                                _categories[index].name,
+                                style: TextStyle(
+                                    color: MyColors.textLightColor,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
                       Expanded(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -240,58 +272,100 @@ class _HomePageState extends State<HomePage> {
                                 padding: EdgeInsets.only(top: 8),
                                 color: Colors.black26,
                                 child: ListView.builder(
-                                    itemCount: _categorySingers[_categories[index]]?.length + 1,
+                                    itemCount:
+                                        _categorySingers[_categories[index]]
+                                                ?.length ??
+                                            0 + 1,
                                     scrollDirection: Axis.horizontal,
                                     itemBuilder: (context, index2) {
-                                      return index2 < _categorySingers[_categories[index]]?.length
+                                      return index2 <
+                                              _categorySingers[
+                                                      _categories[index]]
+                                                  ?.length
                                           ? InkWell(
                                               onTap: () {
-                                                Navigator.of(context).pushNamed('/singer-page', arguments: {
-                                                  'singer': _categorySingers[_categories[index]][index2],
-                                                  'data_type': DataTypes.SONGS
-                                                });
+                                                Navigator.of(context).pushNamed(
+                                                    '/singer-page',
+                                                    arguments: {
+                                                      'singer':
+                                                          _categorySingers[
+                                                                  _categories[
+                                                                      index]]
+                                                              [index2],
+                                                      'data_type':
+                                                          DataTypes.SONGS
+                                                    });
                                               },
                                               child: Container(
                                                 height: 110,
                                                 width: 110,
                                                 child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   children: [
                                                     CachedImage(
                                                       width: 100,
                                                       height: 100,
-                                                      imageShape: BoxShape.circle,
-                                                      imageUrl: _categorySingers[_categories[index]][index2]?.imageUrl,
-                                                      defaultAssetImage: Strings.default_profile_image,
+                                                      imageShape:
+                                                          BoxShape.circle,
+                                                      imageUrl: _categorySingers[
+                                                                  _categories[
+                                                                      index]]
+                                                              [index2]
+                                                          ?.imageUrl,
+                                                      defaultAssetImage: Strings
+                                                          .default_profile_image,
                                                     ),
                                                     Text(
-                                                      _categorySingers[_categories[index]][index2]?.name,
+                                                      _categorySingers[
+                                                                  _categories[
+                                                                      index]]
+                                                              [index2]
+                                                          ?.name,
                                                       style: TextStyle(
-                                                        color: Colors.grey.shade300,
+                                                        color: Colors
+                                                            .grey.shade300,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                             )
-                                          : _categorySingers[_categories[index]]?.length == 15
+                                          : _categorySingers[_categories[index]]
+                                                      ?.length ==
+                                                  15
                                               ? InkWell(
                                                   onTap: () {
-                                                    Navigator.of(context).pushNamed('/category-page',
-                                                        arguments: {'category': _categories[index]});
+                                                    Navigator.of(context)
+                                                        .pushNamed(
+                                                            '/category-page',
+                                                            arguments: {
+                                                          'category':
+                                                              _categories[index]
+                                                        });
                                                   },
                                                   child: Padding(
-                                                    padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 46),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            right: 8.0,
+                                                            left: 8.0,
+                                                            bottom: 46),
                                                     child: Center(
                                                         child: Container(
-                                                      padding: EdgeInsets.all(8),
-                                                      color: MyColors.lightPrimaryColor,
+                                                      padding:
+                                                          EdgeInsets.all(8),
+                                                      color: MyColors
+                                                          .lightPrimaryColor,
                                                       child: Text(
                                                         'VIEW ALL',
                                                         style: TextStyle(
-                                                            color: MyColors.darkPrimaryColor,
-                                                            decoration: TextDecoration.underline),
+                                                            color: MyColors
+                                                                .darkPrimaryColor,
+                                                            decoration:
+                                                                TextDecoration
+                                                                    .underline),
                                                       ),
                                                     )),
                                                   ),
@@ -327,13 +401,15 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       setState(() {
         _records = records;
-        if (_records.length > 0) this.lastVisiblePostSnapShot = records.last.timestamp;
+        if (_records.length > 0)
+          this.lastVisiblePostSnapShot = records.last.timestamp;
       });
     }
   }
 
   nextRecords() async {
-    List<Record> records = await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
+    List<Record> records =
+        await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
     if (records.length > 0) {
       setState(() {
         records.forEach((element) => _records.add(element));
@@ -379,7 +455,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: Constants.language == 'en' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          crossAxisAlignment: Constants.language == 'en'
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.end,
           children: [
             Container(
               height: 140,
@@ -398,8 +476,12 @@ class _HomePageState extends State<HomePage> {
                             return index < _singers.length
                                 ? InkWell(
                                     onTap: () {
-                                      Navigator.of(context).pushNamed('/singer-page',
-                                          arguments: {'singer': _singers[index], 'data_type': DataTypes.MELODIES});
+                                      Navigator.of(context).pushNamed(
+                                          '/singer-page',
+                                          arguments: {
+                                            'singer': _singers[index],
+                                            'data_type': DataTypes.MELODIES
+                                          });
                                     },
                                     child: Container(
                                       height: 120,
@@ -411,11 +493,13 @@ class _HomePageState extends State<HomePage> {
                                             height: 100,
                                             imageShape: BoxShape.circle,
                                             imageUrl: _singers[index].imageUrl,
-                                            defaultAssetImage: Strings.default_profile_image,
+                                            defaultAssetImage:
+                                                Strings.default_profile_image,
                                           ),
                                           Text(
                                             _singers[index].name,
-                                            style: TextStyle(color: MyColors.textLightColor),
+                                            style: TextStyle(
+                                                color: MyColors.textLightColor),
                                           )
                                         ],
                                       ),
@@ -424,10 +508,14 @@ class _HomePageState extends State<HomePage> {
                                 : _singers.length == 15
                                     ? InkWell(
                                         onTap: () {
-                                          Navigator.of(context).pushNamed('/singers-page');
+                                          Navigator.of(context)
+                                              .pushNamed('/singers-page');
                                         },
                                         child: Padding(
-                                          padding: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 70),
+                                          padding: const EdgeInsets.only(
+                                              right: 8.0,
+                                              left: 8.0,
+                                              bottom: 70),
                                           child: Center(
                                               child: Container(
                                             padding: EdgeInsets.all(8),
@@ -435,8 +523,10 @@ class _HomePageState extends State<HomePage> {
                                             child: Text(
                                               'VIEW ALL',
                                               style: TextStyle(
-                                                  color: MyColors.darkPrimaryColor,
-                                                  decoration: TextDecoration.underline),
+                                                  color:
+                                                      MyColors.darkPrimaryColor,
+                                                  decoration:
+                                                      TextDecoration.underline),
                                             ),
                                           )),
                                         ),
@@ -466,7 +556,8 @@ class _HomePageState extends State<HomePage> {
             Flexible(
                 fit: FlexFit.loose,
                 flex: 8,
-                child: MediaQuery.removePadding(context: context, removeTop: true, child: recordListView()))
+                child: MediaQuery.removePadding(
+                    context: context, removeTop: true, child: recordListView()))
           ],
         ),
       ),
@@ -523,17 +614,19 @@ class _HomePageState extends State<HomePage> {
     _pageController = PageController(
       initialPage: 0,
     );
-    _tabController = TabController(length: 3, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
 
     _recordsScrollController
       ..addListener(() {
-        if (_recordsScrollController.offset >= _recordsScrollController.position.maxScrollExtent &&
+        if (_recordsScrollController.offset >=
+                _recordsScrollController.position.maxScrollExtent &&
             !_recordsScrollController.position.outOfRange) {
           print('reached the bottom');
           nextRecords();
-        } else if (_recordsScrollController.offset <= _recordsScrollController.position.minScrollExtent &&
+        } else if (_recordsScrollController.offset <=
+                _recordsScrollController.position.minScrollExtent &&
             !_recordsScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -553,11 +646,60 @@ class _HomePageState extends State<HomePage> {
   var currentBackPressTime;
   Future<bool> _onBackPressed() {
     DateTime now = DateTime.now();
-    if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 2)) {
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > Duration(seconds: 2)) {
       currentBackPressTime = now;
       AppUtil.showToast('Press back again to exit');
       return Future.value(false);
     }
     return Future.value(true);
+  }
+
+  editCategory(Category category) async {
+    setState(() {
+      _categoryController.text = category;
+    });
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _categoryController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(hintText: 'New name'),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_categoryController.text.trim().isEmpty) {
+                AppUtil.showToast('Please enter a name');
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              await categoriesRef.document(category.id).updateData({
+                'name': _categoryController.text,
+                'search': searchList(_categoryController.text),
+              });
+              AppUtil.showToast('Name Updated');
+              Navigator.of(context).pop();
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              'Update',
+              style: TextStyle(color: Colors.white),
+            ),
+          )
+        ],
+      ),
+    )));
   }
 }

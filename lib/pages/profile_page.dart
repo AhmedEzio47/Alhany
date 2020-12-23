@@ -30,7 +30,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin{
   bool _editing = false;
 
   TextEditingController _descriptionController = TextEditingController();
@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   configureTabs() {
-    _tabController = TabController(length: 2, initialIndex: 0);
+    _tabController = TabController(vsync:this,length: 2, initialIndex: 0);
 
     _tabs = [
       Tab(

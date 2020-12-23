@@ -19,7 +19,7 @@ class StarPage extends StatefulWidget {
   _StarPageState createState() => _StarPageState();
 }
 
-class _StarPageState extends State<StarPage> {
+class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin{
   ScrollController _melodiesScrollController = ScrollController();
   TabController _tabController;
   int _page = 0;
@@ -76,7 +76,7 @@ class _StarPageState extends State<StarPage> {
     getSlideImages();
     getMelodies();
     super.initState();
-    _tabController = TabController(length: 2, initialIndex: 0);
+    _tabController = TabController(vsync:this,length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
         if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&

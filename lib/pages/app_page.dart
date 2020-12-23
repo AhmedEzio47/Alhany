@@ -21,7 +21,7 @@ class AppPage extends StatefulWidget {
   _AppPageState createState() => _AppPageState();
 }
 
-class _AppPageState extends State<AppPage> {
+class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
   PageController _pageController;
 
   int _page = 2;

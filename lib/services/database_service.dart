@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/category_model.dart';
 import 'package:Alhany/models/comment_model.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/message_model.dart';
@@ -759,12 +760,9 @@ class DatabaseService {
         .updateData({'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
-  static getCategories() async {
+  static Future<List<Category>> getCategories() async {
     QuerySnapshot snapshot = await categoriesRef.getDocuments();
-    List<String> categories = [];
-    for (DocumentSnapshot category in snapshot.documents) {
-      categories.add(category.data['name']);
-    }
+    List<Category> categories = snapshot.documents.map((doc) => Category.fromDoc(doc)).toList();
     return categories;
   }
 
