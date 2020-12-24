@@ -25,8 +25,6 @@ class _UploadSongsState extends State<UploadSongs> {
   String _songName;
   File _image;
 
-  String _price;
-
   List<String> _singersNames = [];
   //List<String> _categories = [];
 
@@ -114,11 +112,6 @@ class _UploadSongsState extends State<UploadSongs> {
               SizedBox(
                 height: 10,
               ),
-              Text(
-                'Note: Price and singer applies for both single and multiple songs',
-                style: TextStyle(color: MyColors.accentColor),
-                textAlign: TextAlign.center,
-              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -169,21 +162,6 @@ class _UploadSongsState extends State<UploadSongs> {
 //                    ),
                     SizedBox(
                       width: 10,
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        onChanged: (text) {
-                          setState(() {
-                            _price = text;
-                          });
-                        },
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: 'Price',
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -346,7 +324,6 @@ class _UploadSongsState extends State<UploadSongs> {
       'audio_url': songUrl,
       'image_url': imageUrl,
       'is_song': true,
-      'price': _price,
       'singer': _singerName,
 //      'category': _category,
       'search': _songName != null
@@ -391,7 +368,6 @@ class _UploadSongsState extends State<UploadSongs> {
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
         'is_song': true,
-        'price': _price,
         'singer': _singerName,
         'duration': duration,
         'search': searchList(fileNameWithoutExtension),

@@ -22,6 +22,7 @@ class UploadSingleLevelMelody extends StatefulWidget {
 class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
   String _melodyName;
   File _image;
+  String _price;
 
   List<String> _singersNames = [];
   List<Singer> _singers = [];
@@ -71,6 +72,11 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                           },
                           child: Image.asset(Strings.default_melody_image))
                       : Image.file(_image)),
+              Text(
+                'Note: Price and singer applies for both single and multiple melodies',
+                style: TextStyle(color: MyColors.accentColor),
+                textAlign: TextAlign.center,
+              ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
@@ -84,23 +90,46 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                   decoration: InputDecoration(hintText: 'Melody name'),
                 ),
               ),
-              DropdownButton(
-                hint: Text('Singer'),
-                value: _singerName,
-                onChanged: (text) async {
-                  Singer singer = await DatabaseService.getSingerWithName(text);
-                  setState(() {
-                    _singer = singer;
-                    _singerName = text;
-                  });
-                },
-                items: (_singersNames)
-                    .map<DropdownMenuItem<dynamic>>((dynamic value) {
-                  return DropdownMenuItem<dynamic>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: DropdownButton(
+                      hint: Text('Singer'),
+                      value: _singerName,
+                      onChanged: (text) async {
+                        Singer singer =
+                            await DatabaseService.getSingerWithName(text);
+                        setState(() {
+                          _singer = singer;
+                          _singerName = text;
+                        });
+                      },
+                      items: (_singersNames)
+                          .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                        return DropdownMenuItem<dynamic>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      onChanged: (text) {
+                        setState(() {
+                          _price = text;
+                        });
+                      },
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Price',
+                      ),
+                    ),
+                  ),
+                ],
               ),
               RaisedButton(
                   color: MyColors.primaryColor,
@@ -200,15 +229,18 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       'author_id': _singerName == null ? Constants.currentUserID : null,
       'singer': _singerName,
       'is_song': false,
+      'price': _price,
       'search': _melodyName != null
           ? searchList(_melodyName)
           : searchList(fileNameWithoutExtension),
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await singersRef
-        .document(_singer.id)
-        .updateData({'melodies': FieldValue.increment(1)});
+    if (_singer != null) {
+      await singersRef
+          .document(_singer.id)
+          .updateData({'melodies': FieldValue.increment(1)});
+    }
 
     Navigator.of(context).pop();
     AppUtil.showToast(language(
@@ -243,6 +275,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
         'author_id': _singerName == null ? Constants.currentUserID : null,
         'singer': _singerName,
         'is_song': false,
+        'price': _price,
         'search': searchList(fileNameWithoutExtension),
         'duration': duration,
         'timestamp': FieldValue.serverTimestamp()

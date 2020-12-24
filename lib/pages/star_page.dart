@@ -19,7 +19,8 @@ class StarPage extends StatefulWidget {
   _StarPageState createState() => _StarPageState();
 }
 
-class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin{
+class _StarPageState extends State<StarPage>
+    with SingleTickerProviderStateMixin {
   ScrollController _melodiesScrollController = ScrollController();
   TabController _tabController;
   int _page = 0;
@@ -35,25 +36,28 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
   ScrollController _scrollController = ScrollController();
 
   getMelodies() async {
-    List<Melody> melodies = await DatabaseService.getMelodies();
+    List<Melody> melodies = await DatabaseService.getStarMelodies();
     if (mounted) {
       setState(() {
         _melodies = melodies;
-        if (_melodies.length > 0) this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        if (_melodies.length > 0)
+          this.lastVisiblePostSnapShot = melodies.last.timestamp;
       });
     }
   }
 
   List<SlideImage> _slideImages = [];
   getSlideImages() async {
-    List<SlideImage> slideImages = await DatabaseService.getSlideImages('صفحة الفنان');
+    List<SlideImage> slideImages =
+        await DatabaseService.getSlideImages('صفحة الفنان');
     setState(() {
       _slideImages = slideImages;
     });
   }
 
   nextMelodies() async {
-    List<Melody> melodies = await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+    List<Melody> melodies =
+        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -76,14 +80,16 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
     getSlideImages();
     getMelodies();
     super.initState();
-    _tabController = TabController(vsync:this,length: 2, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >=
+                _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           if (!_isSearching) nextMelodies();
-        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <=
+                _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -120,7 +126,8 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -157,12 +164,16 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                                         enlargeCenterPage: true,
                                       ),
                                       itemCount: _slideImages.length,
-                                      itemBuilder: (BuildContext context, int index) => CachedImage(
+                                      itemBuilder:
+                                          (BuildContext context, int index) =>
+                                              CachedImage(
                                         imageUrl: _slideImages[index]?.url,
                                         height: 200,
                                         imageShape: BoxShape.rectangle,
-                                        width: MediaQuery.of(context).size.width,
-                                        defaultAssetImage: Strings.default_cover_image,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        defaultAssetImage:
+                                            Strings.default_cover_image,
                                       ),
                                     )
                                   : Container(),
@@ -172,16 +183,20 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                               Constants.isAdmin
                                   ? Center(
                                       child: InkWell(
-                                          onTap: () => Navigator.of(context).pushNamed('/slide-images'),
+                                          onTap: () => Navigator.of(context)
+                                              .pushNamed('/slide-images'),
                                           child: Text(
                                             'Edit Slide show images',
                                             style: TextStyle(
-                                                color: MyColors.textLightColor, decoration: TextDecoration.underline),
+                                                color: MyColors.textLightColor,
+                                                decoration:
+                                                    TextDecoration.underline),
                                           )),
                                     )
                                   : Container(),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
@@ -189,15 +204,19 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                                       width: 60,
                                       height: 60,
                                       imageShape: BoxShape.circle,
-                                      imageUrl: Constants.startUser?.profileImageUrl,
-                                      defaultAssetImage: Strings.default_profile_image,
+                                      imageUrl:
+                                          Constants.startUser?.profileImageUrl,
+                                      defaultAssetImage:
+                                          Strings.default_profile_image,
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
                                       Constants.startUser?.name,
-                                      style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
+                                      style: TextStyle(
+                                          color: MyColors.textLightColor,
+                                          fontSize: 16),
                                     ),
                                   )
                                 ],
@@ -218,13 +237,18 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                                   controller: _tabController,
                                   tabs: [
                                     Tab(
-                                      text: language(en: 'Melodies', ar: 'آخر الأعمال'),
+                                      text: language(
+                                          en: 'Melodies', ar: 'آخر الأعمال'),
                                     ),
                                     Tab(
-                                      text: language(en: 'News', ar: 'آخر الأخبار'),
+                                      text: language(
+                                          en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
-                              MediaQuery.removePadding(context: context, removeTop: true, child: _currentPage())
+                              MediaQuery.removePadding(
+                                  context: context,
+                                  removeTop: true,
+                                  child: _currentPage())
                             ]),
                           ),
                         ],
@@ -257,27 +281,34 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                 onPressed: () async {
                   AppUtil.showAlertDialog(
                       context: context,
-                      message: language(en: 'What do you want to upload?', ar: 'ما الذي تريد رفعه؟'),
+                      message: language(
+                          en: 'What do you want to upload?',
+                          ar: 'ما الذي تريد رفعه؟'),
                       firstBtnText: language(en: 'Melody', ar: 'لحن'),
                       firstFunc: () async {
                         Navigator.of(context).pop();
                         AppUtil.showAlertDialog(
                             context: context,
                             message: language(
-                                en: 'Single level or multi-level melody?', ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
+                                en: 'Single level or multi-level melody?',
+                                ar: 'لحن مستوى واحد أم متعدد المستويات؟'),
                             firstBtnText: language(en: 'Single', ar: 'أحادي'),
                             firstFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/upload-single-level-melody');
+                              Navigator.of(context)
+                                  .pushNamed('/upload-single-level-melody');
                             },
-                            secondBtnText: language(en: 'Multi level', ar: 'متعدد المستويات'),
+                            secondBtnText: language(
+                                en: 'Multi level', ar: 'متعدد المستويات'),
                             secondFunc: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/upload-multi-level-melody');
+                              Navigator.of(context)
+                                  .pushNamed('/upload-multi-level-melody');
                             });
                       },
                       thirdBtnText: language(en: 'News', ar: 'خبر'),
-                      thirdFunc: () => Navigator.of(context).pushNamed('/upload-news'),
+                      thirdFunc: () =>
+                          Navigator.of(context).pushNamed('/upload-news'),
                       secondBtnText: language(en: 'Song', ar: 'أغنية'),
                       secondFunc: () async {
                         Navigator.of(context).pop();
@@ -355,7 +386,8 @@ class _StarPageState extends State<StarPage> with SingleTickerProviderStateMixin
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_melodies[index].id),
-                          url: _melodies[index].audioUrl ?? _melodies[index].levelUrls.values.elementAt(0),
+                          url: _melodies[index].audioUrl ??
+                              _melodies[index].levelUrls.values.elementAt(0),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _melodies[index].name,
                           btnSize: 30,
