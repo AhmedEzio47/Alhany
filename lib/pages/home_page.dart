@@ -316,7 +316,7 @@ class _HomePageState extends State<HomePage>
                                                       width: 100,
                                                       height: 100,
                                                       imageShape:
-                                                          BoxShape.circle,
+                                                          BoxShape.rectangle,
                                                       imageUrl: _categorySingers[
                                                                   _categories[
                                                                       index]]

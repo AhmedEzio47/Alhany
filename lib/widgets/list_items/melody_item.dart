@@ -14,7 +14,13 @@ class MelodyItem extends StatefulWidget {
   final bool isRounded;
   final double imageSize;
   final double padding;
-  MelodyItem({Key key, this.melody, this.context, this.isRounded = true, this.imageSize = 50, this.padding = 4.0})
+  MelodyItem(
+      {Key key,
+      this.melody,
+      this.context,
+      this.isRounded = true,
+      this.imageSize = 50,
+      this.padding = 4.0})
       : super(key: key);
 
   @override
@@ -52,9 +58,12 @@ class _MelodyItemState extends State<MelodyItem> {
   }
 
   isFavourite() async {
-    bool isFavourite =
-        (await usersRef.document(Constants.currentUserID).collection('favourites').document(widget.melody.id).get())
-            .exists;
+    bool isFavourite = (await usersRef
+            .document(Constants.currentUserID)
+            .collection('favourites')
+            .document(widget.melody.id)
+            .get())
+        .exists;
 
     setState(() {
       _isFavourite = isFavourite;
@@ -68,7 +77,7 @@ class _MelodyItemState extends State<MelodyItem> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.4),
+          color: Colors.white.withOpacity(.1),
           borderRadius: widget.isRounded ? BorderRadius.circular(20.0) : null,
         ),
         child: ListTile(
@@ -79,14 +88,20 @@ class _MelodyItemState extends State<MelodyItem> {
             imageShape: BoxShape.rectangle,
             defaultAssetImage: Strings.default_melody_image,
           ),
-          title: Text(widget.melody.name),
-          subtitle: Text(_author?.name ?? widget.melody.singer ?? ''),
+          title: Text(widget.melody.name,
+              style: TextStyle(color: MyColors.textLightColor)),
+          subtitle: Text(
+            _author?.name ?? widget.melody.singer ?? '',
+            style: TextStyle(color: MyColors.textLightColor),
+          ),
           trailing: widget.melody?.isSong ?? false
               ? InkWell(
                   onTap: () async {
                     _isFavourite
-                        ? await DatabaseService.deleteMelodyFromFavourites(widget.melody.id)
-                        : await DatabaseService.addMelodyToFavourites(widget.melody.id);
+                        ? await DatabaseService.deleteMelodyFromFavourites(
+                            widget.melody.id)
+                        : await DatabaseService.addMelodyToFavourites(
+                            widget.melody.id);
 
                     await isFavourite();
                   },

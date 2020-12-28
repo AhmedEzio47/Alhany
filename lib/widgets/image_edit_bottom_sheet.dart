@@ -86,7 +86,8 @@ class ImageEditBottomSheet {
     );
   }
 
-  Widget _widgetBottomSheetRow(BuildContext context, Icon icon, {String text, Function onPressed}) {
+  Widget _widgetBottomSheetRow(BuildContext context, Icon icon,
+      {String text, Function onPressed}) {
     return Expanded(
       child: customInkWell(
         context: context,

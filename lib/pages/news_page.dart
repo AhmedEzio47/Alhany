@@ -17,7 +17,8 @@ class NewsPage extends StatefulWidget {
 
   final bool isVideoVisible;
 
-  const NewsPage({Key key, this.news, this.isVideoVisible = true}) : super(key: key);
+  const NewsPage({Key key, this.news, this.isVideoVisible = true})
+      : super(key: key);
   @override
   _NewsPageState createState() => _NewsPageState();
 }
@@ -30,7 +31,8 @@ class _NewsPageState extends State<NewsPage> {
     AppUtil.showLoader(context);
 
     if (_commentController.text.isNotEmpty) {
-      DatabaseService.addComment(_commentController.text, newsId: widget.news.id);
+      DatabaseService.addComment(_commentController.text,
+          newsId: widget.news.id);
 
       await NotificationHandler.sendNotification(
           Constants.startUser.id,
@@ -39,7 +41,8 @@ class _NewsPageState extends State<NewsPage> {
           widget.news.id,
           'news_comment');
 
-      await AppUtil.checkIfContainsMention(_commentController.text, widget.news.id);
+      await AppUtil.checkIfContainsMention(
+          _commentController.text, widget.news.id);
 
       Constants.currentRoute = '';
       Navigator.pop(context);
@@ -71,14 +74,16 @@ class _NewsPageState extends State<NewsPage> {
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments = await DatabaseService.getComments(newsId: widget.news.id);
+    List<Comment> comments =
+        await DatabaseService.getComments(newsId: widget.news.id);
     setState(() {
       _comments = comments;
     });
   }
 
   getAllComments() async {
-    List<Comment> comments = await DatabaseService.getAllComments(newsId: widget.news.id);
+    List<Comment> comments =
+        await DatabaseService.getAllComments(newsId: widget.news.id);
     setState(() {
       _comments = comments;
     });
@@ -116,16 +121,16 @@ class _NewsPageState extends State<NewsPage> {
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             gradient: new LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black,
-                MyColors.primaryColor,
-              ],
-            ),
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black,
+                  MyColors.primaryColor,
+                ]),
             color: MyColors.primaryColor,
             image: DecorationImage(
-              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              colorFilter: new ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
               image: AssetImage(Strings.default_bg),
               fit: BoxFit.cover,
             ),
@@ -166,10 +171,12 @@ class _NewsPageState extends State<NewsPage> {
                                       }
                                       return index < _comments.length
                                           ? FutureBuilder(
-                                              future: DatabaseService.getUserWithId(
+                                              future:
+                                                  DatabaseService.getUserWithId(
                                                 comment.commenterID,
                                               ),
-                                              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                              builder: (BuildContext context,
+                                                  AsyncSnapshot snapshot) {
                                                 if (!snapshot.hasData) {
                                                   return SizedBox.shrink();
                                                 }
@@ -191,13 +198,18 @@ class _NewsPageState extends State<NewsPage> {
                                                     Navigator.of(context).pop();
                                                   },
                                                   child: Padding(
-                                                    padding: const EdgeInsets.all(8.0),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
                                                     child: Center(
                                                         child: Text(
                                                       'show all',
                                                       style: TextStyle(
-                                                          color: MyColors.accentColor,
-                                                          decoration: TextDecoration.underline),
+                                                          color: MyColors
+                                                              .accentColor,
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline),
                                                     )),
                                                   ),
                                                 )
@@ -211,20 +223,30 @@ class _NewsPageState extends State<NewsPage> {
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
-                          margin: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+                          margin: EdgeInsets.only(
+                              left: 8, right: 8, top: 8, bottom: 8),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
+                              borderRadius: BorderRadius.circular(30.0),
+                              color: MyColors.lightPrimaryColor),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: TextField(
                                 style: TextStyle(color: Colors.white),
-                                textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                                textAlign: Constants.language == 'ar'
+                                    ? TextAlign.right
+                                    : TextAlign.left,
                                 controller: _commentController,
                                 decoration: InputDecoration(
                                   hintStyle: TextStyle(color: Colors.white),
-                                  hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
-                                  suffix: Constants.language == 'en' ? sendBtn() : null,
-                                  prefix: Constants.language == 'ar' ? sendBtn() : null,
+                                  hintText: language(
+                                      en: Strings.en_leave_comment,
+                                      ar: Strings.ar_leave_comment),
+                                  suffix: Constants.language == 'en'
+                                      ? sendBtn()
+                                      : null,
+                                  prefix: Constants.language == 'ar'
+                                      ? sendBtn()
+                                      : null,
                                 )),
                           ),
                         ),

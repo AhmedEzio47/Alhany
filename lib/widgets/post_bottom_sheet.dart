@@ -29,7 +29,10 @@ class PostBottomSheet {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.arrow_drop_down),
+          child: Icon(
+            Icons.arrow_drop_down,
+            color: MyColors.textLightColor,
+          ),
         ));
   }
 
@@ -43,7 +46,8 @@ class PostBottomSheet {
     return ratio;
   }
 
-  void _openBottomSheet(BuildContext context, {Record record, News news}) async {
+  void _openBottomSheet(BuildContext context,
+      {Record record, News news}) async {
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       context: context,
@@ -91,7 +95,8 @@ class PostBottomSheet {
                 firstBtnText: 'Yes',
                 firstFunc: () async {
                   AppUtil.showLoader(context);
-                  await DatabaseService.deletePost(recordId: record?.id, newsId: news?.id);
+                  await DatabaseService.deletePost(
+                      recordId: record?.id, newsId: news?.id);
                   Navigator.of(context).pushReplacementNamed('/');
                 },
                 secondBtnText: 'No',
@@ -105,7 +110,8 @@ class PostBottomSheet {
 
   TextEditingController _commentController = TextEditingController();
 
-  editComment(BuildContext context, Comment comment, {Record record, News news}) async {
+  editComment(BuildContext context, Comment comment,
+      {Record record, News news}) async {
     _commentController.text = comment.text;
 
     Navigator.of(context).push(CustomModal(
@@ -134,11 +140,13 @@ class PostBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editComment(comment.id, _commentController.text,
+              await DatabaseService.editComment(
+                  comment.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
-              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
-              Navigator.of(context)
-                  .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pushReplacementNamed('/record-page',
+                  arguments: {'record': record, 'is_video_visible': true});
             },
             color: MyColors.primaryColor,
             child: Text(
@@ -151,7 +159,8 @@ class PostBottomSheet {
     )));
   }
 
-  editReply(BuildContext context, Comment reply, Comment parentComment, {Record record, News news}) async {
+  editReply(BuildContext context, Comment reply, Comment parentComment,
+      {Record record, News news}) async {
     _commentController.text = reply.text;
 
     Navigator.of(context).push(CustomModal(
@@ -180,11 +189,17 @@ class PostBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editReply(parentComment.id, reply.id, _commentController.text,
+              await DatabaseService.editReply(
+                  parentComment.id, reply.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
-              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/comment-page',
-                  arguments: {'record': record, 'news': news, 'comment': parentComment});
+                  arguments: {
+                    'record': record,
+                    'news': news,
+                    'comment': parentComment
+                  });
             },
             color: MyColors.primaryColor,
             child: Text(
@@ -221,7 +236,8 @@ class PostBottomSheet {
                 AppUtil.showLoader(context);
 
                 await DatabaseService.unfollowUser(user.id);
-                await NotificationHandler.removeNotification(user.id, Constants.currentUserID, 'follow');
+                await NotificationHandler.removeNotification(
+                    user.id, Constants.currentUserID, 'follow');
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -273,7 +289,8 @@ class PostBottomSheet {
     );
   }
 
-  Future _deleteComment(BuildContext context, String commentId, String parentCommentId,
+  Future _deleteComment(
+      BuildContext context, String commentId, String parentCommentId,
       {String recordId, String newId}) async {
     await showDialog(
       context: context,
@@ -296,12 +313,16 @@ class PostBottomSheet {
             new GestureDetector(
               onTap: () async {
                 if (parentCommentId == null)
-                  await DatabaseService.deleteComment(commentId, recordId: recordId, newsId: newId);
+                  await DatabaseService.deleteComment(commentId,
+                      recordId: recordId, newsId: newId);
                 else
-                  await DatabaseService.deleteReply(commentId, parentCommentId, recordId: recordId, newsId: newId);
+                  await DatabaseService.deleteReply(commentId, parentCommentId,
+                      recordId: recordId, newsId: newId);
 
                 await NotificationHandler.removeNotification(
-                    (await DatabaseService.getRecordWithId(recordId)).singerId, recordId, 'comment');
+                    (await DatabaseService.getRecordWithId(recordId)).singerId,
+                    recordId,
+                    'comment');
 
                 Navigator.of(context).pop();
               },
