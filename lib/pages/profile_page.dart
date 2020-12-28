@@ -52,8 +52,6 @@ class _ProfilePageState extends State<ProfilePage>
 
   bool isFollowing = false;
 
-  var tabTextColor = MyColors.textLightColor;
-
   List<SlideImage> _slideImages = [];
   getSlideImages() async {
     List<SlideImage> slideImages =
@@ -104,7 +102,9 @@ class _ProfilePageState extends State<ProfilePage>
           child: Align(
             alignment: Alignment.center,
             child: Text(language(en: "Records", ar: 'التسجيلات'),
-                style: TextStyle(fontSize: 14, color: MyColors.textDarkColor)),
+                style: TextStyle(
+                  fontSize: 14,
+                )),
           ),
         ),
       ),
@@ -116,19 +116,13 @@ class _ProfilePageState extends State<ProfilePage>
           child: Align(
             alignment: Alignment.center,
             child: Text(language(en: "Favourites", ar: 'المفضلات'),
-                style: TextStyle(fontSize: 14, color: MyColors.textLightColor)),
+                style: TextStyle(
+                  fontSize: 14,
+                )),
           ),
         ),
       )
     ];
-  }
-
-  _updateTapTextColor() {
-    setState(() {
-      _page == 1
-          ? tabTextColor = MyColors.textDarkColor
-          : MyColors.textLightColor;
-    });
   }
 
   LinkedScrollControllerGroup _controllers;
@@ -540,16 +534,12 @@ class _ProfilePageState extends State<ProfilePage>
                                         //_isPlaying = false;
                                         _page = index;
                                         print('page=${_page}');
-                                        index == 1
-                                            ? tabTextColor =
-                                                MyColors.textDarkColor
-                                            : MyColors.textLightColor;
                                       });
-                                      _updateTapTextColor();
                                     },
                                     controller: _tabController,
-                                    // unselectedLabelColor:
-                                    //   MyColors.lightPrimaryColor,
+                                    unselectedLabelColor: Colors.grey,
+                                    indicatorColor: Colors.grey,
+                                    labelColor: Colors.black,
                                     indicatorSize: TabBarIndicatorSize.label,
                                     indicator: BoxDecoration(
                                         borderRadius: BorderRadius.circular(50),
