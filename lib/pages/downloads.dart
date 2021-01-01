@@ -51,6 +51,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
             });
 
             AppUtil.showLoader(context);
+            AppUtil.showToast('Decrypting, please wait!');
             await playAllSongs();
             Navigator.of(context).pop();
           },
@@ -78,7 +79,8 @@ class _DownloadsPageState extends State<DownloadsPage> {
                     ),
                     color: MyColors.primaryColor,
                     image: DecorationImage(
-                      colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                      colorFilter: new ColorFilter.mode(
+                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
                       image: AssetImage(Strings.default_bg),
                       fit: BoxFit.cover,
                     ),
@@ -109,10 +111,14 @@ class _DownloadsPageState extends State<DownloadsPage> {
                                 );
                               })
                           : Padding(
-                              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 40),
+                              padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.height / 2 -
+                                      40),
                               child: Text(
                                 'No downloads yet!',
-                                style: TextStyle(color: MyColors.textLightColor, fontSize: 18),
+                                style: TextStyle(
+                                    color: MyColors.textLightColor,
+                                    fontSize: 18),
                               ),
                             ),
                     ],

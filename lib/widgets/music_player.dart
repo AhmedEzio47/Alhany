@@ -460,7 +460,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
           ),
           child: Icon(
             _isFavourite ? Icons.favorite : Icons.favorite_border,
-            color: MyColors.accentColor,
+            color: MyColors.primaryColor,
           ),
         ),
       ),
@@ -536,7 +536,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
                     child: Icon(
                       Icons.file_download,
-                      color: MyColors.accentColor,
+                      color: MyColors.primaryColor,
                       size: widget.btnSize - 10,
                     ),
                   ),
