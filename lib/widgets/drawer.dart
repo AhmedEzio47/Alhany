@@ -6,7 +6,6 @@ import 'package:Alhany/main.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BuildDrawer extends StatefulWidget {
   @override
@@ -31,14 +30,17 @@ class _BuildDrawerState extends State<BuildDrawer> {
               children: <Widget>[
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()));
                   },
                   child: CircleAvatar(
                     radius: 50.0,
                     backgroundColor: Theme.of(context).primaryColor,
-                    backgroundImage: Constants.currentUser?.profileImageUrl != null
-                        ? CachedNetworkImageProvider(Constants.currentUser.profileImageUrl)
-                        : AssetImage(Strings.default_profile_image),
+                    backgroundImage:
+                        Constants.currentUser?.profileImageUrl != null
+                            ? CachedNetworkImageProvider(
+                                Constants.currentUser.profileImageUrl)
+                            : AssetImage(Strings.default_profile_image),
                   ),
                 ),
                 Row(
@@ -48,7 +50,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         Constants.currentUser?.name ?? '',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
                       ),
                     ),
                     //Icon(Icons.arrow_drop_down)
@@ -97,6 +100,25 @@ class _BuildDrawerState extends State<BuildDrawer> {
                   ),
                 )
               : Container(),
+          ListTile(
+            onTap: () async {
+              try {
+                Navigator.of(context).pushNamed('/password-change');
+              } catch (e) {
+                print('Sign out: $e');
+              }
+            },
+            title: Text(
+              language(en: 'Change Password', ar: 'تغيير كلمة المرور'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.lock,
+              color: MyColors.primaryColor,
+            ),
+          ),
           ListTile(
             onTap: () async {
               await AppUtil.switchLanguage();

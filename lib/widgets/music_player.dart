@@ -504,7 +504,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       value: choice,
                       child: Text(
                         choice,
-                        style: TextStyle(color: MyColors.textLightColor),
+                        style: TextStyle(color: MyColors.primaryColor),
                       ),
                     );
                   }).toList();
@@ -666,6 +666,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 .updateData({'melodies': FieldValue.increment(-1)});
           }
           AppUtil.showToast('Deleted!');
+          Navigator.of(context).pop();
           Navigator.of(context).pop();
         },
         secondBtnText: 'No',

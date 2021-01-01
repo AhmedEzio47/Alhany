@@ -28,7 +28,8 @@ class SingerPage extends StatefulWidget {
   _SingerPageState createState() => _SingerPageState();
 }
 
-class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateMixin{
+class _SingerPageState extends State<SingerPage>
+    with SingleTickerProviderStateMixin {
   TabController _tabController;
   int _page;
   ScrollController _songsScrollController = ScrollController();
@@ -41,7 +42,8 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
   Timestamp lastVisiblePostSnapShot;
 
   getSongs() async {
-    List<Melody> songs = await DatabaseService.getSongsBySingerName(widget.singer.name);
+    List<Melody> songs =
+        await DatabaseService.getSongsBySingerName(widget.singer.name);
     if (mounted) {
       setState(() {
         _songs = songs;
@@ -51,7 +53,8 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
   }
 
   nextSongs() async {
-    List<Melody> songs = await DatabaseService.getNextSongsBySingerName(widget.singer.name, lastVisiblePostSnapShot);
+    List<Melody> songs = await DatabaseService.getNextSongsBySingerName(
+        widget.singer.name, lastVisiblePostSnapShot);
     if (songs.length > 0) {
       setState(() {
         songs.forEach((element) => _songs.add(element));
@@ -61,7 +64,8 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
   }
 
   getMelodies() async {
-    List<Melody> melodies = await DatabaseService.getMelodiesBySingerName(widget.singer.name);
+    List<Melody> melodies =
+        await DatabaseService.getMelodiesBySingerName(widget.singer.name);
     if (mounted) {
       setState(() {
         _melodies = melodies;
@@ -70,8 +74,8 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
   }
 
   nextMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getNextMelodiesBySingerName(widget.singer.name, lastVisiblePostSnapShot);
+    List<Melody> melodies = await DatabaseService.getNextMelodiesBySingerName(
+        widget.singer.name, lastVisiblePostSnapShot);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -85,11 +89,13 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
     widget.dataType == DataTypes.SONGS ? _page = 1 : _page = 0;
     _songsScrollController
       ..addListener(() {
-        if (_songsScrollController.offset >= _songsScrollController.position.maxScrollExtent &&
+        if (_songsScrollController.offset >=
+                _songsScrollController.position.maxScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print('reached the bottom');
           nextSongs();
-        } else if (_songsScrollController.offset <= _songsScrollController.position.minScrollExtent &&
+        } else if (_songsScrollController.offset <=
+                _songsScrollController.position.minScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -97,16 +103,18 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
 
     _melodiesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >= _melodiesScrollController.position.maxScrollExtent &&
+        if (_melodiesScrollController.offset >=
+                _melodiesScrollController.position.maxScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print('reached the bottom');
           nextMelodies();
-        } else if (_melodiesScrollController.offset <= _melodiesScrollController.position.minScrollExtent &&
+        } else if (_melodiesScrollController.offset <=
+                _melodiesScrollController.position.minScrollExtent &&
             !_melodiesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
       });
-    _tabController = TabController(vsync:this,length: 2, initialIndex: 1);
+    _tabController = TabController(vsync: this, length: 2, initialIndex: 1);
     super.initState();
   }
 
@@ -221,7 +229,8 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -243,13 +252,15 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
                               ),
                               Positioned.fill(
                                   child: Padding(
-                                padding: const EdgeInsets.only(left: 16.0, bottom: 16),
+                                padding: const EdgeInsets.only(
+                                    left: 16.0, bottom: 16),
                                 child: Align(
                                   alignment: Alignment.bottomLeft,
                                   child: CachedImage(
                                     height: 100,
                                     width: 100,
-                                    defaultAssetImage: Strings.default_profile_image,
+                                    defaultAssetImage:
+                                        Strings.default_profile_image,
                                     imageUrl: widget.singer.imageUrl,
                                     imageShape: BoxShape.circle,
                                   ),
@@ -261,12 +272,15 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
                                   child: Align(
                                     alignment: Alignment.bottomRight,
                                     child: Container(
-                                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 4, horizontal: 16),
                                       color: Colors.black.withOpacity(.6),
                                       child: Text(
                                         widget.singer.name,
-                                        style:
-                                            TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontSize: 22,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -288,10 +302,12 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
                                 controller: _tabController,
                                 tabs: [
                                     Tab(
-                                      text: language(en: 'Melodies', ar: 'الألحان'),
+                                      text: language(
+                                          en: 'Melodies', ar: 'الألحان'),
                                     ),
                                     Tab(
-                                      text: language(en: 'Songs', ar: 'الأغاني'),
+                                      text:
+                                          language(en: 'Songs', ar: 'الأغاني'),
                                     ),
                                   ])
                             : Container(),
@@ -378,11 +394,13 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
     String ext = path.extension(image.path);
 
     if (widget.singer.imageUrl != null) {
-      String fileName = await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+      String fileName =
+          await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
-    String url = await AppUtil().uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
+    String url = await AppUtil()
+        .uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
     await singersRef.document(widget.singer.id).updateData({'image_url': url});
     AppUtil.showToast('Image updated!');
   }
@@ -444,9 +462,31 @@ class _SingerPageState extends State<SingerPage> with SingleTickerProviderStateM
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
           if (widget.singer.imageUrl != null) {
-            String fileName = await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+            String fileName =
+                await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
             await storageRef.child('/singers_images/$fileName').delete();
           }
+          if (widget.singer.coverUrl != null) {
+            String fileName =
+                await AppUtil.getStorageFileNameFromUrl(widget.singer.coverUrl);
+            await storageRef.child('/singers_covers/$fileName').delete();
+          }
+          List<Melody> songs =
+              await DatabaseService.getSongsBySingerName(widget.singer.name);
+          if (songs != null) {
+            for (Melody song in songs) {
+              await DatabaseService.deleteMelody(song);
+            }
+          }
+
+          List<Melody> melodies =
+              await DatabaseService.getMelodiesBySingerName(widget.singer.name);
+          if (melodies != null) {
+            for (Melody melody in melodies) {
+              await DatabaseService.deleteMelody(melody);
+            }
+          }
+
           await singersRef.document(widget.singer.id).delete();
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();

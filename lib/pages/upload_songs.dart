@@ -287,10 +287,14 @@ class _UploadSongsState extends State<UploadSongs> {
   }
 
   uploadSong() async {
-//    if (_songName.trim().isEmpty) {
-//      AppUtil.showToast('Please choose a name for the song');
-//      return;
-//    }
+    // if (_songName.trim().isEmpty) {
+    //   AppUtil.showToast('Please choose a name for the song');
+    //   return;
+    // }
+    if (_singer == null) {
+      AppUtil.showToast('Please choose a singer');
+      return;
+    }
     File songFile = await AppUtil.chooseAudio();
     String ext = path.extension(songFile.path);
     String fileNameWithoutExtension =
@@ -342,6 +346,10 @@ class _UploadSongsState extends State<UploadSongs> {
   }
 
   uploadSongs() async {
+    if (_singer == null) {
+      AppUtil.showToast('Please choose a singer');
+      return;
+    }
     List<File> songFiles = await AppUtil.chooseAudio(multiple: true);
     if (songFiles.length == 0) {
       print('no file chosen error');

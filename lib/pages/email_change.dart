@@ -6,8 +6,6 @@ import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/widgets/custom_modal.dart';
-import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -37,7 +35,8 @@ class _EmailChangePageState extends State<EmailChangePage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.splash),
                     fit: BoxFit.cover,
                   ),
@@ -71,13 +70,17 @@ class _EmailChangePageState extends State<EmailChangePage> {
         ));
   }
 
-  Widget _entryField(String title, {bool isEmail = false, bool isPassword = false}) {
+  Widget _entryField(String title,
+      {bool isEmail = false, bool isPassword = false}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border(
-          bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
+          bottom: BorderSide(
+              color: MyColors.primaryColor,
+              width: 0.5,
+              style: BorderStyle.solid),
         ),
       ),
       child: Row(
@@ -87,7 +90,11 @@ class _EmailChangePageState extends State<EmailChangePage> {
           Expanded(
             child: TextFormField(
                 onChanged: (value) {
-                  isPassword ? _password = value : isEmail ? _email = value : _confirm = value;
+                  isPassword
+                      ? _password = value
+                      : isEmail
+                          ? _email = value
+                          : _confirm = value;
                 },
                 style: TextStyle(color: MyColors.textDarkColor),
                 obscureText: isPassword,
@@ -95,7 +102,11 @@ class _EmailChangePageState extends State<EmailChangePage> {
                   prefixIcon: Container(
                       width: 48,
                       child: Icon(
-                        isPassword ? Icons.lock_outline : isEmail ? Icons.mail_outline : Icons.email,
+                        isPassword
+                            ? Icons.lock_outline
+                            : isEmail
+                                ? Icons.mail_outline
+                                : Icons.email,
                         size: 30,
                         color: Colors.grey.shade400,
                       )),
@@ -129,38 +140,47 @@ class _EmailChangePageState extends State<EmailChangePage> {
             return;
           }
           if (_email != _confirm) {
-            AppUtil.showToast(language(en: 'Two emails does not match', ar: 'عنواني البريد غير متطابقان'));
+            AppUtil.showToast(language(
+                en: 'Two emails does not match',
+                ar: 'عنواني البريد غير متطابقان'));
             return;
           }
           AppUtil.showLoader(context);
 
           User user = await DatabaseService.getUserWithEmail(_email);
           if (user.id != null) {
-            AppUtil.showToast(language(en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
+            AppUtil.showToast(language(
+                en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
           } else {
             final BaseAuth auth = AuthProvider.of(context).auth;
-            FirebaseUser firebaseUser =
-                await auth.signInWithEmailAndPassword(Constants.currentFirebaseUser.email, _password);
+            FirebaseUser firebaseUser = await auth.signInWithEmailAndPassword(
+                Constants.currentFirebaseUser.email, _password);
             if (firebaseUser == null) {
-              AppUtil.showToast(language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
+              AppUtil.showToast(
+                  language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
               return;
             }
 
             await firebaseUser.updateEmail(_email);
             await firebaseUser.sendEmailVerification();
-            await usersRef.document(Constants.currentUserID).updateData({'email': _email});
-            Constants.currentUser = await DatabaseService.getUserWithId(firebaseUser.uid);
+            await usersRef
+                .document(Constants.currentUserID)
+                .updateData({'email': _email});
+            Constants.currentUser =
+                await DatabaseService.getUserWithId(firebaseUser.uid);
             Constants.currentFirebaseUser = firebaseUser;
             // print('Password reset e-mail sent');
-            AppUtil.showToast(
-                language(en: 'Email changed, verification email sent!', ar: 'تم تغيير البريد، من فضلك قم بالتفعيل'));
+            AppUtil.showToast(language(
+                en: 'Email changed, verification email sent!',
+                ar: 'تم تغيير البريد، من فضلك قم بالتفعيل'));
             Navigator.of(context).pop();
           }
 
           Navigator.of(context).pop();
         } catch (e) {
           Navigator.of(context).pop();
-          AppUtil.showToast(language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
+          AppUtil.showToast(
+              language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
           return;
         }
       },
@@ -173,7 +193,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
             gradient: LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerRight,
-                colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
+                colors: [MyColors.primaryColor, MyColors.primaryColor])),
         child: Text(
           language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
           style: TextStyle(fontSize: 20, color: MyColors.textLightColor),

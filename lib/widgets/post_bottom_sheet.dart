@@ -49,7 +49,7 @@ class PostBottomSheet {
   void _openBottomSheet(BuildContext context,
       {Record record, News news}) async {
     await showModalBottomSheet(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       context: context,
       builder: (context) {
         return Container(
@@ -85,7 +85,7 @@ class PostBottomSheet {
           context,
           Icon(
             Icons.delete_forever,
-            color: MyColors.darkPrimaryColor,
+            color: MyColors.primaryColor,
           ),
           text: 'Delete Post',
           onPressed: () async {
@@ -151,7 +151,7 @@ class PostBottomSheet {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_update, ar: Strings.ar_update),
-              style: TextStyle(color: MyColors.textLightColor),
+              style: TextStyle(color: MyColors.primaryColor),
             ),
           )
         ],
@@ -204,7 +204,7 @@ class PostBottomSheet {
             color: MyColors.primaryColor,
             child: Text(
               language(en: Strings.en_update, ar: Strings.ar_update),
-              style: TextStyle(color: MyColors.textLightColor),
+              style: TextStyle(color: MyColors.primaryColor),
             ),
           )
         ],
