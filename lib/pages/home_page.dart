@@ -1,5 +1,6 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/category_model.dart';
 import 'package:Alhany/models/melody_model.dart';
@@ -230,7 +231,7 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: 180,
+                  height: Sizes.singerBox + 70,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,8 +305,8 @@ class _HomePageState extends State<HomePage>
                                                     });
                                               },
                                               child: Container(
-                                                height: 110,
-                                                width: 110,
+                                                height: Sizes.singerBox,
+                                                width: Sizes.singerBox,
                                                 child: Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
@@ -313,8 +314,10 @@ class _HomePageState extends State<HomePage>
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     CachedImage(
-                                                      width: 100,
-                                                      height: 100,
+                                                      width:
+                                                          Sizes.singerBox - 10,
+                                                      height:
+                                                          Sizes.singerBox - 10,
                                                       imageShape:
                                                           BoxShape.rectangle,
                                                       imageUrl: _categorySingers[
@@ -472,7 +475,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Flexible(
                     fit: FlexFit.tight,
-                    flex: 2,
+                    flex: 3,
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       color: Colors.black26,
@@ -505,6 +508,8 @@ class _HomePageState extends State<HomePage>
                                           ),
                                           Text(
                                             _singers[index].name,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.visible,
                                             style: TextStyle(
                                                 color: MyColors.textLightColor),
                                           )
