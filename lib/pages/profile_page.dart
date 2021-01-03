@@ -679,6 +679,7 @@ class _ProfilePageState extends State<ProfilePage>
                       //   musicPlayer.stop();
                       // }
                       musicPlayer = MusicPlayer(
+                        key: ValueKey(_favourites[index].id),
                         melody: _favourites[index],
                         title: _favourites[index].name,
                         initialDuration: _favourites[index].duration,

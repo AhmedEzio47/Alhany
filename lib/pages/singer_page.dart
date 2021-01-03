@@ -142,6 +142,7 @@ class _SingerPageState extends State<SingerPage>
               onTap: () async {
                 setState(() {
                   musicPlayer = MusicPlayer(
+                    key: ValueKey(_songs[index].id),
                     melody: _songs[index],
                     url: _songs[index].audioUrl,
                     backColor: MyColors.lightPrimaryColor,
@@ -179,6 +180,7 @@ class _SingerPageState extends State<SingerPage>
               onTap: () async {
                 setState(() {
                   musicPlayer = MusicPlayer(
+                    key: ValueKey(_melodies[index].id),
                     melody: _melodies[index],
                     url: _melodies[index].audioUrl,
                     backColor: MyColors.lightPrimaryColor,
@@ -346,7 +348,7 @@ class _SingerPageState extends State<SingerPage>
                             value: choice,
                             child: Text(
                               choice,
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.black),
                             ),
                           );
                         }).toList();
