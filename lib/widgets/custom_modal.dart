@@ -1,7 +1,7 @@
-import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
 class CustomModal extends ModalRoute<void> {
+  //Test Commit
   final Widget child;
   final Function onWillPop;
 
@@ -59,8 +59,8 @@ class CustomModal extends ModalRoute<void> {
   }
 
   @override
-  Widget buildTransitions(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     // You can add your own animations for the overlay content
     return FadeTransition(
       opacity: animation,
