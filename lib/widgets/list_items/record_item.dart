@@ -217,9 +217,7 @@ class _RecordItemState extends State<RecordItem> {
                           ],
                         ),
                       ],
-                    ),
-                    Constants.currentUserID == widget.record.singerId
-                        ? ValueListenableBuilder<int>(
+                    ),ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {
                               return PostBottomSheet().postOptionIcon(
@@ -228,7 +226,7 @@ class _RecordItemState extends State<RecordItem> {
                               );
                             },
                           )
-                        : Container()
+
                   ],
                 ),
               ),
