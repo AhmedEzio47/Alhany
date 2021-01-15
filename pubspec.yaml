@@ -24,7 +24,7 @@ dependencies:
   firebase_storage:
   shared_preferences: ^0.5.6+3
   cached_network_image: ^2.0.0
-  file_picker: ^2.0.0
+  file_picker: 2.0.0
   audioplayers: ^0.15.0
   loading: ^1.0.2
   http: ^0.12.2

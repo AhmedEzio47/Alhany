@@ -161,10 +161,7 @@ class AppUtil with ChangeNotifier {
 
   static Future<File> pickImageFromGallery() async {
     FilePickerResult result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: [
-      'jpg',
-      'png',
-    ]);
+        .pickFiles(type: FileType.custom, allowedExtensions: ['jpg', 'png']);
 
     if (result != null) {
       File file = File(result.files.single.path);

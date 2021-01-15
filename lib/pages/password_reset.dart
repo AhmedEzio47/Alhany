@@ -4,8 +4,6 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/widgets/custom_modal.dart';
-import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:flutter/material.dart';
 
 class PasswordResetPage extends StatefulWidget {
@@ -31,7 +29,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.splash),
                     fit: BoxFit.cover,
                   ),
@@ -67,7 +66,10 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border(
-          bottom: BorderSide(color: MyColors.primaryColor, width: 0.5, style: BorderStyle.solid),
+          bottom: BorderSide(
+              color: MyColors.primaryColor,
+              width: 0.5,
+              style: BorderStyle.solid),
         ),
       ),
       child: Row(
@@ -79,7 +81,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 onChanged: (value) {
                   _email = value;
                 },
-                style: TextStyle(color: MyColors.darkPrimaryColor),
+                style: TextStyle(color: MyColors.primaryColor),
                 decoration: InputDecoration(
                   prefixIcon: Container(
                       width: 48,
@@ -89,7 +91,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                         color: MyColors.iconInactiveColor,
                       )),
                   hintText: 'johndoe@example.com',
-                  hintStyle: TextStyle(color: MyColors.textInactiveColor, fontSize: 18),
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
                   border: InputBorder.none,
                 )),
           )
@@ -133,10 +135,10 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             gradient: LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerRight,
-                colors: [MyColors.lightPrimaryColor, MyColors.darkPrimaryColor])),
+                colors: [MyColors.primaryColor, MyColors.primaryColor])),
         child: Text(
           language(en: 'Reset Password', ar: 'استعادة كلمة المرور'),
-          style: TextStyle(fontSize: 20, color: MyColors.textLightColor),
+          style: TextStyle(fontSize: 20, color: MyColors.darkPrimaryColor),
         ),
       ),
     );
