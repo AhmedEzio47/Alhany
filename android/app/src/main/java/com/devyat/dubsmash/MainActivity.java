@@ -1,4 +1,4 @@
-package com.devyat.Alhany;
+package com.devyat.alhani;
 
 import io.flutter.embedding.android.FlutterActivity;
 

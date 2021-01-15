@@ -3,12 +3,15 @@ const String appName = 'Alhany';
 String appTempDirectoryPath;
 
 class Strings {
-  static const String default_profile_image = 'assets/images/default_profile.png';
+  static const String default_profile_image =
+      'assets/images/default_profile.png';
   static const String default_cover_image = 'assets/images/default_cover.jpg';
   static const String default_bg = 'assets/images/piano_bg.jpg';
   static const String default_melody_image = 'assets/images/default_melody.jpg';
-  static const String default_melody_page_bg = 'assets/images/default_record_bg.jpg';
-  static const String headphones_alert_bg = 'assets/images/headphones_alert.jpg';
+  static const String default_melody_page_bg =
+      'assets/images/default_record_bg.jpg';
+  static const String headphones_alert_bg =
+      'assets/images/headphones_alert.jpg';
   static const String splash = 'assets/images/splash.jpg';
   static const String splash_icon = 'assets/images/splash_icon.png';
   static const String app_art = 'assets/images/app_art.png';
@@ -16,16 +19,25 @@ class Strings {
   static const String app_bar = 'assets/images/logo_appbar.png';
 
   //App
-  static const String packageName = 'com.devyat.Alhany';
+  static const String packageName = 'com.devyat.alhani';
 
   //Admin ID
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
 
   //Melodies categories
-  static const List<String> melodyCategories = ['do', 're', 'mi', 'fa', 'sol', 'la', 'si'];
+  static const List<String> melodyCategories = [
+    'do',
+    're',
+    'mi',
+    'fa',
+    'sol',
+    'la',
+    'si'
+  ];
 
   //Stripe Payment
-  static const String stripePublishableKey = "pk_live_5FXfeoysTRHWhu3PV2mRLVSi00JgLi7Zyt";
+  static const String stripePublishableKey =
+      "pk_live_5FXfeoysTRHWhu3PV2mRLVSi00JgLi7Zyt";
   static const String stripeSecret =
       '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';
   // static const merchantId = "05674331101508648233";
