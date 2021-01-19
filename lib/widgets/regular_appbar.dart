@@ -5,13 +5,45 @@ import 'package:flutter/material.dart';
 class RegularAppbar extends StatelessWidget {
   BuildContext context;
   Color color;
+  double height;
   double margin;
+  Widget leading;
+  Widget trailing;
   Future<bool> Function() onBackPressed;
 
-  RegularAppbar(BuildContext context, {this.color = Colors.white, this.margin = 40, this.onBackPressed}) {
+  RegularAppbar(BuildContext context,
+      {this.color = Colors.white,
+      this.height = 50,
+      this.margin = 5,
+      this.onBackPressed,
+      this.leading,
+      this.trailing}) {
+    const double padding = 16;
     this.context = context;
     if (onBackPressed == null) {
       onBackPressed = _onBackPressed;
+    }
+
+    if (trailing == null) {
+      trailing = Padding(
+        padding: const EdgeInsets.only(right: padding),
+        child: Container(
+          height: 0,
+          width: 30,
+        ),
+      );
+    }
+
+    if (leading == null) {
+      leading = InkWell(
+          onTap: onBackPressed,
+          child: Padding(
+            padding: const EdgeInsets.only(left: padding),
+            child: Icon(
+              Icons.arrow_back,
+              color: color,
+            ),
+          ));
     }
   }
   Future<bool> _onBackPressed() {
@@ -21,7 +53,6 @@ class RegularAppbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double padding = 16;
     return Container(
         width: MediaQuery.of(context).size.width,
         margin: EdgeInsets.only(top: margin),
@@ -29,29 +60,15 @@ class RegularAppbar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            InkWell(
-                onTap: onBackPressed,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: padding),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: color,
-                  ),
-                )),
+            leading,
             Container(
-              height: 40,
+              height: height,
               width: 150,
               child: Image.asset(
-                Strings.app_bar,
+                Strings.app_icon,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: padding),
-              child: Container(
-                height: 0,
-                width: 30,
-              ),
-            )
+            trailing
           ],
         ));
   }

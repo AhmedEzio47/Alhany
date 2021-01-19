@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
@@ -15,6 +16,7 @@ import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -207,13 +209,11 @@ class _ProfilePageState extends State<ProfilePage>
                               )
                             : Container(),
                         Align(
-                          child: Container(
-                            margin: EdgeInsets.only(top: 35),
-                            height: 40,
-                            width: 150,
-                            child: Image.asset(
-                              Strings.app_bar,
-                            ),
+                          child: RegularAppbar(
+                            context,
+                            color: Colors.black,
+                            height: Sizes.appbarHeight,
+                            margin: 25,
                           ),
                           alignment: Alignment.topCenter,
                         ),

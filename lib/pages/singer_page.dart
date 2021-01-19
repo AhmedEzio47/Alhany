@@ -326,7 +326,8 @@ class _SingerPageState extends State<SingerPage>
                 child: RegularAppbar(
                   context,
                   color: Colors.black,
-                  margin: 5,
+                  height: 50,
+                  margin: 10,
                 ),
               ),
             ),

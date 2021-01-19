@@ -1,6 +1,7 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
@@ -10,6 +11,7 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -135,13 +137,11 @@ class _StarPageState extends State<StarPage>
                 child: Column(
                   children: [
                     Align(
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 35),
-                        height: 35,
-                        width: 150,
-                        child: Image.asset(
-                          Strings.app_bar,
-                        ),
+                      child: RegularAppbar(
+                        context,
+                        color: Colors.black,
+                        height: Sizes.appbarHeight,
+                        margin: 25,
                       ),
                       alignment: Alignment.topCenter,
                     ),

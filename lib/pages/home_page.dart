@@ -12,6 +12,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
@@ -154,15 +155,11 @@ class _HomePageState extends State<HomePage>
               )),
               Positioned.fill(
                   child: Align(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 35),
-                  child: Container(
-                    height: 40,
-                    width: 150,
-                    child: Image.asset(
-                      Strings.app_bar,
-                    ),
-                  ),
+                child: RegularAppbar(
+                  context,
+                  color: Colors.black,
+                  height: Sizes.appbarHeight,
+                  margin: 25,
                 ),
                 alignment: Alignment.topCenter,
               )),

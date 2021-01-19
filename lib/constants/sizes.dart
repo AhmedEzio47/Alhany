@@ -32,6 +32,7 @@ class Sizes {
   static const int postExcerpt = 100; // vertical   offset
 
   static const double singerBox = 150;
+  static const double appbarHeight = 50;
 
   static double fullWidth(BuildContext context) {
     // print(MediaQuery.of(context).size.width.toString());

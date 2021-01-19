@@ -67,20 +67,8 @@ class _WelcomePageState extends State<WelcomePage> {
                 width: MediaQuery.of(context).size.width,
                 child: Center(
                     child: Image.asset(
-                  'assets/images/app_art.png',
+                  Strings.app_icon,
                   scale: 1.2,
-                )),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Container(
-                height: 100,
-                width: MediaQuery.of(context).size.width,
-                child: Center(
-                    child: Image.asset(
-                  'assets/images/app_text.png',
-                  scale: 1.4,
                 )),
               ),
             ),
@@ -191,15 +179,15 @@ class _WelcomePageState extends State<WelcomePage> {
             child: new Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(70.0),
+                  padding: EdgeInsets.all(20.0),
                   child: Center(
                     child: Container(
-                      height: 180,
-                      width: 180,
+                      height: 220,
+                      width: 220,
                       child: Center(
                           child: Image.asset(
-                        'assets/images/splash_icon.png',
-                        scale: 2,
+                        Strings.app_icon,
+                        scale: 1.5,
                       )),
                     ),
                   ),
@@ -666,15 +654,15 @@ class _WelcomePageState extends State<WelcomePage> {
             child: new Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(70.0),
+                  padding: EdgeInsets.all(20.0),
                   child: Center(
                     child: Container(
-                      height: 180,
-                      width: 180,
+                      height: 220,
+                      width: 220,
                       child: Center(
                           child: Image.asset(
-                        'assets/images/splash_icon.png',
-                        scale: 2,
+                        Strings.app_icon,
+                        scale: 1.5,
                       )),
                     ),
                   ),

@@ -43,99 +43,105 @@ class _DownloadsPageState extends State<DownloadsPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onBack,
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            setState(() {
-              _isPlaying = true;
-            });
+      child: SafeArea(
+        child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              setState(() {
+                _isPlaying = true;
+              });
 
-            AppUtil.showLoader(context);
-            AppUtil.showToast('Decrypting, please wait!');
-            await playAllSongs();
-            Navigator.of(context).pop();
-          },
-          child: Icon(Icons.playlist_play),
-        ),
-        body: InkWell(
-          onTap: () {
-            setState(() {
-              _isPlaying = false;
-            });
-          },
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(
-                    gradient: new LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black,
-                        MyColors.primaryColor,
+              AppUtil.showLoader(context);
+              AppUtil.showToast('Decrypting, please wait!');
+              await playAllSongs();
+              Navigator.of(context).pop();
+            },
+            child: Icon(Icons.playlist_play),
+          ),
+          body: InkWell(
+            onTap: () {
+              setState(() {
+                _isPlaying = false;
+              });
+            },
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      gradient: new LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black,
+                          MyColors.primaryColor,
+                        ],
+                      ),
+                      color: MyColors.primaryColor,
+                      image: DecorationImage(
+                        colorFilter: new ColorFilter.mode(
+                            Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                        image: AssetImage(Strings.default_bg),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        RegularAppbar(
+                          context,
+                          height: 50,
+                        ),
+                        _downloads.length > 0
+                            ? ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: _downloads.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      setState(() {
+                                        _isPlaying = true;
+                                      });
+
+                                      AppUtil.showLoader(context);
+                                      await playSong(index);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: MelodyItem(
+                                      //Solves confusion between songs and melodies when adding to favourites
+                                      key: ValueKey('song_item'),
+                                      melody: _downloads[index],
+                                    ),
+                                  );
+                                })
+                            : Padding(
+                                padding: EdgeInsets.only(
+                                    top:
+                                        MediaQuery.of(context).size.height / 2 -
+                                            40),
+                                child: Text(
+                                  'No downloads yet!',
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor,
+                                      fontSize: 18),
+                                ),
+                              ),
                       ],
                     ),
-                    color: MyColors.primaryColor,
-                    image: DecorationImage(
-                      colorFilter: new ColorFilter.mode(
-                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                      image: AssetImage(Strings.default_bg),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      RegularAppbar(context),
-                      _downloads.length > 0
-                          ? ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: _downloads.length,
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  onTap: () async {
-                                    setState(() {
-                                      _isPlaying = true;
-                                    });
-
-                                    AppUtil.showLoader(context);
-                                    await playSong(index);
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: MelodyItem(
-                                    //Solves confusion between songs and melodies when adding to favourites
-                                    key: ValueKey('song_item'),
-                                    melody: _downloads[index],
-                                  ),
-                                );
-                              })
-                          : Padding(
-                              padding: EdgeInsets.only(
-                                  top: MediaQuery.of(context).size.height / 2 -
-                                      40),
-                              child: Text(
-                                'No downloads yet!',
-                                style: TextStyle(
-                                    color: MyColors.textLightColor,
-                                    fontSize: 18),
-                              ),
-                            ),
-                    ],
                   ),
                 ),
-              ),
-              _isPlaying
-                  ? Positioned.fill(
-                      child: Align(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: musicPlayer,
-                      ),
-                      alignment: Alignment.bottomCenter,
-                    ))
-                  : Container(),
-            ],
+                _isPlaying
+                    ? Positioned.fill(
+                        child: Align(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: musicPlayer,
+                        ),
+                        alignment: Alignment.bottomCenter,
+                      ))
+                    : Container(),
+              ],
+            ),
           ),
         ),
       ),

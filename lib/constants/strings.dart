@@ -14,9 +14,6 @@ class Strings {
       'assets/images/headphones_alert.jpg';
   static const String splash = 'assets/images/splash.jpg';
   static const String splash_icon = 'assets/images/splash_icon.png';
-  static const String app_art = 'assets/images/app_art.png';
-  static const String app_text = 'assets/images/app_text.png';
-  static const String app_bar = 'assets/images/logo_appbar.png';
 
   //App
   static const String packageName = 'com.devyat.alhani';

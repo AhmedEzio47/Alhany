@@ -107,7 +107,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         width: MediaQuery.of(context).size.width,
         child: Center(
             child: Image.asset(
-          'assets/images/app_art.png',
+          Strings.app_icon,
           scale: 1.2,
         )),
       ),
