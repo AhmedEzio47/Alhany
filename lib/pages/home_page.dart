@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage>
                       },
                       child: Icon(
                         Icons.search,
-                        color: MyColors.iconLightColor,
+                        color: MyColors.accentColor,
                       ),
                     ),
                   ),

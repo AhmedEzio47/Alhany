@@ -21,7 +21,7 @@ class AppPage extends StatefulWidget {
   _AppPageState createState() => _AppPageState();
 }
 
-class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
+class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   PageController _pageController;
 
   int _page = 2;
@@ -39,19 +39,29 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
   }
 
   void initDynamicLinks() async {
-    FirebaseDynamicLinks.instance.onLink(onSuccess: (PendingDynamicLinkData dynamicLink) async {
+    FirebaseDynamicLinks.instance.onLink(
+        onSuccess: (PendingDynamicLinkData dynamicLink) async {
       final Uri deepLink = dynamicLink?.link;
 
       if (deepLink != null) {
-        if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
-          Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
-          Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
-        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
-          User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
-          Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
-        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
-          News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
-          Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
+        if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'records') {
+          Record record =
+              await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/record-page',
+              arguments: {'record': record, 'is_video_visible': true});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'users') {
+          User user =
+              await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+          Navigator.of(context)
+              .pushNamed('/profile-page', arguments: {'user_id': user.id});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'news') {
+          News news =
+              await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/news-page',
+              arguments: {'news': news, 'is_video_visible': true});
         }
       }
     }, onError: (OnLinkErrorException e) async {
@@ -59,19 +69,29 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
       print(e.message);
     });
 
-    final PendingDynamicLinkData data = await FirebaseDynamicLinks.instance.getInitialLink();
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
     final Uri deepLink = data?.link;
 
     if (deepLink != null) {
-      if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'records') {
-        Record record = await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
-        Navigator.of(context).pushNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
-      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'users') {
-        User user = await DatabaseService.getUserWithId(deepLink.pathSegments.last);
-        Navigator.of(context).pushNamed('/profile-page', arguments: {'user_id': user.id});
-      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] == 'news') {
-        News news = await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
-        Navigator.of(context).pushNamed('/news-page', arguments: {'news': news, 'is_video_visible': true});
+      if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+          'records') {
+        Record record =
+            await DatabaseService.getRecordWithId(deepLink.pathSegments.last);
+        Navigator.of(context).pushNamed('/record-page',
+            arguments: {'record': record, 'is_video_visible': true});
+      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+          'users') {
+        User user =
+            await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+        Navigator.of(context)
+            .pushNamed('/profile-page', arguments: {'user_id': user.id});
+      } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+          'news') {
+        News news =
+            await DatabaseService.getNewsWithId(deepLink.pathSegments.last);
+        Navigator.of(context).pushNamed('/news-page',
+            arguments: {'news': news, 'is_video_visible': true});
       }
     }
   }
@@ -101,14 +121,15 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
           index: _page,
           height: 55,
           backgroundColor: MyColors.primaryColor,
-          color: Colors.white,
+          color: MyColors.accentColor,
           items: <Widget>[
             Icon(Icons.star, size: 30),
             (_currentUser?.notificationsNumber ?? 0) > 0
                 ? Badge(
                     badgeColor: MyColors.accentColor,
-                    badgeContent: Text(
-                        _currentUser.notificationsNumber < 9 ? _currentUser?.notificationsNumber.toString() : '+9'),
+                    badgeContent: Text(_currentUser.notificationsNumber < 9
+                        ? _currentUser?.notificationsNumber.toString()
+                        : '+9'),
                     child: Icon(
                       Icons.notifications,
                       size: 30,
@@ -156,7 +177,7 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin{
                     },
                     child: Icon(
                       Icons.menu,
-                      color: Colors.white,
+                      color: MyColors.accentColor,
                     ),
                   ),
                 ),

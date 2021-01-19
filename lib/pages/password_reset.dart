@@ -42,7 +42,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        SizedBox(height: 200),
                         _icon(),
                         SizedBox(height: 50),
                         _entryField('E-Mail'),
@@ -101,10 +100,17 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   }
 
   Widget _icon() {
-    return Icon(
-      Icons.music_note,
-      color: MyColors.primaryColor,
-      size: 50,
+    return Container(
+      padding: EdgeInsets.only(top: 100.0),
+      child: Container(
+        height: 170,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+            child: Image.asset(
+          'assets/images/app_art.png',
+          scale: 1.2,
+        )),
+      ),
     );
   }
 

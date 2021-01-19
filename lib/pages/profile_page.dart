@@ -537,7 +537,8 @@ class _ProfilePageState extends State<ProfilePage>
                                       });
                                     },
                                     controller: _tabController,
-                                    unselectedLabelColor: MyColors.accentColor,
+                                    unselectedLabelColor:
+                                        MyColors.textLightColor,
                                     indicatorColor: Colors.grey,
                                     labelColor: MyColors.primaryColor,
                                     indicatorSize: TabBarIndicatorSize.label,

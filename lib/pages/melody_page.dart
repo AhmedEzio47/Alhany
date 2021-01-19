@@ -1024,7 +1024,6 @@ class _MelodyPageState extends State<MelodyPage> {
           Center(
             child: LinearPercentIndicator(
               width: MediaQuery.of(context).size.width - 40,
-              lineHeight: 24.0,
               percent: _progress,
               backgroundColor: Colors.grey,
               progressColor: MyColors.primaryColor,

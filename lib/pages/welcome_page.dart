@@ -128,7 +128,7 @@ class _WelcomePageState extends State<WelcomePage> {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
-                  color: Colors.grey.shade800,
+                  color: MyColors.accentColor,
                   borderRadius: BorderRadius.circular(30.0)),
               child: new Row(
                 children: <Widget>[
@@ -152,7 +152,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 language(en: "SIGN UP", ar: 'تسجيل'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: MyColors.textLightColor,
+                                    color: MyColors.textDarkColor,
                                     fontWeight: FontWeight.bold),
                               ),
                             ),

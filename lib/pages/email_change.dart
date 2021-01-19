@@ -48,7 +48,6 @@ class _EmailChangePageState extends State<EmailChangePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        SizedBox(height: 200),
                         _icon(),
                         SizedBox(height: 50),
                         _entryField('E-mail', isEmail: true),
@@ -124,10 +123,17 @@ class _EmailChangePageState extends State<EmailChangePage> {
   }
 
   Widget _icon() {
-    return Icon(
-      Icons.music_note,
-      color: MyColors.primaryColor,
-      size: 50,
+    return Container(
+      padding: EdgeInsets.only(top: 100.0),
+      child: Container(
+        height: 120,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+            child: Image.asset(
+          'assets/images/app_art.png',
+          scale: 1.2,
+        )),
+      ),
     );
   }
 
@@ -213,7 +219,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.arrow_back, color: MyColors.iconLightColor),
+              child: Icon(Icons.arrow_back, color: MyColors.primaryColor),
             ),
           ],
         ),
