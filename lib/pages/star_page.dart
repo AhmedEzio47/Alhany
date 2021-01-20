@@ -140,7 +140,7 @@ class _StarPageState extends State<StarPage>
                       child: RegularAppbar(
                         context,
                         color: Colors.black,
-                        height: Sizes.appbarHeight,
+                        height: Sizes.appbar_height,
                         margin: 25,
                       ),
                       alignment: Alignment.topCenter,
@@ -412,7 +412,7 @@ class _StarPageState extends State<StarPage>
     return Positioned.fill(
         child: Align(
       child: Padding(
-        padding: const EdgeInsets.only(top: 20, left: 40),
+        padding: const EdgeInsets.only(top: 25, left: 40),
         child: InkWell(
           onTap: () {
             setState(() {

@@ -142,53 +142,54 @@ class _ChatsState extends State<Chats>
                 padding: const EdgeInsets.only(top: 70),
                 child: _chats.length > 0
                     ? ListView.separated(
-                  padding: EdgeInsets.all(10),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        height: 0.5,
-                        width: MediaQuery.of(context).size.width / 1.3,
-                        child: Divider(),
-                      ),
-                    );
-                  },
-                  itemCount:
-                  !_searching ? _chats.length : _filteredChats.length,
-                  itemBuilder: !_searching
-                      ? (BuildContext context, int index) {
-                    ChatItem chat = _chats[index];
-                    return chat;
-                  }
-                      : (BuildContext context, int index) {
-                    ChatItem chat = _filteredChats[index];
-                    return chat;
-                  },
-                )
+                        padding: EdgeInsets.all(10),
+                        separatorBuilder: (BuildContext context, int index) {
+                          return Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              height: 0.5,
+                              width: MediaQuery.of(context).size.width / 1.3,
+                              child: Divider(),
+                            ),
+                          );
+                        },
+                        itemCount:
+                            !_searching ? _chats.length : _filteredChats.length,
+                        itemBuilder: !_searching
+                            ? (BuildContext context, int index) {
+                                ChatItem chat = _chats[index];
+                                return chat;
+                              }
+                            : (BuildContext context, int index) {
+                                ChatItem chat = _filteredChats[index];
+                                return chat;
+                              },
+                      )
                     : Center(
-                    child: Text(
-                      'No chats yet',
-                      style: TextStyle(fontSize: 20, color: MyColors.textInactiveColor),
-                    )),
+                        child: Text(
+                        'No chats yet',
+                        style: TextStyle(
+                            fontSize: 20, color: MyColors.textInactiveColor),
+                      )),
               ),
             ),
             Positioned.fill(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 50, top: 30),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: TextField(
-                      cursorColor: Colors.white,
-                      controller: _searchController,
-                      style: TextStyle(color: MyColors.textLightColor),
-                      decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.search,
-                            size: 28.0,
-                            color: MyColors.iconLightColor,
-                          ),
-                          suffixIcon: _searching
-                              ? IconButton(
+              padding: const EdgeInsets.only(left: 50, top: 30),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: TextField(
+                  cursorColor: Colors.white,
+                  controller: _searchController,
+                  style: TextStyle(color: MyColors.textLightColor),
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.search,
+                        size: 28.0,
+                        color: MyColors.iconLightColor,
+                      ),
+                      suffixIcon: _searching
+                          ? IconButton(
                               icon: Icon(
                                 Icons.close,
                                 color: MyColors.iconLightColor,
@@ -196,35 +197,53 @@ class _ChatsState extends State<Chats>
                               onPressed: () {
                                 _searchController.clear();
                               })
-                              : null,
-                          hintText: 'Search',
-                          hintStyle: TextStyle(
-                            color: MyColors.textLightColor,
-                          )),
-                      onChanged: (text) {
-                        _filteredChats = [];
-                        if (text.length != 0) {
-                          setState(() {
-                            _searching = true;
-                          });
-                        } else {
-                          setState(() {
-                            _searching = false;
-                          });
-                        }
-                        _chats.forEach((chatItem) {
-                          if (chatItem.name
-                              .toLowerCase()
-                              .contains(text.toLowerCase())) {
-                            setState(() {
-                              _filteredChats.add(chatItem);
-                            });
-                          }
+                          : null,
+                      hintText: 'Search',
+                      hintStyle: TextStyle(
+                        color: MyColors.textLightColor,
+                      )),
+                  onChanged: (text) {
+                    _filteredChats = [];
+                    if (text.length != 0) {
+                      setState(() {
+                        _searching = true;
+                      });
+                    } else {
+                      setState(() {
+                        _searching = false;
+                      });
+                    }
+                    _chats.forEach((chatItem) {
+                      if (chatItem.name
+                          .toLowerCase()
+                          .contains(text.toLowerCase())) {
+                        setState(() {
+                          _filteredChats.add(chatItem);
                         });
-                      },
+                      }
+                    });
+                  },
+                ),
+              ),
+            )),
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.only(left: 15.0, top: 40),
+              child: Align(
+                child: Builder(
+                  builder: (context) => InkWell(
+                    onTap: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                    child: Icon(
+                      Icons.menu,
+                      color: MyColors.accentColor,
                     ),
                   ),
-                ))
+                ),
+                alignment: Alignment.topLeft,
+              ),
+            ))
           ],
         ),
       ),

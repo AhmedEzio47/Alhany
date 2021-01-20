@@ -1,12 +1,12 @@
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/notification_model.dart' as notification_model;
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/notification_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:Alhany/models/notification_model.dart' as notification_model;
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -25,8 +25,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
-          leading: Text(''),
-          title: Text("Notifications"),
+          leading: Builder(
+            builder: (context) => InkWell(
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+              child: Icon(
+                Icons.menu,
+                color: MyColors.accentColor,
+              ),
+            ),
+          ),
+          title: Text(
+            "Notifications",
+            style: TextStyle(color: MyColors.accentColor),
+          ),
           centerTitle: true,
         ),
         body: _notifications.length > 0
@@ -35,7 +48,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 decoration: BoxDecoration(
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -48,11 +62,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     shrinkWrap: true,
                     itemCount: _notifications.length,
                     itemBuilder: (BuildContext context, int index) {
-                      notification_model.Notification notification = _notifications[index];
+                      notification_model.Notification notification =
+                          _notifications[index];
 
                       return FutureBuilder(
-                          future: DatabaseService.getUserWithId(notification.sender),
-                          builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          future: DatabaseService.getUserWithId(
+                              notification.sender),
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
                             if (!snapshot.hasData) {
                               return SizedBox.shrink();
                             }
@@ -79,7 +96,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 decoration: BoxDecoration(
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -96,7 +114,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   _setupFeed() async {
-    List<notification_model.Notification> notifications = await DatabaseService.getNotifications();
+    List<notification_model.Notification> notifications =
+        await DatabaseService.getNotifications();
     setState(() {
       _notifications = notifications;
       this.lastVisibleNotificationSnapShot = notifications.last.timestamp;
@@ -104,7 +123,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   void nextNotifications() async {
-    var notifications = await DatabaseService.getNextNotifications(lastVisibleNotificationSnapShot);
+    var notifications = await DatabaseService.getNextNotifications(
+        lastVisibleNotificationSnapShot);
     if (notifications.length > 0) {
       setState(() {
         notifications.forEach((element) => _notifications.add(element));
@@ -118,11 +138,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
     super.initState();
     _scrollController
       ..addListener(() {
-        if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        if (_scrollController.offset >=
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextNotifications();
-        } else if (_scrollController.offset <= _scrollController.position.minScrollExtent &&
+        } else if (_scrollController.offset <=
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}

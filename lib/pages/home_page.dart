@@ -67,7 +67,8 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 70),
+                  padding: const EdgeInsets.only(
+                      top: Sizes.home_screen_page_view_padding),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,30 +137,42 @@ class _HomePageState extends State<HomePage>
                     ))
                   : Container(),
               Positioned.fill(
-                  child: Padding(
-                padding: const EdgeInsets.only(right: 15.0, top: 40),
-                child: Align(
-                  child: Builder(
-                    builder: (context) => InkWell(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/search-page');
-                      },
-                      child: Icon(
-                        Icons.search,
-                        color: MyColors.accentColor,
-                      ),
-                    ),
-                  ),
-                  alignment: Alignment.topRight,
-                ),
-              )),
-              Positioned.fill(
                   child: Align(
                 child: RegularAppbar(
                   context,
                   color: Colors.black,
-                  height: Sizes.appbarHeight,
+                  height: Sizes.appbar_height,
                   margin: 25,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 15.0,
+                    ),
+                    child: Builder(
+                      builder: (context) => InkWell(
+                        onTap: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                        child: Icon(
+                          Icons.menu,
+                          color: MyColors.accentColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 15),
+                    child: Builder(
+                      builder: (context) => InkWell(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/search-page');
+                        },
+                        child: Icon(
+                          Icons.search,
+                          color: MyColors.accentColor,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 alignment: Alignment.topCenter,
               )),
@@ -228,7 +241,7 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: Sizes.singerBox + 70,
+                  height: Sizes.singer_box + 70,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,8 +315,8 @@ class _HomePageState extends State<HomePage>
                                                     });
                                               },
                                               child: Container(
-                                                height: Sizes.singerBox,
-                                                width: Sizes.singerBox,
+                                                height: Sizes.singer_box,
+                                                width: Sizes.singer_box,
                                                 child: Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
@@ -312,9 +325,9 @@ class _HomePageState extends State<HomePage>
                                                   children: [
                                                     CachedImage(
                                                       width:
-                                                          Sizes.singerBox - 10,
+                                                          Sizes.singer_box - 10,
                                                       height:
-                                                          Sizes.singerBox - 10,
+                                                          Sizes.singer_box - 10,
                                                       imageShape:
                                                           BoxShape.rectangle,
                                                       imageUrl: _categorySingers[

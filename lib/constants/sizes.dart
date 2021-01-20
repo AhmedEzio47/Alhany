@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Sizes {
+  ///Editable
+  static const double singer_box = 150;
+  static const double appbar_height = 65;
+  static const double home_screen_page_view_padding = 85;
+
   /// User Profile Sizes
   static const double sm_profile_image_w = 30.0;
   static const double sm_profile_image_h = 30.0;
@@ -30,9 +35,6 @@ class Sizes {
   static const int maxPostChars = 289;
 
   static const int postExcerpt = 100; // vertical   offset
-
-  static const double singerBox = 150;
-  static const double appbarHeight = 50;
 
   static double fullWidth(BuildContext context) {
     // print(MediaQuery.of(context).size.width.toString());

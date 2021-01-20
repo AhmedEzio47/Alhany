@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class RegularAppbar extends StatelessWidget {
 
   RegularAppbar(BuildContext context,
       {this.color = Colors.white,
-      this.height = 50,
+      this.height = Sizes.appbar_height,
       this.margin = 5,
       this.onBackPressed,
       this.leading,

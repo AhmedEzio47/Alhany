@@ -166,24 +166,6 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
                 ),
               ],
             ),
-            Positioned.fill(
-                child: Padding(
-              padding: const EdgeInsets.only(left: 15.0, top: 40),
-              child: Align(
-                child: Builder(
-                  builder: (context) => InkWell(
-                    onTap: () {
-                      Scaffold.of(context).openDrawer();
-                    },
-                    child: Icon(
-                      Icons.menu,
-                      color: MyColors.accentColor,
-                    ),
-                  ),
-                ),
-                alignment: Alignment.topLeft,
-              ),
-            ))
           ],
         ));
   }

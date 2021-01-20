@@ -212,8 +212,24 @@ class _ProfilePageState extends State<ProfilePage>
                           child: RegularAppbar(
                             context,
                             color: Colors.black,
-                            height: Sizes.appbarHeight,
+                            height: Sizes.appbar_height,
                             margin: 25,
+                            leading: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 15.0,
+                              ),
+                              child: Builder(
+                                builder: (context) => InkWell(
+                                  onTap: () {
+                                    Scaffold.of(context).openDrawer();
+                                  },
+                                  child: Icon(
+                                    Icons.menu,
+                                    color: MyColors.accentColor,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                           alignment: Alignment.topCenter,
                         ),
