@@ -13,6 +13,7 @@ import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../app_util.dart';
 
@@ -607,8 +608,31 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
-                )
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: SignInWithAppleButton(
+                    borderRadius: BorderRadius.circular(25),
+                    onPressed: () async {
+                      final credential =
+                          await SignInWithApple.getAppleIDCredential(
+                        scopes: [
+                          AppleIDAuthorizationScopes.email,
+                          AppleIDAuthorizationScopes.fullName,
+                        ],
+                      );
+
+                      print(credential);
+
+                      // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+                      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
               ],
             ),
           ),
@@ -889,7 +913,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 SizedBox(
                   height: 20,
-                )
+                ),
               ],
             ),
           ),

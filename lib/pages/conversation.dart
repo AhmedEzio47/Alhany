@@ -1,10 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:Alhany/app_util.dart';
-import 'package:Alhany/app_util.dart';
-import 'package:Alhany/app_util.dart';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
@@ -18,13 +14,14 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/chat_bubble.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/image_overlay.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:random_string/random_string.dart';
 import 'package:path/path.dart' as path;
+import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
   final String otherUid;
@@ -40,7 +37,8 @@ class Conversation extends StatefulWidget {
   _ConversationState createState() => state;
 }
 
-class _ConversationState extends State<Conversation> with WidgetsBindingObserver {
+class _ConversationState extends State<Conversation>
+    with WidgetsBindingObserver {
   bool isMicrophoneGranted = false;
   Firestore _firestore = Firestore.instance;
 
@@ -91,7 +89,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
 
   void getPrevMessages() async {
     var messages;
-    messages = await DatabaseService.getPrevMessages(firstVisibleGameSnapShot, widget.otherUid);
+    messages = await DatabaseService.getPrevMessages(
+        firstVisibleGameSnapShot, widget.otherUid);
 
     if (messages.length > 0) {
       setState(() {
@@ -168,7 +167,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
 
   String formatTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
@@ -205,9 +205,13 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
 
   void updateOnlineUserState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      await usersRef.document(Constants.currentUserID).updateData({'online': FieldValue.serverTimestamp()});
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': FieldValue.serverTimestamp()});
     } else if (state == AppLifecycleState.resumed) {
-      await usersRef.document(Constants.currentUserID).updateData({'online': 'online'});
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': 'online'});
     }
   }
 
@@ -276,11 +280,13 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
     ///Set up listener here
     _scrollController
       ..addListener(() {
-        if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        if (_scrollController.offset >=
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           getPrevMessages();
-        } else if (_scrollController.offset <= _scrollController.position.minScrollExtent &&
+        } else if (_scrollController.offset <=
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -348,7 +354,11 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                         ),
                         SizedBox(height: 5),
                         Text(
-                          otherUser != null ? otherUser.online == 'online' ? 'online' : 'offline' : '',
+                          otherUser != null
+                              ? otherUser.online == 'online'
+                                  ? 'online'
+                                  : 'offline'
+                              : '',
                           style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: Colors.white,
@@ -361,7 +371,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                 ],
               ),
               onTap: () {
-                Navigator.of(context).pushNamed('/user-profile', arguments: {'userId': widget.otherUid});
+                Navigator.of(context).pushNamed('/user-profile',
+                    arguments: {'userId': widget.otherUid});
               },
             ),
           ),
@@ -382,7 +393,9 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                             return ChatBubble(
                               message: msg.message,
                               username: otherUser.name,
-                              time: msg.timestamp != null ? formatTimestamp(msg.timestamp) : 'now',
+                              time: msg.timestamp != null
+                                  ? formatTimestamp(msg.timestamp)
+                                  : 'now',
                               type: msg.type,
                               replyText: null,
                               isMe: msg.sender == Constants.currentUserID,
@@ -431,40 +444,54 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                 color: Colors.white,
                               ),
                               onPressed: () async {
-                                ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                                ImageEditBottomSheet bottomSheet =
+                                    ImageEditBottomSheet();
                                 await bottomSheet.openBottomSheet(context);
 
                                 File image;
                                 if (bottomSheet.source == ImageSource.gallery) {
                                   image = await AppUtil.pickImageFromGallery();
-                                } else if (bottomSheet.source == ImageSource.camera) {
+                                } else if (bottomSheet.source ==
+                                    ImageSource.camera) {
                                   image = await AppUtil.takePhoto();
                                 } else {
-                                  AppUtil.showToast(language(en: 'Nothing chosen', ar: 'لم يتم اختيار صورة'));
+                                  AppUtil.showToast(language(
+                                      en: 'Nothing chosen',
+                                      ar: 'لم يتم اختيار صورة'));
                                   return;
                                 }
 
                                 if (image != null) {
                                   showDialog(
                                       barrierDismissible: true,
-                                      child: Container(
-                                        width: 300,
-                                        height: 300,
-                                        child: ImageOverlay(imageFile: image, btnIcons: [
-                                          Icons.send
-                                        ], btnFunctions: [
-                                          () async {
-                                            String url = await AppUtil().uploadFile(image, context,
-                                                'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image.path)}');
+                                      builder: (_) => Container(
+                                            width: 300,
+                                            height: 300,
+                                            child: ImageOverlay(
+                                                imageFile: image,
+                                                btnIcons: [
+                                                  Icons.send
+                                                ],
+                                                btnFunctions: [
+                                                  () async {
+                                                    String url = await AppUtil()
+                                                        .uploadFile(
+                                                            image,
+                                                            context,
+                                                            'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image.path)}');
 
-                                            messageController.clear();
-                                            await DatabaseService.sendMessage(widget.otherUid, 'image', url);
-                                            makeMessagesUnseen();
+                                                    messageController.clear();
+                                                    await DatabaseService
+                                                        .sendMessage(
+                                                            widget.otherUid,
+                                                            'image',
+                                                            url);
+                                                    makeMessagesUnseen();
 
-                                            Navigator.of(context).pop();
-                                          },
-                                        ]),
-                                      ),
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ]),
+                                          ),
                                       context: context);
                                 }
                               },
@@ -474,7 +501,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                 ? TextField(
                                     cursorColor: Colors.white,
                                     focusNode: _focusNode,
-                                    textCapitalization: TextCapitalization.sentences,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
                                     controller: messageController,
                                     onChanged: (value) {
                                       messageText = value;
@@ -486,7 +514,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                     decoration: InputDecoration(
                                       contentPadding: EdgeInsets.all(10.0),
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
                                         borderSide: BorderSide(
                                           color: MyColors.primaryColor,
                                         ),
@@ -495,7 +524,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                         borderSide: BorderSide(
                                           color: MyColors.primaryColor,
                                         ),
-                                        borderRadius: BorderRadius.circular(5.0),
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
                                       ),
                                       hintText: "Write your message...",
                                       hintStyle: TextStyle(
@@ -514,18 +544,22 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                                     ),
                                     onPressed: () async {
                                       messageController.clear();
-                                      await DatabaseService.sendMessage(widget.otherUid, 'text', messageText);
+                                      await DatabaseService.sendMessage(
+                                          widget.otherUid, 'text', messageText);
                                     },
                                   )
                                 : GestureDetector(
                                     onLongPress: () async {
-                                      if (await PermissionsService().hasMicrophonePermission()) {
+                                      if (await PermissionsService()
+                                          .hasMicrophonePermission()) {
                                         setState(() {
                                           isMicrophoneGranted = true;
                                         });
                                       } else {
-                                        bool isGranted = await PermissionsService().requestMicrophonePermission(
-                                            onPermissionDenied: () {
+                                        bool isGranted =
+                                            await PermissionsService()
+                                                .requestMicrophonePermission(
+                                                    onPermissionDenied: () {
                                           AppUtil.showAlertDialog(
                                               context: context,
                                               heading: 'info',
@@ -545,24 +579,31 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
 
                                       if (isMicrophoneGranted) {
                                         setState(() {
-                                          _currentStatus = RecordingStatus.Recording;
+                                          _currentStatus =
+                                              RecordingStatus.Recording;
                                         });
                                         await initRecorder();
-                                        await recorder.startRecording(conversation: this.widget);
+                                        await recorder.startRecording(
+                                            conversation: this.widget);
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
                                       if (isMicrophoneGranted) {
                                         setState(() {
-                                          _currentStatus = RecordingStatus.Stopped;
+                                          _currentStatus =
+                                              RecordingStatus.Stopped;
                                         });
-                                        Recording result = await recorder.stopRecording();
+                                        Recording result =
+                                            await recorder.stopRecording();
 
                                         //Storage path is voice_messages/sender_id/receiver_id/file
-                                        _url = await AppUtil().uploadFile(File(result.path), context,
+                                        _url = await AppUtil().uploadFile(
+                                            File(result.path),
+                                            context,
                                             'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result.path)}');
 
-                                        await DatabaseService.sendMessage(widget.otherUid, 'audio', _url);
+                                        await DatabaseService.sendMessage(
+                                            widget.otherUid, 'audio', _url);
                                       }
                                     },
                                     child: IconButton(

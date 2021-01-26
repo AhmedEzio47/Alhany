@@ -66,7 +66,7 @@ class RegularAppbar extends StatelessWidget {
               height: height,
               width: 150,
               child: Image.asset(
-                Strings.app_icon,
+                Strings.app_bar,
               ),
             ),
             trailing

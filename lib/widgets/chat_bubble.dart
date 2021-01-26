@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:Alhany/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../app_util.dart';
 import 'audio_message_player.dart';
 import 'image_overlay.dart';
@@ -52,7 +53,8 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   Widget build(BuildContext context) {
     final bg = widget.isMe ? MyColors.primaryColor : Colors.grey[200];
-    final align = widget.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final align =
+        widget.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final radius = widget.isMe
         ? BorderRadius.only(
             topLeft: Radius.circular(5.0),
@@ -99,11 +101,17 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ),
                         )
                       : SizedBox(),
-              widget.isGroup ? widget.isMe ? SizedBox() : SizedBox(height: 5) : SizedBox(),
+              widget.isGroup
+                  ? widget.isMe
+                      ? SizedBox()
+                      : SizedBox(height: 5)
+                  : SizedBox(),
               widget.isReply
                   ? Container(
                       decoration: BoxDecoration(
-                        color: !widget.isMe ? MyColors.accentColor : MyColors.primaryColor,
+                        color: !widget.isMe
+                            ? MyColors.accentColor
+                            : MyColors.primaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(5.0)),
                       ),
                       constraints: BoxConstraints(
@@ -154,7 +162,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                         ? Text(
                             widget.message,
                             style: TextStyle(
-                              color: widget.isMe ? MyColors.textLightColor : MyColors.textDarkColor,
+                              color: widget.isMe
+                                  ? MyColors.textLightColor
+                                  : MyColors.textDarkColor,
                             ),
                           )
                         : Container(
@@ -162,7 +172,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                             child: Text(
                               widget.message,
                               style: TextStyle(
-                                color: widget.isMe ? MyColors.textLightColor : MyColors.textDarkColor,
+                                color: widget.isMe
+                                    ? MyColors.textLightColor
+                                    : MyColors.textDarkColor,
                               ),
                             ),
                           )
@@ -171,17 +183,21 @@ class _ChatBubbleState extends State<ChatBubble> {
                             onTap: () {
                               showDialog(
                                   barrierDismissible: true,
-                                  child: Container(
-                                    width: 200,
-                                    height: 200,
-                                    child: ImageOverlay(imageUrl: widget.message, btnIcons: [
-                                      Icons.file_download
-                                    ], btnFunctions: [
-                                      () {
-                                        AppUtil.downloadFile(widget.message);
-                                      },
-                                    ]),
-                                  ),
+                                  builder: (_) => Container(
+                                        width: 200,
+                                        height: 200,
+                                        child: ImageOverlay(
+                                            imageUrl: widget.message,
+                                            btnIcons: [
+                                              Icons.file_download
+                                            ],
+                                            btnFunctions: [
+                                              () {
+                                                AppUtil.downloadFile(
+                                                    widget.message);
+                                              },
+                                            ]),
+                                      ),
                                   context: context);
                             },
                             child: Image.network(
@@ -191,7 +207,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                               fit: BoxFit.cover,
                             ),
                           )
-                        : widget.type == 'audio' ? AudioMessagePlayer(url: widget.message) : Container(),
+                        : widget.type == 'audio'
+                            ? AudioMessagePlayer(url: widget.message)
+                            : Container(),
               ),
             ],
           ),
