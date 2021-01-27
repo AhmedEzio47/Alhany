@@ -609,9 +609,9 @@ class _ProfilePageState extends State<ProfilePage>
     if (this.widget.userId != Constants.currentUserID) {
       DocumentSnapshot followSnapshot = await firestore
           .collection('users')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .collection('following')
-          .document(widget.userId)
+          .doc(widget.userId)
           .get();
 
       setState(() {
@@ -748,7 +748,7 @@ class _ProfilePageState extends State<ProfilePage>
     List<String> search = searchList(_nameController.text);
     search.addAll(searchList(_usernameController.text));
 
-    await usersRef.document(Constants.currentUserID).updateData({
+    await usersRef.doc(Constants.currentUserID).update({
       'username': isValidUsername ? _usernameController.text : _user.username,
       'name': _nameController.text,
       'description': _descriptionController.text,
@@ -788,9 +788,7 @@ class _ProfilePageState extends State<ProfilePage>
 
     String url = await AppUtil().uploadFile(image, context,
         'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
-    await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'profile_url': url});
+    await usersRef.doc(Constants.currentUserID).update({'profile_url': url});
     Navigator.of(context).pop();
     await getUser();
     setState(() {
@@ -825,11 +823,9 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   Future<bool> isUsernameTaken(String username) async {
-    final QuerySnapshot result = await usersRef
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .getDocuments();
-    return result.documents.isNotEmpty;
+    final QuerySnapshot result =
+        await usersRef.where('username', isEqualTo: username).limit(1).get();
+    return result.docs.isNotEmpty;
   }
 
   Future<bool> _onBackPressed() {

@@ -98,11 +98,11 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
 
   userListener() {
     usersRef.snapshots().listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
+      querySnapshot.docChanges.forEach((change) {
         if (mounted) {
           setState(() {
-            if (change.document.documentID == Constants.currentUserID) {
-              Constants.currentUser = User.fromDoc(change.document);
+            if (change.doc.id == Constants.currentUserID) {
+              Constants.currentUser = User.fromDoc(change.doc);
               setState(() {
                 _currentUser = Constants.currentUser;
               });

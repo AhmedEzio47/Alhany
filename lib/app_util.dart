@@ -23,16 +23,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants/colors.dart';
 import 'constants/constants.dart';
-import 'models/user_model.dart';
+import 'models/user_model.dart' as user_model;
 
 saveToken() async {
   if (Constants.currentUserID == null) return;
   String token = await FirebaseMessaging().getToken();
   usersRef
-      .document(Constants.currentUserID)
+      .doc(Constants.currentUserID)
       .collection('tokens')
-      .document(token)
-      .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+      .doc(token)
+      .set({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
 }
 
 List<String> searchList(String text) {
@@ -175,20 +175,19 @@ class AppUtil with ChangeNotifier {
       File file, BuildContext context, String path) async {
     if (file == null) return '';
 
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(path);
-    print('storage path: $path');
-    StorageUploadTask uploadTask;
+    Reference storageReference = FirebaseStorage.instance.ref().child(path);
 
+    UploadTask uploadTask;
     uploadTask = storageReference.putFile(file);
-    uploadTask.events.listen((event) {
-      progress = event.snapshot.bytesTransferred.toDouble() /
-          event.snapshot.totalByteCount.toDouble();
+
+    uploadTask.snapshotEvents.listen((snapshot) {
+      progress =
+          snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble();
       notifyListeners();
     }).onError((error) {
       // do something to handle error
     });
-    await uploadTask.onComplete;
+    await uploadTask;
     print('File Uploaded');
     String url = await storageReference.getDownloadURL();
 
@@ -370,7 +369,7 @@ class AppUtil with ChangeNotifier {
   static checkIfContainsMention(String text, String recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
-        User user =
+        user_model.User user =
             await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
@@ -403,10 +402,11 @@ class AppUtil with ChangeNotifier {
     print('Check out: $postText : $postLink');
   }
 
-  static setUserVariablesByFirebaseUser(FirebaseUser user) async {
-    User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
+  static setUserVariablesByFirebaseUser(User user) async {
+    user_model.User loggedInUser =
+        await DatabaseService.getUserWithId(user?.uid);
 
-    User star = await DatabaseService.getUserWithId(Strings.starId);
+    user_model.User star = await DatabaseService.getUserWithId(Strings.starId);
 
     Constants.currentUser = loggedInUser;
     Constants.currentFirebaseUser = user;

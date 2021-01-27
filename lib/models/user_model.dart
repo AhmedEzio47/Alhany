@@ -26,15 +26,15 @@ class User {
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(
-        id: doc.documentID,
-        name: doc['name'],
-        username: doc['username'],
-        profileImageUrl: doc['profile_url'],
-        email: doc['email'],
-        description: doc['description'] ?? '',
-        violations: doc['violations'],
-        notificationsNumber: doc['notificationsNumber'],
-        online: doc['online'],
-        search: doc['search']);
+        id: doc.id,
+        name: doc.data()['name'],
+        username: doc.data()['username'],
+        profileImageUrl: doc.data()['profile_url'],
+        email: doc.data()['email'],
+        description: doc.data()['description'] ?? '',
+        violations: doc.data()['violations'],
+        notificationsNumber: doc.data()['notificationsNumber'],
+        online: doc.data()['online'],
+        search: doc.data()['search']);
   }
 }

@@ -36,21 +36,21 @@ class Melody {
 
   factory Melody.fromDoc(DocumentSnapshot doc) {
     return Melody(
-        id: doc.documentID,
-        name: doc['name'],
-        audioUrl: doc['audio_url'],
-        lyrics: doc['lyrics'],
-        levelUrls: doc['level_urls'],
-        levelDurations: doc['level_durations'],
-        imageUrl: doc['image_url'],
-        authorId: doc['author_id'],
-        singer: doc['singer'],
-        isSong: doc['is_song'],
-        price: doc['price'],
-        views: doc['views'],
-        duration: doc['duration'],
-        search: doc['search'],
-        timestamp: doc['timestamp']);
+        id: doc.id,
+        name: doc.data()['name'],
+        audioUrl: doc.data()['audio_url'],
+        lyrics: doc.data()['lyrics'],
+        levelUrls: doc.data()['level_urls'],
+        levelDurations: doc.data()['level_durations'],
+        imageUrl: doc.data()['image_url'],
+        authorId: doc.data()['author_id'],
+        singer: doc.data()['singer'],
+        isSong: doc.data()['is_song'],
+        price: doc.data()['price'],
+        views: doc.data()['views'],
+        duration: doc.data()['duration'],
+        search: doc.data()['search'],
+        timestamp: doc.data()['timestamp']);
   }
 
   factory Melody.fromMap(Map<String, dynamic> map) {

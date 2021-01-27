@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
-import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/pages/app_page.dart';
 import 'package:Alhany/pages/welcome_page.dart';
 import 'package:Alhany/services/auth.dart';
@@ -13,7 +9,6 @@ import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -51,7 +46,8 @@ class _RootPageState extends State<RootPage> {
       body: Container(
         color: MyColors.primaryColor,
         alignment: Alignment.center,
-        child: Center(//
+        child: Center(
+            //
             child: FlipLoader(
                 loaderBackground: Colors.white,
                 iconColor: MyColors.primaryColor,
@@ -75,15 +71,16 @@ class _RootPageState extends State<RootPage> {
   }
 
   Future authAssignment() async {
-    FirebaseUser user = await Auth().getCurrentUser();
+    User user = await Auth().getCurrentUser();
 
-    if (user?.uid != null && ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
+    if (user?.uid != null &&
+        ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
       AppUtil.setUserVariablesByFirebaseUser(user);
       setState(() {
         _authStatus = AuthStatus.LOGGED_IN;
       });
-    } else if (user?.uid != null && !(user.isEmailVerified)) {
-      print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');
+    } else if (user?.uid != null && !(user.emailVerified)) {
+      print('!(user.isEmailVerified) = ${!(user.emailVerified)}');
       setState(() {
         _authStatus = AuthStatus.NOT_LOGGED_IN;
         authStatus = AuthStatus.NOT_LOGGED_IN;

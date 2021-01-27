@@ -21,7 +21,9 @@ class PostFullscreen extends StatefulWidget {
   final News news;
   final User singer;
   final Melody melody;
-  const PostFullscreen({Key key, this.record, this.singer, this.melody, this.news}) : super(key: key);
+  const PostFullscreen(
+      {Key key, this.record, this.singer, this.melody, this.news})
+      : super(key: key);
   @override
   _PostFullscreenState createState() => _PostFullscreenState();
 }
@@ -41,8 +43,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
   isFollowing() async {
     if (Constants.currentUserID == _singer?.id) return true;
 
-    DocumentSnapshot snapshot =
-        await usersRef.document(Constants.currentUserID).collection('following').document(_singer?.id).get();
+    DocumentSnapshot snapshot = await usersRef
+        .doc(Constants.currentUserID)
+        .collection('following')
+        .doc(_singer?.id)
+        .get();
     return snapshot.exists;
   }
 
@@ -62,9 +67,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
       collectionReference = newsRef;
     }
     DocumentSnapshot likedSnapshot = await collectionReference
-        .document(record?.id ?? news?.id)
+        .doc(record?.id ?? news?.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
 
     //Solves the problem setState() called after dispose()
@@ -87,27 +92,33 @@ class _PostFullscreenState extends State<PostFullscreen> {
     }
     if (isLiked == true) {
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
-      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(-1)});
+      await collectionReference
+          .doc(record?.id ?? news?.id)
+          .update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
-          record?.singerId ?? Constants.startUser.id, record?.id ?? news?.id, 'like');
+          record?.singerId ?? Constants.startUser.id,
+          record?.id ?? news?.id,
+          'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
     } else if (isLiked == false) {
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
-      await collectionReference.document(record?.id ?? news?.id).updateData({'likes': FieldValue.increment(1)});
+      await collectionReference
+          .doc(record?.id ?? news?.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -120,7 +131,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
           record?.id ?? news?.id,
           record != null ? 'record_like' : 'news_like');
     }
-    var recordMeta = await DatabaseService.getPostMeta(recordId: record?.id, newsId: news?.id);
+    var recordMeta = await DatabaseService.getPostMeta(
+        recordId: record?.id, newsId: news?.id);
     setState(() {
       record?.likes = recordMeta['likes'];
       news?.likes = recordMeta['likes'];
@@ -129,12 +141,14 @@ class _PostFullscreenState extends State<PostFullscreen> {
   }
 
   void _goToProfilePage() {
-    Navigator.of(context)
-        .pushNamed('/profile-page', arguments: {'user_id': widget.record?.singerId ?? Constants.startUser.id});
+    Navigator.of(context).pushNamed('/profile-page', arguments: {
+      'user_id': widget.record?.singerId ?? Constants.startUser.id
+    });
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context).pushNamed('/melody-page', arguments: {'melody': widget.melody});
+    Navigator.of(context)
+        .pushNamed('/melody-page', arguments: {'melody': widget.melody});
   }
 
   Record _record;
@@ -150,7 +164,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
           _scrollable = true;
         });
       }
-      if (_pageController.position.userScrollDirection == ScrollDirection.forward) {
+      if (_pageController.position.userScrollDirection ==
+          ScrollDirection.forward) {
         print('swiped down');
       } else {
         print('swiped up');
@@ -209,36 +224,47 @@ class _PostFullscreenState extends State<PostFullscreen> {
           widget.record != null
               ? SimpleGestureDetector(
                   onVerticalSwipe: (SwipeDirection swipeDirection) {
-                    if (swipeDirection == SwipeDirection.up && _scrollDirection == ScrollDirection.forward) {
+                    if (swipeDirection == SwipeDirection.up &&
+                        _scrollDirection == ScrollDirection.forward) {
                       setState(() {
                         _scrollable = true;
                       });
                       _pageController.animateToPage(_page + 1,
-                          duration: Duration(milliseconds: 800), curve: Curves.easeOut);
+                          duration: Duration(milliseconds: 800),
+                          curve: Curves.easeOut);
                       print('Swipe up');
-                    } else if (swipeDirection == SwipeDirection.down && _scrollDirection == ScrollDirection.reverse) {
+                    } else if (swipeDirection == SwipeDirection.down &&
+                        _scrollDirection == ScrollDirection.reverse) {
                       setState(() {
                         _scrollable = true;
                       });
                       _pageController.animateToPage(_page - 1,
-                          duration: Duration(milliseconds: 800), curve: Curves.easeOut);
+                          duration: Duration(milliseconds: 800),
+                          curve: Curves.easeOut);
                       print('Swipe down');
                     }
                   },
                   child: PageView.builder(
                       controller: _pageController,
-                      physics: !_scrollable ? NeverScrollableScrollPhysics() : null,
+                      physics:
+                          !_scrollable ? NeverScrollableScrollPhysics() : null,
                       onPageChanged: (index) async {
                         Record record, next, previous;
                         if (index > _page) {
-                          record = await DatabaseService.getNextRecord(_record.timestamp);
-                          next = await DatabaseService.getNextRecord(record.timestamp);
+                          record = await DatabaseService.getNextRecord(
+                              _record.timestamp);
+                          next = await DatabaseService.getNextRecord(
+                              record.timestamp);
                         } else {
-                          record = await DatabaseService.getPrevRecord(_record.timestamp);
-                          previous = await DatabaseService.getPrevRecord(record.timestamp);
+                          record = await DatabaseService.getPrevRecord(
+                              _record.timestamp);
+                          previous = await DatabaseService.getPrevRecord(
+                              record.timestamp);
                         }
-                        if ((next == null && _scrollDirection == ScrollDirection.reverse) ||
-                            (previous == null && _scrollDirection == ScrollDirection.forward)) {
+                        if ((next == null &&
+                                _scrollDirection == ScrollDirection.reverse) ||
+                            (previous == null &&
+                                _scrollDirection == ScrollDirection.forward)) {
                           setState(() {
                             _scrollable = false;
                           });
@@ -290,7 +316,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: _controller != null ? VideoPlayer(_controller) : Container(),
+              child:
+                  _controller != null ? VideoPlayer(_controller) : Container(),
             )),
         Padding(
           padding: EdgeInsets.only(bottom: 70),
@@ -316,9 +343,16 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           padding: EdgeInsets.only(left: 10, bottom: 10),
                           child: Text.rich(
                             TextSpan(children: <TextSpan>[
-                              TextSpan(text: '${widget.singer?.name}\n', style: TextStyle(fontWeight: FontWeight.bold)),
-                              TextSpan(text: 'singed\n', style: TextStyle(fontSize: 12)),
-                              TextSpan(text: widget.melody?.name, style: TextStyle(fontWeight: FontWeight.bold))
+                              TextSpan(
+                                  text: '${widget.singer?.name}\n',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              TextSpan(
+                                  text: 'singed\n',
+                                  style: TextStyle(fontSize: 12)),
+                              TextSpan(
+                                  text: widget.melody?.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold))
                             ]),
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ))
@@ -352,8 +386,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
                               child: CircleAvatar(
                                 radius: 19,
                                 backgroundColor: Colors.black,
-                                backgroundImage:
-                                    NetworkImage(widget.singer?.profileImageUrl ?? Constants.startUser.profileImageUrl),
+                                backgroundImage: NetworkImage(
+                                    widget.singer?.profileImageUrl ??
+                                        Constants.startUser.profileImageUrl),
                               ),
                             ),
                           ),
@@ -362,8 +397,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                   alignment: Alignment.bottomCenter,
                                   child: CircleAvatar(
                                     radius: 10,
-                                    backgroundColor: MyColors.primaryColor.withOpacity(1),
-                                    child: Center(child: Icon(Icons.add, size: 15, color: Colors.white)),
+                                    backgroundColor:
+                                        MyColors.primaryColor.withOpacity(1),
+                                    child: Center(
+                                        child: Icon(Icons.add,
+                                            size: 15, color: Colors.white)),
                                   ),
                                 )
                               : Container()
@@ -378,14 +416,18 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           InkWell(
                             onTap: () async {
                               if (isLikeEnabled) {
-                                await likeBtnHandler(record: _record, news: widget.news);
+                                await likeBtnHandler(
+                                    record: _record, news: widget.news);
                               }
                             },
                             child: isLiked
-                                ? Icon(Icons.thumb_up, size: 35, color: MyColors.primaryColor)
-                                : Icon(Icons.thumb_up, size: 35, color: Colors.white),
+                                ? Icon(Icons.thumb_up,
+                                    size: 35, color: MyColors.primaryColor)
+                                : Icon(Icons.thumb_up,
+                                    size: 35, color: Colors.white),
                           ),
-                          Text('${_record?.likes ?? widget.news?.likes ?? 0}', style: TextStyle(color: Colors.white))
+                          Text('${_record?.likes ?? widget.news?.likes ?? 0}',
+                              style: TextStyle(color: Colors.white))
                         ],
                       ),
                     ),
@@ -393,11 +435,17 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       onTap: () {
                         //addComment();
                         if (_record != null) {
-                          Navigator.of(context)
-                              .pushNamed('/record-page', arguments: {'record': _record, 'is_video_visible': false});
+                          Navigator.of(context).pushNamed('/record-page',
+                              arguments: {
+                                'record': _record,
+                                'is_video_visible': false
+                              });
                         } else {
-                          Navigator.of(context)
-                              .pushNamed('/news-page', arguments: {'news': widget.news, 'is_video_visible': false});
+                          Navigator.of(context).pushNamed('/news-page',
+                              arguments: {
+                                'news': widget.news,
+                                'is_video_visible': false
+                              });
                         }
                       },
                       child: Container(
@@ -408,8 +456,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
                             Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(math.pi),
-                                child: Icon(Icons.sms, size: 35, color: Colors.white)),
-                            Text('${_record?.comments ?? widget.news?.comments ?? 0}',
+                                child: Icon(Icons.sms,
+                                    size: 35, color: Colors.white)),
+                            Text(
+                                '${_record?.comments ?? widget.news?.comments ?? 0}',
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),
@@ -423,18 +473,24 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           Transform(
                               alignment: Alignment.center,
                               transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.remove_red_eye, size: 35, color: Colors.white)),
-                          Text('${_record?.views ?? widget.news?.views ?? 0}', style: TextStyle(color: Colors.white))
+                              child: Icon(Icons.remove_red_eye,
+                                  size: 35, color: Colors.white)),
+                          Text('${_record?.views ?? widget.news?.views ?? 0}',
+                              style: TextStyle(color: Colors.white))
                         ],
                       ),
                     ),
                     InkWell(
                       onTap: () {
                         if (_record != null) {
-                          AppUtil.sharePost('${widget.singer.name} singed ${widget.melody?.name}', '',
-                              recordId: _record.id, newsId: widget.news?.id);
+                          AppUtil.sharePost(
+                              '${widget.singer.name} singed ${widget.melody?.name}',
+                              '',
+                              recordId: _record.id,
+                              newsId: widget.news?.id);
                         } else {
-                          AppUtil.sharePost('${Constants.startUser.name} post some news', '',
+                          AppUtil.sharePost(
+                              '${Constants.startUser.name} post some news', '',
                               recordId: _record?.id, newsId: widget.news?.id);
                         }
                       },
@@ -446,8 +502,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
                             Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(math.pi),
-                                child: Icon(Icons.share, size: 35, color: Colors.white)),
-                            Text('${_record?.shares ?? widget.news?.shares ?? 0}',
+                                child: Icon(Icons.share,
+                                    size: 35, color: Colors.white)),
+                            Text(
+                                '${_record?.shares ?? widget.news?.shares ?? 0}',
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),
@@ -475,7 +533,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
             child: TextField(
               controller: _commentController,
               textAlign: TextAlign.center,
-              decoration: InputDecoration(hintText: language(en: 'New Comment', ar: 'تعليق جديد')),
+              decoration: InputDecoration(
+                  hintText: language(en: 'New Comment', ar: 'تعليق جديد')),
             ),
           ),
           SizedBox(
@@ -490,7 +549,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
               if (_record != null) {
-                await DatabaseService.addComment(_commentController.text, recordId: _record.id);
+                await DatabaseService.addComment(_commentController.text,
+                    recordId: _record.id);
 
                 NotificationHandler.sendNotification(
                     _record.singerId,
@@ -499,7 +559,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
                     _record.id,
                     'record_comment');
               } else if (widget.news != null) {
-                await DatabaseService.addComment(_commentController.text, recordId: widget.news.id);
+                await DatabaseService.addComment(_commentController.text,
+                    recordId: widget.news.id);
                 NotificationHandler.sendNotification(
                     Constants.startUser.id,
                     '${Constants.currentUser.name} commented on your news',
@@ -507,7 +568,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
                     widget.news.id,
                     'news_comment');
               }
-              AppUtil.showToast(language(en: 'Comment Added', ar: 'تم إضافة التعليق'));
+              AppUtil.showToast(
+                  language(en: 'Comment Added', ar: 'تم إضافة التعليق'));
               Navigator.of(context).pop();
             },
             color: MyColors.primaryColor,

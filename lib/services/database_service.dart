@@ -15,7 +15,7 @@ import '../app_util.dart';
 
 class DatabaseService {
   static Future<User> getUserWithId(String userId) async {
-    DocumentSnapshot userDocSnapshot = await usersRef?.document(userId)?.get();
+    DocumentSnapshot userDocSnapshot = await usersRef?.doc(userId)?.get();
     if (userDocSnapshot.exists) {
       return User.fromDoc(userDocSnapshot);
     }
@@ -24,16 +24,16 @@ class DatabaseService {
 
   static Future<User> getUserWithEmail(String email) async {
     QuerySnapshot userDocSnapshot =
-        await usersRef.where('email', isEqualTo: email).getDocuments();
-    if (userDocSnapshot.documents.length != 0) {
-      return User.fromDoc(userDocSnapshot.documents[0]);
+        await usersRef.where('email', isEqualTo: email).get();
+    if (userDocSnapshot.docs.length != 0) {
+      return User.fromDoc(userDocSnapshot.docs[0]);
     }
     return User();
   }
 
   static Future<Melody> getMelodyWithId(String melodyId) async {
     DocumentSnapshot melodyDocSnapshot =
-        await melodiesRef?.document(melodyId)?.get();
+        await melodiesRef?.doc(melodyId)?.get();
     if (melodyDocSnapshot.exists) {
       return Melody.fromDoc(melodyDocSnapshot);
     }
@@ -54,7 +54,7 @@ class DatabaseService {
       'search': search
     };
 
-    await usersRef.document(id).setData(userMap);
+    await usersRef.doc(id).set(userMap);
   }
 
   static Future<List<Melody>> getMelodies() async {
@@ -62,9 +62,9 @@ class DatabaseService {
         .where('is_song', isEqualTo: false)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
@@ -74,9 +74,9 @@ class DatabaseService {
         .where('author_id', isEqualTo: Constants.startUser.id)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
@@ -87,9 +87,9 @@ class DatabaseService {
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
@@ -99,23 +99,23 @@ class DatabaseService {
         .where('search', arrayContains: text)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
   static Future<List<Melody>> getFavourites() async {
     QuerySnapshot melodiesSnapshot = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('favourites')
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
 
     List<Melody> melodies = [];
 
-    for (DocumentSnapshot doc in melodiesSnapshot.documents) {
-      Melody melody = await getMelodyWithId(doc.documentID);
+    for (DocumentSnapshot doc in melodiesSnapshot.docs) {
+      Melody melody = await getMelodyWithId(doc.id);
       melodies.add(melody);
     }
 
@@ -127,9 +127,9 @@ class DatabaseService {
         .where('is_song', isEqualTo: true)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> songs =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
 
@@ -140,9 +140,9 @@ class DatabaseService {
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Melody> songs =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
 
@@ -152,9 +152,9 @@ class DatabaseService {
         .where('search', arrayContains: text)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> songs =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
 
@@ -163,19 +163,17 @@ class DatabaseService {
         .where('search', arrayContains: text)
         .limit(20)
         .orderBy('name', descending: false)
-        .getDocuments();
+        .get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
   static Future<List<Record>> getRecords() async {
-    QuerySnapshot recordsSnapshot = await recordsRef
-        .limit(20)
-        .orderBy('timestamp', descending: true)
-        .getDocuments();
+    QuerySnapshot recordsSnapshot =
+        await recordsRef.limit(20).orderBy('timestamp', descending: true).get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
 
@@ -183,9 +181,9 @@ class DatabaseService {
     QuerySnapshot recordsSnapshot = await recordsRef
         .where('melody_id', isEqualTo: melodyId)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
 
@@ -195,9 +193,9 @@ class DatabaseService {
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
 
@@ -206,9 +204,9 @@ class DatabaseService {
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(1)
-        .getDocuments();
+        .get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records.length > 0 ? records[0] : null;
   }
 
@@ -217,9 +215,9 @@ class DatabaseService {
         .orderBy('timestamp', descending: false)
         .startAfter([lastVisiblePostSnapShot])
         .limit(1)
-        .getDocuments();
+        .get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records.length > 0 ? records[0] : null;
   }
 
@@ -227,31 +225,31 @@ class DatabaseService {
     QuerySnapshot recordsSnapshot = await recordsRef
         .where('singer_id', isEqualTo: userId)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Record> records =
-        recordsSnapshot.documents.map((doc) => Record.fromDoc(doc)).toList();
+        recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records;
   }
 
   static Future addMelodyToFavourites(String melodyId) async {
     await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('favourites')
-        .document(melodyId)
-        .setData({'timestamp': FieldValue.serverTimestamp()});
+        .doc(melodyId)
+        .set({'timestamp': FieldValue.serverTimestamp()});
   }
 
   static Future deleteMelodyFromFavourites(String melodyId) async {
     await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('favourites')
-        .document(melodyId)
+        .doc(melodyId)
         .delete();
   }
 
   static submitRecord(String melodyId, String recordId, String url,
       String thumbnailUrl, int duration) async {
-    await recordsRef.document(recordId).setData({
+    await recordsRef.doc(recordId).set({
       'audio_url': url,
       'thumbnail_url': thumbnailUrl,
       'singer_id': Constants.currentUserID,
@@ -265,70 +263,66 @@ class DatabaseService {
     QuerySnapshot snapshot = await recordsRef
         .where('melody_id', isEqualTo: melodyId)
         .where('singer_id', isEqualTo: Constants.currentUserID)
-        .getDocuments();
-    if (snapshot.documents.length > 0) {
-      return snapshot.documents[0].documentID;
+        .get();
+    if (snapshot.docs.length > 0) {
+      return snapshot.docs[0].id;
     }
     return null;
   }
 
   static unfollowUser(String userId) async {
     await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('following')
-        .document(userId)
+        .doc(userId)
         .delete();
 
     await usersRef
-        .document(userId)
+        .doc(userId)
         .collection('followers')
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .delete();
 
     //Store/update user locally
     User user = await DatabaseService.getUserWithId(userId);
 
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'following': FieldValue.increment(-1)});
+        .doc(Constants.currentUserID)
+        .update({'following': FieldValue.increment(-1)});
 
-    await usersRef
-        .document(userId)
-        .updateData({'followers': FieldValue.increment(-1)});
+    await usersRef.doc(userId).update({'followers': FieldValue.increment(-1)});
   }
 
   static followUser(String userId) async {
     await usersRef
-        .document(userId)
+        .doc(userId)
         .collection('followers')
-        .document(Constants.currentUserID)
-        .setData({
+        .doc(Constants.currentUserID)
+        .set({
       'timestamp': FieldValue.serverTimestamp(),
     });
 
     await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('following')
-        .document(userId)
-        .setData({
+        .doc(userId)
+        .set({
       'timestamp': FieldValue.serverTimestamp(),
     });
 
     //Increment current user following and other user followers
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'following': FieldValue.increment(1)});
+        .doc(Constants.currentUserID)
+        .update({'following': FieldValue.increment(1)});
 
-    await usersRef
-        .document(userId)
-        .updateData({'followers': FieldValue.increment(1)});
+    await usersRef.doc(userId).update({'followers': FieldValue.increment(1)});
   }
 
   static sendMessage(String otherUserId, String type, String message) async {
     await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('messages')
         .add({
       'sender': Constants.currentUserID,
@@ -338,9 +332,9 @@ class DatabaseService {
     });
 
     await chatsRef
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('conversations')
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('messages')
         .add({
       'sender': Constants.currentUserID,
@@ -350,63 +344,63 @@ class DatabaseService {
     });
 
     await chatsRef
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('conversations')
-        .document(Constants.currentUserID)
-        .setData({
+        .doc(Constants.currentUserID)
+        .set({
       'last_message_timestamp': FieldValue.serverTimestamp(),
     });
 
     await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUserId)
-        .setData({
+        .doc(otherUserId)
+        .set({
       'last_message_timestamp': FieldValue.serverTimestamp(),
     });
   }
 
   static Future<List<Message>> getMessages(String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .limit(20)
-        .getDocuments();
+        .get();
     List<Message> messages =
-        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.docs.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
 
   static Future<List<Message>> getPrevMessages(
       Timestamp firstVisibleGameSnapShot, String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .startAfter([firstVisibleGameSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Message> messages =
-        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.docs.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
 
   static getLastMessage(String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUserId)
+        .doc(otherUserId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .limit(1)
-        .getDocuments();
+        .get();
     List<Message> messages =
-        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.docs.map((doc) => Message.fromDoc(doc)).toList();
     if (messages.length == 0)
       return Message(
           message: 'Say hi to your new friend!',
@@ -417,26 +411,24 @@ class DatabaseService {
   }
 
   static makeUserOnline() async {
-    await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'online': 'online'});
+    await usersRef.doc(Constants.currentUserID).update({'online': 'online'});
   }
 
   static makeUserOffline() async {
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'online': FieldValue.serverTimestamp()});
+        .doc(Constants.currentUserID)
+        .update({'online': FieldValue.serverTimestamp()});
   }
 
   static Future<List<String>> getChats() async {
     QuerySnapshot chatsSnapshot = await chatsRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .getDocuments();
+        .get();
 
     List<String> chattersIds = [];
-    for (DocumentSnapshot doc in chatsSnapshot.documents) {
-      chattersIds.add(doc.documentID);
+    for (DocumentSnapshot doc in chatsSnapshot.docs) {
+      chattersIds.add(doc.id);
     }
     return chattersIds;
   }
@@ -444,51 +436,43 @@ class DatabaseService {
   static removeNotification(
       String receiverId, String objectId, String type) async {
     QuerySnapshot snapshot = await usersRef
-        .document(receiverId)
+        .doc(receiverId)
         .collection('notifications')
         .where('sender', isEqualTo: Constants.currentUserID)
         .where('type', isEqualTo: type)
         .where('object_id', isEqualTo: objectId)
-        .getDocuments();
+        .get();
 
-    if (snapshot.documents.length > 0) {
+    if (snapshot.docs.length > 0) {
       await usersRef
-          .document(receiverId)
+          .doc(receiverId)
           .collection('notifications')
-          .document(snapshot.documents[0].documentID)
+          .doc(snapshot.docs[0].id)
           .delete();
 
       await usersRef
-          .document(receiverId)
-          .updateData({'notificationsNumber': FieldValue.increment(-1)});
+          .doc(receiverId)
+          .update({'notificationsNumber': FieldValue.increment(-1)});
     }
   }
 
   static incrementMelodyViews(String melodyId) async {
-    await melodiesRef
-        .document(melodyId)
-        .updateData({'views': FieldValue.increment(1)});
+    await melodiesRef.doc(melodyId).update({'views': FieldValue.increment(1)});
   }
 
   static incrementRecordViews(String recordId) async {
-    await recordsRef
-        .document(recordId)
-        .updateData({'views': FieldValue.increment(1)});
+    await recordsRef.doc(recordId).update({'views': FieldValue.increment(1)});
   }
 
   static incrementNewsViews(String newsId) async {
-    await newsRef
-        .document(newsId)
-        .updateData({'views': FieldValue.increment(1)});
+    await newsRef.doc(newsId).update({'views': FieldValue.increment(1)});
   }
 
   static Future<List<Singer>> getSingers() async {
-    QuerySnapshot singersSnapshot = await singersRef
-        .orderBy('name', descending: false)
-        .limit(15)
-        .getDocuments();
+    QuerySnapshot singersSnapshot =
+        await singersRef.orderBy('name', descending: false).limit(15).get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
@@ -498,9 +482,9 @@ class DatabaseService {
         .orderBy('melodies', descending: true)
         .orderBy('name', descending: false)
         .limit(15)
-        .getDocuments();
+        .get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
@@ -510,9 +494,9 @@ class DatabaseService {
         .orderBy('name', descending: false)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
@@ -522,9 +506,9 @@ class DatabaseService {
         .where('singer', isEqualTo: singerName)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> songs =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
 
@@ -536,9 +520,9 @@ class DatabaseService {
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> songs =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return songs;
   }
 
@@ -548,9 +532,9 @@ class DatabaseService {
         .where('singer', isEqualTo: singerName)
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
@@ -562,9 +546,9 @@ class DatabaseService {
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
         .orderBy('timestamp', descending: true)
-        .getDocuments();
+        .get();
     List<Melody> melodies =
-        melodiesSnapshot.documents.map((doc) => Melody.fromDoc(doc)).toList();
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
   }
 
@@ -577,10 +561,10 @@ class DatabaseService {
     }
     var postMeta = Map();
     DocumentSnapshot postDocSnapshot =
-        await collectionReference.document(recordId ?? newsId).get();
+        await collectionReference.doc(recordId ?? newsId).get();
     if (postDocSnapshot.exists) {
-      postMeta['likes'] = postDocSnapshot.data['likes'];
-      postMeta['comments'] = postDocSnapshot.data['comments'];
+      postMeta['likes'] = postDocSnapshot.data()['likes'];
+      postMeta['comments'] = postDocSnapshot.data()['comments'];
     }
     return postMeta;
   }
@@ -594,7 +578,7 @@ class DatabaseService {
       collectionReference = newsRef;
     }
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
         .add({
       'commenter': Constants.currentUserID,
@@ -602,8 +586,8 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp()
     });
     await collectionReference
-        .document(recordId ?? newsId)
-        .updateData({'comments': FieldValue.increment(1)});
+        .doc(recordId ?? newsId)
+        .update({'comments': FieldValue.increment(1)});
   }
 
   static Future<Map> getReplyMeta(String commentId, String replyId,
@@ -617,15 +601,15 @@ class DatabaseService {
 
     var replyMeta = Map();
     DocumentSnapshot replyDocSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .collection('replies')
-        .document(replyId)
+        .doc(replyId)
         .get();
 
     if (replyDocSnapshot.exists) {
-      replyMeta['likes'] = replyDocSnapshot.data['likes'];
+      replyMeta['likes'] = replyDocSnapshot.data()['likes'];
     }
     return replyMeta;
   }
@@ -640,15 +624,15 @@ class DatabaseService {
     }
 
     QuerySnapshot commentSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .collection('replies')
         ?.orderBy('timestamp', descending: true)
         ?.limit(20)
-        ?.getDocuments();
+        ?.get();
     List<Comment> comments =
-        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+        commentSnapshot.docs.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
@@ -663,24 +647,24 @@ class DatabaseService {
     }
 
     QuerySnapshot commentSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .collection('replies')
         ?.orderBy('timestamp', descending: true)
         ?.startAfter([lastVisiblePostSnapShot])
         ?.limit(20)
-        ?.getDocuments();
+        ?.get();
     List<Comment> comments =
-        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+        commentSnapshot.docs.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
   static Future<User> getUserWithUsername(String username) async {
     QuerySnapshot userDocSnapshot =
-        await usersRef.where('username', isEqualTo: username).getDocuments();
+        await usersRef.where('username', isEqualTo: username).get();
     User user =
-        userDocSnapshot.documents.map((doc) => User.fromDoc(doc)).toList()[0];
+        userDocSnapshot.docs.map((doc) => User.fromDoc(doc)).toList()[0];
 
     return user;
   }
@@ -695,22 +679,21 @@ class DatabaseService {
     }
     var commentMeta = Map();
     DocumentSnapshot commentDocSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .get();
 
     if (commentDocSnapshot.exists) {
-      commentMeta['likes'] = commentDocSnapshot.data['likes'];
-      commentMeta['dislikes'] = commentDocSnapshot.data['dislikes'];
-      commentMeta['replies'] = commentDocSnapshot.data['replies'];
+      commentMeta['likes'] = commentDocSnapshot.data()['likes'];
+      commentMeta['dislikes'] = commentDocSnapshot.data()['dislikes'];
+      commentMeta['replies'] = commentDocSnapshot.data()['replies'];
     }
     return commentMeta;
   }
 
   static Future<Record> getRecordWithId(String recordId) async {
-    DocumentSnapshot recordDocSnapshot =
-        await recordsRef?.document(recordId)?.get();
+    DocumentSnapshot recordDocSnapshot = await recordsRef?.doc(recordId)?.get();
     if (recordDocSnapshot.exists) {
       return Record.fromDoc(recordDocSnapshot);
     }
@@ -718,7 +701,7 @@ class DatabaseService {
   }
 
   static Future<News> getNewsWithId(String newsId) async {
-    DocumentSnapshot newsDocSnapshot = await newsRef?.document(newsId)?.get();
+    DocumentSnapshot newsDocSnapshot = await newsRef?.doc(newsId)?.get();
     if (newsDocSnapshot.exists) {
       return News.fromDoc(newsDocSnapshot);
     }
@@ -734,69 +717,61 @@ class DatabaseService {
       collectionReference = newsRef;
     }
     DocumentReference commentRef = collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId);
+        .doc(commentId);
 
-    (await commentRef.collection('replies').getDocuments())
-        .documents
-        .forEach((reply) async {
+    (await commentRef.collection('replies').get()).docs.forEach((reply) async {
       (await commentRef
               .collection('replies')
-              .document(reply.documentID)
+              .doc(reply.id)
               .collection('likes')
-              .getDocuments())
-          .documents
+              .get())
+          .docs
           .forEach((replyLike) {
         commentRef
             .collection('replies')
-            .document(reply.documentID)
+            .doc(reply.id)
             .collection('likes')
-            .document(replyLike.documentID)
+            .doc(replyLike.id)
             .delete();
       });
 
       (await commentRef
               .collection('replies')
-              .document(reply.documentID)
+              .doc(reply.id)
               .collection('dislikes')
-              .getDocuments())
-          .documents
+              .get())
+          .docs
           .forEach((replyDislike) {
         commentRef
             .collection('replies')
-            .document(reply.documentID)
+            .doc(reply.id)
             .collection('dislikes')
-            .document(replyDislike.documentID)
+            .doc(replyDislike.id)
             .delete();
       });
 
-      commentRef.collection('replies').document(reply.documentID).delete();
+      commentRef.collection('replies').doc(reply.id).delete();
     });
 
-    (await commentRef.collection('likes').getDocuments())
-        .documents
+    (await commentRef.collection('likes').get())
+        .docs
         .forEach((commentLike) async {
-      await commentRef
-          .collection('likes')
-          .document(commentLike.documentID)
-          .delete();
+      await commentRef.collection('likes').doc(commentLike.id).delete();
     });
 
-    (await commentRef.collection('dislikes').getDocuments())
-        .documents
+    (await commentRef.collection('dislikes').get())
+        .docs
         .forEach((commentDislike) async {
-      await commentRef
-          .collection('dislikes')
-          .document(commentDislike.documentID)
-          .delete();
+      await commentRef.collection('dislikes').doc(commentDislike.id).delete();
     });
 
     await commentRef.delete();
 
     await recordsRef
-        .document(recordId ?? newsId)
-        .updateData({'comments': FieldValue.increment(-1)});
+        .doc(recordId ?? newsId)
+        .update({'comments': FieldValue.increment(-1)});
   }
 
   static deleteReply(String commentId, String parentCommentId,
@@ -809,34 +784,27 @@ class DatabaseService {
     }
 
     DocumentReference replyRef = collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(parentCommentId)
+        .doc(parentCommentId)
         .collection('replies')
-        .document(commentId);
+        .doc(commentId);
 
-    (await replyRef.collection('likes').getDocuments())
-        .documents
-        .forEach((replyLike) {
-      replyRef.collection('likes').document(replyLike.documentID).delete();
+    (await replyRef.collection('likes').get()).docs.forEach((replyLike) {
+      replyRef.collection('likes').doc(replyLike.id).delete();
     });
 
-    (await replyRef.collection('dislikes').getDocuments())
-        .documents
-        .forEach((replyDislike) {
-      replyRef
-          .collection('dislikes')
-          .document(replyDislike.documentID)
-          .delete();
+    (await replyRef.collection('dislikes').get()).docs.forEach((replyDislike) {
+      replyRef.collection('dislikes').doc(replyDislike.id).delete();
     });
 
     replyRef.delete();
 
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(parentCommentId)
-        .updateData({'replies': FieldValue.increment(-1)});
+        .doc(parentCommentId)
+        .update({'replies': FieldValue.increment(-1)});
   }
 
   static Future<List<Comment>> getComments(
@@ -848,13 +816,13 @@ class DatabaseService {
       collectionReference = newsRef;
     }
     QuerySnapshot commentSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
         ?.orderBy('timestamp', descending: true)
         ?.limit(20)
-        ?.getDocuments();
+        ?.get();
     List<Comment> comments =
-        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+        commentSnapshot.docs.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
@@ -867,12 +835,12 @@ class DatabaseService {
       collectionReference = newsRef;
     }
     QuerySnapshot commentSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
         ?.orderBy('timestamp', descending: true)
-        ?.getDocuments();
+        ?.get();
     List<Comment> comments =
-        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+        commentSnapshot.docs.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
@@ -885,9 +853,9 @@ class DatabaseService {
       collectionReference = newsRef;
     }
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .collection('replies')
         .add({
       'commenter': Constants.currentUserID,
@@ -895,10 +863,10 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp()
     });
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
-        .updateData({'replies': FieldValue.increment(1)});
+        .doc(commentId)
+        .update({'replies': FieldValue.increment(1)});
   }
 
   static Future editComment(String commentId, String commentText,
@@ -911,10 +879,10 @@ class DatabaseService {
     }
 
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
-        .updateData(
+        .doc(commentId)
+        .update(
             {'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
@@ -928,19 +896,18 @@ class DatabaseService {
     }
 
     await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(commentId)
+        .doc(commentId)
         .collection('replies')
-        .document(replyId)
-        .updateData(
-            {'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
+        .doc(replyId)
+        .update({'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static Future<List<Category>> getCategories() async {
-    QuerySnapshot snapshot = await categoriesRef.getDocuments();
+    QuerySnapshot snapshot = await categoriesRef.get();
     List<Category> categories =
-        snapshot.documents.map((doc) => Category.fromDoc(doc)).toList();
+        snapshot.docs.map((doc) => Category.fromDoc(doc)).toList();
     return categories;
   }
 
@@ -951,9 +918,9 @@ class DatabaseService {
         .orderBy('songs', descending: true)
         .orderBy('name', descending: false)
         .limit(15)
-        .getDocuments();
+        .get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
@@ -966,29 +933,27 @@ class DatabaseService {
         .orderBy('name', descending: false)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
-        .getDocuments();
+        .get();
     List<Singer> singers =
-        singersSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singersSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers;
   }
 
   static getNews() async {
     QuerySnapshot snapshot =
-        await newsRef.orderBy('timestamp', descending: true).getDocuments();
-    List<News> news =
-        snapshot.documents.map((doc) => News.fromDoc(doc)).toList();
+        await newsRef.orderBy('timestamp', descending: true).get();
+    List<News> news = snapshot.docs.map((doc) => News.fromDoc(doc)).toList();
     return news;
   }
 
   static Future<List<notification.Notification>> getNotifications() async {
     QuerySnapshot notificationSnapshot = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('notifications')
         .orderBy('timestamp', descending: true)
         .limit(20)
-        .getDocuments();
-    List<notification.Notification> notifications = notificationSnapshot
-        .documents
+        .get();
+    List<notification.Notification> notifications = notificationSnapshot.docs
         .map((doc) => notification.Notification.fromDoc(doc))
         .toList();
     return notifications;
@@ -997,14 +962,13 @@ class DatabaseService {
   static Future<List<notification.Notification>> getNextNotifications(
       Timestamp lastVisibleNotificationSnapShot) async {
     QuerySnapshot notificationSnapshot = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('notifications')
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisibleNotificationSnapShot])
         .limit(20)
-        .getDocuments();
-    List<notification.Notification> notifications = notificationSnapshot
-        .documents
+        .get();
+    List<notification.Notification> notifications = notificationSnapshot.docs
         .map((doc) => notification.Notification.fromDoc(doc))
         .toList();
     return notifications;
@@ -1042,107 +1006,98 @@ class DatabaseService {
     }
 
     CollectionReference commentsRef =
-        collectionReference.document(recordId ?? newsId).collection('comments');
+        collectionReference.doc(recordId ?? newsId).collection('comments');
 
     CollectionReference likesRef =
-        collectionReference.document(recordId ?? newsId).collection('likes');
+        collectionReference.doc(recordId ?? newsId).collection('likes');
 
     CollectionReference dislikesRef =
-        collectionReference.document(recordId ?? newsId).collection('dislikes');
+        collectionReference.doc(recordId ?? newsId).collection('dislikes');
 
-    (await commentsRef.getDocuments()).documents.forEach((comment) async {
-      (await commentsRef
-              .document(comment.documentID)
-              .collection('replies')
-              .getDocuments())
-          .documents
+    (await commentsRef.get()).docs.forEach((comment) async {
+      (await commentsRef.doc(comment.id).collection('replies').get())
+          .docs
           .forEach((reply) async {
         (await commentsRef
-                .document(comment.documentID)
+                .doc(comment.id)
                 .collection('replies')
-                .document(reply.documentID)
+                .doc(reply.id)
                 .collection('likes')
-                .getDocuments())
-            .documents
+                .get())
+            .docs
             .forEach((replyLike) {
           commentsRef
-              .document(comment.documentID)
+              .doc(comment.id)
               .collection('replies')
-              .document(reply.documentID)
+              .doc(reply.id)
               .collection('likes')
-              .document(replyLike.documentID)
+              .doc(replyLike.id)
               .delete();
         });
 
         (await commentsRef
-                .document(comment.documentID)
+                .doc(comment.id)
                 .collection('replies')
-                .document(reply.documentID)
+                .doc(reply.id)
                 .collection('dislikes')
-                .getDocuments())
-            .documents
+                .get())
+            .docs
             .forEach((replyDislike) {
           commentsRef
-              .document(comment.documentID)
+              .doc(comment.id)
               .collection('replies')
-              .document(reply.documentID)
+              .doc(reply.id)
               .collection('dislikes')
-              .document(replyDislike.documentID)
+              .doc(replyDislike.id)
               .delete();
         });
 
         commentsRef
-            .document(comment.documentID)
+            .doc(comment.id)
             .collection('replies')
-            .document(reply.documentID)
+            .doc(reply.id)
             .delete();
       });
 
-      (await commentsRef
-              .document(comment.documentID)
-              .collection('likes')
-              .getDocuments())
-          .documents
+      (await commentsRef.doc(comment.id).collection('likes').get())
+          .docs
           .forEach((commentLike) async {
         await commentsRef
-            .document(comment.documentID)
+            .doc(comment.id)
             .collection('likes')
-            .document(commentLike.documentID)
+            .doc(commentLike.id)
             .delete();
       });
 
-      (await commentsRef
-              .document(comment.documentID)
-              .collection('dislikes')
-              .getDocuments())
-          .documents
+      (await commentsRef.doc(comment.id).collection('dislikes').get())
+          .docs
           .forEach((commentDislike) async {
         await commentsRef
-            .document(comment.documentID)
+            .doc(comment.id)
             .collection('dislikes')
-            .document(commentDislike.documentID)
+            .doc(commentDislike.id)
             .delete();
       });
 
-      await commentsRef.document(comment.documentID).delete();
+      await commentsRef.doc(comment.id).delete();
     });
 
-    (await likesRef.getDocuments()).documents.forEach((like) async {
-      await likesRef.document(like.documentID).delete();
+    (await likesRef.get()).docs.forEach((like) async {
+      await likesRef.doc(like.id).delete();
     });
 
-    (await dislikesRef.getDocuments()).documents.forEach((dislike) async {
-      await dislikesRef.document(dislike.documentID).delete();
+    (await dislikesRef.get()).docs.forEach((dislike) async {
+      await dislikesRef.doc(dislike.id).delete();
     });
 
-    await collectionReference.document(recordId ?? newsId).delete();
+    await collectionReference.doc(recordId ?? newsId).delete();
   }
 
   static Future<List<User>> getUsers() async {
     QuerySnapshot usersSnapshot =
-        await usersRef.orderBy('name', descending: true).getDocuments();
+        await usersRef.orderBy('name', descending: true).get();
     List<User> users =
-        usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+        usersSnapshot.docs.map((doc) => User.fromDoc(doc)).toList();
     return users;
   }
 
@@ -1168,42 +1123,41 @@ class DatabaseService {
         await storageRef.child('/melodies/$fileName').delete();
       }
     }
-    await melodiesRef.document(melody.id).delete();
+    await melodiesRef.doc(melody.id).delete();
     List<User> users = await getUsers();
     for (User user in users) {
       await usersRef
-          .document(user.id)
+          .doc(user.id)
           .collection('favourites')
-          .document(melody.id)
+          .doc(melody.id)
           .delete();
       await usersRef
-          .document(user.id)
+          .doc(user.id)
           .collection('downloads')
-          .document(melody.id)
+          .doc(melody.id)
           .delete();
     }
   }
 
   static Future<Singer> getSingerWithName(String name) async {
     QuerySnapshot singerSnapshot =
-        await singersRef.where('name', isEqualTo: name).getDocuments();
+        await singersRef.where('name', isEqualTo: name).get();
     List<Singer> singers =
-        singerSnapshot.documents.map((doc) => Singer.fromDoc(doc)).toList();
+        singerSnapshot.docs.map((doc) => Singer.fromDoc(doc)).toList();
     return singers[0];
   }
 
   static Future<List<SlideImage>> getSlideImages(String page) async {
     QuerySnapshot slideImagesSnapshot =
-        await slideImagesRef.where('page', isEqualTo: page).getDocuments();
-    List<SlideImage> slideImages = slideImagesSnapshot.documents
-        .map((doc) => SlideImage.fromDoc(doc))
-        .toList();
+        await slideImagesRef.where('page', isEqualTo: page).get();
+    List<SlideImage> slideImages =
+        slideImagesSnapshot.docs.map((doc) => SlideImage.fromDoc(doc)).toList();
     return slideImages;
   }
 
   static deleteSlideImage(SlideImage slideImage) async {
     String fileName = await AppUtil.getStorageFileNameFromUrl(slideImage.url);
     await storageRef.child('/slide_images/$fileName').delete();
-    await slideImagesRef.document(slideImage.id).delete();
+    await slideImagesRef.doc(slideImage.id).delete();
   }
 }

@@ -10,10 +10,10 @@ class SlideImage {
 
   factory SlideImage.fromDoc(DocumentSnapshot doc) {
     return SlideImage(
-      id: doc.documentID,
-      url: doc['url'],
-      page: doc['page'],
-      timestamp: doc['timestamp'],
+      id: doc.id,
+      url: doc.data()['url'],
+      page: doc.data()['page'],
+      timestamp: doc.data()['timestamp'],
     );
   }
 }

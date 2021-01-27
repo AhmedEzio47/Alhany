@@ -12,18 +12,26 @@ class Notification {
   final String type;
 
   Notification(
-      {this.id, this.title, this.body, this.icon, this.seen, this.timestamp, this.sender, this.objectId, this.type});
+      {this.id,
+      this.title,
+      this.body,
+      this.icon,
+      this.seen,
+      this.timestamp,
+      this.sender,
+      this.objectId,
+      this.type});
 
   factory Notification.fromDoc(DocumentSnapshot doc) {
     return Notification(
-        id: doc.documentID,
-        title: doc['title'],
-        body: doc['body'],
-        icon: doc['icon'],
-        seen: doc['seen'],
-        timestamp: doc['timestamp'],
-        sender: doc['sender'],
-        objectId: doc['object_id'],
-        type: doc['type']);
+        id: doc.id,
+        title: doc.data()['title'],
+        body: doc.data()['body'],
+        icon: doc.data()['icon'],
+        seen: doc.data()['seen'],
+        timestamp: doc.data()['timestamp'],
+        sender: doc.data()['sender'],
+        objectId: doc.data()['object_id'],
+        type: doc.data()['type']);
   }
 }

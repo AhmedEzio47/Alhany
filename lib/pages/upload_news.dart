@@ -268,7 +268,7 @@ class _UploadNewsState extends State<UploadNews> {
     String ext = path.extension(_contentFile.path);
     String url =
         await AppUtil().uploadFile(_contentFile, context, 'news/$id$ext');
-    await newsRef.document(id).setData({
+    await newsRef.doc(id).set({
       'text': _textController.text,
       'content_url': url,
       'duration': _duration,

@@ -2,7 +2,7 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/models/user_model.dart' as user_model;
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/database_service.dart';
@@ -153,13 +153,13 @@ class _EmailChangePageState extends State<EmailChangePage> {
           }
           AppUtil.showLoader(context);
 
-          User user = await DatabaseService.getUserWithEmail(_email);
+          user_model.User user = await DatabaseService.getUserWithEmail(_email);
           if (user.id != null) {
             AppUtil.showToast(language(
                 en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
           } else {
             final BaseAuth auth = AuthProvider.of(context).auth;
-            FirebaseUser firebaseUser = await auth.signInWithEmailAndPassword(
+            User firebaseUser = await auth.signInWithEmailAndPassword(
                 Constants.currentFirebaseUser.email, _password);
             if (firebaseUser == null) {
               AppUtil.showToast(
@@ -170,8 +170,8 @@ class _EmailChangePageState extends State<EmailChangePage> {
             await firebaseUser.updateEmail(_email);
             await firebaseUser.sendEmailVerification();
             await usersRef
-                .document(Constants.currentUserID)
-                .updateData({'email': _email});
+                .doc(Constants.currentUserID)
+                .update({'email': _email});
             Constants.currentUser =
                 await DatabaseService.getUserWithId(firebaseUser.uid);
             Constants.currentFirebaseUser = firebaseUser;

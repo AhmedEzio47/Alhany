@@ -59,9 +59,9 @@ class _MelodyItemState extends State<MelodyItem> {
 
   isFavourite() async {
     bool isFavourite = (await usersRef
-            .document(Constants.currentUserID)
+            .doc(Constants.currentUserID)
             .collection('favourites')
-            .document(widget.melody.id)
+            .doc(widget.melody.id)
             .get())
         .exists;
 

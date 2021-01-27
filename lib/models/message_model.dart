@@ -11,11 +11,11 @@ class Message {
 
   factory Message.fromDoc(DocumentSnapshot doc) {
     return Message(
-      id: doc.documentID,
-      sender: doc['sender'],
-      message: doc['message'],
-      timestamp: doc['timestamp'],
-      type: doc['type'],
+      id: doc.id,
+      sender: doc.data()['sender'],
+      message: doc.data()['message'],
+      timestamp: doc.data()['timestamp'],
+      type: doc.data()['type'],
     );
   }
 }

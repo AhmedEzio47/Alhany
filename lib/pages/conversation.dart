@@ -40,7 +40,6 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation>
     with WidgetsBindingObserver {
   bool isMicrophoneGranted = false;
-  Firestore _firestore = Firestore.instance;
 
   User otherUser = User();
   Timestamp firstVisibleGameSnapShot;
@@ -101,28 +100,27 @@ class _ConversationState extends State<Conversation>
   }
 
   void listenToMessagesChanges() async {
-    messagesSubscription = _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
+    messagesSubscription = chatsRef
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
         .listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
+      querySnapshot.docChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
           print('type is her');
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
-                _messages.insert(0, Message.fromDoc(change.document));
+                _messages.insert(0, Message.fromDoc(change.doc));
               });
             }
           }
         }
 
-        if (Message.fromDoc(change.document).sender == widget.otherUid) {
+        if (Message.fromDoc(change.doc).sender == widget.otherUid) {
           makeMessagesSeen();
         }
       });
@@ -130,19 +128,18 @@ class _ConversationState extends State<Conversation>
   }
 
   void listenIfMessagesSeen() {
-    _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
+    chatsRef
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('messages')
         .snapshots()
         .listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == 'seen') {
+      querySnapshot.docChanges.forEach((change) {
+        if (change.doc.id == 'seen') {
           if (this.mounted) {
             setState(() {
-              seen = change.document.data['isSeen'];
+              seen = change.doc.data()['isSeen'];
               print('seen');
             });
           }
@@ -153,11 +150,11 @@ class _ConversationState extends State<Conversation>
 
   void otherUserListener() {
     usersRef.snapshots().listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == widget.otherUid) {
+      querySnapshot.docChanges.forEach((change) {
+        if (change.doc.id == widget.otherUid) {
           if (mounted) {
             setState(() {
-              otherUser = User.fromDoc(change.document);
+              otherUser = User.fromDoc(change.doc);
             });
           }
         }
@@ -206,38 +203,33 @@ class _ConversationState extends State<Conversation>
   void updateOnlineUserState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .update({'online': FieldValue.serverTimestamp()});
     } else if (state == AppLifecycleState.resumed) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': 'online'});
+      await usersRef.doc(Constants.currentUserID).update({'online': 'online'});
     }
   }
 
   makeMessagesSeen() async {
-    await _firestore
-        .collection('chats')
-        .document(widget.otherUid)
+    await chatsRef
+        .doc(widget.otherUid)
         .collection('conversations')
-        .document(Constants.currentUserID)
-        .setData({'isSeen': true});
+        .doc(Constants.currentUserID)
+        .set({'isSeen': true});
   }
 
   makeMessagesUnseen() async {
-    await _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
+    await chatsRef
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
-        .setData({'isSeen': false});
+        .doc(widget.otherUid)
+        .set({'isSeen': false});
 
-    await _firestore
-        .collection('chats')
-        .document(widget.otherUid)
+    await chatsRef
+        .doc(widget.otherUid)
         .collection('conversations')
-        .document(Constants.currentUserID)
-        .setData({'isSeen': false});
+        .doc(Constants.currentUserID)
+        .set({'isSeen': false});
   }
 
   void _onFocusChange() {

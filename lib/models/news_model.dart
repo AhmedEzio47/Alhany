@@ -26,15 +26,15 @@ class News {
 
   factory News.fromDoc(DocumentSnapshot doc) {
     return News(
-        id: doc.documentID,
-        text: doc['text'],
-        contentUrl: doc['content_url'],
-        type: doc['type'],
-        duration: doc['duration'],
-        likes: doc['likes'],
-        comments: doc['comments'],
-        shares: doc['shares'],
-        views: doc['views'],
-        timestamp: doc['timestamp']);
+        id: doc.id,
+        text: doc.data()['text'],
+        contentUrl: doc.data()['content_url'],
+        type: doc.data()['type'],
+        duration: doc.data()['duration'],
+        likes: doc.data()['likes'],
+        comments: doc.data()['comments'],
+        shares: doc.data()['shares'],
+        views: doc.data()['views'],
+        timestamp: doc.data()['timestamp']);
   }
 }

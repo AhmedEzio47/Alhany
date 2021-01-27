@@ -23,10 +23,10 @@ class _AddSingerPageState extends State<AddSingerPage> {
   List<String> _categories = [];
   getCategories() async {
     _categories = [];
-    QuerySnapshot categoriesSnapshot = await categoriesRef.getDocuments();
-    for (DocumentSnapshot doc in categoriesSnapshot.documents) {
+    QuerySnapshot categoriesSnapshot = await categoriesRef.get();
+    for (DocumentSnapshot doc in categoriesSnapshot.docs) {
       setState(() {
-        _categories.add(doc.data['name']);
+        _categories.add(doc.data()['name']);
       });
     }
   }
@@ -179,7 +179,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                             _coverImage, context, '/singers_covers/$id$ext');
                       }
 
-                      await singersRef.document(id).setData({
+                      await singersRef.doc(id).set({
                         'name': _singerController.text,
                         'category': _category,
                         'image_url': imageUrl,

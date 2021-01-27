@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/models/user_model.dart' as user_model;
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/database_service.dart';
@@ -275,30 +277,30 @@ class _WelcomePageState extends State<WelcomePage> {
                     Padding(
                       padding: const EdgeInsets.only(right: 20.0),
                       child: FlatButton(
-                        child: Constants.currentFirebaseUser?.isEmailVerified ??
-                                true
-                            ? Text(
-                                language(
-                                    en: Strings.en_forgot_password,
-                                    ar: Strings.ar_forgot_password),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: MyColors.primaryColor,
-                                  fontSize: 15.0,
-                                ),
-                                textAlign: TextAlign.end,
-                              )
-                            : Text(
-                                "Resend verification email",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: MyColors.primaryColor,
-                                  fontSize: 15.0,
-                                ),
-                                textAlign: TextAlign.end,
-                              ),
+                        child:
+                            Constants.currentFirebaseUser?.emailVerified ?? true
+                                ? Text(
+                                    language(
+                                        en: Strings.en_forgot_password,
+                                        ar: Strings.ar_forgot_password),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: MyColors.primaryColor,
+                                      fontSize: 15.0,
+                                    ),
+                                    textAlign: TextAlign.end,
+                                  )
+                                : Text(
+                                    "Resend verification email",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: MyColors.primaryColor,
+                                      fontSize: 15.0,
+                                    ),
+                                    textAlign: TextAlign.end,
+                                  ),
                         onPressed: () async {
-                          if (Constants.currentFirebaseUser?.isEmailVerified ??
+                          if (Constants.currentFirebaseUser?.emailVerified ??
                               true) {
                             Navigator.of(context).pushNamed('/password-reset');
                           } else {
@@ -416,7 +418,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                           child: new FlatButton(
                                             onPressed: () async {
                                               print('trying to login with fb');
-                                              FirebaseUser user =
+                                              User user =
                                                   await signInWithFacebook();
                                               if (user != null) {
                                                 await AppUtil
@@ -519,7 +521,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                         new Expanded(
                                           child: new FlatButton(
                                             onPressed: () async {
-                                              FirebaseUser user =
+                                              User user =
                                                   await signInWithGoogle();
                                               if (user != null) {
                                                 await AppUtil
@@ -607,29 +609,33 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: SignInWithAppleButton(
-                    borderRadius: BorderRadius.circular(25),
-                    onPressed: () async {
-                      final credential =
-                          await SignInWithApple.getAppleIDCredential(
-                        scopes: [
-                          AppleIDAuthorizationScopes.email,
-                          AppleIDAuthorizationScopes.fullName,
-                        ],
-                      );
+                Platform.isIOS
+                    ? SizedBox(
+                        height: 10,
+                      )
+                    : Container(),
+                Platform.isIOS
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        child: SignInWithAppleButton(
+                          borderRadius: BorderRadius.circular(25),
+                          onPressed: () async {
+                            final credential =
+                                await SignInWithApple.getAppleIDCredential(
+                              scopes: [
+                                AppleIDAuthorizationScopes.email,
+                                AppleIDAuthorizationScopes.fullName,
+                              ],
+                            );
 
-                      print(credential);
+                            print(credential);
 
-                      // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
-                      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
-                    },
-                  ),
-                ),
+                            // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+                            // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+                          },
+                        ),
+                      )
+                    : Container(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1081,12 +1087,12 @@ class _WelcomePageState extends State<WelcomePage> {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     try {
-      FirebaseUser user = await auth.signInWithEmailAndPassword(
+      User user = await auth.signInWithEmailAndPassword(
           _emailController.text, _passwordController.text);
       _userId = user.uid;
-      User temp = await DatabaseService.getUserWithId(_userId);
+      user_model.User temp = await DatabaseService.getUserWithId(_userId);
 
-      if (user.isEmailVerified && temp.id == null) {
+      if (user.emailVerified && temp.id == null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String name = prefs.getString('name');
         String username = await _createUsername();
@@ -1096,7 +1102,7 @@ class _WelcomePageState extends State<WelcomePage> {
         //TODO saveToken();
 
         Navigator.of(context).pushReplacementNamed('/');
-      } else if (!user.isEmailVerified) {
+      } else if (!user.emailVerified) {
         Navigator.of(context).pop();
         AppUtil.showAlertDialog(
             context: context,
@@ -1132,14 +1138,14 @@ class _WelcomePageState extends State<WelcomePage> {
       String username = randomAlphaNumeric(6);
 
       QuerySnapshot snapshot =
-          await usersRef.where('username', isEqualTo: username).getDocuments();
-      if (snapshot.documents.length == 0) {
+          await usersRef.where('username', isEqualTo: username).get();
+      if (snapshot.docs.length == 0) {
         return username;
       }
     }
   }
 
-  Future<FirebaseUser> signInWithGoogle() async {
+  Future<User> signInWithGoogle() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
     final GoogleSignInAccount googleSignInAccount =
         await googleSignIn.signIn().catchError((onError) {
@@ -1151,12 +1157,12 @@ class _WelcomePageState extends State<WelcomePage> {
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final FirebaseUser user = await auth.signInWithCredential(credential);
+    final User user = await auth.signInWithCredential(credential);
     setState(() {
       _nameController.text = user.displayName;
       _emailController.text = user.email;
@@ -1164,13 +1170,13 @@ class _WelcomePageState extends State<WelcomePage> {
     assert(!user.isAnonymous);
     assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await auth.getCurrentUser();
+    final User currentUser = await auth.getCurrentUser();
     assert(user.uid == currentUser.uid);
 
     return user;
   }
 
-  Future<FirebaseUser> signInWithFacebook() async {
+  Future<User> signInWithFacebook() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     final FacebookLoginResult result = await FacebookLogin().logIn(
@@ -1178,13 +1184,13 @@ class _WelcomePageState extends State<WelcomePage> {
           FacebookPermission.email,
           FacebookPermission.publicProfile
         ]);
-    FirebaseUser user;
+    User user;
 
     switch (result.status) {
       case FacebookLoginStatus.Success:
         FacebookAccessToken facebookAccessToken = result.accessToken;
-        final AuthCredential credential = FacebookAuthProvider.getCredential(
-            accessToken: facebookAccessToken.token);
+        final AuthCredential credential =
+            FacebookAuthProvider.credential(facebookAccessToken.token);
         user = await auth.signInWithCredential(credential);
 
         print('${user.displayName} signed in');
@@ -1192,11 +1198,11 @@ class _WelcomePageState extends State<WelcomePage> {
           _nameController.text = user.displayName;
           _emailController.text = user.email;
         });
-        print('${user.photoUrl} FACEBOOK PHOTO');
+        print('${user.photoURL} FACEBOOK PHOTO');
         assert(!user.isAnonymous);
         assert(await user.getIdToken() != null);
 
-        final FirebaseUser currentUser = await auth.getCurrentUser();
+        final User currentUser = await auth.getCurrentUser();
         assert(user.uid == currentUser.uid);
         break;
       case FacebookLoginStatus.Cancel:

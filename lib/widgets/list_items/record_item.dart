@@ -80,14 +80,14 @@ class _RecordItemState extends State<RecordItem> {
     });
     if (isLiked == true) {
       await recordsRef
-          .document(record.id)
+          .doc(record.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
       await recordsRef
-          .document(record.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(record.id)
+          .update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
           record.singerId, record.id, 'record_like');
@@ -97,14 +97,14 @@ class _RecordItemState extends State<RecordItem> {
       });
     } else if (isLiked == false) {
       await recordsRef
-          .document(record.id)
+          .doc(record.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
       await recordsRef
-          .document(record.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(record.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -126,9 +126,9 @@ class _RecordItemState extends State<RecordItem> {
 
   void initLikes(Record record) async {
     DocumentSnapshot likedSnapshot = await recordsRef
-        .document(record.id)
+        .doc(record.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
 
     //Solves the problem setState() called after dispose()
@@ -217,16 +217,16 @@ class _RecordItemState extends State<RecordItem> {
                           ],
                         ),
                       ],
-                    ),ValueListenableBuilder<int>(
-                            valueListenable: number,
-                            builder: (context, value, child) {
-                              return PostBottomSheet().postOptionIcon(
-                                context,
-                                record: widget.record,
-                              );
-                            },
-                          )
-
+                    ),
+                    ValueListenableBuilder<int>(
+                      valueListenable: number,
+                      builder: (context, value, child) {
+                        return PostBottomSheet().postOptionIcon(
+                          context,
+                          record: widget.record,
+                        );
+                      },
+                    )
                   ],
                 ),
               ),

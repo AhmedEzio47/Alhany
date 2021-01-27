@@ -28,16 +28,16 @@ class Record {
 
   factory Record.fromDoc(DocumentSnapshot doc) {
     return Record(
-        id: doc.documentID,
-        url: doc['audio_url'],
-        thumbnailUrl: doc['thumbnail_url'],
-        singerId: doc['singer_id'],
-        melodyId: doc['melody_id'],
-        duration: doc['duration'],
-        likes: doc['likes'],
-        comments: doc['comments'],
-        shares: doc['shares'],
-        views: doc['views'],
-        timestamp: doc['timestamp']);
+        id: doc.id,
+        url: doc.data()['audio_url'],
+        thumbnailUrl: doc.data()['thumbnail_url'],
+        singerId: doc.data()['singer_id'],
+        melodyId: doc.data()['melody_id'],
+        duration: doc.data()['duration'],
+        likes: doc.data()['likes'],
+        comments: doc.data()['comments'],
+        shares: doc.data()['shares'],
+        views: doc.data()['views'],
+        timestamp: doc.data()['timestamp']);
   }
 }

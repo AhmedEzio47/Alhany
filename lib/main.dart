@@ -2,10 +2,13 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/route_generator.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -24,7 +27,6 @@ class MyApp extends StatefulWidget {
 
 class _RestartWidgetState extends State<MyApp> {
   Key key = UniqueKey();
-
   void restartApp() {
     setState(() {
       key = UniqueKey();

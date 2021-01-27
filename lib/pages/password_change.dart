@@ -265,7 +265,7 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
     AppUtil.showLoader(context);
 
     try {
-      String email = (await firebaseAuth.currentUser()).email;
+      String email = (await firebaseAuth.currentUser.email);
       await firebaseAuth.signInWithEmailAndPassword(
           email: email, password: _currentPassword);
     } catch (ex) {

@@ -9,8 +9,6 @@ class Category {
 
   factory Category.fromDoc(DocumentSnapshot doc) {
     return Category(
-      id: doc.documentID,
-      name: doc['name'],
-      search: doc['search']);
+        id: doc.id, name: doc.data()['name'], search: doc.data()['search']);
   }
 }

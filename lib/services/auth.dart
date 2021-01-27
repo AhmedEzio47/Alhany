@@ -3,16 +3,15 @@ import 'dart:async';
 import 'package:Alhany/app_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 
-Future<FirebaseUser> getCurrentUser() async {
-  FirebaseUser currentUser = await Auth().getCurrentUser();
+Future<User> getCurrentUser() async {
+  User currentUser = await Auth().getCurrentUser();
   return currentUser;
 }
 
 abstract class BaseAuth {
-  Future<FirebaseUser> signInWithEmailAndPassword(String email, String password);
-  Future<FirebaseUser> signInWithCredential(AuthCredential authCredential);
+  Future<User> signInWithEmailAndPassword(String email, String password);
+  Future<User> signInWithCredential(AuthCredential authCredential);
 
   Future<String> signIn(String email, String password);
 
@@ -20,7 +19,7 @@ abstract class BaseAuth {
 
   // Future<String> currentUser();
 
-  Future<FirebaseUser> getCurrentUser();
+  Future<User> getCurrentUser();
 
   Future<void> sendEmailVerification();
 
@@ -41,27 +40,34 @@ class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
-  Future<FirebaseUser> signInWithEmailAndPassword(String email, String password) async {
+  Future<User> signInWithEmailAndPassword(String email, String password) async {
     try {
-      final FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password)).user;
+      final User user = (await _firebaseAuth.signInWithEmailAndPassword(
+              email: email, password: password))
+          .user;
       return user;
     } catch (error) {
-      if ((error as PlatformException).code == 'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') {
-        AppUtil.showToast(
-            language(en: 'This email is used with another login method', ar: 'هذا البريد مستخدم بطريقة دخول أخرى'));
+      if ((error as PlatformException).code ==
+          'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') {
+        AppUtil.showToast(language(
+            en: 'This email is used with another login method',
+            ar: 'هذا البريد مستخدم بطريقة دخول أخرى'));
       }
     }
     return null;
   }
 
-  Future<FirebaseUser> signInWithCredential(AuthCredential authCredential) async {
+  Future<User> signInWithCredential(AuthCredential authCredential) async {
     try {
-      final FirebaseUser user = (await _firebaseAuth.signInWithCredential(authCredential)).user;
+      final User user =
+          (await _firebaseAuth.signInWithCredential(authCredential)).user;
       return user;
     } catch (error) {
-      if ((error as PlatformException).code == 'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') {
-        AppUtil.showToast(
-            language(en: 'This email is used with another login method', ar: 'هذا البريد مستخدم بطريقة دخول أخرى'));
+      if ((error as PlatformException).code ==
+          'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') {
+        AppUtil.showToast(language(
+            en: 'This email is used with another login method',
+            ar: 'هذا البريد مستخدم بطريقة دخول أخرى'));
       }
     }
     return null;
@@ -69,16 +75,20 @@ class Auth implements BaseAuth {
 
   @override
   Future<String> signIn(String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password)).user;
-    if (user.isEmailVerified) return user.uid;
+    User user = (await _firebaseAuth.signInWithEmailAndPassword(
+            email: email, password: password))
+        .user;
+    if (user.emailVerified) return user.uid;
     return null;
   }
 
   // ignore: missing_return
   Future<String> signUp(String username, String email, String password) async {
-    FirebaseUser user;
+    User user;
     try {
-      user = (await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password)).user;
+      user = (await _firebaseAuth.createUserWithEmailAndPassword(
+              email: email, password: password))
+          .user;
     } catch (signUpError) {
       if (signUpError is PlatformException) {
         print('Sign up error: ${signUpError.code}');
@@ -109,8 +119,8 @@ class Auth implements BaseAuth {
   //   return user?.uid;
   // }
 
-  Future<FirebaseUser> getCurrentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+  Future<User> getCurrentUser() async {
+    User user = await _firebaseAuth.currentUser;
     return user;
   }
 
@@ -119,18 +129,18 @@ class Auth implements BaseAuth {
   }
 
   Future<void> sendEmailVerification() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = await _firebaseAuth.currentUser;
     user.sendEmailVerification();
   }
 
   Future<bool> isEmailVerified() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user.isEmailVerified;
+    User user = await _firebaseAuth.currentUser;
+    return user.emailVerified;
   }
 
   @override
   Future<void> changeEmail(String email) async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = await _firebaseAuth.currentUser;
     user.updateEmail(email).then((_) {
       print("Successfully changed email");
     }).catchError((error) {
@@ -142,7 +152,7 @@ class Auth implements BaseAuth {
   @override
   Future<String> changePassword(String password) async {
     try {
-      FirebaseUser user = await _firebaseAuth.currentUser();
+      User user = await _firebaseAuth.currentUser;
       await user.updatePassword(password);
       print("Successfully changed password");
       return null;
@@ -154,7 +164,7 @@ class Auth implements BaseAuth {
 
   @override
   Future<void> deleteUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = await _firebaseAuth.currentUser;
     user.delete().then((_) {
       print("Succesfull user deleted");
     }).catchError((error) {

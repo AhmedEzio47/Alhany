@@ -711,10 +711,10 @@ class _HomePageState extends State<HomePage>
                   await DatabaseService.getSingersByCategory(category.name);
               for (Singer singer in singers) {
                 await singersRef
-                    .document(singer.id)
-                    .updateData({'category': _categoryController.text});
+                    .doc(singer.id)
+                    .update({'category': _categoryController.text});
               }
-              await categoriesRef.document(category.id).updateData({
+              await categoriesRef.doc(category.id).update({
                 'name': _categoryController.text,
                 'search': searchList(_categoryController.text),
               });

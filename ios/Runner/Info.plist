@@ -13,7 +13,7 @@
          <key>NSAllowsArbitraryLoads</key>
          <true/>
          <key>NSAllowsArbitraryLoadsForMedia</key>
-         <true/
+         <true/>
     </dict>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>App need permission to access photo library.</string>

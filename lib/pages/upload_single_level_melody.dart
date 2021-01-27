@@ -32,10 +32,10 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
 
   getSingers() async {
     _singersNames = [];
-    QuerySnapshot singersSnapshot = await singersRef.getDocuments();
-    for (DocumentSnapshot doc in singersSnapshot.documents) {
+    QuerySnapshot singersSnapshot = await singersRef.get();
+    for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data['name']);
+        _singersNames.add(doc.data()['name']);
       });
     }
   }
@@ -222,7 +222,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       return;
     }
 
-    await melodiesRef.document(id).setData({
+    await melodiesRef.doc(id).set({
       'name': _melodyName ?? fileNameWithoutExtension,
       'audio_url': melodyUrl,
       'image_url': imageUrl,
@@ -238,8 +238,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     });
     if (_singer != null) {
       await singersRef
-          .document(_singer.id)
-          .updateData({'melodies': FieldValue.increment(1)});
+          .doc(_singer.id)
+          .update({'melodies': FieldValue.increment(1)});
     }
 
     Navigator.of(context).pop();
@@ -269,7 +269,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
           double.parse(info.getMediaProperties()['duration'].toString())
               .toInt();
 
-      await melodiesRef.document(id).setData({
+      await melodiesRef.doc(id).set({
         'name': fileNameWithoutExtension,
         'audio_url': melodyUrl,
         'author_id': _singerName == null ? Constants.currentUserID : null,
@@ -281,8 +281,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
         'timestamp': FieldValue.serverTimestamp()
       });
       await singersRef
-          .document(_singer.id)
-          .updateData({'melodies': FieldValue.increment(melodiesFiles.length)});
+          .doc(_singer.id)
+          .update({'melodies': FieldValue.increment(melodiesFiles.length)});
     }
     AppUtil.showToast(language(en: 'Melodies uploaded!', ar: 'تم رفع الألحان'));
     Navigator.of(context).pop();

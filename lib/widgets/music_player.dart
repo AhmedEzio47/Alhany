@@ -85,9 +85,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   isFavourite() async {
     bool isFavourite = (await usersRef
-            .document(Constants.currentUserID)
+            .doc(Constants.currentUserID)
             .collection('favourites')
-            .document(widget.melody?.id)
+            .doc(widget.melody?.id)
             .get())
         .exists;
 
@@ -591,7 +591,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
     String url = await AppUtil()
         .uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
-    await melodiesRef.document(widget.melody.id).updateData({'image_url': url});
+    await melodiesRef.doc(widget.melody.id).update({'image_url': url});
     AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }
 
@@ -626,7 +626,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await melodiesRef.document(widget.melody.id).updateData({
+              await melodiesRef.doc(widget.melody.id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -658,12 +658,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
               await DatabaseService.getSingerWithName(widget.melody.singer);
           if (widget.melody.isSong) {
             await singersRef
-                .document(singer.id)
-                .updateData({'songs': FieldValue.increment(-1)});
+                .doc(singer.id)
+                .update({'songs': FieldValue.increment(-1)});
           } else {
             await singersRef
-                .document(singer.id)
-                .updateData({'melodies': FieldValue.increment(-1)});
+                .doc(singer.id)
+                .update({'melodies': FieldValue.increment(-1)});
           }
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();
@@ -681,9 +681,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
       token.tokenId = 'free';
     } else {
       DocumentSnapshot doc = await usersRef
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .collection('downloads')
-          .document(widget.melody.id)
+          .doc(widget.melody.id)
           .get();
       bool alreadyDownloaded = doc.exists;
       print('alreadyDownloaded: $alreadyDownloaded');
@@ -693,10 +693,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
             arguments: {'amount': widget.melody.price});
         if (success) {
           usersRef
-              .document(Constants.currentUserID)
+              .doc(Constants.currentUserID)
               .collection('downloads')
-              .document(widget.melody.id)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
+              .doc(widget.melody.id)
+              .set({'timestamp': FieldValue.serverTimestamp()});
         }
         token.tokenId = 'purchased';
 
@@ -731,10 +731,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
       if (storedMelody == null) {
         await MelodySqlite.insert(melody);
         await usersRef
-            .document(Constants.currentUserID)
+            .doc(Constants.currentUserID)
             .collection('downloads')
-            .document(widget.melody.id)
-            .setData({'timestamp': FieldValue.serverTimestamp()});
+            .doc(widget.melody.id)
+            .set({'timestamp': FieldValue.serverTimestamp()});
         Navigator.of(context).pop();
         AppUtil.showToast('Downloaded!');
         Navigator.of(context).pushNamed('/downloads');

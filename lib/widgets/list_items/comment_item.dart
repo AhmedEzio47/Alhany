@@ -1,17 +1,17 @@
-import 'package:Alhany/models/news_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/comment_model.dart';
+import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/comment_bottom_sheet.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +23,14 @@ class CommentItem2 extends StatefulWidget {
   final bool isReply;
   final Comment parentComment;
 
-  const CommentItem2({Key key, this.record, this.comment, this.commenter, this.isReply, this.parentComment, this.news})
+  const CommentItem2(
+      {Key key,
+      this.record,
+      this.comment,
+      this.commenter,
+      this.isReply,
+      this.parentComment,
+      this.news})
       : super(key: key);
 
   @override
@@ -70,12 +77,17 @@ class _CommentItem2State extends State<CommentItem2> {
                     child: CachedImage(
                       imageUrl: widget.commenter.profileImageUrl,
                       imageShape: BoxShape.circle,
-                      width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
-                      height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
+                      width: widget.isReply
+                          ? Sizes.vsm_profile_image_w
+                          : Sizes.sm_profile_image_w,
+                      height: widget.isReply
+                          ? Sizes.vsm_profile_image_w
+                          : Sizes.sm_profile_image_h,
                       defaultAssetImage: Strings.default_profile_image,
                     ),
                     onTap: () {
-                      Navigator.of(context).pushNamed('/profile-page', arguments: {
+                      Navigator.of(context)
+                          .pushNamed('/profile-page', arguments: {
                         'user_id': widget.comment.commenterID,
                       });
                     }),
@@ -96,30 +108,38 @@ class _CommentItem2State extends State<CommentItem2> {
                                 TextSpan(
                                     text: ' ${widget.commenter.name}',
                                     style: TextStyle(
-                                        color: MyColors.darkPrimaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                                        color: MyColors.darkPrimaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
                                 TextSpan(
                                     text: ' @${widget.commenter.username}',
-                                    style: TextStyle(color: MyColors.primaryColor)),
+                                    style: TextStyle(
+                                        color: MyColors.primaryColor)),
                               ],
                             ),
                           ),
                           onTap: () {
-                            Navigator.of(context).pushNamed('/profile-page', arguments: {
+                            Navigator.of(context)
+                                .pushNamed('/profile-page', arguments: {
                               'user_id': widget.comment.commenterID,
                             });
                           },
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4.0, vertical: 2),
                           child: Text.rich(
                             TextSpan(
                                 text: '',
-                                children: widget.comment.text.split(' ').map((w) {
+                                children:
+                                    widget.comment.text.split(' ').map((w) {
                                   return w.startsWith('@') && w.length > 1
                                       ? TextSpan(
                                           text: ' ' + w,
                                           style: TextStyle(color: Colors.blue),
-                                          recognizer: TapGestureRecognizer()..onTap = () => mentionedUserProfile(w),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap =
+                                                () => mentionedUserProfile(w),
                                         )
                                       : TextSpan(
                                           text: ' ' + w,
@@ -135,7 +155,8 @@ class _CommentItem2State extends State<CommentItem2> {
                 ValueListenableBuilder<int>(
                   valueListenable: number,
                   builder: (context, value, child) {
-                    return CommentBottomSheet().commentOptionIcon(context, widget.comment, widget.parentComment,
+                    return CommentBottomSheet().commentOptionIcon(
+                        context, widget.comment, widget.parentComment,
                         record: widget.record, news: widget.news);
                   },
                 )
@@ -146,8 +167,10 @@ class _CommentItem2State extends State<CommentItem2> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
-                      style: TextStyle(color: MyColors.primaryColor, fontSize: 12)),
+                  Text(
+                      '${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
+                      style: TextStyle(
+                          color: MyColors.primaryColor, fontSize: 12)),
                   Row(
                     children: [
                       InkWell(
@@ -167,8 +190,12 @@ class _CommentItem2State extends State<CommentItem2> {
                                     ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(widget.comment.likes == null ? 0.toString() : widget.comment.likes.toString(),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                  widget.comment.likes == null
+                                      ? 0.toString()
+                                      : widget.comment.likes.toString(),
                                   style: TextStyle(color: Colors.white)),
                             ),
                           ],
@@ -176,9 +203,11 @@ class _CommentItem2State extends State<CommentItem2> {
                         onTap: () async {
                           if (isLikeEnabled) {
                             if (!widget.isReply) {
-                              await likeBtnHandler(widget.comment, record: widget.record, news: widget.news);
+                              await likeBtnHandler(widget.comment,
+                                  record: widget.record, news: widget.news);
                             } else {
-                              await repliesLikeBtnHandler(widget.comment, widget.parentComment.id,
+                              await repliesLikeBtnHandler(
+                                  widget.comment, widget.parentComment.id,
                                   record: widget.record, news: widget.news);
                             }
                           }
@@ -190,7 +219,8 @@ class _CommentItem2State extends State<CommentItem2> {
                             InkWell(
                               onTap: () {
                                 if (Constants.currentRoute != '/comment-page') {
-                                  Navigator.of(context).pushNamed('/comment-page', arguments: {
+                                  Navigator.of(context)
+                                      .pushNamed('/comment-page', arguments: {
                                     'record': widget.record,
                                     'news': widget.news,
                                     'comment': widget.comment
@@ -206,9 +236,12 @@ class _CommentItem2State extends State<CommentItem2> {
                               )),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
                               child: Text(
-                                widget.comment.replies == null ? 0.toString() : widget.comment.replies.toString(),
+                                widget.comment.replies == null
+                                    ? 0.toString()
+                                    : widget.comment.replies.toString(),
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
@@ -217,11 +250,16 @@ class _CommentItem2State extends State<CommentItem2> {
                         onTap: () {
                           print('Mention reply : ${widget.commenter.username}');
 
-                          Navigator.of(context).pushNamed('/add-reply', arguments: {
+                          Navigator.of(context)
+                              .pushNamed('/add-reply', arguments: {
                             'post': widget.record ?? widget.news,
-                            'comment': widget.isReply ? widget.parentComment : widget.comment,
+                            'comment': widget.isReply
+                                ? widget.parentComment
+                                : widget.comment,
                             'user': widget.commenter,
-                            'mention': widget.isReply ? '@${widget.commenter.username} ' : '',
+                            'mention': widget.isReply
+                                ? '@${widget.commenter.username} '
+                                : '',
                           });
                         },
                       ),
@@ -236,7 +274,8 @@ class _CommentItem2State extends State<CommentItem2> {
     );
   }
 
-  Future<void> likeBtnHandler(Comment comment, {Record record, News news}) async {
+  Future<void> likeBtnHandler(Comment comment,
+      {Record record, News news}) async {
     setState(() {
       isLikeEnabled = false;
     });
@@ -248,35 +287,35 @@ class _CommentItem2State extends State<CommentItem2> {
     }
     if (isLiked == true) {
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
       });
     } else if (isLiked == false) {
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
       await collectionReference
-          .document(record?.id ?? news?.id)
+          .doc(record?.id ?? news?.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -289,7 +328,8 @@ class _CommentItem2State extends State<CommentItem2> {
           record?.id ?? news?.id,
           record != null ? 'record_like' : 'news_like');
     }
-    var commentMeta = await DatabaseService.getCommentMeta(widget.comment.id, recordId: record?.id, newsId: news?.id);
+    var commentMeta = await DatabaseService.getCommentMeta(widget.comment.id,
+        recordId: record?.id, newsId: news?.id);
     setState(() {
       widget.comment.likes = commentMeta['likes'];
       widget.comment.replies = commentMeta['replies'];
@@ -305,11 +345,11 @@ class _CommentItem2State extends State<CommentItem2> {
       collectionReference = newsRef;
     }
     DocumentSnapshot likedSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
 
     //Solves the problem setState() called after dispose()
@@ -320,7 +360,8 @@ class _CommentItem2State extends State<CommentItem2> {
     }
   }
 
-  Future<void> repliesLikeBtnHandler(Comment comment, String parentCommentId, {Record record, News news}) async {
+  Future<void> repliesLikeBtnHandler(Comment comment, String parentCommentId,
+      {Record record, News news}) async {
     setState(() {
       isLikeEnabled = false;
     });
@@ -332,42 +373,42 @@ class _CommentItem2State extends State<CommentItem2> {
     }
     if (isLiked == true) {
       await collectionReference
-          .document(record?.id ?? news.id)
+          .doc(record?.id ?? news.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
       await collectionReference
-          .document(record?.id ?? news.id)
+          .doc(record?.id ?? news.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
       });
     } else if (isLiked == false) {
       await collectionReference
-          .document(record?.id ?? news.id)
+          .doc(record?.id ?? news.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await collectionReference
-          .document(record?.id ?? news.id)
+          .doc(record?.id ?? news.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -381,17 +422,20 @@ class _CommentItem2State extends State<CommentItem2> {
           record?.id ?? news?.id,
           record != null ? 'record_like' : 'news_like');
     }
-    var replyMeta =
-        await DatabaseService.getReplyMeta(parentCommentId, widget.comment.id, recordId: record.id, newsId: news.id);
+    var replyMeta = await DatabaseService.getReplyMeta(
+        parentCommentId, widget.comment.id,
+        recordId: record.id, newsId: news.id);
     setState(() {
       widget.comment.likes = replyMeta['likes'];
       isLikeEnabled = true;
     });
 
-    print('likes = ${replyMeta['likes']} and dislikes = ${replyMeta['dislikes']}');
+    print(
+        'likes = ${replyMeta['likes']} and dislikes = ${replyMeta['dislikes']}');
   }
 
-  void repliesInitLikes(Comment comment, String parentCommentId, {String recordId, String newsId}) async {
+  void repliesInitLikes(Comment comment, String parentCommentId,
+      {String recordId, String newsId}) async {
     CollectionReference collectionReference;
     if (recordId != null) {
       collectionReference = recordsRef;
@@ -399,13 +443,13 @@ class _CommentItem2State extends State<CommentItem2> {
       collectionReference = newsRef;
     }
     DocumentSnapshot likedSnapshot = await collectionReference
-        .document(recordId ?? newsId)
+        .doc(recordId ?? newsId)
         .collection('comments')
-        .document(parentCommentId)
+        .doc(parentCommentId)
         .collection('replies')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
 
     //Solves the problem setState() called after dispose()
@@ -417,7 +461,8 @@ class _CommentItem2State extends State<CommentItem2> {
   }
 
   loadReplies(String commentId, {String recordId, String newsId}) async {
-    List<Comment> replies = await DatabaseService.getCommentReplies(commentId, recordId: recordId, newsId: newsId);
+    List<Comment> replies = await DatabaseService.getCommentReplies(commentId,
+        recordId: recordId, newsId: newsId);
     if (mounted) {
       setState(() {
         this.replies = replies;
@@ -445,18 +490,22 @@ class _CommentItem2State extends State<CommentItem2> {
         recordId: widget.record?.id,
         newsId: widget.news?.id,
       );
-      loadReplies(widget.comment.id, recordId: widget.record?.id, newsId: widget.news?.id);
+      loadReplies(widget.comment.id,
+          recordId: widget.record?.id, newsId: widget.news?.id);
     } else {
-      repliesInitLikes(widget.comment, widget.parentComment.id, recordId: widget.record?.id, newsId: widget.news?.id);
+      repliesInitLikes(widget.comment, widget.parentComment.id,
+          recordId: widget.record?.id, newsId: widget.news?.id);
     }
 
     ///Set up listener here
     scrollController.addListener(() {
-      if (scrollController.offset >= scrollController.position.maxScrollExtent &&
+      if (scrollController.offset >=
+              scrollController.position.maxScrollExtent &&
           !scrollController.position.outOfRange) {
         print('reached the bottom');
         //nextComments();
-      } else if (scrollController.offset <= scrollController.position.minScrollExtent &&
+      } else if (scrollController.offset <=
+              scrollController.position.minScrollExtent &&
           !scrollController.position.outOfRange) {
         print("reached the top");
       } else {}
@@ -466,7 +515,8 @@ class _CommentItem2State extends State<CommentItem2> {
   mentionedUserProfile(String w) async {
     String username = w.substring(1);
     User user = await DatabaseService.getUserWithUsername(username);
-    Navigator.of(context).pushNamed('/user-profile', arguments: {'userId': user.id});
+    Navigator.of(context)
+        .pushNamed('/user-profile', arguments: {'userId': user.id});
     print(w);
   }
 }

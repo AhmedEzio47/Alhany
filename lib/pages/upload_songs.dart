@@ -36,10 +36,10 @@ class _UploadSongsState extends State<UploadSongs> {
 
   getSingers() async {
     _singersNames = [];
-    QuerySnapshot singersSnapshot = await singersRef.getDocuments();
-    for (DocumentSnapshot doc in singersSnapshot.documents) {
+    QuerySnapshot singersSnapshot = await singersRef.get();
+    for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data['name']);
+        _singersNames.add(doc.data()['name']);
       });
     }
   }
@@ -323,7 +323,7 @@ class _UploadSongsState extends State<UploadSongs> {
       return;
     }
 
-    await melodiesRef.document(id).setData({
+    await melodiesRef.doc(id).set({
       'name': _songName ?? fileNameWithoutExtension,
       'audio_url': songUrl,
       'image_url': imageUrl,
@@ -336,9 +336,7 @@ class _UploadSongsState extends State<UploadSongs> {
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await singersRef
-        .document(_singer.id)
-        .updateData({'songs': FieldValue.increment(1)});
+    await singersRef.doc(_singer.id).update({'songs': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -372,7 +370,7 @@ class _UploadSongsState extends State<UploadSongs> {
           double.parse(info.getMediaProperties()['duration'].toString())
               .toInt();
 
-      await melodiesRef.document(id).setData({
+      await melodiesRef.doc(id).set({
         'name': fileNameWithoutExtension,
         'audio_url': songUrl,
         'is_song': true,
@@ -383,8 +381,8 @@ class _UploadSongsState extends State<UploadSongs> {
       });
     }
     await singersRef
-        .document(_singer.id)
-        .updateData({'songs': FieldValue.increment(songFiles.length)});
+        .doc(_singer.id)
+        .update({'songs': FieldValue.increment(songFiles.length)});
     AppUtil.showToast('Songs uploaded!');
     Navigator.of(context).pop();
     Navigator.of(context).pop();

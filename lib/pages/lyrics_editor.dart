@@ -42,7 +42,7 @@ class _LyricsEditorState extends State<LyricsEditor> {
 
   updateLyrics() async {
     final String lyrics = await keyEditor.currentState.getText();
-    melodiesRef.document(widget.melody.id).updateData({'lyrics': lyrics});
+    melodiesRef.doc(widget.melody.id).update({'lyrics': lyrics});
     AppUtil.showToast('Lyrics updated!');
   }
 }

@@ -9,8 +9,8 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:random_string/random_string.dart';
 import 'package:path/path.dart' as path;
+import 'package:random_string/random_string.dart';
 
 class SlideImages extends StatefulWidget {
   @override
@@ -81,22 +81,30 @@ class _SlideImagesState extends State<SlideImages> {
                               child: Container(
                                 height: 40,
                                 width: 40,
-                                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.black45),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black45),
                                 child: IconButton(
                                   icon: Icon(Icons.close),
                                   onPressed: () {
                                     AppUtil.showAlertDialog(
                                         context: context,
-                                        message: 'Are you sure to delete this post?',
+                                        message:
+                                            'Are you sure to delete this post?',
                                         firstBtnText: 'Yes',
                                         firstFunc: () async {
                                           AppUtil.showLoader(context);
-                                          await DatabaseService.deleteSlideImage(_slideImages[index]);
+                                          await DatabaseService
+                                              .deleteSlideImage(
+                                                  _slideImages[index]);
                                           Navigator.of(context).pop();
-                                          Navigator.of(context).pushReplacementNamed('/slide-images');
+                                          Navigator.of(context)
+                                              .pushReplacementNamed(
+                                                  '/slide-images');
                                         },
                                         secondBtnText: 'No',
-                                        secondFunc: () => Navigator.of(context).pop());
+                                        secondFunc: () =>
+                                            Navigator.of(context).pop());
                                   },
                                   alignment: Alignment.center,
                                   color: Colors.white,
@@ -124,15 +132,21 @@ class _SlideImagesState extends State<SlideImages> {
     File image = await AppUtil.pickImageFromGallery();
     String ext = path.extension(image.path);
     AppUtil.showLoader(context);
-    String url = await AppUtil().uploadFile(image, context, '/slide_images/$id$ext');
-    slideImagesRef.document(id).setData({'url': url, 'page': _chosenPage, 'timestamp': FieldValue.serverTimestamp()});
+    String url =
+        await AppUtil().uploadFile(image, context, '/slide_images/$id$ext');
+    slideImagesRef.doc(id).set({
+      'url': url,
+      'page': _chosenPage,
+      'timestamp': FieldValue.serverTimestamp()
+    });
     AppUtil.showToast('Uploaded');
     Navigator.of(context).pop();
     Navigator.of(context).pushReplacementNamed('/slide-images');
   }
 
   getSlideImages() async {
-    List<SlideImage> slideImages = await DatabaseService.getSlideImages(_chosenPage);
+    List<SlideImage> slideImages =
+        await DatabaseService.getSlideImages(_chosenPage);
     setState(() {
       _slideImages = slideImages;
     });

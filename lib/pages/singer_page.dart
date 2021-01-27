@@ -403,7 +403,7 @@ class _SingerPageState extends State<SingerPage>
 
     String url = await AppUtil()
         .uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
-    await singersRef.document(widget.singer.id).updateData({'image_url': url});
+    await singersRef.doc(widget.singer.id).update({'image_url': url});
     AppUtil.showToast('Image updated!');
   }
 
@@ -437,7 +437,7 @@ class _SingerPageState extends State<SingerPage>
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await singersRef.document(widget.singer.id).updateData({
+              await singersRef.doc(widget.singer.id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -489,7 +489,7 @@ class _SingerPageState extends State<SingerPage>
             }
           }
 
-          await singersRef.document(widget.singer.id).delete();
+          await singersRef.doc(widget.singer.id).delete();
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();
         },

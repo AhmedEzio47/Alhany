@@ -31,10 +31,10 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
 
   getSingers() async {
     _singers = [];
-    QuerySnapshot singersSnapshot = await singersRef.getDocuments();
-    for (DocumentSnapshot doc in singersSnapshot.documents) {
+    QuerySnapshot singersSnapshot = await singersRef.get();
+    for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singers.add(doc.data['name']);
+        _singers.add(doc.data()['name']);
       });
     }
   }
@@ -280,7 +280,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
           .uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
-    await melodiesRef.document(id).setData({
+    await melodiesRef.doc(id).set({
       'name': _melodyName,
       'audio_url': _melodyUrl,
       'image_url': imageUrl,
@@ -294,8 +294,8 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     });
 
     await singersRef
-        .document(_singer.id)
-        .updateData({'melodies': FieldValue.increment(1)});
+        .doc(_singer.id)
+        .update({'melodies': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     AppUtil.showToast(language(en: 'Melody uploaded!', ar: 'تم رقع اللحن'));

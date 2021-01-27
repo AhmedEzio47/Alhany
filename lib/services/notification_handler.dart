@@ -56,10 +56,10 @@ class NotificationHandler {
 
   static makeNotificationSeen(String notificationId) {
     usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('notifications')
-        .document(notificationId)
-        .updateData({
+        .doc(notificationId)
+        .update({
       'seen': true,
     });
   }
@@ -102,7 +102,7 @@ class NotificationHandler {
   static sendNotification(String receiverId, String title, String body,
       String objectId, String type) async {
     if (receiverId == Constants.currentUserID) return;
-    usersRef.document(receiverId).collection('notifications').add({
+    usersRef.doc(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
       'seen': false,
@@ -115,8 +115,8 @@ class NotificationHandler {
     //To increment notificationsNumber
     //User user = await DatabaseService.getUserWithId(receiverId);
     await usersRef
-        .document(receiverId)
-        .updateData({'notificationsNumber': FieldValue.increment(1)});
+        .doc(receiverId)
+        .update({'notificationsNumber': FieldValue.increment(1)});
   }
 
   static removeNotification(
@@ -162,7 +162,7 @@ class NotificationHandler {
 
   clearNotificationsNumber() async {
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'notificationsNumber': 0});
+        .doc(Constants.currentUserID)
+        .update({'notificationsNumber': 0});
   }
 }

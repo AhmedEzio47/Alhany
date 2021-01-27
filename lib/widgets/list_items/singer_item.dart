@@ -36,7 +36,8 @@ class _SingerItemState extends State<SingerItem> {
       height: 70,
       child: ListTile(
         onTap: () {
-          Navigator.of(context).pushNamed('/songs-page', arguments: {'singer': widget.singer});
+          Navigator.of(context)
+              .pushNamed('/songs-page', arguments: {'singer': widget.singer});
         },
         title: Text(
           widget.singer.name,
@@ -96,12 +97,14 @@ class _SingerItemState extends State<SingerItem> {
     String ext = path.extension(image.path);
 
     if (widget.singer.imageUrl != null) {
-      String fileName = await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+      String fileName =
+          await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
-    String url = await AppUtil().uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
-    await singersRef.document(widget.singer.id).updateData({'image_url': url});
+    String url = await AppUtil()
+        .uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
+    await singersRef.doc(widget.singer.id).update({'image_url': url});
     AppUtil.showToast('Image updated!');
   }
 
@@ -135,7 +138,7 @@ class _SingerItemState extends State<SingerItem> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await singersRef.document(widget.singer.id).updateData({
+              await singersRef.doc(widget.singer.id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -162,10 +165,11 @@ class _SingerItemState extends State<SingerItem> {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
           if (widget.singer.imageUrl != null) {
-            String fileName = await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+            String fileName =
+                await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
             await storageRef.child('/singers_images/$fileName').delete();
           }
-          await singersRef.document(widget.singer.id).delete();
+          await singersRef.doc(widget.singer.id).delete();
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();
         },

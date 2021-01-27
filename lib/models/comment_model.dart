@@ -19,12 +19,12 @@ class Comment {
 
   factory Comment.fromDoc(DocumentSnapshot doc) {
     return Comment(
-      id: doc.documentID,
-      commenterID: doc['commenter'],
-      text: doc['text'],
-      likes: doc['likes'],
-      replies: doc['replies'],
-      timestamp: doc['timestamp'],
+      id: doc.id,
+      commenterID: doc.data()['commenter'],
+      text: doc.data()['text'],
+      likes: doc.data()['likes'],
+      replies: doc.data()['replies'],
+      timestamp: doc.data()['timestamp'],
     );
   }
 }

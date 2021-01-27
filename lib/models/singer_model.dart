@@ -22,13 +22,13 @@ class Singer {
 
   factory Singer.fromDoc(DocumentSnapshot doc) {
     return Singer(
-        id: doc.documentID,
-        name: doc['name'],
-        category: doc['category'],
-        imageUrl: doc['image_url'],
-        coverUrl: doc['cover_url'],
-        songs: doc['songs'],
-        melodies: doc['melodies'],
-        search: doc['search']);
+        id: doc.id,
+        name: doc.data()['name'],
+        category: doc.data()['category'],
+        imageUrl: doc.data()['image_url'],
+        coverUrl: doc.data()['cover_url'],
+        songs: doc.data()['songs'],
+        melodies: doc.data()['melodies'],
+        search: doc.data()['search']);
   }
 }
