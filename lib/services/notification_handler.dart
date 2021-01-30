@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
@@ -19,39 +18,39 @@ class NotificationHandler {
     StreamSubscription iosSubscription;
     FirebaseMessaging _fcm = FirebaseMessaging();
 
-    if (Platform.isIOS) {
-      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-        // save the token  OR subscribe to a topic here
-      });
-
-      _fcm.requestNotificationPermissions(IosNotificationSettings());
-    }
-
-    _fcm.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-        makeNotificationSeen(message['data']['id']);
-
-        AppUtil.showToast(
-          message['notification']['title'],
-        );
-
-        //showNotification(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-        makeNotificationSeen(message['data']['id']);
-
-        navigateToScreen(
-            context, message['data']['type'], message['data']['object_id']);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-        makeNotificationSeen(message['data']['id']);
-        navigateToScreen(
-            context, message['data']['type'], message['data']['object_id']);
-      },
-    );
+    // if (Platform.isIOS) {
+    //   iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
+    //     // save the token  OR subscribe to a topic here
+    //   });
+    //
+    //   _fcm.requestNotificationPermissions(IosNotificationSettings());
+    // }
+    //
+    // _fcm.configure(
+    //   onMessage: (Map<String, dynamic> message) async {
+    //     print("onMessage: $message");
+    //     makeNotificationSeen(message['data']['id']);
+    //
+    //     AppUtil.showToast(
+    //       message['notification']['title'],
+    //     );
+    //
+    //     //showNotification(message);
+    //   },
+    //   onLaunch: (Map<String, dynamic> message) async {
+    //     print("onLaunch: $message");
+    //     makeNotificationSeen(message['data']['id']);
+    //
+    //     navigateToScreen(
+    //         context, message['data']['type'], message['data']['object_id']);
+    //   },
+    //   onResume: (Map<String, dynamic> message) async {
+    //     print("onResume: $message");
+    //     makeNotificationSeen(message['data']['id']);
+    //     navigateToScreen(
+    //         context, message['data']['type'], message['data']['object_id']);
+    //   },
+    // );
   }
 
   static makeNotificationSeen(String notificationId) {
