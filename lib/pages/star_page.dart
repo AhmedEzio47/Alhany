@@ -8,6 +8,7 @@ import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
+import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
@@ -106,6 +107,7 @@ class _StarPageState extends State<StarPage>
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        drawer: BuildDrawer(),
         body: GestureDetector(
           onTap: () {
             setState(() {

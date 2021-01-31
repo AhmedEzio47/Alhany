@@ -12,6 +12,7 @@ import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_ovelay.dart';
+import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
@@ -158,6 +159,7 @@ class _ProfilePageState extends State<ProfilePage>
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        drawer: BuildDrawer(),
         body: GestureDetector(
           onTap: () {
             // if (musicPlayer != null) {

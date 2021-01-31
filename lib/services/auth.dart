@@ -63,8 +63,8 @@ class Auth implements BaseAuth {
           (await _firebaseAuth.signInWithCredential(authCredential)).user;
       return user;
     } catch (error) {
-      if ((error as PlatformException).code ==
-          'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') {
+      if ((error as FirebaseAuthException).code ==
+          'account-exists-with-different-credential') {
         AppUtil.showToast(language(
             en: 'This email is used with another login method',
             ar: 'هذا البريد مستخدم بطريقة دخول أخرى'));

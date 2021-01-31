@@ -9,6 +9,7 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
+import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
@@ -40,6 +41,7 @@ class _HomePageState extends State<HomePage>
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        drawer: BuildDrawer(),
         body: GestureDetector(
           onTap: () {
             setState(() {

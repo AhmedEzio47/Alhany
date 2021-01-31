@@ -3,6 +3,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/chat_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -126,6 +127,7 @@ class _ChatsState extends State<Chats>
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        drawer: BuildDrawer(),
         body: Stack(
           children: [
             Container(
