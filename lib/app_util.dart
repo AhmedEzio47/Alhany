@@ -27,7 +27,12 @@ import 'models/user_model.dart' as user_model;
 
 saveToken() async {
   if (Constants.currentUserID == null) return;
-  String token = await FirebaseMessaging().getToken();
+  String token;
+  if (Platform.isIOS || Platform.isMacOS) {
+    token = await FirebaseMessaging.instance.getAPNSToken();
+  } else {
+    token = await FirebaseMessaging.instance.getToken();
+  }
   usersRef
       .doc(Constants.currentUserID)
       .collection('tokens')
