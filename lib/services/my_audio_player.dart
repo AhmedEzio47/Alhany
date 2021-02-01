@@ -1,18 +1,18 @@
-import 'package:Alhany/services/audio_background_service.dart';
-import 'package:audio_service/audio_service.dart';
+//import 'package:Alhany/services/audio_background_service.dart';
+//import 'package:audio_service/audio_service.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/pages/melody_page.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:Alhany/pages/melody_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
-import 'package:Alhany/constants/constants.dart';
 
 // NOTE: Your entrypoint MUST be a top-level function.
-void _audioPlayerTaskEntrypoint() async {
-  AudioServiceBackground.run(() => AudioPlayerTask(mediaLibrary: mediaLibrary));
-}
+// void _audioPlayerTaskEntrypoint() async {
+//   AudioServiceBackground.run(() => AudioPlayerTask(mediaLibrary: mediaLibrary));
+// }
 
-List<MediaItem> mediaLibrary = [];
+//List<MediaItem> mediaLibrary = [];
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
@@ -28,7 +28,8 @@ class MyAudioPlayer with ChangeNotifier {
   final Function onComplete;
   final bool isLocal;
 
-  MyAudioPlayer({this.url, this.urlList, this.isLocal = false, this.onComplete}) {
+  MyAudioPlayer(
+      {this.url, this.urlList, this.isLocal = false, this.onComplete}) {
     initAudioPlayer();
   }
 
@@ -37,27 +38,27 @@ class MyAudioPlayer with ChangeNotifier {
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    if (this.url != null) {
-      mediaLibrary = [
-        MediaItem(
-          album: "Science Friday",
-          title: "A Salute To Head-Scratching Science",
-          artist: "Science Friday and WNYC Studios",
-          artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
-          id: url,
-          duration: duration,
-        )
-      ];
-    }
-    AudioService.start(
-      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-      androidNotificationChannelName: 'Audio Service Demo',
-      // Enable this if you want the Android service to exit the foreground state on pause.
-      //androidStopForegroundOnPause: true,
-      androidNotificationColor: 0xFF2196f3,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-      androidEnableQueue: true,
-    );
+    // if (this.url != null) {
+    //   mediaLibrary = [
+    //     MediaItem(
+    //       album: "Science Friday",
+    //       title: "A Salute To Head-Scratching Science",
+    //       artist: "Science Friday and WNYC Studios",
+    //       artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
+    //       id: url,
+    //       duration: duration,
+    //     )
+    //   ];
+    // }
+    // AudioService.start(
+    //   backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
+    //   androidNotificationChannelName: 'Audio Service Demo',
+    //   // Enable this if you want the Android service to exit the foreground state on pause.
+    //   //androidStopForegroundOnPause: true,
+    //   androidNotificationColor: 0xFF2196f3,
+    //   androidNotificationIcon: 'mipmap/ic_launcher',
+    //   androidEnableQueue: true,
+    // );
     advancedPlayer.durationHandler = (d) {
       duration = d;
       notifyListeners();
@@ -70,7 +71,8 @@ class MyAudioPlayer with ChangeNotifier {
       print('D:${duration.inMilliseconds}');
       notifyListeners();
 
-      if (duration.inMilliseconds - p.inMilliseconds < Constants.endPositionOffsetInMilliSeconds) {
+      if (duration.inMilliseconds - p.inMilliseconds <
+          Constants.endPositionOffsetInMilliSeconds) {
         stop();
         if (urlList != null) {
           if (this.index < urlList.length - 1)
@@ -113,7 +115,8 @@ class MyAudioPlayer with ChangeNotifier {
     position = null;
     duration = null;
     notifyListeners();
-    if (onComplete != null && MelodyPage.recordingStatus == RecordingStatus.Recording) {
+    if (onComplete != null &&
+        MelodyPage.recordingStatus == RecordingStatus.Recording) {
       onComplete();
     }
   }
