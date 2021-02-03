@@ -376,7 +376,7 @@ class _MelodyPageState extends State<MelodyPage> {
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
       print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
-      Navigator.of(context).pop();
+
       setState(() {
         _progressVisible = true;
       });
@@ -442,14 +442,19 @@ class _MelodyPageState extends State<MelodyPage> {
                                 ? () async {
                                     _image =
                                         await AppUtil.pickImageFromGallery();
-                                    AppUtil.showLoader(context);
+
                                     setState(() {
                                       imageVideoPath =
                                           '${path.withoutExtension(mergedFilePath)}.mp4';
                                     });
+                                    setState(() {
+                                      _progressVisible = true;
+                                    });
                                     success = await flutterFFmpeg.execute(
                                         "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
-                                    Navigator.of(context).pop();
+                                    setState(() {
+                                      _progressVisible = false;
+                                    });
                                   }
                                 : null,
                             color: MyColors.primaryColor,
