@@ -6,6 +6,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -70,8 +71,8 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context)
-        .pushNamed('/melody-page', arguments: {'melody': _melody});
+    Navigator.of(context).pushNamed('/melody-page',
+        arguments: {'melody': _melody, 'type': Types.AUDIO});
   }
 
   Future<void> likeBtnHandler(Record record) async {

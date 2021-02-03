@@ -16,12 +16,15 @@ import 'custom_inkwell.dart';
 import 'custom_text.dart';
 
 class CommentBottomSheet {
-  Widget commentOptionIcon(BuildContext context, Comment comment, Comment parentComment, {Record record, News news}) {
+  Widget commentOptionIcon(
+      BuildContext context, Comment comment, Comment parentComment,
+      {Record record, News news}) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, comment, parentComment, record: record, news: news);
+          _openBottomSheet(context, comment, parentComment,
+              record: record, news: news);
         },
         child: Container(
           width: 25,
@@ -43,7 +46,8 @@ class CommentBottomSheet {
     return ratio;
   }
 
-  void _openBottomSheet(BuildContext context, Comment comment, Comment parentComment,
+  void _openBottomSheet(
+      BuildContext context, Comment comment, Comment parentComment,
       {Record record, News news}) async {
     User user = await DatabaseService.getUserWithId(
       comment.commenterID,
@@ -55,7 +59,8 @@ class CommentBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
+            height:
+                Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: MyColors.lightPrimaryColor,
@@ -64,12 +69,15 @@ class CommentBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _commentOptions(context, isMyComment, comment, parentComment, user, record: record, news: news));
+            child: _commentOptions(
+                context, isMyComment, comment, parentComment, user,
+                record: record, news: news));
       },
     );
   }
 
-  Widget _commentOptions(BuildContext context, bool isMyComment, Comment comment, Comment parentComment, User user,
+  Widget _commentOptions(BuildContext context, bool isMyComment,
+      Comment comment, Comment parentComment, User user,
       {Record record, News news}) {
     return Column(
       children: <Widget>[
@@ -99,7 +107,8 @@ class CommentBottomSheet {
                   } else {
 //                    Navigator.of(context).pushNamed('/edit-comment',
 //                        arguments: {'record': record, 'comment': parentComment, 'reply': comment, 'user': user});
-                    editReply(context, comment, parentComment, record: record, news: news);
+                    editReply(context, comment, parentComment,
+                        record: record, news: news);
                   }
                 },
                 isEnable: false,
@@ -114,14 +123,22 @@ class CommentBottomSheet {
                 ),
                 text: 'Delete Comment',
                 onPressed: () async {
-                  await _deleteComment(context, comment.id, parentComment == null ? null : parentComment.id,
+                  await _deleteComment(context, comment.id,
+                      parentComment == null ? null : parentComment.id,
                       recordId: record.id, newId: news.id);
                   if (parentComment == null) {
-                    Navigator.of(context)
-                        .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
+                    Navigator.of(context).pushReplacementNamed('/record-page',
+                        arguments: {
+                          'record': record,
+                          'is_video_visible': true
+                        });
                   } else {
                     Navigator.of(context).pushReplacementNamed('/comment-page',
-                        arguments: {'record': record, 'news': news, 'comment': parentComment});
+                        arguments: {
+                          'record': record,
+                          'news': news,
+                          'comment': parentComment
+                        });
                   }
                 },
                 isEnable: true,
@@ -129,8 +146,9 @@ class CommentBottomSheet {
             : Container(),
         isMyComment
             ? Container()
-            : _widgetBottomSheetRow(context, Icon(Icons.indeterminate_check_box), text: 'Unfollow ${user.username}',
-                onPressed: () async {
+            : _widgetBottomSheetRow(
+                context, Icon(Icons.indeterminate_check_box),
+                text: 'Unfollow ${user.username}', onPressed: () async {
                 unfollowUser(context, user);
               }),
 
@@ -161,7 +179,8 @@ class CommentBottomSheet {
 
   TextEditingController _commentController = TextEditingController();
 
-  editComment(BuildContext context, Comment comment, {Record record, News news}) async {
+  editComment(BuildContext context, Comment comment,
+      {Record record, News news}) async {
     _commentController.text = comment.text;
 
     Navigator.of(context).push(CustomModal(
@@ -190,11 +209,13 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editComment(comment.id, _commentController.text,
+              await DatabaseService.editComment(
+                  comment.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
-              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
-              Navigator.of(context)
-                  .pushReplacementNamed('/record-page', arguments: {'record': record, 'is_video_visible': true});
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pushReplacementNamed('/record-page',
+                  arguments: {'record': record, 'is_video_visible': true});
             },
             color: MyColors.primaryColor,
             child: Text(
@@ -207,7 +228,8 @@ class CommentBottomSheet {
     )));
   }
 
-  editReply(BuildContext context, Comment reply, Comment parentComment, {Record record, News news}) async {
+  editReply(BuildContext context, Comment reply, Comment parentComment,
+      {Record record, News news}) async {
     _commentController.text = reply.text;
 
     Navigator.of(context).push(CustomModal(
@@ -236,11 +258,17 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editReply(parentComment.id, reply.id, _commentController.text,
+              await DatabaseService.editReply(
+                  parentComment.id, reply.id, _commentController.text,
                   recordId: record.id, newsId: news.id);
-              AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/comment-page',
-                  arguments: {'record': record, 'news': news, 'comment': parentComment});
+                  arguments: {
+                    'record': record,
+                    'news': news,
+                    'comment': parentComment
+                  });
             },
             color: MyColors.primaryColor,
             child: Text(
@@ -277,7 +305,8 @@ class CommentBottomSheet {
                 AppUtil.showLoader(context);
 
                 await DatabaseService.unfollowUser(user.id);
-                await NotificationHandler.removeNotification(user.id, Constants.currentUserID, 'follow');
+                await NotificationHandler.removeNotification(
+                    user.id, Constants.currentUserID, 'follow');
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -317,7 +346,7 @@ class CommentBottomSheet {
                 text,
                 context: context,
                 style: TextStyle(
-                  color: MyColors.primaryColor,
+                  color: MyColors.textLightColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
@@ -329,7 +358,8 @@ class CommentBottomSheet {
     );
   }
 
-  Future _deleteComment(BuildContext context, String commentId, String parentCommentId,
+  Future _deleteComment(
+      BuildContext context, String commentId, String parentCommentId,
       {String recordId, String newId}) async {
     await showDialog(
       context: context,
@@ -352,12 +382,16 @@ class CommentBottomSheet {
             new GestureDetector(
               onTap: () async {
                 if (parentCommentId == null)
-                  await DatabaseService.deleteComment(commentId, recordId: recordId, newsId: newId);
+                  await DatabaseService.deleteComment(commentId,
+                      recordId: recordId, newsId: newId);
                 else
-                  await DatabaseService.deleteReply(commentId, parentCommentId, recordId: recordId, newsId: newId);
+                  await DatabaseService.deleteReply(commentId, parentCommentId,
+                      recordId: recordId, newsId: newId);
 
                 await NotificationHandler.removeNotification(
-                    (await DatabaseService.getRecordWithId(recordId)).singerId, recordId, 'comment');
+                    (await DatabaseService.getRecordWithId(recordId)).singerId,
+                    recordId,
+                    'comment');
 
                 Navigator.of(context).pop();
               },

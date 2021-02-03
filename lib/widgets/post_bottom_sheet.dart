@@ -277,7 +277,7 @@ class PostBottomSheet {
                 text,
                 context: context,
                 style: TextStyle(
-                  color: MyColors.primaryColor,
+                  color: MyColors.textLightColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
