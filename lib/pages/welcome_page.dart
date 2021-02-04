@@ -1203,6 +1203,10 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future signInWithApple() async {
+    if (!(await SignInWithApple.isAvailable())) {
+      AppUtil.showToast('Apple sigin in is not available');
+      return;
+    }
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     final AuthorizationCredentialAppleID credential =
@@ -1219,11 +1223,9 @@ class _WelcomePageState extends State<WelcomePage> {
         ),
       ),
     );
-
     // auth.
     //
     // print(credential);
-
     // This is the endpoint that will convert an authorization code obtained
     // via Sign in with Apple into a session in your system
     final signInWithAppleEndpoint = Uri(
