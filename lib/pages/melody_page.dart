@@ -415,119 +415,14 @@ class _MelodyPageState extends State<MelodyPage> {
       await initVideoPlayer();
     }
 
-    Navigator.of(context).push(CustomModal(
-        onWillPop: () async {
-          await _deleteFiles();
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
-          Navigator.of(context).pushReplacementNamed('/melody-page',
-              arguments: {'melody': widget.melody, 'type': widget.type});
-        },
-        child: Container(
-          child: _type == Types.AUDIO
-              ? SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      melodyPlayer,
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          RaisedButton(
-                            onPressed: imageVideoPath == null
-                                ? () async {
-                                    _image =
-                                        await AppUtil.pickImageFromGallery();
-
-                                    setState(() {
-                                      imageVideoPath =
-                                          '${path.withoutExtension(mergedFilePath)}.mp4';
-                                    });
-                                    setState(() {
-                                      _progressVisible = true;
-                                    });
-                                    success = await flutterFFmpeg.execute(
-                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
-                                    setState(() {
-                                      _progressVisible = false;
-                                    });
-                                  }
-                                : null,
-                            color: MyColors.primaryColor,
-                            child: Text(
-                              imageVideoPath == null ? 'Choose Image' : 'Done',
-                              style: TextStyle(color: MyColors.textLightColor),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          RaisedButton(
-                            onPressed: () async {
-                              if (_image == null) {
-                                AppUtil.showToast(language(
-                                    en: 'Please choose an image',
-                                    ar: 'من فضلك اختر صورة'));
-                                return;
-                              }
-                              Navigator.of(context).pop(false);
-                              await submitRecord();
-                            },
-                            color: MyColors.primaryColor,
-                            child: Text(
-                              'Submit',
-                              style: TextStyle(color: MyColors.textLightColor),
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                )
-              : Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: _videoController.value.aspectRatio,
-                      child: video_player.VideoPlayer(_videoController),
-                    ),
-                    Positioned.fill(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Align(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            playPauseBtn(),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            RaisedButton(
-                              onPressed: () async {
-                                Navigator.of(context).pop(false);
-                                await submitRecord();
-                              },
-                              color: MyColors.primaryColor,
-                              child: Text(
-                                'Submit',
-                                style:
-                                    TextStyle(color: MyColors.textLightColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.bottomCenter,
-                      ),
-                    )),
-                  ],
-                ),
-        )));
+    setState(() {
+      choosingImage = true;
+    });
 
     print(success == 1 ? 'Failure!' : 'Success!');
   }
+
+  bool choosingImage = false;
 
   void statisticsCallback(Statistics statistics) {
     try {
@@ -725,13 +620,15 @@ class _MelodyPageState extends State<MelodyPage> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        body: _progressVisible
-            ? progressPage()
-            : recordingStatus == RecordingStatus.Recording &&
-                    _type == Types.VIDEO
-                ? videoRecordingPage()
-                : mainPage(),
-        floatingActionButton: !_progressVisible
+        body: choosingImage
+            ? choosingImagePage()
+            : _progressVisible
+                ? progressPage()
+                : recordingStatus == RecordingStatus.Recording &&
+                        _type == Types.VIDEO
+                    ? videoRecordingPage()
+                    : mainPage(),
+        floatingActionButton: !_progressVisible && !choosingImage
             ? FloatingActionButton(
                 onPressed: () async {
                   if (recordingStatus == RecordingStatus.Recording) {
@@ -769,6 +666,126 @@ class _MelodyPageState extends State<MelodyPage> {
                 ),
               )
             : null,
+      ),
+    );
+  }
+
+  choosingImagePage() {
+    return Container(
+      decoration: BoxDecoration(
+        color: MyColors.primaryColor,
+        image: DecorationImage(
+          colorFilter: new ColorFilter.mode(
+              Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          image: AssetImage(Strings.default_melody_page_bg),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Center(
+        child: Container(
+          child: _type == Types.AUDIO
+              ? SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      melodyPlayer,
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          RaisedButton(
+                            onPressed: imageVideoPath == null
+                                ? () async {
+                                    _image =
+                                        await AppUtil.pickImageFromGallery();
+
+                                    setState(() {
+                                      imageVideoPath =
+                                          '${path.withoutExtension(mergedFilePath)}.mp4';
+                                    });
+                                    setState(() {
+                                      _progressVisible = true;
+                                      choosingImage = false;
+                                    });
+                                    int success = await flutterFFmpeg.execute(
+                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+                                    setState(() {
+                                      _progressVisible = false;
+                                      choosingImage = true;
+                                    });
+                                  }
+                                : null,
+                            color: MyColors.primaryColor,
+                            child: Text(
+                              imageVideoPath == null ? 'Choose Image' : 'Done',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          RaisedButton(
+                            onPressed: () async {
+                              if (_image == null) {
+                                AppUtil.showToast(language(
+                                    en: 'Please choose an image',
+                                    ar: 'من فضلك اختر صورة'));
+                                return;
+                              }
+                              Navigator.of(context).pop(false);
+                              await submitRecord();
+                            },
+                            color: MyColors.primaryColor,
+                            child: Text(
+                              'Submit',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              : Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: _videoController.value.aspectRatio,
+                      child: video_player.VideoPlayer(_videoController),
+                    ),
+                    Positioned.fill(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            playPauseBtn(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            RaisedButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop(false);
+                                await submitRecord();
+                              },
+                              color: MyColors.primaryColor,
+                              child: Text(
+                                'Submit',
+                                style:
+                                    TextStyle(color: MyColors.textLightColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.bottomCenter,
+                      ),
+                    )),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -1075,7 +1092,7 @@ class _MelodyPageState extends State<MelodyPage> {
         if (mounted) {
           setState(() {
             _recordingText =
-                '${(counter % 60).toInt()} : ${counter ~/ 60} / ${_duration % 60} : ${_duration ~/ 60}';
+                '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
           });
         }
       },
