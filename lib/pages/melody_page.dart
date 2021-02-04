@@ -735,8 +735,14 @@ class _MelodyPageState extends State<MelodyPage> {
                                     ar: 'من فضلك اختر صورة'));
                                 return;
                               }
-                              Navigator.of(context).pop(false);
+                              setState(() {
+                                choosingImage = false;
+                                _progressVisible = true;
+                              });
                               await submitRecord();
+                              setState(() {
+                                _progressVisible = false;
+                              });
                             },
                             color: MyColors.primaryColor,
                             child: Text(
@@ -1046,7 +1052,7 @@ class _MelodyPageState extends State<MelodyPage> {
           Center(
             child: LinearPercentIndicator(
               width: MediaQuery.of(context).size.width - 40,
-              percent: _progress,
+              percent: _progress >= 0 && _progress <= 1 ? _progress : 0,
               backgroundColor: Colors.grey,
               progressColor: MyColors.primaryColor,
             ),
