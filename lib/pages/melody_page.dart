@@ -184,8 +184,12 @@ class _MelodyPageState extends State<MelodyPage> {
       myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
 
       await myAudioPlayer.play();
-
-      await recorder.startRecording(conversation: this.widget);
+      try {
+        await recorder.startRecording(conversation: this.widget);
+      } catch (ex) {
+        AppUtil.showToast('Unexpected error. Please try again.');
+        Navigator.of(context).pop();
+      }
       _recordingTimer();
     } else {}
   }
@@ -495,6 +499,11 @@ class _MelodyPageState extends State<MelodyPage> {
           );
   }
 
+  createAppFolder() async {
+    await AppUtil.createAppDirectory();
+    await AppUtil.deleteFiles();
+  }
+
   double _progress = 0;
   submitRecord() async {
     //AppUtil.showLoader(context);
@@ -541,18 +550,12 @@ class _MelodyPageState extends State<MelodyPage> {
 
     await DatabaseService.submitRecord(
         widget.melody.id, recordId, url, thumbnailUrl, duration);
-    _deleteFiles();
+    await AppUtil.deleteFiles();
     Navigator.of(context).pop();
     Navigator.of(context).pushReplacementNamed('/melody-page',
         arguments: {'melody': widget.melody, 'type': widget.type});
 
     AppUtil.showToast('Submitted!');
-  }
-
-  _deleteFiles() async {
-    final dir = Directory(appTempDirectoryPath);
-    await dir.delete(recursive: true);
-    await AppUtil.createAppDirectory();
   }
 
   initRecorder() async {
@@ -575,6 +578,7 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       _type = widget.type;
     });
+    createAppFolder();
     DatabaseService.incrementMelodyViews(widget.melody.id);
     if (widget.melody.levelUrls != null) {
       _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
@@ -699,8 +703,24 @@ class _MelodyPageState extends State<MelodyPage> {
                           RaisedButton(
                             onPressed: imageVideoPath == null
                                 ? () async {
-                                    _image =
-                                        await AppUtil.pickImageFromGallery();
+                                    _image = await AppUtil
+                                        .pickCompressedImageFromGallery();
+                                    // FileStat s = await _image.stat();
+                                    //
+                                    // print('Non-Compressed file: ${s.size}');
+                                    //
+                                    // File result = await FlutterImageCompress
+                                    //     .compressAndGetFile(
+                                    //   _image.absolute.path,
+                                    //   '$appTempDirectoryPath/${path.basename(_image.absolute.path)}',
+                                    //   quality: 50,
+                                    // );
+                                    // setState(() {
+                                    //   _image = null;
+                                    //   _image = File(result.path);
+                                    // });
+                                    // s = await _image.stat();
+                                    //print('Compressed file size: ${s.size}');
 
                                     setState(() {
                                       imageVideoPath =
@@ -710,6 +730,9 @@ class _MelodyPageState extends State<MelodyPage> {
                                       _progressVisible = true;
                                       choosingImage = false;
                                     });
+                                    _flutterFFmpegConfig
+                                        .enableStatisticsCallback(
+                                            this.statisticsCallback);
                                     int success = await flutterFFmpeg.execute(
                                         "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
                                     setState(() {

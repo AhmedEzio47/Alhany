@@ -103,6 +103,12 @@ class AppUtil with ChangeNotifier {
         });
   }
 
+  static deleteFiles() async {
+    final dir = Directory(appTempDirectoryPath);
+    await dir.delete(recursive: true);
+    await AppUtil.createAppDirectory();
+  }
+
   static showToast(String message) {
     Fluttertoast.showToast(
         msg: message,
@@ -165,8 +171,10 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> pickImageFromGallery() async {
-    FilePickerResult result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: ['jpg', 'png']);
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png'],
+        allowCompression: true);
 
     if (result != null) {
       File file = File(result.files.single.path);
@@ -174,6 +182,12 @@ class AppUtil with ChangeNotifier {
     }
 
     return null;
+  }
+
+  static pickCompressedImageFromGallery() async {
+    File pickedFile = await ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50);
+    return pickedFile;
   }
 
   Future<String> uploadFile(
