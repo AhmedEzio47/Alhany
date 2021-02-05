@@ -352,7 +352,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
       success = await flutterFFmpeg.execute(
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
-      print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
+      print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success2!');
 
       info = await fFprobe
           .getMediaInformation('${appTempDirectoryPath}stereo_audio.wav');
@@ -506,8 +506,21 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   createAppFolder() async {
-    await AppUtil.createAppDirectory();
-    await AppUtil.deleteFiles();
+    if ((await PermissionsService().hasStoragePermission())) {
+      await AppUtil.createAppDirectory();
+    }
+    if (!await PermissionsService().hasStoragePermission()) {
+      await PermissionsService().requestStoragePermission();
+    }
+  }
+
+  deleteAppFolder() async {
+    if ((await PermissionsService().hasStoragePermission())) {
+      await AppUtil.deleteFiles();
+    }
+    if (!await PermissionsService().hasStoragePermission()) {
+      await PermissionsService().requestStoragePermission();
+    }
   }
 
   double _progress = 0;
@@ -643,6 +656,7 @@ class _MelodyPageState extends State<MelodyPage> {
                 onPressed: () async {
                   if (recordingStatus == RecordingStatus.Recording) {
                     await saveRecord();
+                    //await deleteAppFolder();
                   } else {
                     if ((await PermissionsService().hasStoragePermission()) &&
                         (await PermissionsService()
@@ -736,10 +750,10 @@ class _MelodyPageState extends State<MelodyPage> {
                                     _flutterFFmpegConfig
                                         .enableStatisticsCallback(
                                             this.statisticsCallback);
-                                    int success = await flutterFFmpeg.execute(
-                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+                                    print('mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
+                                     int success = await flutterFFmpeg.execute("-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale='min(1280,iw)':-2,format=yuv420p\" -c:v libx264 -preset medium -profile:v main -c:a aac -shortest -movflags +faststart $imageVideoPath");
                                     print('conversion success:$success');
-                                    if (success == 1) {
+                                    if (success != 0) {
                                       AppUtil.showToast(
                                           'Unexpected error, please try another image');
                                       Navigator.of(context).pop();
