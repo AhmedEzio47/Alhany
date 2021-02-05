@@ -8,66 +8,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:480329879410:android:7a409c0ade3c5dfe0317eb",
-        "android_client_info": {
-          "package_name": "com.devyat.Alhany"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "480329879410-22djh1m8mj8aab97nq7u2d2q2doqn00r.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.devyat.Alhany",
-            "certificate_hash": "9709bea382ec3c092b33bedf6af588b5a3795d0d"
-          }
-        },
-        {
-          "client_id": "480329879410-gnsp4n1a1h0l1fs9olh71q7k9iqp1v60.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.devyat.Alhany",
-            "certificate_hash": "3092c4e8b8aa7b3647ef1bd29a78735ebd401097"
-          }
-        },
-        {
-          "client_id": "480329879410-rpitq147hjtbr06sqatod9v7k1oei1ao.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.devyat.Alhany",
-            "certificate_hash": "134671414983cf21b91a98bd4b25a2a85837210b"
-          }
-        },
-        {
-          "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD1yDkbdl4ePr6TCVynjEgapOyf-6fXCXs"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "480329879410-dijkhr42lp029lc885qnq0hm7dvrsbel.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.devyat.Alhany"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:480329879410:android:cb8acb246a49c3940317eb",
         "android_client_info": {
           "package_name": "com.devyat.alhani"
@@ -75,47 +15,27 @@
       },
       "oauth_client": [
         {
-          "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD1yDkbdl4ePr6TCVynjEgapOyf-6fXCXs"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "480329879410-r83rvu3ntfhn1lm2dc2e8r399fvqbrqf.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "480329879410-dijkhr42lp029lc885qnq0hm7dvrsbel.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.devyat.Alhany"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:480329879410:android:9c2f979d884054430317eb",
-        "android_client_info": {
-          "package_name": "com.devyat.dubsmash"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "480329879410-qvreh9ljau6vrmj8h3oi7bjde8to67u0.apps.googleusercontent.com",
+          "client_id": "480329879410-2rrvu2j88o8bvii2bmkkn2uqgedf4gfs.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.devyat.dubsmash",
-            "certificate_hash": "6a8af290b55ac94a7b81f546960aef3d27bf178c"
+            "package_name": "com.devyat.alhani",
+            "certificate_hash": "4089fb768e2f15c2dd6a47be21b2c7e319c69fe0"
+          }
+        },
+        {
+          "client_id": "480329879410-5vo7t1flr5mglfeoudkf75iics4vin7b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.alhani",
+            "certificate_hash": "cd046e04b7f46a1d3759e8c790c47790cea2f53b"
+          }
+        },
+        {
+          "client_id": "480329879410-8cq4gifquk2bba6fa6pdutg57emk8d8n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.alhani",
+            "certificate_hash": "d4d125e21446e425daa5fd045a9559bfdc74a793"
           }
         },
         {
@@ -136,10 +56,10 @@
               "client_type": 3
             },
             {
-              "client_id": "480329879410-dijkhr42lp029lc885qnq0hm7dvrsbel.apps.googleusercontent.com",
+              "client_id": "480329879410-5qnhsopt4spd1u52fnlg64cuoosgsvoo.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.devyat.Alhany"
+                "bundle_id": "com.devyat.alhani"
               }
             }
           ]

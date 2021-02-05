@@ -738,6 +738,13 @@ class _MelodyPageState extends State<MelodyPage> {
                                             this.statisticsCallback);
                                     int success = await flutterFFmpeg.execute(
                                         "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+                                    print('conversion success:$success');
+                                    if (success == 1) {
+                                      AppUtil.showToast(
+                                          'Unexpected error, please try another image');
+                                      Navigator.of(context).pop();
+                                      return;
+                                    }
 
                                     if (_image == null) {
                                       AppUtil.showToast(language(
