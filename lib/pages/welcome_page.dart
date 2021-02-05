@@ -4,19 +4,22 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/user_model.dart' as user_model;
+import 'package:Alhany/services/AppleSignInAvailable.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:apple_sign_in/apple_sign_in.dart';
+//import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:apple_sign_in/apple_sign_in.dart' as apple;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../app_util.dart';
 
@@ -166,6 +169,9 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Widget LoginPage() {
+    final appleSignInIsAvailable =
+        Provider.of<AppleSignInAvailable>(context, listen: false);
+
     return new Container(
       height: MediaQuery.of(context).size.height,
       decoration: BoxDecoration(
@@ -615,11 +621,33 @@ class _WelcomePageState extends State<WelcomePage> {
                         height: 10,
                       )
                     : Container(),
-                Platform.isIOS
+                Platform.isIOS && appleSignInIsAvailable.isAvailable
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
-                        child: SignInWithAppleButton(
-                          onPressed: () async {},
+                        child: AppleSignInButton(
+                          style: apple.ButtonStyle.black,
+                          type: apple.ButtonType.signIn,
+                          onPressed: () async {
+                            User user = await _signInWithApple(context);
+                            if (user != null) {
+                              await AppUtil.setUserVariablesByFirebaseUser(
+                                  user);
+                              if ((await DatabaseService.getUserWithId(
+                                          user.uid))
+                                      .id ==
+                                  null) {
+                                String username = await _createUsername();
+                                await DatabaseService.addUserToDatabase(
+                                    user.uid,
+                                    _emailController.text,
+                                    _nameController.text,
+                                    username);
+                                //await user.sendEmailVerification();
+                              }
+                              saveToken();
+                              Navigator.of(context).pushReplacementNamed('/');
+                            }
+                          },
                         ),
                       )
                     : Container(),
@@ -1071,6 +1099,8 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future _login() async {
+    final appleSignInIsAvailable =
+        Provider.of<AppleSignInAvailable>(context, listen: false);
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     try {
@@ -1163,6 +1193,75 @@ class _WelcomePageState extends State<WelcomePage> {
     return user;
   }
 
+  // Future signInWithApple() async {
+  //   if (!(await SignInWithApple.isAvailable())) {
+  //     AppUtil.showToast('Apple sigin in is not available');
+  //     return;
+  //   }
+  //   final BaseAuth auth = AuthProvider.of(context).auth;
+  //
+  //   final AuthorizationCredentialAppleID credential =
+  //       await SignInWithApple.getAppleIDCredential(
+  //     scopes: [
+  //       AppleIDAuthorizationScopes.email,
+  //       AppleIDAuthorizationScopes.fullName,
+  //     ],
+  //     webAuthenticationOptions: WebAuthenticationOptions(
+  //       // TODO: Set the `clientId` and `redirectUri` arguments to the values you entered in the Apple Developer portal during the setup
+  //       clientId: 'com.devyat.alhani.signin',
+  //       redirectUri: Uri.parse(
+  //         'https://www.skippar.com',
+  //       ),
+  //     ),
+  //   );
+  //   // auth.
+  //   //
+  //   // print(credential);
+  //   // This is the endpoint that will convert an authorization code obtained
+  //   // via Sign in with Apple into a session in your system
+  //   final signInWithAppleEndpoint = Uri(
+  //     scheme: 'https',
+  //     host: 'flutter-sign-in-with-apple-example.glitch.me',
+  //     path: '/sign_in_with_apple',
+  //     queryParameters: <String, String>{
+  //       'code': credential.authorizationCode,
+  //       'firstName': credential.givenName,
+  //       'lastName': credential.familyName,
+  //       'useBundleId': Platform.isIOS || Platform.isMacOS ? 'true' : 'false',
+  //       if (credential.state != null) 'state': credential.state,
+  //     },
+  //   );
+  //
+  //   final session = await http.Client().post(
+  //     signInWithAppleEndpoint,
+  //   );
+  //
+  //   // If we got this far, a session based on the Apple ID credential has been created in your system,
+  //   // and you can now set this as the app's session
+  //   print(session);
+  // }
+  Future<User> _signInWithApple(BuildContext context) async {
+    try {
+      final BaseAuth auth = AuthProvider.of(context).auth;
+      final user = await auth.signInWithApple();
+      setState(() {
+        _nameController.text = user.displayName;
+        _emailController.text = user.email;
+      });
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
+
+      final User currentUser = await auth.getCurrentUser();
+      assert(user.uid == currentUser.uid);
+
+      print('uid: ${user.uid}');
+      return user;
+    } catch (e) {
+      // TODO: Show alert here
+      print(e);
+    }
+  }
+
   Future<User> signInWithFacebook() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
@@ -1200,54 +1299,6 @@ class _WelcomePageState extends State<WelcomePage> {
         break;
     }
     return user;
-  }
-
-  Future signInWithApple() async {
-    if (!(await SignInWithApple.isAvailable())) {
-      AppUtil.showToast('Apple sigin in is not available');
-      return;
-    }
-    final BaseAuth auth = AuthProvider.of(context).auth;
-
-    final AuthorizationCredentialAppleID credential =
-        await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-      webAuthenticationOptions: WebAuthenticationOptions(
-        // TODO: Set the `clientId` and `redirectUri` arguments to the values you entered in the Apple Developer portal during the setup
-        clientId: 'com.devyat.alhani.signin',
-        redirectUri: Uri.parse(
-          'https://www.skippar.com',
-        ),
-      ),
-    );
-    // auth.
-    //
-    // print(credential);
-    // This is the endpoint that will convert an authorization code obtained
-    // via Sign in with Apple into a session in your system
-    final signInWithAppleEndpoint = Uri(
-      scheme: 'https',
-      host: 'flutter-sign-in-with-apple-example.glitch.me',
-      path: '/sign_in_with_apple',
-      queryParameters: <String, String>{
-        'code': credential.authorizationCode,
-        'firstName': credential.givenName,
-        'lastName': credential.familyName,
-        'useBundleId': Platform.isIOS || Platform.isMacOS ? 'true' : 'false',
-        if (credential.state != null) 'state': credential.state,
-      },
-    );
-
-    final session = await http.Client().post(
-      signInWithAppleEndpoint,
-    );
-
-    // If we got this far, a session based on the Apple ID credential has been created in your system,
-    // and you can now set this as the app's session
-    print(session);
   }
 
   void _setFocusNode(FocusNode focusNode) {

@@ -56,6 +56,8 @@ dependencies:
   flutter_login_facebook: ^0.4.0+1
   simple_gesture_detector: ^0.1.4
   sign_in_with_apple: ^2.5.4
+  apple_sign_in: ^0.1.0
+  provider: ^4.3.3
 
 dev_dependencies:
   flutter_test:

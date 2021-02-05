@@ -1,15 +1,21 @@
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/services/AppleSignInAvailable.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/route_generator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final appleSignInAvailable = await AppleSignInAvailable.check();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(Provider<AppleSignInAvailable>.value(
+    value: appleSignInAvailable,
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
