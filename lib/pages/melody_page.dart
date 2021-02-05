@@ -507,16 +507,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
   createAppFolder() async {
     if ((await PermissionsService().hasStoragePermission())) {
-      await AppUtil.createAppDirectory();
-    }
-    if (!await PermissionsService().hasStoragePermission()) {
-      await PermissionsService().requestStoragePermission();
-    }
-  }
-
-  deleteAppFolder() async {
-    if ((await PermissionsService().hasStoragePermission())) {
       await AppUtil.deleteFiles();
+      await AppUtil.createAppDirectory();
     }
     if (!await PermissionsService().hasStoragePermission()) {
       await PermissionsService().requestStoragePermission();
@@ -656,7 +648,6 @@ class _MelodyPageState extends State<MelodyPage> {
                 onPressed: () async {
                   if (recordingStatus == RecordingStatus.Recording) {
                     await saveRecord();
-                    //await deleteAppFolder();
                   } else {
                     if ((await PermissionsService().hasStoragePermission()) &&
                         (await PermissionsService()

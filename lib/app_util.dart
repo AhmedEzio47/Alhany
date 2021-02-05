@@ -104,9 +104,11 @@ class AppUtil with ChangeNotifier {
   }
 
   static deleteFiles() async {
-    final dir = Directory(appTempDirectoryPath);
-    await dir.delete(recursive: true);
-    await AppUtil.createAppDirectory();
+    if(appTempDirectoryPath != '' && appTempDirectoryPath != null){
+      final dir = Directory(appTempDirectoryPath);
+      await dir.delete(recursive: true);
+      await AppUtil.createAppDirectory();
+    }
   }
 
   static showToast(String message) {
