@@ -119,7 +119,7 @@ class CommentBottomSheet {
                 context,
                 Icon(
                   Icons.delete_forever,
-                  color: MyColors.darkPrimaryColor,
+                  color: MyColors.iconLightColor,
                 ),
                 text: 'Delete Comment',
                 onPressed: () async {

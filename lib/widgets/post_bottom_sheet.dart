@@ -85,7 +85,7 @@ class PostBottomSheet {
           context,
           Icon(
             Icons.delete_forever,
-            color: MyColors.primaryColor,
+            color: MyColors.iconLightColor,
           ),
           text: 'Delete Post',
           onPressed: () async {

@@ -91,9 +91,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
             .get())
         .exists;
 
-    setState(() {
-      _isFavourite = isFavourite;
-    });
+    if (mounted) {
+      setState(() {
+        _isFavourite = isFavourite;
+      });
+    }
   }
 
   @override

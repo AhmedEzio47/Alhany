@@ -302,7 +302,7 @@ class _RecordItemState extends State<RecordItem> {
                         Text(
                           ' Likes, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.record.comments ?? 0}',
@@ -311,7 +311,7 @@ class _RecordItemState extends State<RecordItem> {
                         Text(
                           '  Comments, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.record.shares ?? 0}',
@@ -320,7 +320,7 @@ class _RecordItemState extends State<RecordItem> {
                         Text(
                           ' Shares',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                       ],
                     ),

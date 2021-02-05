@@ -430,8 +430,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
   void statisticsCallback(Statistics statistics) {
     try {
+      double progress = statistics.time / (_recordingDuration * 1000);
+
       setState(() {
-        _progress = statistics.time / (_recordingDuration * 1000);
+        if (progress > 1)
+          _progress = 1;
+        else if (progress < 0)
+          _progress = 0;
+        else if (progress >= 0 && progress <= 1) _progress = progress;
       });
       print("Progress: $_progress%");
     } catch (ex) {}
@@ -705,22 +711,19 @@ class _MelodyPageState extends State<MelodyPage> {
                                 ? () async {
                                     _image = await AppUtil
                                         .pickCompressedImageFromGallery();
-                                    // FileStat s = await _image.stat();
+                                    // FileStat s = await pickedImage.stat();
                                     //
                                     // print('Non-Compressed file: ${s.size}');
                                     //
-                                    // File result = await FlutterImageCompress
+                                    // _image = await FlutterImageCompress
                                     //     .compressAndGetFile(
-                                    //   _image.absolute.path,
-                                    //   '$appTempDirectoryPath/${path.basename(_image.absolute.path)}',
+                                    //   pickedImage.absolute.path,
+                                    //   '$appTempDirectoryPath/${path.basename(pickedImage.absolute.path)}',
                                     //   quality: 50,
                                     // );
-                                    // setState(() {
-                                    //   _image = null;
-                                    //   _image = File(result.path);
-                                    // });
+                                    //
                                     // s = await _image.stat();
-                                    //print('Compressed file size: ${s.size}');
+                                    // print('Compressed file size: ${s.size}');
 
                                     setState(() {
                                       imageVideoPath =
@@ -735,44 +738,35 @@ class _MelodyPageState extends State<MelodyPage> {
                                             this.statisticsCallback);
                                     int success = await flutterFFmpeg.execute(
                                         "-loop 1 -i ${_image.path} -i $mergedFilePath -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath");
+
+                                    if (_image == null) {
+                                      AppUtil.showToast(language(
+                                          en: 'Please choose an image',
+                                          ar: 'من فضلك اختر صورة'));
+                                      return;
+                                    }
+                                    setState(() {
+                                      choosingImage = false;
+                                      _progressVisible = true;
+                                    });
+                                    await submitRecord();
                                     setState(() {
                                       _progressVisible = false;
-                                      choosingImage = true;
                                     });
+                                    // setState(() {
+                                    //   _progressVisible = false;
+                                    //   choosingImage = true;
+                                    // });
                                   }
                                 : null,
                             color: MyColors.primaryColor,
                             child: Text(
-                              imageVideoPath == null ? 'Choose Image' : 'Done',
+                              imageVideoPath == null
+                                  ? 'Choose Image & Submit'
+                                  : 'Done',
                               style: TextStyle(color: MyColors.textLightColor),
                             ),
                           ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          RaisedButton(
-                            onPressed: () async {
-                              if (_image == null) {
-                                AppUtil.showToast(language(
-                                    en: 'Please choose an image',
-                                    ar: 'من فضلك اختر صورة'));
-                                return;
-                              }
-                              setState(() {
-                                choosingImage = false;
-                                _progressVisible = true;
-                              });
-                              await submitRecord();
-                              setState(() {
-                                _progressVisible = false;
-                              });
-                            },
-                            color: MyColors.primaryColor,
-                            child: Text(
-                              'Submit',
-                              style: TextStyle(color: MyColors.textLightColor),
-                            ),
-                          )
                         ],
                       )
                     ],
@@ -1075,7 +1069,7 @@ class _MelodyPageState extends State<MelodyPage> {
           Center(
             child: LinearPercentIndicator(
               width: MediaQuery.of(context).size.width - 40,
-              percent: _progress >= 0 && _progress <= 1 ? _progress : 0,
+              percent: _progress,
               backgroundColor: Colors.grey,
               progressColor: MyColors.primaryColor,
             ),
