@@ -60,6 +60,8 @@ android {
         release {
             debuggable true
             signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }

@@ -16,7 +16,7 @@ class Strings {
   static const String splash_icon = 'assets/images/splash_icon.png';
 
   //App
-  static const String packageName = 'com.devyat.alhani.app';
+  static const String packageName = 'com.devyat.alhani';
 
   //Admin ID
   static const String starId = 'PKckiJkH1KbDnik1f4EqrWCMmNr2';
