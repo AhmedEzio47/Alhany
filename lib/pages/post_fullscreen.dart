@@ -3,12 +3,14 @@ import 'dart:math' as math;
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
+import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -383,12 +385,15 @@ class _PostFullscreenState extends State<PostFullscreen> {
                             child: CircleAvatar(
                               radius: 20,
                               backgroundColor: Colors.white,
-                              child: CircleAvatar(
-                                radius: 19,
-                                backgroundColor: Colors.black,
-                                backgroundImage: NetworkImage(
-                                    widget.singer?.profileImageUrl ??
-                                        Constants.startUser.profileImageUrl),
+                              child: CachedImage(
+                                key: ValueKey('profile'),
+                                height: 38,
+                                width: 38,
+                                imageShape: BoxShape.circle,
+                                defaultAssetImage:
+                                    Strings.default_profile_image,
+                                imageUrl: widget.singer?.profileImageUrl ??
+                                    Constants.startUser.profileImageUrl,
                               ),
                             ),
                           ),
