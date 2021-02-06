@@ -187,6 +187,7 @@ class _MelodyPageState extends State<MelodyPage> {
       try {
         await recorder.startRecording(conversation: this.widget);
       } catch (ex) {
+        await myAudioPlayer.stop();
         AppUtil.showToast('Unexpected error. Please try again.');
         Navigator.of(context).pop();
       }
@@ -519,7 +520,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   double _progress = 0;
   submitRecord() async {
-    //AppUtil.showLoader(context);
+    AppUtil.showLoader(context);
     setState(() {
       _progressVisible = true;
     });
@@ -536,31 +537,27 @@ class _MelodyPageState extends State<MelodyPage> {
     });
     if (_type == Types.VIDEO) {
       url = await appUtil.uploadFile(File(mergedFilePath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(
-              mergedFilePath)}');
+          'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
     } else {
       url = await appUtil.uploadFile(File(imageVideoPath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(
-              imageVideoPath)}');
+          'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
     }
     if (_type == Types.VIDEO) {
       thumbnailUrl = await appUtil.uploadFile(
           File('${appTempDirectoryPath}thumbnail.png'),
           context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(
-              '${appTempDirectoryPath}thumbnail.png')}');
+          'records_thumbnails/${widget.melody.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
     } else {
       thumbnailUrl = await appUtil.uploadFile(File(_image.path), context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(
-              _image.path)}');
+          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(_image.path)}');
     }
 
     if (mounted) {
-    setState(() {
-      _progressVisible = false;
-    });
-  }
-    AppUtil.showLoader(context);
+      setState(() {
+        _progressVisible = false;
+      });
+    }
+    //AppUtil.showLoader(context);
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(
         _type == Types.VIDEO ? mergedFilePath : imageVideoPath);
@@ -571,8 +568,6 @@ class _MelodyPageState extends State<MelodyPage> {
         widget.melody.id, recordId, url, thumbnailUrl, duration);
     await AppUtil.deleteFiles();
     Navigator.of(context).pop();
-    Navigator.of(context).pushReplacementNamed('/melody-page',
-        arguments: {'melody': widget.melody, 'type': widget.type});
 
     AppUtil.showToast('Submitted!');
   }
@@ -644,7 +639,7 @@ class _MelodyPageState extends State<MelodyPage> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         body: choosingImage
-            ? choosingImagePage()
+            ? choosingImagePage(context)
             : _progressVisible
                 ? progressPage()
                 : recordingStatus == RecordingStatus.Recording &&
@@ -693,7 +688,7 @@ class _MelodyPageState extends State<MelodyPage> {
     );
   }
 
-  choosingImagePage() {
+  choosingImagePage(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: MyColors.primaryColor,
@@ -749,8 +744,10 @@ class _MelodyPageState extends State<MelodyPage> {
                                     _flutterFFmpegConfig
                                         .enableStatisticsCallback(
                                             this.statisticsCallback);
-                                    print('mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
-                                     int success = await flutterFFmpeg.execute("-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale='min(1280,iw)':-2,format=yuv420p\" -c:v libx264 -preset medium -profile:v main -c:a aac -shortest -movflags +faststart $imageVideoPath");
+                                    print(
+                                        'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
+                                    int success = await flutterFFmpeg.execute(
+                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale='min(1280,iw)':-2,format=yuv420p\" -c:v libx264 -preset medium -profile:v main -c:a aac -shortest -movflags +faststart $imageVideoPath");
                                     print('conversion success:$success');
                                     if (success != 0) {
                                       AppUtil.showToast(
@@ -773,6 +770,8 @@ class _MelodyPageState extends State<MelodyPage> {
                                     setState(() {
                                       _progressVisible = false;
                                     });
+                                    Navigator.pushNamedAndRemoveUntil(
+                                        context, "/", (r) => false);
                                     // setState(() {
                                     //   _progressVisible = false;
                                     //   choosingImage = true;
@@ -811,8 +810,10 @@ class _MelodyPageState extends State<MelodyPage> {
                             ),
                             RaisedButton(
                               onPressed: () async {
-                                Navigator.of(context).pop(false);
+                                //Navigator.of(context).pop(false);
                                 await submitRecord();
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, "/", (r) => false);
                               },
                               color: MyColors.primaryColor,
                               child: Text(
@@ -904,7 +905,9 @@ class _MelodyPageState extends State<MelodyPage> {
                             Constants.currentMelodyLevel = choice;
                             Navigator.of(context).pushReplacementNamed(
                                 '/melody-page',
-                                arguments: {'melody': widget.melody});
+                                arguments: {
+                                  'melody': widget.melody,
+                                });
                           },
                           items: (widget.melody.levelUrls.keys.toList())
                               .map<DropdownMenuItem<dynamic>>((dynamic value) {
@@ -1058,10 +1061,13 @@ class _MelodyPageState extends State<MelodyPage> {
                     value: Types.VIDEO,
                   ),
                 ],
-                onChanged: (type) {
+                onChanged: (type) async {
                   setState(() {
                     _type = type;
                   });
+                  if (_type == Types.VIDEO) {
+                    await _initCamera();
+                  }
                 },
               ),
             ),
