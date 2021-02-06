@@ -104,9 +104,18 @@ class AppUtil with ChangeNotifier {
   }
 
   static deleteFiles() async {
+    String initialPath = '${(await getApplicationSupportDirectory()).path}/';
+    if ((await Directory('$initialPath' + 'temp').exists())) {
+      print('Deleting old temp files!');
+      final dir = Directory('$initialPath' + 'temp');
+      await dir.delete(recursive: true);
+      appTempDirectoryPath = '';
+    }
     if (appTempDirectoryPath != '' && appTempDirectoryPath != null) {
+      print('deleting temp files');
       final dir = Directory(appTempDirectoryPath);
       await dir.delete(recursive: true);
+      appTempDirectoryPath = '';
       //await AppUtil.createAppDirectory();
     }
   }
@@ -253,14 +262,32 @@ class AppUtil with ChangeNotifier {
     return fileName;
   }
 
+  static Future<String> createFolderInAppDocDir(String folderName) async {
+
+    //Get this App Document Directory
+    final Directory _appDocDir = await getApplicationDocumentsDirectory();
+    appTempDirectoryPath = '${_appDocDir.path}/$folderName/';
+    print('appTempDirectoryPath: $appTempDirectoryPath');
+    //App Document Directory + folder name
+    final Directory _appDocDirFolder =  Directory('$appTempDirectoryPath');
+
+    if(await _appDocDirFolder.exists()){ //if folder already exists return path
+      return _appDocDirFolder.path;
+    }else{//if folder not exists create folder and then return its path
+      final Directory _appDocDirNewFolder=await _appDocDirFolder.create(recursive: true);
+      return _appDocDirNewFolder.path;
+    }
+  }
+
   static createAppDirectory() async {
     String initialPath = '${(await getApplicationSupportDirectory()).path}/';
-    if (!(await Directory('$initialPath$appName').exists())) {
-      final dir = await Directory('$initialPath$appName').create();
+    if (!(await Directory('$initialPath' + 'temp').exists())) {
+      final dir = await Directory('$initialPath' + 'temp').create(recursive: true);
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
-      appTempDirectoryPath = '$initialPath$appName/';
+      appTempDirectoryPath = '$initialPath$appName/temp';
+      print('TempDir already exists: $appTempDirectoryPath');
     }
   }
 

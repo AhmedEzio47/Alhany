@@ -507,7 +507,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
   createAppFolder() async {
     if ((await PermissionsService().hasStoragePermission())) {
+      print('deleting temp files then creating an empty folder...');
       await AppUtil.deleteFiles();
+      //await AppUtil.createFolderInAppDocDir('record_temp');
       await AppUtil.createAppDirectory();
     }
     if (!await PermissionsService().hasStoragePermission()) {
@@ -534,24 +536,30 @@ class _MelodyPageState extends State<MelodyPage> {
     });
     if (_type == Types.VIDEO) {
       url = await appUtil.uploadFile(File(mergedFilePath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+          'records/${widget.melody.id}/$recordId${path.extension(
+              mergedFilePath)}');
     } else {
       url = await appUtil.uploadFile(File(imageVideoPath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
+          'records/${widget.melody.id}/$recordId${path.extension(
+              imageVideoPath)}');
     }
     if (_type == Types.VIDEO) {
       thumbnailUrl = await appUtil.uploadFile(
           File('${appTempDirectoryPath}thumbnail.png'),
           context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
+          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(
+              '${appTempDirectoryPath}thumbnail.png')}');
     } else {
       thumbnailUrl = await appUtil.uploadFile(File(_image.path), context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(_image.path)}');
+          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(
+              _image.path)}');
     }
 
+    if (mounted) {
     setState(() {
       _progressVisible = false;
     });
+  }
     AppUtil.showLoader(context);
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(
@@ -570,7 +578,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   initRecorder() async {
-    await AppUtil.createAppDirectory();
+    //await AppUtil.createAppDirectory();
     recordingFilePath = appTempDirectoryPath;
     recorder = AudioRecorder();
   }
@@ -652,7 +660,7 @@ class _MelodyPageState extends State<MelodyPage> {
                     if ((await PermissionsService().hasStoragePermission()) &&
                         (await PermissionsService()
                             .hasMicrophonePermission())) {
-                      await AppUtil.createAppDirectory();
+                      //await AppUtil.createAppDirectory();
                       recordingFilePath = appTempDirectoryPath;
                       melodyPath = appTempDirectoryPath;
                       mergedFilePath = appTempDirectoryPath;
