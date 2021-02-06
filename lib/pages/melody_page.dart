@@ -475,35 +475,37 @@ class _MelodyPageState extends State<MelodyPage> {
               ),
             ),
           )
-        : InkWell(
-            onTap: _videoController.value.isPlaying
-                ? () => setState(() {
-                      _isVideoPlaying = false;
-                      _videoController.pause();
-                    })
-                : null,
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.pause,
-                color: MyColors.primaryColor,
-                size: 35,
-              ),
-            ),
-          );
+        :
+        // : InkWell(
+        //     onTap: _videoController.value.isPlaying
+        //         ? () => setState(() {
+        //               _isVideoPlaying = false;
+        //               _videoController.pause();
+        //             })
+        //         : null,
+        //     child: Container(
+        //       height: 40,
+        //       width: 40,
+        //       decoration: BoxDecoration(
+        //         shape: BoxShape.circle,
+        //         color: Colors.grey.shade300,
+        //         boxShadow: [
+        //           BoxShadow(
+        //             color: Colors.black54,
+        //             spreadRadius: 2,
+        //             blurRadius: 4,
+        //             offset: Offset(0, 2), // changes position of shadow
+        //           ),
+        //         ],
+        //       ),
+        //       child: Icon(
+        //         Icons.pause,
+        //         color: MyColors.primaryColor,
+        //         size: 35,
+        //       ),
+        //     ),
+        //   );
+        Container();
   }
 
   createAppFolder() async {
@@ -688,6 +690,7 @@ class _MelodyPageState extends State<MelodyPage> {
     );
   }
 
+  bool _isPreviewVideoPlaying = false;
   choosingImagePage(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -786,6 +789,20 @@ class _MelodyPageState extends State<MelodyPage> {
                               style: TextStyle(color: MyColors.textLightColor),
                             ),
                           ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          RaisedButton(
+                            onPressed: () async {
+                              await AppUtil.deleteFiles();
+                              Navigator.of(context).pop();
+                            },
+                            color: MyColors.primaryColor,
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
+                          ),
                         ],
                       )
                     ],
@@ -798,16 +815,18 @@ class _MelodyPageState extends State<MelodyPage> {
                       child: video_player.VideoPlayer(_videoController),
                     ),
                     Positioned.fill(
+                        child: Align(
+                      child: playPauseBtn(),
+                      alignment: Alignment.center,
+                    )),
+                    Positioned.fill(
                         child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Align(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            playPauseBtn(),
-                            SizedBox(
-                              height: 10,
-                            ),
                             RaisedButton(
                               onPressed: () async {
                                 //Navigator.of(context).pop(false);
@@ -818,6 +837,22 @@ class _MelodyPageState extends State<MelodyPage> {
                               color: MyColors.primaryColor,
                               child: Text(
                                 'Submit',
+                                style:
+                                    TextStyle(color: MyColors.textLightColor),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            RaisedButton(
+                              onPressed: () async {
+                                await _videoController.pause();
+                                await AppUtil.deleteFiles();
+                                Navigator.of(context).pop();
+                              },
+                              color: MyColors.primaryColor,
+                              child: Text(
+                                'Cancel',
                                 style:
                                     TextStyle(color: MyColors.textLightColor),
                               ),
