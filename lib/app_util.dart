@@ -104,7 +104,7 @@ class AppUtil with ChangeNotifier {
   }
 
   static deleteFiles() async {
-    String initialPath = '${(await getApplicationSupportDirectory()).path}/';
+    String initialPath = '${(await getApplicationDocumentsDirectory()).path}/';
     if ((await Directory('$initialPath' + 'temp').exists())) {
       print('Deleting old temp files!');
       final dir = Directory('$initialPath' + 'temp');
@@ -289,7 +289,7 @@ class AppUtil with ChangeNotifier {
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
-      appTempDirectoryPath = '$initialPath$appName/temp';
+      appTempDirectoryPath = '$initialPath$appName/temp/';
       print('TempDir already exists: $appTempDirectoryPath');
     }
   }

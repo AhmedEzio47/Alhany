@@ -56,8 +56,8 @@ class _MelodyPageState extends State<MelodyPage> {
   String melodyPath;
   String mergedFilePath;
   String imageVideoPath;
-
-  FlutterFFmpeg flutterFFmpeg;
+  //
+  // FlutterFFmpeg flutterFFmpeg;
 
   String _dropdownValue;
 
@@ -71,12 +71,13 @@ class _MelodyPageState extends State<MelodyPage> {
 
   File _image;
 
-  FlutterFFmpegConfig _flutterFFmpegConfig = FlutterFFmpegConfig();
+  final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
+  final FlutterFFmpeg flutterFFmpeg = new FlutterFFmpeg();
+  final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
 
   double _recordingDuration;
 
   bool _progressVisible = false;
-
   _countDown() {
     const oneSec = const Duration(seconds: 1);
     Timer.periodic(
@@ -123,7 +124,6 @@ class _MelodyPageState extends State<MelodyPage> {
 
     String filePath = await AppUtil.downloadFile(url);
 
-    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     //print("File Duration: ${info.getMediaProperties()['duration']}");
     _duration =
@@ -343,8 +343,8 @@ class _MelodyPageState extends State<MelodyPage> {
           "-i $recordingFilePath -ac 2 -filter:a \"volume=${Constants.voiceVolume}\" ${appTempDirectoryPath}stereo_audio.wav");
       print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
 
-      FlutterFFprobe fFprobe = FlutterFFprobe();
-      MediaInformation info = await fFprobe.getMediaInformation(melodyPath);
+      MediaInformation info =
+          await _flutterFFprobe.getMediaInformation(melodyPath);
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
       setState(() {
@@ -355,7 +355,7 @@ class _MelodyPageState extends State<MelodyPage> {
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
       print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success2!');
 
-      info = await fFprobe
+      info = await _flutterFFprobe
           .getMediaInformation('${appTempDirectoryPath}stereo_audio.wav');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
@@ -375,8 +375,8 @@ class _MelodyPageState extends State<MelodyPage> {
       //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex amerge=inputs=2 -shortest ${appTempDirectoryPath}final_audio.mp3");
-      FlutterFFprobe fFprobe = FlutterFFprobe();
-      MediaInformation info = await fFprobe
+
+      MediaInformation info = await _flutterFFprobe
           .getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
@@ -399,7 +399,6 @@ class _MelodyPageState extends State<MelodyPage> {
     }
     int duration;
     try {
-      final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(mergedFilePath);
       duration = double.parse(info.getMediaProperties()['duration'].toString())
@@ -512,7 +511,6 @@ class _MelodyPageState extends State<MelodyPage> {
     if ((await PermissionsService().hasStoragePermission())) {
       print('deleting temp files then creating an empty folder...');
       await AppUtil.deleteFiles();
-      //await AppUtil.createFolderInAppDocDir('record_temp');
       await AppUtil.createAppDirectory();
     }
     if (!await PermissionsService().hasStoragePermission()) {
@@ -560,7 +558,6 @@ class _MelodyPageState extends State<MelodyPage> {
       });
     }
     //AppUtil.showLoader(context);
-    final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(
         _type == Types.VIDEO ? mergedFilePath : imageVideoPath);
     int duration =
@@ -591,6 +588,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   void initState() {
+    super.initState();
     setState(() {
       _type = widget.type;
     });
@@ -610,14 +608,17 @@ class _MelodyPageState extends State<MelodyPage> {
     if (_type == Types.VIDEO) {
       _initCamera();
     }
-    flutterFFmpeg = FlutterFFmpeg();
-    super.initState();
+    //flutterFFmpeg = FlutterFFmpeg();
   }
 
   @override
   dispose() {
     if (_videoController != null) {
       _videoController.dispose();
+    }
+
+    if (cameraController != null) {
+      cameraController.dispose();
     }
     super.dispose();
   }
@@ -1194,10 +1195,17 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   void _initCamera() async {
-    List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.medium,
-        enableAudio: true);
-    await cameraController.initialize();
+    if ((await PermissionsService().hasCameraPermission())) {
+      List<CameraDescription> cameras = await availableCameras();
+      if (cameraController != null) {
+        await cameraController.dispose();
+      }
+      cameraController = CameraController(cameras[1], ResolutionPreset.medium,
+          enableAudio: true);
+      await cameraController.initialize();
+    } else {
+      await PermissionsService().requestCameraPermission();
+    }
   }
 
   Future<bool> _onBackPressed() {
