@@ -263,26 +263,29 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> createFolderInAppDocDir(String folderName) async {
-
     //Get this App Document Directory
     final Directory _appDocDir = await getApplicationDocumentsDirectory();
     appTempDirectoryPath = '${_appDocDir.path}/$folderName/';
     print('appTempDirectoryPath: $appTempDirectoryPath');
     //App Document Directory + folder name
-    final Directory _appDocDirFolder =  Directory('$appTempDirectoryPath');
+    final Directory _appDocDirFolder = Directory('$appTempDirectoryPath');
 
-    if(await _appDocDirFolder.exists()){ //if folder already exists return path
+    if (await _appDocDirFolder.exists()) {
+      //if folder already exists return path
       return _appDocDirFolder.path;
-    }else{//if folder not exists create folder and then return its path
-      final Directory _appDocDirNewFolder=await _appDocDirFolder.create(recursive: true);
+    } else {
+      //if folder not exists create folder and then return its path
+      final Directory _appDocDirNewFolder =
+          await _appDocDirFolder.create(recursive: true);
       return _appDocDirNewFolder.path;
     }
   }
 
   static createAppDirectory() async {
-    String initialPath = '${(await getApplicationSupportDirectory()).path}/';
+    String initialPath = '${(await getApplicationDocumentsDirectory()).path}/';
     if (!(await Directory('$initialPath' + 'temp').exists())) {
-      final dir = await Directory('$initialPath' + 'temp').create(recursive: true);
+      final dir =
+          await Directory('$initialPath' + 'temp').create(recursive: true);
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
