@@ -243,7 +243,17 @@ class _MelodyPageState extends State<MelodyPage> {
       try {
         File(recordingFilePath).deleteSync();
       } catch (e) {}
-      cameraController.startVideoRecording(recordingFilePath);
+
+      if (cameraController == null) {
+        await _initCamera();
+      }
+      try {
+        await cameraController.startVideoRecording(recordingFilePath);
+      } catch (ex) {
+        AppUtil.showToast('Unexpected error, please try again');
+        Navigator.of(context).pop();
+      }
+
       _recordingTimer();
     } else {}
   }
@@ -321,11 +331,16 @@ class _MelodyPageState extends State<MelodyPage> {
 
     await myAudioPlayer.stop();
 
-    if (_type == Types.AUDIO) {
-      Recording result = await recorder.stopRecording();
-      recordingFilePath = result.path;
-    } else {
-      await cameraController.stopVideoRecording();
+    try {
+      if (_type == Types.AUDIO) {
+        Recording result = await recorder.stopRecording();
+        recordingFilePath = result.path;
+      } else {
+        await cameraController.stopVideoRecording();
+      }
+    } catch (ex) {
+      AppUtil.showToast('Unknown error, please try again.');
+      Navigator.of(context).pop();
     }
     //TODO use in case of need of conversion
 //                          recordingFilePathMp3 +=
@@ -592,23 +607,30 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       _type = widget.type;
     });
-    createAppFolder();
+
     DatabaseService.incrementMelodyViews(widget.melody.id);
     if (widget.melody.levelUrls != null) {
       _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
     }
+    prepareEnv();
+  }
+
+  prepareEnv() async {
+    //await createAppFolder();
 
     if (widget.melody.audioUrl != null) {
-      initMelodyPlayer(widget.melody.audioUrl);
+      await initMelodyPlayer(widget.melody.audioUrl);
     } else if (Constants.currentMelodyLevel != null) {
-      initMelodyPlayer(widget.melody.levelUrls[Constants.currentMelodyLevel]);
+      await initMelodyPlayer(
+          widget.melody.levelUrls[Constants.currentMelodyLevel]);
     } else {
-      initMelodyPlayer(widget.melody.levelUrls.values.elementAt(0).toString());
+      await initMelodyPlayer(
+          widget.melody.levelUrls.values.elementAt(0).toString());
     }
+
     if (_type == Types.VIDEO) {
-      _initCamera();
+      await _initCamera();
     }
-    //flutterFFmpeg = FlutterFFmpeg();
   }
 
   @override
@@ -617,8 +639,11 @@ class _MelodyPageState extends State<MelodyPage> {
       _videoController.dispose();
     }
 
+    print('trying to dispose camera');
     if (cameraController != null) {
+      print('disposing camera');
       cameraController.dispose();
+      print('camera disposed');
     }
     super.dispose();
   }
@@ -658,6 +683,7 @@ class _MelodyPageState extends State<MelodyPage> {
                     if ((await PermissionsService().hasStoragePermission()) &&
                         (await PermissionsService()
                             .hasMicrophonePermission())) {
+                      await createAppFolder();
                       //await AppUtil.createAppDirectory();
                       recordingFilePath = appTempDirectoryPath;
                       melodyPath = appTempDirectoryPath;
@@ -711,7 +737,7 @@ class _MelodyPageState extends State<MelodyPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      melodyPlayer,
+                      melodyPlayer ?? Container(),
                       SizedBox(
                         height: 10,
                       ),
@@ -874,7 +900,7 @@ class _MelodyPageState extends State<MelodyPage> {
     return Stack(
       children: [
         AspectRatio(
-            aspectRatio: cameraController.value.aspectRatio,
+            aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
             child: CameraPreview(cameraController)),
       ],
     );
@@ -972,7 +998,7 @@ class _MelodyPageState extends State<MelodyPage> {
                 height: 10,
               ),
               recordingStatus != RecordingStatus.Recording
-                  ? melodyPlayer
+                  ? melodyPlayer ?? Container()
                   : _recordingTimerText(),
               Expanded(
                 child: Container(
@@ -1101,6 +1127,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   setState(() {
                     _type = type;
                   });
+                  print('Type: $_type');
                   if (_type == Types.VIDEO) {
                     await _initCamera();
                   }
@@ -1194,17 +1221,53 @@ class _MelodyPageState extends State<MelodyPage> {
     );
   }
 
+  bool isCameraPermissionGranted = false;
   void _initCamera() async {
-    if ((await PermissionsService().hasCameraPermission())) {
-      List<CameraDescription> cameras = await availableCameras();
+    if (await PermissionsService().hasCameraPermission()) {
+      setState(() {
+        isCameraPermissionGranted = true;
+      });
+    } else {
+      bool isGranted = await PermissionsService().requestCameraPermission(
+          onPermissionDenied: () {
+        AppUtil.showAlertDialog(
+          context: context,
+          heading: 'info',
+          message:
+              'You must grant this camera access to be able to use this feature.',
+          firstBtnText: 'Give Permission',
+          firstFunc: () async {
+            await _initCamera();
+          },
+          secondBtnText: 'Leave',
+          secondFunc: () async {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        );
+
+        print('Permission has been denied');
+      });
+      setState(() {
+        isCameraPermissionGranted = isGranted;
+      });
+      return;
+    }
+
+    if (isCameraPermissionGranted) {
       if (cameraController != null) {
         await cameraController.dispose();
       }
+      cameras = await availableCameras();
       cameraController = CameraController(cameras[1], ResolutionPreset.medium,
           enableAudio: true);
-      await cameraController.initialize();
-    } else {
-      await PermissionsService().requestCameraPermission();
+      print('Camera: $cameraController');
+      await cameraController.initialize().then((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {});
+      });
     }
   }
 

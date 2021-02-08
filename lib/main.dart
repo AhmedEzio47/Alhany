@@ -12,7 +12,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appleSignInAvailable = await AppleSignInAvailable.check();
   await Firebase.initializeApp();
-
   runApp(Provider<AppleSignInAvailable>.value(
     value: appleSignInAvailable,
     child: MyApp(),

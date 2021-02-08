@@ -42,6 +42,7 @@ dependencies:
   html_editor: ^1.0.1
   path_provider:
   camera: ^0.5.8+11
+  #camera_fix_exception: ^0.4.0+5
   badges: ^1.1.0
   audio_service: ^0.15.3
   audio_session: ^0.0.9

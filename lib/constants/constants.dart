@@ -1,5 +1,6 @@
 import 'package:Alhany/models/user_model.dart' as user_model;
 import 'package:Alhany/widgets/music_player.dart';
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,7 +17,7 @@ final singersRef = firestore.collection('singers');
 final categoriesRef = firestore.collection('categories');
 final newsRef = firestore.collection('news');
 final slideImagesRef = firestore.collection('slide_images');
-
+List<CameraDescription> cameras;
 MusicPlayer musicPlayer;
 
 enum AuthStatus {
@@ -43,8 +44,8 @@ class Constants {
 
   static bool isFacebookOrGoogleUser;
 
-  static double musicVolume = .8;
-  static double voiceVolume = 3.5;
+  static double musicVolume = .5;
+  static double voiceVolume = 4;
 
   static int endPositionOffsetInMilliSeconds = 600;
 }
