@@ -464,7 +464,8 @@ class AppUtil with ChangeNotifier {
     Constants.currentUserID = user?.uid;
     authStatus = AuthStatus.LOGGED_IN;
     Constants.startUser = star;
-    Constants.isAdmin = (Constants.currentUserID == Strings.starId);
+    Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
+        Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
     Constants.isFacebookOrGoogleUser = false;
   }
 }

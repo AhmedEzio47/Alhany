@@ -4,6 +4,7 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -233,8 +234,11 @@ class _AddSingerPageState extends State<AddSingerPage> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
+              int order = await DatabaseService.getMaxCategoryOrder();
+
               await categoriesRef.add({
                 'name': _categoryController.text,
+                'order': order ?? 1,
                 'search': searchList(_categoryController.text),
               });
               //AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));

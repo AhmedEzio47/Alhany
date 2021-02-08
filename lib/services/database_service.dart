@@ -905,7 +905,8 @@ class DatabaseService {
   }
 
   static Future<List<Category>> getCategories() async {
-    QuerySnapshot snapshot = await categoriesRef.get();
+    QuerySnapshot snapshot =
+        await categoriesRef.orderBy('order', descending: false).get();
     List<Category> categories =
         snapshot.docs.map((doc) => Category.fromDoc(doc)).toList();
     return categories;
@@ -1159,5 +1160,13 @@ class DatabaseService {
     String fileName = await AppUtil.getStorageFileNameFromUrl(slideImage.url);
     await storageRef.child('/slide_images/$fileName').delete();
     await slideImagesRef.doc(slideImage.id).delete();
+  }
+
+  static getMaxCategoryOrder() async {
+    QuerySnapshot snapshot =
+        await categoriesRef.orderBy('order', descending: true).limit(1).get();
+    List<Category> categories =
+        snapshot.docs.map((doc) => Category.fromDoc(doc)).toList();
+    return categories[0].order;
   }
 }
