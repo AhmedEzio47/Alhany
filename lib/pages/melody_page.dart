@@ -196,6 +196,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   CameraController cameraController;
+  Future<void> _initializeControllerFuture;
 
   void _recordVideo() async {
     if (await PermissionsService().hasMicrophonePermission()) {
@@ -248,6 +249,7 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initCamera();
       }
       try {
+        await _initializeControllerFuture;
         await cameraController.startVideoRecording(recordingFilePath);
       } catch (ex) {
         AppUtil.showToast('Unexpected error, please try again');
@@ -899,9 +901,20 @@ class _MelodyPageState extends State<MelodyPage> {
   Widget videoRecordingPage() {
     return Stack(
       children: [
-        AspectRatio(
-            aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
-            child: CameraPreview(cameraController)),
+        FutureBuilder<void>(
+          future: _initializeControllerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              // If the Future is complete, display the preview.
+              return AspectRatio(
+                  aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
+                  child: CameraPreview(cameraController));
+            } else {
+              // Otherwise, display a loading indicator.
+              return Center(child: CircularProgressIndicator());
+            }
+          },
+        )
       ],
     );
   }
@@ -1262,12 +1275,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController = CameraController(cameras[1], ResolutionPreset.medium,
           enableAudio: true);
       print('Camera: $cameraController');
-      await cameraController.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      });
+      _initializeControllerFuture = cameraController.initialize();
     }
   }
 
