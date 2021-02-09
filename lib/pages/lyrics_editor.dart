@@ -32,8 +32,9 @@ class _LyricsEditorState extends State<LyricsEditor> {
         title: Text('Lyrics Editor'),
       ),
       body: HtmlEditor(
-        hint: "Your text here...",
+        showBottomToolbar: true, useBottomSheet: true,
         //value: "text content initial, if any",
+        value: widget.melody.lyrics,
         key: keyEditor,
         height: MediaQuery.of(context).size.height,
       ),
@@ -42,7 +43,9 @@ class _LyricsEditorState extends State<LyricsEditor> {
 
   updateLyrics() async {
     final String lyrics = await keyEditor.currentState.getText();
-    melodiesRef.doc(widget.melody.id).update({'lyrics': lyrics});
+    print('Lyrics:$lyrics');
+    await melodiesRef.doc(widget.melody.id).update({'lyrics': lyrics});
     AppUtil.showToast('Lyrics updated!');
+    Navigator.pushNamedAndRemoveUntil(context, "/", (r) => false);
   }
 }

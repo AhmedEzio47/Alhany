@@ -1067,9 +1067,10 @@ class _MelodyPageState extends State<MelodyPage> {
                   : _recordingTimerText(),
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  color: Colors.white,
                   alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery.of(context).size.width + 50,
                   child: SingleChildScrollView(
                     child: Center(
                       child: HtmlWidget(
@@ -1077,11 +1078,7 @@ class _MelodyPageState extends State<MelodyPage> {
                         textStyle: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                         customStylesBuilder: (e) {
-                          return {
-                            'text-align': 'center',
-                            'color': 'white',
-                            'line-height': '85%'
-                          };
+                          return {'text-align': 'center', 'line-height': '85%'};
                         },
                       ),
                     ),
