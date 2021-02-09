@@ -8,7 +8,6 @@ import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:image_picker/image_picker.dart';
@@ -140,6 +139,12 @@ class _UploadNewsState extends State<UploadNews> {
     );
   }
 
+  @override
+  void dispose() {
+    recorder.dispose();
+    super.dispose();
+  }
+
   _recordingTimer() {
     const oneSec = const Duration(seconds: 1);
     num counter = 0;
@@ -201,7 +206,7 @@ class _UploadNewsState extends State<UploadNews> {
 
   AudioRecorder recorder;
   _recordAudio() async {
-    recorder.startRecording(conversation: this.widget);
+    recorder.startRecording();
     setState(() {
       isRecording = true;
     });
@@ -209,13 +214,13 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _stopAudioRecording() async {
-    Recording result = await recorder.stopRecording();
+    String result = await recorder.stopRecording();
     setState(() {
       isRecording = false;
     });
 
     setState(() {
-      _contentFile = File(result.path);
+      _contentFile = File(result);
     });
     getDuration(_contentFile.path);
   }

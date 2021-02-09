@@ -16,7 +16,6 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -150,14 +149,22 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService().requestMicrophonePermission(
           onPermissionDenied: () {
         AppUtil.showAlertDialog(
-            context: context,
-            heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
-            firstBtnText: 'OK',
-            firstFunc: () {
-              Navigator.of(context).pop();
-            });
+          context: context,
+          heading: 'info',
+          message:
+              'You must grant this microphone access to be able to use this feature.',
+          firstBtnText: 'Give Permission',
+          firstFunc: () async {
+            Navigator.of(context).pop(false);
+            await _recordAudio();
+          },
+          secondBtnText: 'Leave',
+          secondFunc: () async {
+            print('Mic permission denied');
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        );
         print('Permission has been denied');
       });
       setState(() {
@@ -185,7 +192,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
       await myAudioPlayer.play();
       try {
-        await recorder.startRecording(conversation: this.widget);
+        await recorder.startRecording();
       } catch (ex) {
         await myAudioPlayer.stop();
         AppUtil.showToast('Unexpected error. Please try again.');
@@ -207,14 +214,22 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService().requestMicrophonePermission(
           onPermissionDenied: () {
         AppUtil.showAlertDialog(
-            context: context,
-            heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
-            firstBtnText: 'OK',
-            firstFunc: () {
-              Navigator.of(context).pop();
-            });
+          context: context,
+          heading: 'info',
+          message:
+              'You must grant this microphone access to be able to use this feature.',
+          firstBtnText: 'Give Permission',
+          firstFunc: () async {
+            Navigator.of(context).pop(false);
+            await _recordVideo();
+          },
+          secondBtnText: 'Leave',
+          secondFunc: () async {
+            print('Mic permission denied');
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        );
         print('Permission has been denied');
       });
       setState(() {
@@ -335,8 +350,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
     try {
       if (_type == Types.AUDIO) {
-        Recording result = await recorder.stopRecording();
-        recordingFilePath = result.path;
+        String result = await recorder.stopRecording();
+        recordingFilePath = result;
       } else {
         await cameraController.stopVideoRecording();
       }
@@ -528,14 +543,46 @@ class _MelodyPageState extends State<MelodyPage> {
         Container();
   }
 
+  bool isStoragePermissionGranted = false;
   createAppFolder() async {
-    if ((await PermissionsService().hasStoragePermission())) {
+    if (await PermissionsService().hasStoragePermission()) {
+      setState(() {
+        isStoragePermissionGranted = true;
+      });
+      print('storage permission granted');
+    } else {
+      bool isGranted = await PermissionsService().requestStoragePermission(
+          onPermissionDenied: () {
+        AppUtil.showAlertDialog(
+          context: context,
+          heading: 'info',
+          message:
+              'You must grant this storage access to be able to use this feature.',
+          firstBtnText: 'Give Permission',
+          firstFunc: () async {
+            Navigator.of(context).pop(false);
+            await createAppFolder();
+          },
+          secondBtnText: 'Leave',
+          secondFunc: () async {
+            print('storage permission denied');
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+        );
+
+        print('storage permission denied');
+      });
+      setState(() {
+        isStoragePermissionGranted = isGranted;
+      });
+      return;
+    }
+
+    if (isStoragePermissionGranted) {
       print('deleting temp files then creating an empty folder...');
       await AppUtil.deleteFiles();
       await AppUtil.createAppDirectory();
-    }
-    if (!await PermissionsService().hasStoragePermission()) {
-      await PermissionsService().requestStoragePermission();
     }
   }
 
@@ -651,6 +698,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController.dispose();
       print('camera disposed');
     }
+    recorder.dispose();
     super.dispose();
   }
 
@@ -1205,6 +1253,10 @@ class _MelodyPageState extends State<MelodyPage> {
     Timer.periodic(
       oneSec,
       (timer) {
+        //TODO trial
+        // if (recordingStatus == RecordingStatus.Stopped) {
+        //   timer.cancel();
+        // }
         if (_type == Types.AUDIO) {
           if (counter >= _duration ||
               recordingStatus == RecordingStatus.Stopped) {}

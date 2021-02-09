@@ -1,55 +1,59 @@
 import 'dart:async';
-import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/pages/melody_page.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+
+import 'package:sounds/sounds.dart';
+
+enum RecordingStatus { Recording, Stopped, Unset }
 
 class AudioRecorder {
-  FlutterAudioRecorder _recorder;
-  Recording _recording;
+  SoundRecorder _recorder;
+  String _recording;
   Timer timer;
+  Track _track;
 
   AudioRecorder() {
     init();
   }
 
   void init() async {
-    String customPath = appTempDirectoryPath;
+    // String customPath = appTempDirectoryPath;
+    // customPath = customPath + DateTime.now().millisecondsSinceEpoch.toString();
 
-    // can add extension like ".mp4" ".wav" ".m4a" ".aac"
-    customPath = customPath + DateTime.now().millisecondsSinceEpoch.toString();
+    _recording = Track.tempFile(WellKnownMediaFormats.adtsAac);
 
-    // .wav <---> AudioFormat.WAV
-    // .mp4 .m4a .aac <---> AudioFormat.AAC
-    // AudioFormat is optional, if given value, will overwrite path extension when there is conflicts.
+    _recorder = SoundRecorder();
 
-    _recorder = FlutterAudioRecorder(
-      customPath,
-      audioFormat: AudioFormat.WAV,
-      sampleRate: 44100,
-    );
-    await _recorder.initialized;
+    _track =
+        Track.fromFile(_recording, mediaFormat: WellKnownMediaFormats.adtsAac);
+
+    _recorder.onStopped = ({wasUser}) async {
+      await _recorder.release();
+
+      /// recording has finished so play it back to the user.
+      print(_recording);
+      //File(_recording).delete();
+    };
   }
 
-  Future startRecording({var conversation}) async {
-    await _recorder.start();
-    var current = await _recorder.current();
+  Future startRecording() async {
+    await _recorder.record(_track);
+    //var current = await _recorder.current();
 
-    _recording = current;
+    //_recording = current;
 
-    Timer.periodic(Duration(milliseconds: 10), (Timer t) async {
-      var current = await _recorder.current();
-
-      _recording = current;
-      timer = t;
-    });
+    // Timer.periodic(Duration(milliseconds: 10), (Timer t) async {
+    //   var current = await _recorder.current();
+    //
+    //   _recording = current;
+    //   timer = t;
+    // });
   }
 
-  Future stopRecording() async {
-    if (timer != null) {
-      timer.cancel();
-    }
-    var result = await _recorder.stop();
-    _recording = result;
-    return result;
+  Future<String> stopRecording() async {
+    await _recorder.stop();
+    return _recording;
+  }
+
+  dispose() async {
+    //await _recorder.release();
   }
 }

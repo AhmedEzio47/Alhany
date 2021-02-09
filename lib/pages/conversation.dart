@@ -17,7 +17,7 @@ import 'package:Alhany/widgets/image_overlay.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+//import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
@@ -290,6 +290,7 @@ class _ConversationState extends State<Conversation>
     WidgetsBinding.instance.removeObserver(this);
     messagesSubscription.cancel();
     _scrollController.dispose();
+    recorder.dispose();
     super.dispose();
   }
 
@@ -575,8 +576,7 @@ class _ConversationState extends State<Conversation>
                                               RecordingStatus.Recording;
                                         });
                                         await initRecorder();
-                                        await recorder.startRecording(
-                                            conversation: this.widget);
+                                        await recorder.startRecording();
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
@@ -585,14 +585,14 @@ class _ConversationState extends State<Conversation>
                                           _currentStatus =
                                               RecordingStatus.Stopped;
                                         });
-                                        Recording result =
+                                        String result =
                                             await recorder.stopRecording();
 
                                         //Storage path is voice_messages/sender_id/receiver_id/file
                                         _url = await AppUtil().uploadFile(
-                                            File(result.path),
+                                            File(result),
                                             context,
-                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result.path)}');
+                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
 
                                         await DatabaseService.sendMessage(
                                             widget.otherUid, 'audio', _url);

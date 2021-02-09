@@ -14,7 +14,8 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^0.1.3
-  flutter_audio_recorder: ^0.5.5
+  #flutter_audio_recorder: ^0.5.5
+  sounds: ^0.9.3
   permission_handler: '^4.2.0+hotfix.3'
   firebase_auth:
   video_player: ^0.10.10
