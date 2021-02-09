@@ -364,9 +364,11 @@ class _MelodyPageState extends State<MelodyPage> {
           await _flutterFFprobe.getMediaInformation(melodyPath);
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
-      setState(() {
-        _progressVisible = true;
-      });
+      if (mounted) {
+        setState(() {
+          _progressVisible = true;
+        });
+      }
 
       success = await flutterFFmpeg.execute(
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
@@ -399,9 +401,11 @@ class _MelodyPageState extends State<MelodyPage> {
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
       print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
 
-      setState(() {
-        _progressVisible = true;
-      });
+      if (mounted) {
+        setState(() {
+          _progressVisible = true;
+        });
+      }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest $mergedFilePath");
@@ -618,7 +622,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   prepareEnv() async {
-    //await createAppFolder();
+    await createAppFolder();
 
     if (widget.melody.audioUrl != null) {
       await initMelodyPlayer(widget.melody.audioUrl);
@@ -1240,6 +1244,7 @@ class _MelodyPageState extends State<MelodyPage> {
       setState(() {
         isCameraPermissionGranted = true;
       });
+      print('camera permission granted');
     } else {
       bool isGranted = await PermissionsService().requestCameraPermission(
           onPermissionDenied: () {
@@ -1250,16 +1255,18 @@ class _MelodyPageState extends State<MelodyPage> {
               'You must grant this camera access to be able to use this feature.',
           firstBtnText: 'Give Permission',
           firstFunc: () async {
+            Navigator.of(context).pop(false);
             await _initCamera();
           },
           secondBtnText: 'Leave',
           secondFunc: () async {
+            print('camera permission denied');
             Navigator.of(context).pop();
             Navigator.of(context).pop();
           },
         );
 
-        print('Permission has been denied');
+        print('camera permission denied');
       });
       setState(() {
         isCameraPermissionGranted = isGranted;

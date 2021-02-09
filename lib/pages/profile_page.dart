@@ -197,19 +197,6 @@ class _ProfilePageState extends State<ProfilePage>
                           ? MainAxisAlignment.spaceBetween
                           : MainAxisAlignment.center,
                       children: [
-                        _user?.id != Constants.currentUserID
-                            ? Align(
-                                child: Container(
-                                    margin: const EdgeInsets.only(top: 35),
-                                    height: 35,
-                                    width: 35,
-                                    child: Icon(
-                                      Icons.arrow_back,
-                                      color: MyColors.iconLightColor,
-                                    )),
-                                alignment: Alignment.topLeft,
-                              )
-                            : Container(),
                         Align(
                           child: RegularAppbar(
                             context,
@@ -220,17 +207,29 @@ class _ProfilePageState extends State<ProfilePage>
                               padding: const EdgeInsets.only(
                                 left: 15.0,
                               ),
-                              child: Builder(
-                                builder: (context) => InkWell(
-                                  onTap: () {
-                                    Scaffold.of(context).openDrawer();
-                                  },
-                                  child: Icon(
-                                    Icons.menu,
-                                    color: MyColors.accentColor,
-                                  ),
-                                ),
-                              ),
+                              child: _user?.id != Constants.currentUserID
+                                  ? Builder(
+                                      builder: (context) => InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Icon(
+                                          Icons.arrow_back,
+                                          color: MyColors.accentColor,
+                                        ),
+                                      ),
+                                    )
+                                  : Builder(
+                                      builder: (context) => InkWell(
+                                        onTap: () {
+                                          Scaffold.of(context).openDrawer();
+                                        },
+                                        child: Icon(
+                                          Icons.menu,
+                                          color: MyColors.accentColor,
+                                        ),
+                                      ),
+                                    ),
                             ),
                           ),
                           alignment: Alignment.topCenter,
