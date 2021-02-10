@@ -1068,7 +1068,6 @@ class _MelodyPageState extends State<MelodyPage> {
               Expanded(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 10),
-                  color: Colors.white,
                   alignment: Alignment.center,
                   width: MediaQuery.of(context).size.width + 50,
                   child: SingleChildScrollView(
