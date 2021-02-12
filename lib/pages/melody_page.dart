@@ -1313,8 +1313,6 @@ class _MelodyPageState extends State<MelodyPage> {
             Navigator.of(context).pop();
           },
         );
-
-        print('camera permission denied');
       });
       setState(() {
         isCameraPermissionGranted = isGranted;

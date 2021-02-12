@@ -58,7 +58,7 @@ dependencies:
   simple_gesture_detector: ^0.1.4
   apple_sign_in: ^0.1.0
   provider: ^4.3.3
-  flutter_image_compress: ^0.7.0
+  #flutter_image_compress: ^0.7.0
 
 dev_dependencies:
   flutter_test:
