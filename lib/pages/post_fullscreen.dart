@@ -193,9 +193,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
     initLikes(record: _record, news: widget.news);
   }
 
-  initVideoPlayer(String url) {
+  initVideoPlayer(String url) async {
     if (_controller != null) {
-      _controller.dispose();
+      await _controller.dispose();
       setState(() {
         _controller = null;
       });
@@ -209,9 +209,13 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   @override
   void dispose() {
+    disposePlayer();
     super.dispose();
-    _controller.pause();
-    _controller.dispose();
+  }
+
+  disposePlayer() async {
+    await _controller.pause();
+    await _controller.dispose();
   }
 
   Record _next, _previous;

@@ -463,6 +463,7 @@ class _HomePageState extends State<HomePage>
               });
             },
             child: RecordItem(
+              key: ValueKey(_records[index].id),
               record: _records[index],
             ),
           );
