@@ -18,6 +18,8 @@ import 'package:flutter/rendering.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:video_player/video_player.dart';
 
+VideoPlayerController _controller;
+
 class PostFullscreen extends StatefulWidget {
   final Record record;
   final News news;
@@ -36,7 +38,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
   var likes = [];
 
   bool play = true;
-  VideoPlayerController _controller;
 
   bool _isFollowing = false;
 
@@ -195,12 +196,16 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   initVideoPlayer(String url) async {
     if (_controller != null) {
-      await _controller.dispose();
+      //await _controller.dispose();
       setState(() {
         _controller = null;
       });
     }
     _controller = VideoPlayerController.network(url)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..setLooping(false)
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
@@ -216,6 +221,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
   disposePlayer() async {
     await _controller.pause();
     await _controller.dispose();
+    setState(() {
+      _controller = null;
+    });
   }
 
   Record _next, _previous;
@@ -311,10 +319,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
             onPressed: () {
               setState(() {
                 if (play) {
-                  _controller.pause();
+                  _controller?.pause();
                   play = !play;
                 } else {
-                  _controller.play();
+                  _controller?.play();
                   play = !play;
                 }
               });
