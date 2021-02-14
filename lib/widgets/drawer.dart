@@ -4,6 +4,7 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/main.dart';
 import 'package:Alhany/pages/profile_page.dart';
+import 'package:Alhany/pages/web_browser/webview_modal.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -132,6 +133,22 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
             leading: Icon(
               Icons.language,
+              color: MyColors.primaryColor,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
+              Navigator.of(context).push(
+                  WebViewModal(url: 'https://skippar.com/privacy-policy/'));
+            },
+            title: Text(
+              language(ar: 'سياسة الخصوصية', en: 'Privacy policy'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.privacy_tip_outlined,
               color: MyColors.primaryColor,
             ),
           ),
