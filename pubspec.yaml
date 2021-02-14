@@ -59,6 +59,7 @@ dependencies:
   apple_sign_in: ^0.1.0
   provider: ^4.3.3
   #flutter_image_compress: ^0.7.0
+  flutter_webview_plugin:
 
 dev_dependencies:
   flutter_test:

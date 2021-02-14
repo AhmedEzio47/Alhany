@@ -62,6 +62,8 @@
 		<true/>
 		<key>NSAllowsArbitraryLoadsForMedia</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+        <true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>App need permission to access camera.</string>

@@ -14,6 +14,7 @@ import 'package:apple_sign_in/apple_sign_in.dart' as apple;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -22,6 +23,7 @@ import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_util.dart';
+import 'web_browser/webview_modal.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -681,6 +683,10 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
+  bool _isTermsOfTermsAgreed = false;
+  TextStyle defaultStyle =
+      TextStyle(color: MyColors.textDarkColor, fontSize: 12);
+  TextStyle linkStyle = TextStyle(color: Colors.blue);
   Widget SignupPage() {
     return new Container(
       height: MediaQuery.of(context).size.height,
@@ -889,6 +895,52 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ],
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                      onChanged: (value) {
+                        setState(() {
+                          _isTermsOfTermsAgreed = !_isTermsOfTermsAgreed;
+                        });
+                      },
+                      value: _isTermsOfTermsAgreed,
+                      activeColor: MyColors.primaryColor,
+                    ),
+                    Expanded(
+                      child: RichText(
+                        softWrap: true,
+                        text: TextSpan(
+                          style: defaultStyle,
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: 'By clicking Sign Up, you agree to our '),
+                            TextSpan(
+                                text: 'Terms of Service',
+                                style: linkStyle,
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.of(context).push(WebViewModal(
+                                        url:
+                                            'https://skippar.com/privacy-policy/'));
+                                    print('Terms of Service"');
+                                  }),
+                            TextSpan(text: ' and that you have read our '),
+                            TextSpan(
+                                text: 'Privacy Policy',
+                                style: linkStyle,
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.of(context).push(WebViewModal(
+                                        url:
+                                            'https://skippar.com/privacy-policy/'));
+                                    print('Privacy Policy"');
+                                  }),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
                 Container(
                   width: MediaQuery.of(context).size.width,
                   margin:
@@ -1032,6 +1084,11 @@ class _WelcomePageState extends State<WelcomePage> {
             en: 'Please enter your login details', ar: 'من فضلك املأ الخانات'));
       }
     } else if (_currentPage == 2) {
+      if (!_isTermsOfTermsAgreed) {
+        AppUtil.showToast('Please agree to terms of use.');
+        Navigator.of(context).pop();
+        return;
+      }
       if (_emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty &&
           _nameController.text.isNotEmpty &&
