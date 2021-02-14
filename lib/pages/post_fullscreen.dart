@@ -203,7 +203,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
     }
     _controller = VideoPlayerController.network(url)
       ..addListener(() {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       })
       ..setLooping(false)
       ..initialize().then((value) {
@@ -220,10 +222,13 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   disposePlayer() async {
     await _controller.pause();
+    _controller.removeListener(() {});
     await _controller.dispose();
-    setState(() {
-      _controller = null;
-    });
+    if (mounted) {
+      setState(() {
+        _controller = null;
+      });
+    }
   }
 
   Record _next, _previous;

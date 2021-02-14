@@ -423,7 +423,12 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest $mergedFilePath");
+          "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest ${appTempDirectoryPath}final_video.mp4");
+      print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
+
+      //Scale video
+      success = await flutterFFmpeg.execute(
+          "-i ${appTempDirectoryPath}final_video.mp4 -filter:v scale=720:-1 -c:a copy $mergedFilePath");
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       success = await flutterFFmpeg.execute(
@@ -831,7 +836,7 @@ class _MelodyPageState extends State<MelodyPage> {
                                     print(
                                         'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
                                     int success = await flutterFFmpeg.execute(
-                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale='min(1280,iw)':-2,format=yuv420p\" -c:v libx264 -preset medium -profile:v main -c:a aac -shortest -movflags +faststart $imageVideoPath");
+                                        "-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:-1,format=yuv420p\" -c:v libx264 -preset medium -profile:v main -c:a aac -shortest -movflags +faststart $imageVideoPath");
                                     print('conversion success:$success');
                                     if (success != 0) {
                                       AppUtil.showToast(
