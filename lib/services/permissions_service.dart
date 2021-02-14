@@ -1,8 +1,29 @@
+import 'package:Alhany/app_util.dart';
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsService {
   final PermissionHandler _permissionHandler = PermissionHandler();
+  BuildContext _context;
   Future<bool> _requestPermission(PermissionGroup permission) async {
+    PermissionStatus status =
+        await _permissionHandler.checkPermissionStatus(permission);
+    if (status == PermissionStatus.neverAskAgain) {
+      AppUtil.showAlertDialog(
+          context: _context,
+          message:
+              'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+          firstBtnText: 'Go to settings',
+          firstFunc: () {
+            Navigator.of(_context).pop();
+            _permissionHandler.openAppSettings();
+            return;
+          },
+          secondBtnText: 'Cancel',
+          secondFunc: () {
+            Navigator.of(_context).pop();
+          });
+    }
     var result = await _permissionHandler.requestPermissions([permission]);
     if (result[permission] == PermissionStatus.granted) {
       return true;
@@ -11,7 +32,9 @@ class PermissionsService {
   }
 
   /// Requests the users permission to read their contacts.
-  Future<bool> requestContactsPermission({Function onPermissionDenied}) async {
+  Future<bool> requestContactsPermission(BuildContext context,
+      {Function onPermissionDenied}) async {
+    this._context = context;
     var granted = await _requestPermission(PermissionGroup.contacts);
     if (!granted) {
       onPermissionDenied();
@@ -20,7 +43,9 @@ class PermissionsService {
   }
 
   /// Requests the users permission to read/write to the storage.
-  Future<bool> requestStoragePermission({Function onPermissionDenied}) async {
+  Future<bool> requestStoragePermission(BuildContext context,
+      {Function onPermissionDenied}) async {
+    this._context = context;
     var granted = await _requestPermission(PermissionGroup.storage);
     if (!granted) {
       onPermissionDenied();
@@ -29,8 +54,9 @@ class PermissionsService {
   }
 
   /// Requests the users permission to read their microphone.
-  Future<bool> requestMicrophonePermission(
+  Future<bool> requestMicrophonePermission(BuildContext context,
       {Function onPermissionDenied}) async {
+    this._context = context;
     var granted = await _requestPermission(PermissionGroup.microphone);
     if (!granted) {
       onPermissionDenied();
@@ -39,7 +65,9 @@ class PermissionsService {
   }
 
   /// Requests the users permission to their camera.
-  Future<bool> requestCameraPermission({Function onPermissionDenied}) async {
+  Future<bool> requestCameraPermission(BuildContext context,
+      {Function onPermissionDenied}) async {
+    this._context = context;
     var granted = await _requestPermission(PermissionGroup.camera);
     if (!granted) {
       onPermissionDenied();
@@ -48,7 +76,9 @@ class PermissionsService {
   }
 
   /// Requests the users permission to read their location when the app is in use
-  Future<bool> requestLocationPermission({Function onPermissionDenied}) async {
+  Future<bool> requestLocationPermission(BuildContext context,
+      {Function onPermissionDenied}) async {
+    this._context = context;
     var granted = await _requestPermission(PermissionGroup.location);
     if (!granted) {
       onPermissionDenied();

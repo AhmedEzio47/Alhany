@@ -146,8 +146,8 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService()
+          .requestMicrophonePermission(context, onPermissionDenied: () {
         AppUtil.showAlertDialog(
           context: context,
           heading: 'info',
@@ -211,8 +211,8 @@ class _MelodyPageState extends State<MelodyPage> {
         isMicrophoneGranted = true;
       });
     } else {
-      bool isGranted = await PermissionsService().requestMicrophonePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService()
+          .requestMicrophonePermission(context, onPermissionDenied: () {
         AppUtil.showAlertDialog(
           context: context,
           heading: 'info',
@@ -556,8 +556,8 @@ class _MelodyPageState extends State<MelodyPage> {
       });
       print('storage permission granted');
     } else {
-      bool isGranted = await PermissionsService().requestStoragePermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService()
+          .requestStoragePermission(context, onPermissionDenied: () {
         AppUtil.showAlertDialog(
           context: context,
           heading: 'info',
@@ -652,7 +652,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initVideoPlayer() async {
     if (!await PermissionsService().hasStoragePermission()) {
-      PermissionsService().requestStoragePermission();
+      PermissionsService().requestStoragePermission(
+        context,
+      );
     }
     _videoController =
         video_player.VideoPlayerController.file(File(mergedFilePath));
@@ -754,10 +756,14 @@ class _MelodyPageState extends State<MelodyPage> {
                       ));
                     }
                     if (!await PermissionsService().hasStoragePermission()) {
-                      await PermissionsService().requestStoragePermission();
+                      await PermissionsService().requestStoragePermission(
+                        context,
+                      );
                     }
                     if (!await PermissionsService().hasMicrophonePermission()) {
-                      await PermissionsService().requestMicrophonePermission();
+                      await PermissionsService().requestMicrophonePermission(
+                        context,
+                      );
                     }
                   }
                 },
@@ -1299,8 +1305,8 @@ class _MelodyPageState extends State<MelodyPage> {
       });
       print('camera permission granted');
     } else {
-      bool isGranted = await PermissionsService().requestCameraPermission(
-          onPermissionDenied: () {
+      bool isGranted = await PermissionsService()
+          .requestCameraPermission(context, onPermissionDenied: () {
         AppUtil.showAlertDialog(
           context: context,
           heading: 'info',
