@@ -6,6 +6,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/pages/app_page.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -388,12 +389,15 @@ class _RecordItemState extends State<RecordItem> {
 
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen',
-          arguments: {
-            'record': widget.record,
-            'singer': _singer,
-            'melody': _melody
-          }),
+      onTap: () {
+        // Navigator.of(context).pushNamed('/post-fullscreen',
+        //     arguments: {
+        //       'record': widget.record,
+        //       'singer': _singer,
+        //       'melody': _melody
+        //     });
+        appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+      },
       child: Container(
         height: 40,
         width: 40,
@@ -420,12 +424,15 @@ class _RecordItemState extends State<RecordItem> {
 
   playBtn() {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen',
-          arguments: {
-            'record': widget.record,
-            'singer': _singer,
-            'melody': _melody
-          }),
+      onTap: () {
+        // Navigator.of(context).pushNamed('/post-fullscreen',
+        //     arguments: {
+        //       'record': widget.record,
+        //       'singer': _singer,
+        //       'melody': _melody
+        //     });
+        appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+      },
       child: Container(
         height: 35,
         width: 35,

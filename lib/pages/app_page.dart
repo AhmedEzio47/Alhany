@@ -1,3 +1,4 @@
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/models/news_model.dart';
@@ -6,6 +7,7 @@ import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/pages/chats.dart';
 import 'package:Alhany/pages/home_page.dart';
 import 'package:Alhany/pages/notifications_page.dart';
+import 'package:Alhany/pages/post_fullscreen.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/star_page.dart';
 import 'package:Alhany/services/database_service.dart';
@@ -15,6 +17,8 @@ import 'package:Alhany/widgets/drawer.dart';
 import 'package:badges/badges.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+
+AppUtil appPageUtil;
 
 class AppPage extends StatefulWidget {
   @override
@@ -28,14 +32,30 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   User _currentUser;
+  bool _fullScreenPage = false;
+  PostFullscreen _postFullscreen;
   @override
   void initState() {
+    super.initState();
+    appPageUtil = AppUtil();
     initDynamicLinks();
     _currentUser = Constants.currentUser;
     NotificationHandler.receiveNotification(context, _scaffoldKey);
     userListener();
     _pageController = PageController(initialPage: 2);
-    super.initState();
+    appPageUtil.addListener(() {
+      if (mounted) {
+        setState(() {
+          _fullScreenPage = AppUtil.fullScreenPage;
+          _postFullscreen = PostFullscreen(
+            record: AppUtil.fullscreenRecord,
+            singer: AppUtil.fullscreenSinger,
+            melody: AppUtil.fullscreenMelody,
+          );
+        });
+      }
+      print(AppUtil.fullScreenPage);
+    });
   }
 
   void initDynamicLinks() async {
@@ -159,7 +179,7 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
               children: [
                 StarPage(),
                 NotificationsPage(),
-                HomePage(),
+                _fullScreenPage ? _postFullscreen : HomePage(),
                 Chats(),
                 ProfilePage(
                   userId: Constants.currentUserID,

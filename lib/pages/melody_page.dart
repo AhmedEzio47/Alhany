@@ -22,6 +22,7 @@ import 'package:flutter_ffmpeg/statistics.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:path/path.dart' as path;
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart' as video_player;
 
@@ -147,24 +148,43 @@ class _MelodyPageState extends State<MelodyPage> {
       });
     } else {
       bool isGranted = await PermissionsService()
-          .requestMicrophonePermission(context, onPermissionDenied: () {
-        AppUtil.showAlertDialog(
-          context: context,
-          heading: 'info',
-          message:
-              'You must grant this microphone access to be able to use this feature.',
-          firstBtnText: 'Give Permission',
-          firstFunc: () async {
-            Navigator.of(context).pop(false);
-            await _recordAudio();
-          },
-          secondBtnText: 'Leave',
-          secondFunc: () async {
-            print('Mic permission denied');
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-        );
+          .requestMicrophonePermission(context, onPermissionDenied: () async {
+        PermissionStatus status = await PermissionsService()
+            .checkPermissionStatus(PermissionGroup.microphone);
+
+        if (status == PermissionStatus.neverAskAgain) {
+          AppUtil.showAlertDialog(
+              context: context,
+              message:
+                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+              firstBtnText: 'Go to settings',
+              firstFunc: () {
+                Navigator.of(context).pop();
+                PermissionHandler().openAppSettings();
+                return;
+              },
+              secondBtnText: 'Cancel',
+              secondFunc: () {
+                Navigator.of(context).pop();
+              });
+        } else if (status == PermissionStatus.denied)
+          AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message:
+                'You must grant this microphone access to be able to use this feature.',
+            firstBtnText: 'Give Permission',
+            firstFunc: () async {
+              Navigator.of(context).pop(false);
+              await _recordAudio();
+            },
+            secondBtnText: 'Leave',
+            secondFunc: () async {
+              print('Mic permission denied');
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          );
         print('Permission has been denied');
       });
       setState(() {
@@ -212,24 +232,43 @@ class _MelodyPageState extends State<MelodyPage> {
       });
     } else {
       bool isGranted = await PermissionsService()
-          .requestMicrophonePermission(context, onPermissionDenied: () {
-        AppUtil.showAlertDialog(
-          context: context,
-          heading: 'info',
-          message:
-              'You must grant this microphone access to be able to use this feature.',
-          firstBtnText: 'Give Permission',
-          firstFunc: () async {
-            Navigator.of(context).pop(false);
-            await _recordVideo();
-          },
-          secondBtnText: 'Leave',
-          secondFunc: () async {
-            print('Mic permission denied');
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-        );
+          .requestMicrophonePermission(context, onPermissionDenied: () async {
+        PermissionStatus status = await PermissionsService()
+            .checkPermissionStatus(PermissionGroup.microphone);
+
+        if (status == PermissionStatus.neverAskAgain) {
+          AppUtil.showAlertDialog(
+              context: context,
+              message:
+                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+              firstBtnText: 'Go to settings',
+              firstFunc: () {
+                Navigator.of(context).pop();
+                PermissionHandler().openAppSettings();
+                return;
+              },
+              secondBtnText: 'Cancel',
+              secondFunc: () {
+                Navigator.of(context).pop();
+              });
+        } else if (status == PermissionStatus.denied)
+          AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message:
+                'You must grant this microphone access to be able to use this feature.',
+            firstBtnText: 'Give Permission',
+            firstFunc: () async {
+              Navigator.of(context).pop(false);
+              await _recordVideo();
+            },
+            secondBtnText: 'Leave',
+            secondFunc: () async {
+              print('Mic permission denied');
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          );
         print('Permission has been denied');
       });
       setState(() {
@@ -557,24 +596,43 @@ class _MelodyPageState extends State<MelodyPage> {
       print('storage permission granted');
     } else {
       bool isGranted = await PermissionsService()
-          .requestStoragePermission(context, onPermissionDenied: () {
-        AppUtil.showAlertDialog(
-          context: context,
-          heading: 'info',
-          message:
-              'You must grant this storage access to be able to use this feature.',
-          firstBtnText: 'Give Permission',
-          firstFunc: () async {
-            Navigator.of(context).pop(false);
-            await createAppFolder();
-          },
-          secondBtnText: 'Leave',
-          secondFunc: () async {
-            print('storage permission denied');
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-        );
+          .requestStoragePermission(context, onPermissionDenied: () async {
+        PermissionStatus status = await PermissionsService()
+            .checkPermissionStatus(PermissionGroup.storage);
+
+        if (status == PermissionStatus.neverAskAgain) {
+          AppUtil.showAlertDialog(
+              context: context,
+              message:
+                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+              firstBtnText: 'Go to settings',
+              firstFunc: () {
+                Navigator.of(context).pop();
+                PermissionHandler().openAppSettings();
+                return;
+              },
+              secondBtnText: 'Cancel',
+              secondFunc: () {
+                Navigator.of(context).pop();
+              });
+        } else if (status == PermissionStatus.denied)
+          AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message:
+                'You must grant this storage access to be able to use this feature.',
+            firstBtnText: 'Give Permission',
+            firstFunc: () async {
+              Navigator.of(context).pop(false);
+              await createAppFolder();
+            },
+            secondBtnText: 'Leave',
+            secondFunc: () async {
+              print('storage permission denied');
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          );
 
         print('storage permission denied');
       });
@@ -656,6 +714,25 @@ class _MelodyPageState extends State<MelodyPage> {
         context,
       );
     }
+    PermissionStatus status = await PermissionsService()
+        .checkPermissionStatus(PermissionGroup.storage);
+
+    if (status == PermissionStatus.neverAskAgain) {
+      AppUtil.showAlertDialog(
+          context: context,
+          message:
+              'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+          firstBtnText: 'Go to settings',
+          firstFunc: () {
+            Navigator.of(context).pop();
+            PermissionHandler().openAppSettings();
+            return;
+          },
+          secondBtnText: 'Cancel',
+          secondFunc: () {
+            Navigator.of(context).pop();
+          });
+    }
     _videoController =
         video_player.VideoPlayerController.file(File(mergedFilePath));
     await _videoController.initialize();
@@ -727,6 +804,7 @@ class _MelodyPageState extends State<MelodyPage> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: choosingImage
             ? choosingImagePage(context)
             : _progressVisible
@@ -969,9 +1047,11 @@ class _MelodyPageState extends State<MelodyPage> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               // If the Future is complete, display the preview.
-              return AspectRatio(
-                  aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
-                  child: CameraPreview(cameraController));
+              return Center(
+                child: AspectRatio(
+                    aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
+                    child: CameraPreview(cameraController)),
+              );
             } else {
               // Otherwise, display a loading indicator.
               return Center(child: CircularProgressIndicator());
@@ -1306,24 +1386,44 @@ class _MelodyPageState extends State<MelodyPage> {
       print('camera permission granted');
     } else {
       bool isGranted = await PermissionsService()
-          .requestCameraPermission(context, onPermissionDenied: () {
-        AppUtil.showAlertDialog(
-          context: context,
-          heading: 'info',
-          message:
-              'You must grant this camera access to be able to use this feature.',
-          firstBtnText: 'Give Permission',
-          firstFunc: () async {
-            Navigator.of(context).pop(false);
-            await _initCamera();
-          },
-          secondBtnText: 'Leave',
-          secondFunc: () async {
-            print('camera permission denied');
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-        );
+          .requestCameraPermission(context, onPermissionDenied: () async {
+        PermissionStatus status = await PermissionsService()
+            .checkPermissionStatus(PermissionGroup.camera);
+
+        if (status == PermissionStatus.neverAskAgain) {
+          AppUtil.showAlertDialog(
+              context: context,
+              message:
+                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+              firstBtnText: 'Go to settings',
+              firstFunc: () {
+                Navigator.of(context).pop();
+                PermissionHandler().openAppSettings();
+                return;
+              },
+              secondBtnText: 'Cancel',
+              secondFunc: () {
+                Navigator.of(context).pop();
+              });
+        } else if (status == PermissionStatus.denied) {
+          AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message:
+                'You must grant this camera access to be able to use this feature.',
+            firstBtnText: 'Give Permission',
+            firstFunc: () async {
+              Navigator.of(context).pop(false);
+              await _initCamera();
+            },
+            secondBtnText: 'Leave',
+            secondFunc: () async {
+              print('camera permission denied');
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          );
+        }
       });
       setState(() {
         isCameraPermissionGranted = isGranted;

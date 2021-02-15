@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -51,6 +53,23 @@ List<String> searchList(String text) {
 
 class AppUtil with ChangeNotifier {
   static double progress;
+  static bool fullScreenPage = false;
+  static Record fullscreenRecord;
+  static user_model.User fullscreenSinger;
+  static Melody fullscreenMelody;
+
+  goToFullscreen(Record record, user_model.User user, Melody melody) {
+    fullscreenRecord = record;
+    fullscreenSinger = user;
+    fullscreenMelody = melody;
+    fullScreenPage = true;
+    notifyListeners();
+  }
+
+  goToHome() {
+    fullScreenPage = false;
+    notifyListeners();
+  }
 
   static showAlertDialog({
     @required BuildContext context,

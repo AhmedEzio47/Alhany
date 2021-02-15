@@ -3,20 +3,27 @@ import 'dart:math' as math;
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
+import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:video_player/video_player.dart';
+
+import 'app_page.dart';
 
 VideoPlayerController _controller;
 
@@ -159,6 +166,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   void initState() {
     super.initState();
+    getMelodySinger();
     _pageController.addListener(() {
       print(_pageController.position.userScrollDirection.toString());
       if (_pageController.position.userScrollDirection != _scrollDirection) {
@@ -238,6 +246,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MyColors.primaryColor,
       body: Stack(
         children: <Widget>[
           widget.record != null
@@ -296,6 +305,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         DatabaseService.incrementRecordViews(_record.id);
                         initVideoPlayer(_record.url);
                         getSinger();
+                        getMelodySinger();
                         isFollowing();
                         initLikes(record: _record, news: widget.news);
                         setState(() {
@@ -308,6 +318,32 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       }),
                 )
               : fullscreen(),
+          Positioned.fill(
+              child: Align(
+            child: RegularAppbar(
+              context,
+              color: Colors.black,
+              height: Sizes.appbar_height,
+              margin: 25,
+              leading: Padding(
+                padding: const EdgeInsets.only(
+                  left: 15.0,
+                ),
+                child: Builder(
+                  builder: (context) => InkWell(
+                    onTap: () {
+                      appPageUtil.goToHome();
+                    },
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: MyColors.accentColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            alignment: Alignment.topCenter,
+          )),
         ],
       ),
     );
@@ -316,75 +352,44 @@ class _PostFullscreenState extends State<PostFullscreen> {
   PageController _pageController = new PageController();
 
   int _page = 0;
+  Singer _melodySinger;
+  getMelodySinger() async {
+    Singer singer =
+        await DatabaseService.getSingerWithName(widget.melody.singer);
+    setState(() {
+      _melodySinger = singer;
+    });
+  }
+
   fullscreen() {
     return Stack(
       children: <Widget>[
-        FlatButton(
-            padding: EdgeInsets.all(0),
-            onPressed: () {
-              setState(() {
-                if (play) {
-                  _controller?.pause();
-                  play = !play;
-                } else {
-                  _controller?.play();
-                  play = !play;
-                }
-              });
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child:
-                  _controller != null ? VideoPlayer(_controller) : Container(),
-            )),
-        Padding(
-          padding: EdgeInsets.only(bottom: 70),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              width: MediaQuery.of(context).size.width - 100,
-              height: 100,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _record != null
-                      ? Padding(
-                          padding: EdgeInsets.only(left: 10, bottom: 10),
-                          child: Text(
-                            '@${widget.singer?.username}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        )
-                      : Container(),
-                  _record != null
-                      ? Padding(
-                          padding: EdgeInsets.only(left: 10, bottom: 10),
-                          child: Text.rich(
-                            TextSpan(children: <TextSpan>[
-                              TextSpan(
-                                  text: '${widget.singer?.name}\n',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              TextSpan(
-                                  text: 'singed\n',
-                                  style: TextStyle(fontSize: 12)),
-                              TextSpan(
-                                  text: widget.melody?.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold))
-                            ]),
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ))
-                      : Container(),
-                ],
-              ),
-            ),
-          ),
+        Center(
+          child: FlatButton(
+              padding: EdgeInsets.all(0),
+              onPressed: () {
+                setState(() {
+                  if (play) {
+                    _controller?.pause();
+                    play = !play;
+                  } else {
+                    _controller?.play();
+                    play = !play;
+                  }
+                });
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * .45,
+                child: _controller != null
+                    ? VideoPlayer(_controller)
+                    : Container(),
+              )),
         ),
         Padding(
             padding: EdgeInsets.only(bottom: 65, right: 10),
             child: Align(
-              alignment: Alignment.bottomRight,
+              alignment: Alignment.bottomLeft,
               child: Container(
                 width: 70,
                 height: 400,
@@ -397,23 +402,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       height: 50,
                       child: Stack(
                         children: <Widget>[
-                          InkWell(
-                            onTap: () => _goToProfilePage(),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.white,
-                              child: CachedImage(
-                                key: ValueKey('profile'),
-                                height: 38,
-                                width: 38,
-                                imageShape: BoxShape.circle,
-                                defaultAssetImage:
-                                    Strings.default_profile_image,
-                                imageUrl: widget.singer?.profileImageUrl ??
-                                    Constants.startUser.profileImageUrl,
-                              ),
-                            ),
-                          ),
                           _isFollowing
                               ? Align(
                                   alignment: Alignment.bottomCenter,
@@ -487,21 +475,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.remove_red_eye,
-                                  size: 35, color: Colors.white)),
-                          Text('${_record?.views ?? widget.news?.views ?? 0}',
-                              style: TextStyle(color: Colors.white))
-                        ],
-                      ),
-                    ),
                     InkWell(
                       onTap: () {
                         if (_record != null) {
@@ -536,7 +509,198 @@ class _PostFullscreenState extends State<PostFullscreen> {
                   ],
                 ),
               ),
-            ))
+            )),
+        Padding(
+          padding:
+              EdgeInsets.only(top: Sizes.fullHeight(context) * .13, right: 16),
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Container(
+              padding: EdgeInsets.only(bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationY(math.pi),
+                      child: Icon(Icons.remove_red_eye,
+                          size: 30, color: Colors.white)),
+                  Text('${_record?.views ?? widget.news?.views ?? 0}',
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding:
+              EdgeInsets.only(top: Sizes.fullHeight(context) * .13, left: 16),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: InkWell(
+              onTap: () => Navigator.of(context).pushNamed('/melody-page',
+                  arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
+              child: Container(
+                padding: EdgeInsets.only(bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      decoration: BoxDecoration(
+                          color: MyColors.accentColor, shape: BoxShape.circle),
+                      child: Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.rotationY(math.pi),
+                          child:
+                              Icon(Icons.mic, size: 30, color: Colors.black)),
+                    ),
+                    Text(language(en: 'Sing', ar: 'غــني'),
+                        style: TextStyle(color: Colors.white))
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+              right: 20.0, bottom: MediaQuery.of(context).size.height * .15),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              height: 75,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  InkWell(
+                    onTap: () => _goToProfilePage(),
+                    child: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            height: 35,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  _singer.name,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: MyColors.textLightColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${AppUtil.formatTimestamp(widget.record.timestamp)}' ??
+                                          '',
+                                      style: TextStyle(
+                                          color: Colors.grey.shade300,
+                                          fontSize: 12),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Icon(
+                                      Icons.watch_later_outlined,
+                                      color: MyColors.iconLightColor,
+                                      size: 15,
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.white,
+                            child: CachedImage(
+                              key: ValueKey('profile'),
+                              height: 38,
+                              width: 38,
+                              imageShape: BoxShape.circle,
+                              defaultAssetImage: Strings.default_profile_image,
+                              imageUrl: widget.singer?.profileImageUrl ??
+                                  Constants.startUser.profileImageUrl,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 50.0, top: 8),
+                    child: Text(
+                      'أنا أغني مع ${widget.melody.singer}',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: MyColors.textLightColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * .05, right: 15),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  widget.melody.name,
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: MyColors.textLightColor,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Icon(
+                  Icons.music_note,
+                  color: Colors.white,
+                  size: 22,
+                )
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * .05, left: 15),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: InkWell(
+              onTap: () => Navigator.of(context).pushNamed('/singer-page',
+                  arguments: {
+                    'singer': _melodySinger,
+                    'data_type': DataTypes.MELODIES
+                  }),
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.white,
+                child: CachedImage(
+                  key: ValueKey('singer'),
+                  height: 38,
+                  width: 38,
+                  imageShape: BoxShape.circle,
+                  defaultAssetImage: Strings.default_profile_image,
+                  imageUrl: _melodySinger?.imageUrl,
+                ),
+              ),
+            ),
+          ),
+        )
       ],
     );
   }
