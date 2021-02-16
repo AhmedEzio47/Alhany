@@ -219,6 +219,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
+        print('aspect ration: ${_controller.value.aspectRatio}');
       });
   }
 
@@ -245,106 +246,112 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MyColors.primaryColor,
-      body: Stack(
-        children: <Widget>[
-          widget.record != null
-              ? SimpleGestureDetector(
-                  onVerticalSwipe: (SwipeDirection swipeDirection) {
-                    if (swipeDirection == SwipeDirection.up &&
-                        _scrollDirection == ScrollDirection.forward) {
-                      setState(() {
-                        _scrollable = true;
-                      });
-                      _pageController.animateToPage(_page + 1,
-                          duration: Duration(milliseconds: 800),
-                          curve: Curves.easeOut);
-                      print('Swipe up');
-                    } else if (swipeDirection == SwipeDirection.down &&
-                        _scrollDirection == ScrollDirection.reverse) {
-                      setState(() {
-                        _scrollable = true;
-                      });
-                      _pageController.animateToPage(_page - 1,
-                          duration: Duration(milliseconds: 800),
-                          curve: Curves.easeOut);
-                      print('Swipe down');
-                    }
-                  },
-                  child: PageView.builder(
-                      controller: _pageController,
-                      physics:
-                          !_scrollable ? NeverScrollableScrollPhysics() : null,
-                      onPageChanged: (index) async {
-                        Record record, next, previous;
-                        if (index > _page) {
-                          record = await DatabaseService.getNextRecord(
-                              _record.timestamp);
-                          next = await DatabaseService.getNextRecord(
-                              record.timestamp);
-                        } else {
-                          record = await DatabaseService.getPrevRecord(
-                              _record.timestamp);
-                          previous = await DatabaseService.getPrevRecord(
-                              record.timestamp);
-                        }
-                        if ((next == null &&
-                                _scrollDirection == ScrollDirection.reverse) ||
-                            (previous == null &&
-                                _scrollDirection == ScrollDirection.forward)) {
-                          setState(() {
-                            _scrollable = false;
-                          });
-                        }
+    return WillPopScope(
+      onWillPop: () => appPageUtil.goToHome(),
+      child: Scaffold(
+        backgroundColor: MyColors.primaryColor,
+        body: Stack(
+          children: <Widget>[
+            widget.record != null
+                ? SimpleGestureDetector(
+                    onVerticalSwipe: (SwipeDirection swipeDirection) {
+                      if (swipeDirection == SwipeDirection.up &&
+                          _scrollDirection == ScrollDirection.forward) {
                         setState(() {
-                          _record = record;
-                          _next = next;
-                          _previous = previous;
+                          _scrollable = true;
                         });
-                        DatabaseService.incrementRecordViews(_record.id);
-                        initVideoPlayer(_record.url);
-                        getSinger();
-                        getMelodySinger();
-                        isFollowing();
-                        initLikes(record: _record, news: widget.news);
+                        _pageController.animateToPage(_page + 1,
+                            duration: Duration(milliseconds: 800),
+                            curve: Curves.easeOut);
+                        print('Swipe up');
+                      } else if (swipeDirection == SwipeDirection.down &&
+                          _scrollDirection == ScrollDirection.reverse) {
                         setState(() {
-                          _page = index;
+                          _scrollable = true;
                         });
-                      },
-                      scrollDirection: Axis.vertical,
-                      itemBuilder: (context, index) {
-                        return fullscreen();
-                      }),
-                )
-              : fullscreen(),
-          Positioned.fill(
-              child: Align(
-            child: RegularAppbar(
-              context,
-              color: Colors.black,
-              height: Sizes.appbar_height,
-              margin: 25,
-              leading: Padding(
-                padding: const EdgeInsets.only(
-                  left: 15.0,
-                ),
-                child: Builder(
-                  builder: (context) => InkWell(
-                    onTap: () {
-                      appPageUtil.goToHome();
+                        _pageController.animateToPage(_page - 1,
+                            duration: Duration(milliseconds: 800),
+                            curve: Curves.easeOut);
+                        print('Swipe down');
+                      }
                     },
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: MyColors.accentColor,
+                    child: PageView.builder(
+                        controller: _pageController,
+                        physics: !_scrollable
+                            ? NeverScrollableScrollPhysics()
+                            : null,
+                        onPageChanged: (index) async {
+                          Record record, next, previous;
+                          if (index > _page) {
+                            record = await DatabaseService.getNextRecord(
+                                _record.timestamp);
+                            next = await DatabaseService.getNextRecord(
+                                record.timestamp);
+                          } else {
+                            record = await DatabaseService.getPrevRecord(
+                                _record.timestamp);
+                            previous = await DatabaseService.getPrevRecord(
+                                record.timestamp);
+                          }
+                          if ((next == null &&
+                                  _scrollDirection ==
+                                      ScrollDirection.reverse) ||
+                              (previous == null &&
+                                  _scrollDirection ==
+                                      ScrollDirection.forward)) {
+                            setState(() {
+                              _scrollable = false;
+                            });
+                          }
+                          setState(() {
+                            _record = record;
+                            _next = next;
+                            _previous = previous;
+                          });
+                          DatabaseService.incrementRecordViews(_record.id);
+                          initVideoPlayer(_record.url);
+                          getSinger();
+                          getMelodySinger();
+                          isFollowing();
+                          initLikes(record: _record, news: widget.news);
+                          setState(() {
+                            _page = index;
+                          });
+                        },
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context, index) {
+                          return fullscreen();
+                        }),
+                  )
+                : fullscreen(),
+            Positioned.fill(
+                child: Align(
+              child: RegularAppbar(
+                context,
+                color: Colors.black,
+                height: Sizes.appbar_height,
+                margin: 25,
+                leading: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 15.0,
+                  ),
+                  child: Builder(
+                    builder: (context) => InkWell(
+                      onTap: () {
+                        appPageUtil.goToHome();
+                      },
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: MyColors.accentColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            alignment: Alignment.topCenter,
-          )),
-        ],
+              alignment: Alignment.topCenter,
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -378,13 +385,16 @@ class _PostFullscreenState extends State<PostFullscreen> {
                   }
                 });
               },
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * .45,
-                child: _controller != null
-                    ? VideoPlayer(_controller)
-                    : Container(),
-              )),
+              child: _controller != null
+                  ? Container(
+                      height: MediaQuery.of(context).size.height * .45,
+                      width: _controller.value.aspectRatio > .65
+                          ? _controller.value.aspectRatio *
+                              .45 *
+                              MediaQuery.of(context).size.height
+                          : MediaQuery.of(context).size.width,
+                      child: VideoPlayer(_controller))
+                  : Container()),
         ),
         Padding(
             padding: EdgeInsets.only(bottom: 65, right: 10),
@@ -564,7 +574,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
         ),
         Padding(
           padding: EdgeInsets.only(
-              right: 20.0, bottom: MediaQuery.of(context).size.height * .15),
+              right: 20.0, bottom: MediaQuery.of(context).size.height * .11),
           child: Align(
             alignment: Alignment.bottomRight,
             child: Container(
