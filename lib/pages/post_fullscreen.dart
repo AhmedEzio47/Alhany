@@ -390,7 +390,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       height: MediaQuery.of(context).size.height * .45,
                       width: _controller.value.aspectRatio > .65
                           ? _controller.value.aspectRatio *
-                              .45 *
+                              .55 *
                               MediaQuery.of(context).size.height
                           : MediaQuery.of(context).size.width,
                       child: VideoPlayer(_controller))
