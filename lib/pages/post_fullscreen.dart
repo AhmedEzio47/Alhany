@@ -244,10 +244,28 @@ class _PostFullscreenState extends State<PostFullscreen> {
   DragStartDetails startVerticalDragDetails;
   DragUpdateDetails updateVerticalDragDetails;
 
+  Future<bool> _onBackPressed() {
+    if (Constants.routeStack.length < 2) {
+      //Constants.routeStack.removeLast();
+      Constants.currentRoute = '/';
+      appPageUtil.goToHome();
+    } else if (Constants.routeStack[Constants.routeStack.length - 2] ==
+        '/record-page') {
+      Constants.routeStack.removeLast();
+
+      Constants.currentRoute = '/record-page';
+      Navigator.of(context).pop();
+    } else {
+      //Constants.routeStack.removeLast();
+      Constants.currentRoute = '/';
+      appPageUtil.goToHome();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () => appPageUtil.goToHome(),
+      onWillPop: _onBackPressed,
       child: Scaffold(
         backgroundColor: MyColors.primaryColor,
         body: Stack(
@@ -337,9 +355,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                   ),
                   child: Builder(
                     builder: (context) => InkWell(
-                      onTap: () {
-                        appPageUtil.goToHome();
-                      },
+                      onTap: _onBackPressed,
                       child: Icon(
                         Icons.arrow_back,
                         color: MyColors.accentColor,

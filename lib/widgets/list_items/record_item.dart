@@ -220,15 +220,17 @@ class _RecordItemState extends State<RecordItem> {
                         ),
                       ],
                     ),
-                    ValueListenableBuilder<int>(
-                      valueListenable: number,
-                      builder: (context, value, child) {
-                        return PostBottomSheet().postOptionIcon(
-                          context,
-                          record: widget.record,
-                        );
-                      },
-                    )
+                    widget.record.singerId == Constants.currentUserID
+                        ? ValueListenableBuilder<int>(
+                            valueListenable: number,
+                            builder: (context, value, child) {
+                              return PostBottomSheet().postOptionIcon(
+                                context,
+                                record: widget.record,
+                              );
+                            },
+                          )
+                        : Container()
                   ],
                 ),
               ),
@@ -390,13 +392,15 @@ class _RecordItemState extends State<RecordItem> {
   Widget playPauseBtn() {
     return InkWell(
       onTap: () {
-        // Navigator.of(context).pushNamed('/post-fullscreen',
-        //     arguments: {
-        //       'record': widget.record,
-        //       'singer': _singer,
-        //       'melody': _melody
-        //     });
-        appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+        if (Constants.currentRoute == '/record-page') {
+          Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
+            'record': widget.record,
+            'singer': _singer,
+            'melody': _melody
+          });
+        } else {
+          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+        }
       },
       child: Container(
         height: 40,
@@ -425,13 +429,15 @@ class _RecordItemState extends State<RecordItem> {
   playBtn() {
     return InkWell(
       onTap: () {
-        // Navigator.of(context).pushNamed('/post-fullscreen',
-        //     arguments: {
-        //       'record': widget.record,
-        //       'singer': _singer,
-        //       'melody': _melody
-        //     });
-        appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+        if (Constants.currentRoute == '/record-page') {
+          Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
+            'record': widget.record,
+            'singer': _singer,
+            'melody': _melody
+          });
+        } else {
+          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+        }
       },
       child: Container(
         height: 35,

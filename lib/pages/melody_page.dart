@@ -1057,6 +1057,20 @@ class _MelodyPageState extends State<MelodyPage> {
               return Center(child: CircularProgressIndicator());
             }
           },
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+              color: Colors.transparent,
+              height: 200,
+              width: MediaQuery.of(context).size.width,
+              child: HtmlWidget(
+                widget.melody.lyrics ?? '',
+                textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                customStylesBuilder: (e) {
+                  return {'text-align': 'center', 'line-height': '85%'};
+                },
+              )),
         )
       ],
     );

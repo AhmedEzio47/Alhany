@@ -17,7 +17,8 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 class RecordPage extends StatefulWidget {
   final Record record;
   final bool isVideoVisible;
-  const RecordPage({Key key, this.record, this.isVideoVisible = true}) : super(key: key);
+  const RecordPage({Key key, this.record, this.isVideoVisible = true})
+      : super(key: key);
   @override
   _RecordPageState createState() => _RecordPageState();
 }
@@ -50,7 +51,8 @@ class _RecordPageState extends State<RecordPage> {
           widget.record.id,
           'record_comment');
 
-      await AppUtil.checkIfContainsMention(_commentController.text, widget.record.id);
+      await AppUtil.checkIfContainsMention(
+          _commentController.text, widget.record.id);
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
@@ -81,14 +83,16 @@ class _RecordPageState extends State<RecordPage> {
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments = await DatabaseService.getComments(recordId: widget.record.id);
+    List<Comment> comments =
+        await DatabaseService.getComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
   }
 
   getAllComments() async {
-    List<Comment> comments = await DatabaseService.getAllComments(recordId: widget.record.id);
+    List<Comment> comments =
+        await DatabaseService.getAllComments(recordId: widget.record.id);
     setState(() {
       _comments = comments;
     });
@@ -142,7 +146,8 @@ class _RecordPageState extends State<RecordPage> {
             ),
             color: MyColors.primaryColor,
             image: DecorationImage(
-              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              colorFilter: new ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
               image: AssetImage(Strings.default_bg),
               fit: BoxFit.cover,
             ),
@@ -187,10 +192,12 @@ class _RecordPageState extends State<RecordPage> {
                                       }
                                       return index < _comments.length
                                           ? FutureBuilder(
-                                              future: DatabaseService.getUserWithId(
+                                              future:
+                                                  DatabaseService.getUserWithId(
                                                 comment.commenterID,
                                               ),
-                                              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                                              builder: (BuildContext context,
+                                                  AsyncSnapshot snapshot) {
                                                 if (!snapshot.hasData) {
                                                   return SizedBox.shrink();
                                                 }
@@ -212,13 +219,18 @@ class _RecordPageState extends State<RecordPage> {
                                                     Navigator.of(context).pop();
                                                   },
                                                   child: Padding(
-                                                    padding: const EdgeInsets.all(8.0),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
                                                     child: Center(
                                                         child: Text(
                                                       'show all',
                                                       style: TextStyle(
-                                                          color: MyColors.accentColor,
-                                                          decoration: TextDecoration.underline),
+                                                          color: MyColors
+                                                              .accentColor,
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline),
                                                     )),
                                                   ),
                                                 )
@@ -232,20 +244,30 @@ class _RecordPageState extends State<RecordPage> {
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
-                          margin: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+                          margin: EdgeInsets.only(
+                              left: 8, right: 8, top: 8, bottom: 8),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
+                              borderRadius: BorderRadius.circular(30.0),
+                              color: MyColors.lightPrimaryColor),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: TextField(
                                 style: TextStyle(color: Colors.white),
-                                textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                                textAlign: Constants.language == 'ar'
+                                    ? TextAlign.right
+                                    : TextAlign.left,
                                 controller: _commentController,
                                 decoration: InputDecoration(
                                   hintStyle: TextStyle(color: Colors.white),
-                                  hintText: language(en: Strings.en_leave_comment, ar: Strings.ar_leave_comment),
-                                  suffix: Constants.language == 'en' ? sendBtn() : null,
-                                  prefix: Constants.language == 'ar' ? sendBtn() : null,
+                                  hintText: language(
+                                      en: Strings.en_leave_comment,
+                                      ar: Strings.ar_leave_comment),
+                                  suffix: Constants.language == 'en'
+                                      ? sendBtn()
+                                      : null,
+                                  prefix: Constants.language == 'ar'
+                                      ? sendBtn()
+                                      : null,
                                 )),
                           ),
                         ),
@@ -270,6 +292,7 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<bool> _onBackPressed() {
     Constants.currentRoute = '';
+    Constants.routeStack.removeLast();
     Navigator.of(context).pop();
   }
 }

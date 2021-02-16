@@ -152,14 +152,16 @@ class _CommentItem2State extends State<CommentItem2> {
                     ),
                   ),
                 ),
-                ValueListenableBuilder<int>(
-                  valueListenable: number,
-                  builder: (context, value, child) {
-                    return CommentBottomSheet().commentOptionIcon(
-                        context, widget.comment, widget.parentComment,
-                        record: widget.record, news: widget.news);
-                  },
-                )
+                widget.comment.commenterID == Constants.currentUserID
+                    ? ValueListenableBuilder<int>(
+                        valueListenable: number,
+                        builder: (context, value, child) {
+                          return CommentBottomSheet().commentOptionIcon(
+                              context, widget.comment, widget.parentComment,
+                              record: widget.record, news: widget.news);
+                        },
+                      )
+                    : Container()
               ],
             ),
             Padding(

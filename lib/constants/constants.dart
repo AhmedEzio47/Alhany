@@ -39,6 +39,7 @@ class Constants {
   static String currentMelodyLevel;
 
   static String currentRoute;
+  static List<String> routeStack = [];
 
   static String language;
 
