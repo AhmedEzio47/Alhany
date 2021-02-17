@@ -210,7 +210,6 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
 
-      await myAudioPlayer.play();
       try {
         await recorder.startRecording();
       } catch (ex) {
@@ -218,6 +217,8 @@ class _MelodyPageState extends State<MelodyPage> {
         AppUtil.showToast('Unexpected error. Please try again.');
         Navigator.of(context).pop();
       }
+      await myAudioPlayer.play();
+
       _recordingTimer();
     } else {}
   }
@@ -293,7 +294,6 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
 
-      await myAudioPlayer.play();
       recordingFilePath += 'video_rec.mp4';
       try {
         File(recordingFilePath).deleteSync();
@@ -309,6 +309,7 @@ class _MelodyPageState extends State<MelodyPage> {
         AppUtil.showToast('Unexpected error, please try again');
         Navigator.of(context).pop();
       }
+      await myAudioPlayer.play();
 
       _recordingTimer();
     } else {}
@@ -441,10 +442,11 @@ class _MelodyPageState extends State<MelodyPage> {
       });
     } else {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
+      AppUtil.showLoader(context);
       success = await flutterFFmpeg.execute(
           '-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}extracted_audio.mp3');
       print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
-
+      Navigator.of(context).pop();
       //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i $melodyPath -filter_complex amerge=inputs=2 -shortest ${appTempDirectoryPath}final_audio.mp3");
@@ -1064,12 +1066,17 @@ class _MelodyPageState extends State<MelodyPage> {
               color: Colors.transparent,
               height: 200,
               width: MediaQuery.of(context).size.width,
-              child: HtmlWidget(
-                widget.melody.lyrics ?? '',
-                textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                customStylesBuilder: (e) {
-                  return {'text-align': 'center', 'line-height': '85%'};
-                },
+              child: SingleChildScrollView(
+                child: Center(
+                  child: HtmlWidget(
+                    widget.melody.lyrics ?? '',
+                    textStyle:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    customStylesBuilder: (e) {
+                      return {'text-align': 'center', 'line-height': '85%'};
+                    },
+                  ),
+                ),
               )),
         )
       ],
@@ -1372,10 +1379,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
         counter++;
         if (mounted) {
-          setState(() {
-            _recordingText =
-                '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
-          });
+          try {
+            setState(() {
+              _recordingText =
+                  '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
+            });
+          } catch (ex) {
+            timer.cancel();
+          }
         }
       },
     );

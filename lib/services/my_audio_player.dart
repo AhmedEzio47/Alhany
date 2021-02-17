@@ -68,8 +68,8 @@ class MyAudioPlayer with ChangeNotifier {
 
     advancedPlayer.positionHandler = (p) {
       position = p;
-      print('P:${p.inMilliseconds}');
-      print('D:${duration.inMilliseconds}');
+      print('P:${p.inSeconds}');
+      //print('D:${duration.inMilliseconds}');
       notifyListeners();
 
       if (duration.inMilliseconds - p.inMilliseconds <
