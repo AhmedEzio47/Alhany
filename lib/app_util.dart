@@ -71,6 +71,24 @@ class AppUtil with ChangeNotifier {
     notifyListeners();
   }
 
+  static void showFixedSnackBar(BuildContext context,
+      GlobalKey<ScaffoldState> _scaffoldKey, String text) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    _scaffoldKey.currentState?.removeCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: MyColors.textDarkColor,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: MyColors.accentColor,
+      duration: Duration(minutes: 5),
+    ));
+  }
+
   static showAlertDialog({
     @required BuildContext context,
     String heading,

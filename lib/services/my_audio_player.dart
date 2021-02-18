@@ -35,6 +35,8 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   int index = 0;
+  Function onPlayingStarted;
+  bool _onPlayingStartedCalled = false;
 
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
@@ -67,8 +69,14 @@ class MyAudioPlayer with ChangeNotifier {
     };
 
     advancedPlayer.positionHandler = (p) {
+      if (p.inMicroseconds > 0 &&
+          onPlayingStarted != null &&
+          !_onPlayingStartedCalled) {
+        _onPlayingStartedCalled = true;
+        onPlayingStarted();
+      }
       position = p;
-      print('P:${p.inSeconds}');
+      print('P:${p.inMilliseconds}');
       //print('D:${duration.inMilliseconds}');
       notifyListeners();
 
@@ -100,7 +108,8 @@ class MyAudioPlayer with ChangeNotifier {
     };
   }
 
-  Future play({index}) async {
+  Future play({index, Function onPlayingStarted}) async {
+    this.onPlayingStarted = onPlayingStarted;
     print('audio url: $url');
     if (index == null) {
       index = this.index;
