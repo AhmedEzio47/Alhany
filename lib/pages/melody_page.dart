@@ -454,7 +454,11 @@ class _MelodyPageState extends State<MelodyPage> {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
       //AppUtil.showLoader(context);
       AppUtil.showFixedSnackBar(
-          context, _scaffoldKey, 'Please hold on, it\'s not stuck');
+          context,
+          _scaffoldKey,
+          language(
+              en: 'Please hold on, it\'s not stuck',
+              ar: 'برجاء الإنتظار جاري معالجة الفيديو'));
       success = await flutterFFmpeg.execute(
           '-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}extracted_audio.mp3');
       print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
