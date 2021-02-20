@@ -3,9 +3,9 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/audio_recorder.dart';
-import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:sounds/sounds.dart';
 //import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
 // NOTE: Your entrypoint MUST be a top-level function.
@@ -17,12 +17,13 @@ import 'package:flutter/cupertino.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
-  AudioCache audioCache;
+  SoundPlayer soundPlayer;
+  Track _track;
 
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
-
   Duration duration;
   Duration position;
+  Stream<PlaybackDisposition> disposition;
 
   final String url;
   final List<String> urlList;
@@ -31,7 +32,8 @@ class MyAudioPlayer with ChangeNotifier {
 
   MyAudioPlayer(
       {this.url, this.urlList, this.isLocal = false, this.onComplete}) {
-    initAudioPlayer();
+    //initAudioPlayer();
+    initSoundPlayer();
   }
 
   int index = 0;
@@ -40,7 +42,7 @@ class MyAudioPlayer with ChangeNotifier {
 
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: advancedPlayer);
+
     // if (this.url != null) {
     //   mediaLibrary = [
     //     MediaItem(
@@ -108,19 +110,34 @@ class MyAudioPlayer with ChangeNotifier {
     };
   }
 
+  initSoundPlayer() {
+    soundPlayer = SoundPlayer.noUI();
+    disposition = soundPlayer.dispositionStream();
+  }
+
   Future play({index, Function onPlayingStarted}) async {
+    if (soundPlayer.isPaused) soundPlayer.resume();
+
+    if (isLocal) {
+      _track = Track.fromFile(url ?? urlList[index]);
+    } else {
+      _track = Track.fromURL(url ?? urlList[index]);
+    }
+    soundPlayer.play(_track);
+    //await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
+
     this.onPlayingStarted = onPlayingStarted;
     print('audio url: $url');
     if (index == null) {
       index = this.index;
     }
-    await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
     playerState = AudioPlayerState.PLAYING;
     notifyListeners();
   }
 
   Future stop() async {
-    await advancedPlayer.stop();
+    //await advancedPlayer.stop();
+    await soundPlayer.stop();
     playerState = AudioPlayerState.STOPPED;
     position = null;
     duration = null;
@@ -132,18 +149,23 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   Future pause() async {
-    await advancedPlayer.pause();
+    //await advancedPlayer.pause();
+    await soundPlayer.pause();
+
     playerState = AudioPlayerState.PAUSED;
     notifyListeners();
   }
 
   seek(Duration p) {
-    advancedPlayer.seek(p);
+    //advancedPlayer.seek(p);
+    soundPlayer.seekTo(p);
     notifyListeners();
   }
 
   next() {
-    advancedPlayer.stop();
+    //advancedPlayer.stop();
+    soundPlayer.stop();
+
     if (this.index < urlList.length - 1)
       this.index++;
     else
@@ -153,7 +175,9 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   prev() {
-    advancedPlayer.stop();
+    //advancedPlayer.stop();
+    soundPlayer.stop();
+
     if (this.index > 0)
       this.index--;
     else
