@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
@@ -305,11 +307,21 @@ class _MelodyPageState extends State<MelodyPage> {
       if (cameraController == null) {
         await _initCamera();
       }
-
-      await myAudioPlayer.play();
       try {
-        await _initializeControllerFuture;
-        await cameraController.startVideoRecording(recordingFilePath);
+        ReceivePort receivePort = ReceivePort();
+
+        Isolate isolate =
+            await Isolate.spawn(recordVideoInIsolate, receivePort.sendPort);
+
+        // Receive the SendPort from the Isolate
+        SendPort sendPort = await receivePort.first;
+        sendPort.send({
+          '_initializeControllerFuture':
+              jsonEncode(_initializeControllerFuture),
+          'myAudioPlayer': jsonEncode(myAudioPlayer),
+          'cameraController': jsonEncode(cameraController),
+          'recordingFilePath': jsonEncode(recordingFilePath)
+        });
       } catch (ex) {
         AppUtil.showToast('Unexpected error, please try again');
         Navigator.of(context).pop();
@@ -1498,5 +1510,32 @@ class _MelodyPageState extends State<MelodyPage> {
     if (recordingStatus != RecordingStatus.Recording) {
       Navigator.of(context).pop();
     }
+  }
+}
+
+recordVideoInIsolate(SendPort sendPort) async {
+  // Open the ReceivePort to listen for incoming messages (optional)
+  var port = new ReceivePort();
+  MyAudioPlayer myAudioPlayer;
+  CameraController cameraController;
+  // Send messages to other Isolates
+  sendPort.send(port.sendPort);
+
+  // Listen for messages (optional)
+  await for (var args in port) {
+    // `data` is the message received.
+    myAudioPlayer = jsonDecode(args['myAudioPlayer']);
+    cameraController = jsonDecode(args['cameraController']);
+
+    await myAudioPlayer.play(onPlayingStarted: () async {
+      await jsonDecode(args['_initializeControllerFuture']);
+      await cameraController
+          .startVideoRecording(jsonDecode(args['recordingFilePath']));
+    });
+
+    sendPort.send({
+      'myAudioPlayer': jsonEncode(myAudioPlayer),
+      'cameraController': jsonEncode(cameraController)
+    });
   }
 }
