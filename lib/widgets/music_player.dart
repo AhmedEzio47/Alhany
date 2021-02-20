@@ -11,7 +11,6 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -67,9 +66,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
   _MusicPlayerState();
 
   MyAudioPlayer myAudioPlayer;
-
-  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
-  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
   // get durationText => myAudioPlayer.duration != null
   //     ? myAudioPlayer.duration.toString().split('.').first
@@ -131,7 +127,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     super.dispose();
   }
 
-  Duration _duration;
+  //Duration _duration;
 
   void initAudioPlayer() async {
     List<String> urlList;
@@ -146,13 +142,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
         urlList: urlList,
         isLocal: widget.isLocal,
         onComplete: widget.onComplete);
-    myAudioPlayer.addListener(() {
-      if (mounted) {
-        setState(() {
-          _duration = myAudioPlayer.duration;
-        });
-      }
-    });
+    // myAudioPlayer.addListener(() {
+    //   if (mounted) {
+    //     setState(() {
+    //       _duration = myAudioPlayer.duration;
+    //     });
+    //   }
+    // });
   }
 
   Future play() async {
@@ -219,7 +215,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
                     (snapshot.data as PlaybackDisposition)?.position != null
                         ? Text(
-                            '${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position.inMinutes)}:${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position.inSeconds % 60)}',
+                            '${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position?.inMinutes) ?? 0}:${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position?.inSeconds ?? 0 % 60)}',
                             style: TextStyle(color: MyColors.textLightColor),
                           )
                         : Text(
@@ -251,13 +247,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 myAudioPlayer
                                     .seek(Duration(seconds: value ~/ 1000));
 
-                                if (!isPlaying) {
+                                if (!myAudioPlayer.soundPlayer.isPlaying) {
                                   play();
                                 }
                               },
                               min: 0.0,
-                              max: _duration != null
-                                  ? _duration?.inMilliseconds?.toDouble()
+                              max: (snapshot.data as PlaybackDisposition)
+                                          ?.duration !=
+                                      null
+                                  ? (snapshot.data as PlaybackDisposition)
+                                      ?.duration
+                                      ?.inMilliseconds
+                                      ?.toDouble()
                                   : 1.7976931348623157e+308)),
                     ),
                     SizedBox(
@@ -265,7 +266,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
                     (snapshot.data as PlaybackDisposition)?.duration != null
                         ? Text(
-                            '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                            '${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.duration?.inMinutes ?? 0)}:${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.duration?.inSeconds ?? 0 % 60)}',
                             style: TextStyle(color: MyColors.textLightColor),
                           )
                         : Text(
@@ -391,9 +392,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget playPauseBtn() {
-    return !isPlaying
+    return !myAudioPlayer.soundPlayer.isPlaying
         ? InkWell(
-            onTap: () => isPlaying ? null : play(),
+            onTap: () => myAudioPlayer.soundPlayer.isPlaying ? null : play(),
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,
@@ -417,7 +418,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           )
         : InkWell(
-            onTap: isPlaying ? () => pause() : null,
+            onTap: myAudioPlayer.soundPlayer.isPlaying ? () => pause() : null,
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,

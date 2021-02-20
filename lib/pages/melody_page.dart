@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
@@ -212,18 +210,18 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
+      myAudioPlayer =
+          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
+      myAudioPlayer.addListener(() {});
 
-      await myAudioPlayer.play(onPlayingStarted: () async {
-        try {
-          await recorder.startRecording();
-        } catch (ex) {
-          await myAudioPlayer.stop();
-          AppUtil.showToast('Unexpected error. Please try again.');
-          Navigator.of(context).pop();
-        }
-      });
-
+      await myAudioPlayer.play();
+      try {
+        await recorder.startRecording();
+      } catch (ex) {
+        await myAudioPlayer.stop();
+        AppUtil.showToast('Unexpected error. Please try again.');
+        Navigator.of(context).pop();
+      }
       _recordingTimer();
     } else {}
   }
@@ -297,7 +295,9 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer = MyAudioPlayer(url: url, onComplete: saveRecord);
+      myAudioPlayer =
+          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
+      myAudioPlayer.addListener(() {});
 
       recordingFilePath += 'video_rec.mp4';
       try {
@@ -307,21 +307,11 @@ class _MelodyPageState extends State<MelodyPage> {
       if (cameraController == null) {
         await _initCamera();
       }
+
+      await myAudioPlayer.play();
       try {
-        ReceivePort receivePort = ReceivePort();
-
-        Isolate isolate =
-            await Isolate.spawn(recordVideoInIsolate, receivePort.sendPort);
-
-        // Receive the SendPort from the Isolate
-        SendPort sendPort = await receivePort.first;
-        sendPort.send({
-          '_initializeControllerFuture':
-              jsonEncode(_initializeControllerFuture),
-          'myAudioPlayer': jsonEncode(myAudioPlayer),
-          'cameraController': jsonEncode(cameraController),
-          'recordingFilePath': jsonEncode(recordingFilePath)
-        });
+        await _initializeControllerFuture;
+        await cameraController.startVideoRecording(recordingFilePath);
       } catch (ex) {
         AppUtil.showToast('Unexpected error, please try again');
         Navigator.of(context).pop();
@@ -445,11 +435,11 @@ class _MelodyPageState extends State<MelodyPage> {
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
       print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success2!');
 
-      // success = await flutterFFmpeg.execute(
-      //     '-i ${appTempDirectoryPath}stereo_audio.wav -af "adelay=400:all=true" ${appTempDirectoryPath}added_silence.wav');
-      // print(success == 1
-      //     ? 'Added 1 s silence Failure!'
-      //     : 'Added 1 s silence Success!');
+      success = await flutterFFmpeg.execute(
+          '-i ${appTempDirectoryPath}decreased_music.mp3 -af "adelay=700:all=true" ${appTempDirectoryPath}added_silence.mp3');
+      print(success == 1
+          ? 'Added 1 s silence Failure!'
+          : 'Added 1 s silence Success!');
 
       info = await _flutterFFprobe
           .getMediaInformation('${appTempDirectoryPath}stereo_audio.wav');
@@ -1510,32 +1500,5 @@ class _MelodyPageState extends State<MelodyPage> {
     if (recordingStatus != RecordingStatus.Recording) {
       Navigator.of(context).pop();
     }
-  }
-}
-
-recordVideoInIsolate(SendPort sendPort) async {
-  // Open the ReceivePort to listen for incoming messages (optional)
-  var port = new ReceivePort();
-  MyAudioPlayer myAudioPlayer;
-  CameraController cameraController;
-  // Send messages to other Isolates
-  sendPort.send(port.sendPort);
-
-  // Listen for messages (optional)
-  await for (var args in port) {
-    // `data` is the message received.
-    myAudioPlayer = jsonDecode(args['myAudioPlayer']);
-    cameraController = jsonDecode(args['cameraController']);
-
-    await myAudioPlayer.play(onPlayingStarted: () async {
-      await jsonDecode(args['_initializeControllerFuture']);
-      await cameraController
-          .startVideoRecording(jsonDecode(args['recordingFilePath']));
-    });
-
-    sendPort.send({
-      'myAudioPlayer': jsonEncode(myAudioPlayer),
-      'cameraController': jsonEncode(cameraController)
-    });
   }
 }
