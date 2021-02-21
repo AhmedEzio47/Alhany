@@ -1,14 +1,18 @@
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/audio_recorder.dart';
+import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:sounds/sounds.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
-  SoundPlayer soundPlayer;
-  Track _track;
-  Stream<PlaybackDisposition> disposition;
+  AudioCache audioCache;
+
+  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+
+  Duration duration;
+  Duration position;
 
   final String url;
   final List<String> urlList;
@@ -17,74 +21,90 @@ class MyAudioPlayer with ChangeNotifier {
 
   MyAudioPlayer(
       {this.url, this.urlList, this.isLocal = false, this.onComplete}) {
-    //initAudioPlayer();
-    initSoundPlayer();
+    initAudioPlayer();
   }
 
   int index = 0;
-  Function onPlayingStarted;
-  bool _onPlayingStartedCalled = false;
 
-  initSoundPlayer() {
-    soundPlayer = SoundPlayer.noUI();
+  initAudioPlayer() {
+    advancedPlayer = AudioPlayer();
+    audioCache = AudioCache(fixedPlayer: advancedPlayer);
 
-    soundPlayer.onStarted = ({wasUser}) => onPlayingStarted();
-    disposition = soundPlayer.dispositionStream();
+    advancedPlayer.durationHandler = (d) {
+      duration = d;
+      notifyListeners();
+      // print('my duration:$duration');
+    };
+
+    advancedPlayer.positionHandler = (p) {
+      position = p;
+      print('P:${p.inMilliseconds}');
+      print('D:${duration.inMilliseconds}');
+      notifyListeners();
+
+      if (duration.inMilliseconds - p.inMilliseconds <
+          Constants.endPositionOffsetInMilliSeconds) {
+        stop();
+        if (urlList != null) {
+          if (this.index < urlList.length - 1)
+            this.index++;
+          else
+            this.index = 0;
+          play(index: this.index);
+          notifyListeners();
+        } else {
+          stop();
+        }
+      } else if (duration.inMilliseconds - p.inMilliseconds == 0) {
+        if (urlList != null) {
+          if (this.index < urlList.length - 1)
+            this.index++;
+          else
+            this.index = 0;
+          play(index: this.index);
+          notifyListeners();
+        } else {
+          stop();
+        }
+      }
+    };
   }
 
-  Future play({index, Function onPlayingStarted}) async {
-    print('In play:' + soundPlayer.playerState.toString());
-
-    if (soundPlayer.isPaused) {
-      await soundPlayer.resume();
-      return;
-    }
-    ;
-
-    if (isLocal) {
-      _track = Track.fromFile(url ?? urlList[index]);
-    } else {
-      _track = Track.fromURL(url ?? urlList[index]);
-    }
-    await soundPlayer.play(_track);
-
-    this.onPlayingStarted = onPlayingStarted;
+  Future play({index}) async {
     print('audio url: $url');
     if (index == null) {
       index = this.index;
     }
+    await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
+    playerState = AudioPlayerState.PLAYING;
     notifyListeners();
   }
 
   Future stop() async {
-    print('In stop:' + soundPlayer.playerState.toString());
-    try {
-      //await soundPlayer.release();
-      await soundPlayer.stop();
-      notifyListeners();
-      if (onComplete != null &&
-          MelodyPage.recordingStatus == RecordingStatus.Recording) {
-        onComplete();
-      }
-    } catch (ex) {}
-  }
-
-  Future pause() async {
-    print('In pause:' + soundPlayer.playerState.toString());
-    if (soundPlayer.isPlaying) {
-      await soundPlayer.pause();
-      notifyListeners();
+    await advancedPlayer.stop();
+    playerState = AudioPlayerState.STOPPED;
+    position = null;
+    duration = null;
+    notifyListeners();
+    if (onComplete != null &&
+        MelodyPage.recordingStatus == RecordingStatus.Recording) {
+      onComplete();
     }
   }
 
-  seek(Duration p) async {
-    await soundPlayer.seekTo(p);
+  Future pause() async {
+    await advancedPlayer.pause();
+    playerState = AudioPlayerState.PAUSED;
     notifyListeners();
   }
 
-  next() async {
-    await soundPlayer.stop();
+  seek(Duration p) {
+    advancedPlayer.seek(p);
+    notifyListeners();
+  }
 
+  next() {
+    advancedPlayer.stop();
     if (this.index < urlList.length - 1)
       this.index++;
     else
@@ -93,9 +113,8 @@ class MyAudioPlayer with ChangeNotifier {
     play(index: this.index);
   }
 
-  prev() async {
-    await soundPlayer.stop();
-
+  prev() {
+    advancedPlayer.stop();
     if (this.index > 0)
       this.index--;
     else

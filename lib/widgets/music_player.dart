@@ -11,20 +11,20 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:sounds/sounds.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 import 'custom_modal.dart';
 
 typedef void OnError(Exception exception);
 
-// enum PlayerState { stopped, playing, paused }
+enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
@@ -67,13 +67,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   MyAudioPlayer myAudioPlayer;
 
-  // get durationText => myAudioPlayer.duration != null
-  //     ? myAudioPlayer.duration.toString().split('.').first
-  //     : '';
-  //
-  // get positionText => myAudioPlayer.position != null
-  //     ? myAudioPlayer.position.toString().split('.').first
-  //     : '';
+  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
+  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
+
+  get durationText => myAudioPlayer.duration != null
+      ? myAudioPlayer.duration.toString().split('.').first
+      : '';
+
+  get positionText => myAudioPlayer.position != null
+      ? myAudioPlayer.position.toString().split('.').first
+      : '';
 
   bool isMuted = false;
   List<String> choices;
@@ -127,7 +130,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     super.dispose();
   }
 
-  //Duration _duration;
+  Duration _duration;
 
   void initAudioPlayer() async {
     List<String> urlList;
@@ -145,13 +148,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
     myAudioPlayer.addListener(() {
       if (mounted) {
         setState(() {
-          _isPlaying = myAudioPlayer.soundPlayer.isPlaying;
+          _duration = myAudioPlayer.duration;
         });
       }
     });
   }
-
-  bool _isPlaying = false;
 
   Future play() async {
     myAudioPlayer.play();
@@ -167,226 +168,213 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   NumberFormat _numberFormatter = new NumberFormat("##");
 
-  Widget _buildPlayer() => StreamBuilder(
-      stream: myAudioPlayer.disposition,
-      builder: (context, snapshot) {
-        return Container(
-          padding: EdgeInsets.all(0),
-          child: Padding(
-            padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: new BorderRadius.circular(20.0),
-                color: widget.backColor,
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                widget.isCompact
-                    ? Container()
-                    : SizedBox(
-                        height: 5,
-                      ),
-                widget.melodyList != null
-                    ? Text(
-                        widget.melodyList[myAudioPlayer.index].name,
-                        style: TextStyle(
-                            color: MyColors.textLightColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      )
-                    : widget.title != null
-                        ? Text(
-                            widget.title,
-                            style: TextStyle(
-                                color: MyColors.textLightColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          )
-                        : Container(),
-                Row(
-                  children: [
-                    widget.isCompact
-                        ? Container()
-                        : SizedBox(
-                            height: 10,
-                          ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: widget.playBtnPosition == PlayBtnPosition.left
-                          ? playPauseBtn()
-                          : Container(),
-                    ),
-                    (snapshot.data as PlaybackDisposition)?.position != null
-                        ? Text(
-                            '${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position?.inMinutes) ?? 0}:${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.position?.inSeconds ?? 0 % 60)}',
-                            style: TextStyle(color: MyColors.textLightColor),
-                          )
-                        : Text(
-                            '0:0',
-                            style: TextStyle(color: MyColors.textLightColor),
-                          ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      flex: 9,
-                      child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 5.0,
-                            thumbShape:
-                                RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                            overlayShape:
-                                RoundSliderOverlayShape(overlayRadius: 16.0),
-                          ),
-                          child: Slider(
-                              activeColor: MyColors.darkPrimaryColor,
-                              inactiveColor: Colors.grey.shade300,
-                              value: (snapshot.data as PlaybackDisposition)
-                                      ?.position
-                                      ?.inMilliseconds
-                                      ?.toDouble() ??
-                                  0.0,
-                              onChanged: (double value) {
-                                myAudioPlayer
-                                    .seek(Duration(seconds: value ~/ 1000));
-
-                                if (!_isPlaying) {
-                                  play();
-                                }
-                              },
-                              min: 0.0,
-                              max: (snapshot.data as PlaybackDisposition)
-                                          ?.duration !=
-                                      null
-                                  ? (snapshot.data as PlaybackDisposition)
-                                      ?.duration
-                                      ?.inMilliseconds
-                                      ?.toDouble()
-                                  : 1.7976931348623157e+308)),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    (snapshot.data as PlaybackDisposition)?.duration != null
-                        ? Text(
-                            '${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.duration?.inMinutes ?? 0)}:${_numberFormatter.format((snapshot.data as PlaybackDisposition)?.duration?.inSeconds ?? 0 % 60)}',
-                            style: TextStyle(color: MyColors.textLightColor),
-                          )
-                        : Text(
-                            '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
-                            style: TextStyle(color: MyColors.textLightColor),
-                          ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                  ],
-                ),
-                widget.isCompact
-                    ? Container()
-                    : SizedBox(
-                        height: 10,
-                      ),
-                widget.playBtnPosition == PlayBtnPosition.bottom
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          (widget.melody?.isSong ?? false)
-                              ? favouriteBtn()
-                              : Container(),
-                          widget.melodyList != null
-                              ? previousBtn()
-                              : Container(),
-                          playPauseBtn(),
-                          widget.melodyList != null ? nextBtn() : Container(),
-                          (!(widget.melody?.isSong ?? true) &&
-                                  widget.isRecordBtnVisible)
-                              ? SizedBox(
-                                  width: 20,
-                                )
-                              : Container(),
-                          (!(widget.melody?.isSong ?? true) &&
-                                  widget.isRecordBtnVisible)
-                              ? InkWell(
-                                  onTap: () => Navigator.of(context)
-                                      .pushNamed('/melody-page', arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.AUDIO
-                                  }),
-                                  child: Container(
-                                    height: widget.btnSize,
-                                    width: widget.btnSize,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.grey.shade300,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black54,
-                                          spreadRadius: 2,
-                                          blurRadius: 4,
-                                          offset: Offset(0,
-                                              2), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.mic,
-                                      color: MyColors.primaryColor,
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          (!(widget.melody?.isSong ?? true) &&
-                                  widget.isRecordBtnVisible)
-                              ? SizedBox(
-                                  width: 20,
-                                )
-                              : Container(),
-                          (!(widget.melody?.isSong ?? true) &&
-                                  widget.isRecordBtnVisible)
-                              ? InkWell(
-                                  onTap: () => Navigator.of(context).pushNamed(
-                                    '/melody-page',
-                                    arguments: {
-                                      'melody': widget.melody,
-                                      'type': Types.VIDEO
-                                    },
-                                  ),
-                                  child: Container(
-                                    height: widget.btnSize,
-                                    width: widget.btnSize,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.grey.shade300,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black54,
-                                          spreadRadius: 2,
-                                          blurRadius: 4,
-                                          offset: Offset(0,
-                                              2), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.videocam,
-                                      color: MyColors.primaryColor,
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          Constants.currentRoute != '/downloads'
-                              ? downloadOrOptions()
-                              : Container()
-                        ],
-                      )
-                    : Container(),
-                widget.playBtnPosition == PlayBtnPosition.bottom
-                    ? SizedBox(height: 10)
-                    : Container()
-              ]),
+  Widget _buildPlayer() => Container(
+        padding: EdgeInsets.all(0),
+        child: Padding(
+          padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: new BorderRadius.circular(20.0),
+              color: widget.backColor,
             ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 5,
+                    ),
+              widget.melodyList != null
+                  ? Text(
+                      widget.melodyList[myAudioPlayer.index].name,
+                      style: TextStyle(
+                          color: MyColors.textLightColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    )
+                  : widget.title != null
+                      ? Text(
+                          widget.title,
+                          style: TextStyle(
+                              color: MyColors.textLightColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        )
+                      : Container(),
+              Row(
+                children: [
+                  widget.isCompact
+                      ? Container()
+                      : SizedBox(
+                          height: 10,
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: widget.playBtnPosition == PlayBtnPosition.left
+                        ? playPauseBtn()
+                        : Container(),
+                  ),
+                  myAudioPlayer.position != null
+                      ? Text(
+                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        )
+                      : Text(
+                          '0:0',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 5.0,
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape:
+                              RoundSliderOverlayShape(overlayRadius: 16.0),
+                        ),
+                        child: Slider(
+                            activeColor: MyColors.darkPrimaryColor,
+                            inactiveColor: Colors.grey.shade300,
+                            value: myAudioPlayer.position?.inMilliseconds
+                                    ?.toDouble() ??
+                                0.0,
+                            onChanged: (double value) {
+                              myAudioPlayer
+                                  .seek(Duration(seconds: value ~/ 1000));
+
+                              if (!isPlaying) {
+                                play();
+                              }
+                            },
+                            min: 0.0,
+                            max: _duration != null
+                                ? _duration?.inMilliseconds?.toDouble()
+                                : 1.7976931348623157e+308)),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  myAudioPlayer.duration != null
+                      ? Text(
+                          '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        )
+                      : Text(
+                          '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 10,
+                    ),
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        (widget.melody?.isSong ?? false)
+                            ? favouriteBtn()
+                            : Container(),
+                        widget.melodyList != null ? previousBtn() : Container(),
+                        playPauseBtn(),
+                        widget.melodyList != null ? nextBtn() : Container(),
+                        (!(widget.melody?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        (!(widget.melody?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? InkWell(
+                                onTap: () => Navigator.of(context)
+                                    .pushNamed('/melody-page', arguments: {
+                                  'melody': widget.melody,
+                                  'type': Types.AUDIO
+                                }),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.mic,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                        (!(widget.melody?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        (!(widget.melody?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? InkWell(
+                                onTap: () => Navigator.of(context).pushNamed(
+                                  '/melody-page',
+                                  arguments: {
+                                    'melody': widget.melody,
+                                    'type': Types.VIDEO
+                                  },
+                                ),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.videocam,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                        Constants.currentRoute != '/downloads'
+                            ? downloadOrOptions()
+                            : Container()
+                      ],
+                    )
+                  : Container(),
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? SizedBox(height: 10)
+                  : Container()
+            ]),
           ),
-        );
-      });
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -394,9 +382,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget playPauseBtn() {
-    return !_isPlaying
+    return !isPlaying
         ? InkWell(
-            onTap: () => _isPlaying ? null : play(),
+            onTap: () => isPlaying ? null : play(),
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,
@@ -420,7 +408,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           )
         : InkWell(
-            onTap: _isPlaying ? () => pause() : null,
+            onTap: isPlaying ? () => pause() : null,
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,

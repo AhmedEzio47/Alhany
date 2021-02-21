@@ -9,6 +9,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
+import 'package:Alhany/services/my_sounds_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -210,15 +211,15 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer =
-          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
-      myAudioPlayer.addListener(() {});
+      mySoundsPlayer = MySoundsPlayer(
+          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer.addListener(() {});
 
-      await myAudioPlayer.play(onPlayingStarted: () async {
+      await mySoundsPlayer.play(onPlayingStarted: () async {
         try {
           await recorder.startRecording();
         } catch (ex) {
-          await myAudioPlayer.stop();
+          await mySoundsPlayer.stop();
           AppUtil.showToast('Unexpected error. Please try again.');
           Navigator.of(context).pop();
         }
@@ -297,9 +298,9 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer =
-          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
-      myAudioPlayer.addListener(() {});
+      mySoundsPlayer = MySoundsPlayer(
+          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer.addListener(() {});
 
       recordingFilePath += 'video_rec.mp4';
       try {
@@ -310,7 +311,7 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initCamera();
       }
 
-      await myAudioPlayer.play();
+      await mySoundsPlayer.play();
       try {
         await _initializeControllerFuture;
         await cameraController.startVideoRecording(recordingFilePath);
@@ -323,6 +324,7 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {}
   }
 
+  MySoundsPlayer mySoundsPlayer;
   MyAudioPlayer myAudioPlayer;
 
   Widget _headphonesDialog() {
@@ -394,10 +396,11 @@ class _MelodyPageState extends State<MelodyPage> {
     });
     MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
-    await myAudioPlayer.stop();
+    await mySoundsPlayer.stop();
 
     try {
       if (_type == Types.AUDIO) {
+        print('started saving');
         String result = await recorder.stopRecording();
         recordingFilePath = result;
         // String url = await AppUtil().uploadFile(File(recordingFilePath),
@@ -447,23 +450,31 @@ class _MelodyPageState extends State<MelodyPage> {
       //     ? 'Added 1 s silence Failure!'
       //     : 'Added 1 s silence Success!');
 
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation('$recordingFilePath');
-      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
-      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
-
-      if (mounted) {
-        setState(() {
-          _progressVisible = true;
-        });
-      }
+      // MediaInformation info =
+      //     await _flutterFFprobe.getMediaInformation('$recordingFilePath');
+      // _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      // _recordingDuration = double.parse(info.getMediaProperties()['duration']);
+      //
+      // if (mounted) {
+      //   setState(() {
+      //     _progressVisible = true;
+      //   });
+      // }
+      AppUtil.showFixedSnackBar(
+          context,
+          _scaffoldKey,
+          language(
+              en: 'Please hold on, it\'s not stuck',
+              ar: 'برجاء الإنتظار جاري معالجة الفيديو'));
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
-          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"${Constants.voiceVolume} ${Constants.musicVolume}\":duration=first:dropout_transition=1 $mergedFilePath");
-      print(success == 1 ? 'Failure!' : 'Success!');
-      setState(() {
-        _progressVisible = false;
-      });
+          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.4\":duration=first:dropout_transition=1 $mergedFilePath");
+      print(
+          success == 1 ? 'MERGE 2 sounds Failure!' : 'MERGE 2 sounds Success!');
+      _scaffoldKey.currentState?.removeCurrentSnackBar();
+      // setState(() {
+      //   _progressVisible = false;
+      // });
     } else {
       //STEP 1: EXTRACT AUDIO FROM VIDEO
       //AppUtil.showLoader(context);
@@ -540,9 +551,11 @@ class _MelodyPageState extends State<MelodyPage> {
       await initVideoPlayer();
     }
 
-    setState(() {
-      choosingImage = true;
-    });
+    if (mounted) {
+      setState(() {
+        choosingImage = true;
+      });
+    }
 
     print(success == 1 ? 'Failure!' : 'Success!');
   }
