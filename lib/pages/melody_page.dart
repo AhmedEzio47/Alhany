@@ -460,7 +460,8 @@ class _MelodyPageState extends State<MelodyPage> {
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
           "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.4\":duration=first:dropout_transition=1 $mergedFilePath");
-      print(success == 1 ? 'MERGE 2 sounds Failure!' : 'MERGE 2 sounds Success!');
+      print(
+          success == 1 ? 'MERGE 2 sounds Failure!' : 'MERGE 2 sounds Success!');
       setState(() {
         _progressVisible = false;
       });
