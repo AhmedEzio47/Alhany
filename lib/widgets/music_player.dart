@@ -24,7 +24,7 @@ import 'custom_modal.dart';
 
 typedef void OnError(Exception exception);
 
-enum PlayerState { stopped, playing, paused }
+// enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
@@ -142,14 +142,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
         urlList: urlList,
         isLocal: widget.isLocal,
         onComplete: widget.onComplete);
-    // myAudioPlayer.addListener(() {
-    //   if (mounted) {
-    //     setState(() {
-    //       _duration = myAudioPlayer.duration;
-    //     });
-    //   }
-    // });
+    myAudioPlayer.addListener(() {
+      if (mounted) {
+        setState(() {
+          _isPlaying = myAudioPlayer.soundPlayer.isPlaying;
+        });
+      }
+    });
   }
+
+  bool _isPlaying = false;
 
   Future play() async {
     myAudioPlayer.play();
@@ -247,7 +249,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 myAudioPlayer
                                     .seek(Duration(seconds: value ~/ 1000));
 
-                                if (!myAudioPlayer.soundPlayer.isPlaying) {
+                                if (!_isPlaying) {
                                   play();
                                 }
                               },
@@ -392,9 +394,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget playPauseBtn() {
-    return !myAudioPlayer.soundPlayer.isPlaying
+    return !_isPlaying
         ? InkWell(
-            onTap: () => myAudioPlayer.soundPlayer.isPlaying ? null : play(),
+            onTap: () => _isPlaying ? null : play(),
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,
@@ -418,7 +420,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           )
         : InkWell(
-            onTap: myAudioPlayer.soundPlayer.isPlaying ? () => pause() : null,
+            onTap: _isPlaying ? () => pause() : null,
             child: Container(
               height: widget.btnSize,
               width: widget.btnSize,

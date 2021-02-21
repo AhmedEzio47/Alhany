@@ -400,9 +400,9 @@ class _MelodyPageState extends State<MelodyPage> {
       if (_type == Types.AUDIO) {
         String result = await recorder.stopRecording();
         recordingFilePath = result;
-        String url = await AppUtil().uploadFile(File(recordingFilePath),
-            context, 'tests/test${path.extension(recordingFilePath)}');
-        print('test url:' + url);
+        // String url = await AppUtil().uploadFile(File(recordingFilePath),
+        //     context, 'tests/test${path.extension(recordingFilePath)}');
+        // print('test url:' + url);
       } else {
         await cameraController.stopVideoRecording();
       }
@@ -459,7 +459,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
-          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.4\":duration=first:dropout_transition=1 $mergedFilePath");
+          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"${Constants.voiceVolume} ${Constants.musicVolume}\":duration=first:dropout_transition=1 $mergedFilePath");
       print(success == 1 ? 'Failure!' : 'Success!');
       setState(() {
         _progressVisible = false;
