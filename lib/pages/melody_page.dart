@@ -400,6 +400,9 @@ class _MelodyPageState extends State<MelodyPage> {
       if (_type == Types.AUDIO) {
         String result = await recorder.stopRecording();
         recordingFilePath = result;
+        String url = await AppUtil().uploadFile(File(recordingFilePath),
+            context, 'tests/test${path.extension(recordingFilePath)}');
+        print('test url:' + url);
       } else {
         await cameraController.stopVideoRecording();
       }
