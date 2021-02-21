@@ -1,18 +1,8 @@
-//import 'package:Alhany/services/audio_background_service.dart';
-//import 'package:audio_service/audio_service.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sounds/sounds.dart';
-//import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
-
-// NOTE: Your entrypoint MUST be a top-level function.
-// void _audioPlayerTaskEntrypoint() async {
-//   AudioServiceBackground.run(() => AudioPlayerTask(mediaLibrary: mediaLibrary));
-// }
-
-//List<MediaItem> mediaLibrary = [];
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
@@ -35,79 +25,9 @@ class MyAudioPlayer with ChangeNotifier {
   Function onPlayingStarted;
   bool _onPlayingStartedCalled = false;
 
-  // initAudioPlayer() {
-  //   advancedPlayer = AudioPlayer();
-  //
-  //   // if (this.url != null) {
-  //   //   mediaLibrary = [
-  //   //     MediaItem(
-  //   //       album: "Science Friday",
-  //   //       title: "A Salute To Head-Scratching Science",
-  //   //       artist: "Science Friday and WNYC Studios",
-  //   //       artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
-  //   //       id: url,
-  //   //       duration: duration,
-  //   //     )
-  //   //   ];
-  //   // }
-  //   // AudioService.start(
-  //   //   backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-  //   //   androidNotificationChannelName: 'Audio Service Demo',
-  //   //   // Enable this if you want the Android service to exit the foreground state on pause.
-  //   //   //androidStopForegroundOnPause: true,
-  //   //   androidNotificationColor: 0xFF2196f3,
-  //   //   androidNotificationIcon: 'mipmap/ic_launcher',
-  //   //   androidEnableQueue: true,
-  //   // );
-  //   advancedPlayer.durationHandler = (d) {
-  //     duration = d;
-  //     notifyListeners();
-  //     // print('my duration:$duration');
-  //   };
-  //
-  //   advancedPlayer.positionHandler = (p) {
-  //     if (p.inMicroseconds > 0 &&
-  //         onPlayingStarted != null &&
-  //         !_onPlayingStartedCalled) {
-  //       _onPlayingStartedCalled = true;
-  //       onPlayingStarted();
-  //     }
-  //     position = p;
-  //     print('P:${p.inMilliseconds}');
-  //     //print('D:${duration.inMilliseconds}');
-  //     notifyListeners();
-  //
-  //     if (duration.inMilliseconds - p.inMilliseconds <
-  //         Constants.endPositionOffsetInMilliSeconds) {
-  //       stop();
-  //       if (urlList != null) {
-  //         if (this.index < urlList.length - 1)
-  //           this.index++;
-  //         else
-  //           this.index = 0;
-  //         play(index: this.index);
-  //         notifyListeners();
-  //       } else {
-  //         stop();
-  //       }
-  //     } else if (duration.inMilliseconds - p.inMilliseconds == 0) {
-  //       if (urlList != null) {
-  //         if (this.index < urlList.length - 1)
-  //           this.index++;
-  //         else
-  //           this.index = 0;
-  //         play(index: this.index);
-  //         notifyListeners();
-  //       } else {
-  //         stop();
-  //       }
-  //     }
-  //   };
-  // }
-
   initSoundPlayer() {
     soundPlayer = SoundPlayer.noUI();
-    //soundPlayer.onStopped = ({wasUser}) => soundPlayer.release();
+    soundPlayer.onStarted = ({wasUser}) => onPlayingStarted();
     disposition = soundPlayer.dispositionStream();
   }
 
@@ -136,6 +56,7 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   Future stop() async {
+    print(soundPlayer.playerState.toString());
     try {
       await soundPlayer.release();
       await soundPlayer.stop();

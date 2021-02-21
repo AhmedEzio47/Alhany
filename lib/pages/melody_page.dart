@@ -214,14 +214,16 @@ class _MelodyPageState extends State<MelodyPage> {
           MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
       myAudioPlayer.addListener(() {});
 
-      await myAudioPlayer.play();
-      try {
-        await recorder.startRecording();
-      } catch (ex) {
-        await myAudioPlayer.stop();
-        AppUtil.showToast('Unexpected error. Please try again.');
-        Navigator.of(context).pop();
-      }
+      await myAudioPlayer.play(onPlayingStarted: () async {
+        try {
+          await recorder.startRecording();
+        } catch (ex) {
+          await myAudioPlayer.stop();
+          AppUtil.showToast('Unexpected error. Please try again.');
+          Navigator.of(context).pop();
+        }
+      });
+
       _recordingTimer();
     } else {}
   }
@@ -433,19 +435,20 @@ class _MelodyPageState extends State<MelodyPage> {
 
       success = await flutterFFmpeg.execute(
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
-      print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success2!');
+      print(success == 1 ? 'TO STEREO Failure2!' : 'TO STEREO Success2!');
 
-      success = await flutterFFmpeg.execute(
-          '-i ${appTempDirectoryPath}decreased_music.mp3 -af "adelay=700:all=true" ${appTempDirectoryPath}added_silence.mp3');
-      print(success == 1
-          ? 'Added 1 s silence Failure!'
-          : 'Added 1 s silence Success!');
+      // success = await flutterFFmpeg.execute(
+      //     '-i ${appTempDirectoryPath}decreased_music.mp3 -af "adelay=1s:all=true" ${appTempDirectoryPath}added_silence.mp3');
+      // print(success == 1
+      //     ? 'Added 1 s silence Failure!'
+      //     : 'Added 1 s silence Success!');
 
       info = await _flutterFFprobe
           .getMediaInformation('${appTempDirectoryPath}stereo_audio.wav');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
 
+      //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
           "-y -i ${appTempDirectoryPath}stereo_audio.wav -i ${appTempDirectoryPath}decreased_music.mp3 -filter_complex amerge=inputs=2 -shortest $mergedFilePath");
       print(success == 1 ? 'Failure!' : 'Success!');

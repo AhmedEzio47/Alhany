@@ -36,16 +36,6 @@ class AudioRecorder {
 
   Future startRecording() async {
     await _recorder.record(_track);
-    //var current = await _recorder.current();
-
-    //_recording = current;
-
-    // Timer.periodic(Duration(milliseconds: 10), (Timer t) async {
-    //   var current = await _recorder.current();
-    //
-    //   _recording = current;
-    //   timer = t;
-    // });
   }
 
   Future<String> stopRecording() async {
