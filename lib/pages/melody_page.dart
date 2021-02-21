@@ -426,7 +426,6 @@ class _MelodyPageState extends State<MelodyPage> {
       success = await flutterFFmpeg.execute(
           "-i $recordingFilePath -ac 2 -filter:a \"volume=${Constants.voiceVolume}\" ${appTempDirectoryPath}stereo_audio.wav");
       print(success == 1 ? 'TO STEREO Failure!' : 'TO STEREO Success!');
-
       MediaInformation info =
       await _flutterFFprobe.getMediaInformation(melodyPath);
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
@@ -436,7 +435,6 @@ class _MelodyPageState extends State<MelodyPage> {
           _progressVisible = true;
         });
       }
-
       success = await flutterFFmpeg.execute(
           "-i $melodyPath -filter:a \"volume=${Constants.musicVolume}\" ${appTempDirectoryPath}decreased_music.mp3");
       print(success == 1 ? 'TO STEREO Failure2!' : 'TO STEREO Success2!');
@@ -446,22 +444,16 @@ class _MelodyPageState extends State<MelodyPage> {
       // print(success == 1
       //     ? 'Added 1 s silence Failure!'
       //     : 'Added 1 s silence Success!');
-
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation('$recordingFilePath');
+/*
+      info = await _flutterFFprobe
+          .getMediaInformation('${appTempDirectoryPath}stereo_audio.wav');
       _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
       _recordingDuration = double.parse(info.getMediaProperties()['duration']);
-
-      if (mounted) {
-        setState(() {
-          _progressVisible = true;
-        });
-      }
+*/
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
           "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.4\":duration=first:dropout_transition=1 $mergedFilePath");
-      print(
-          success == 1 ? 'MERGE 2 sounds Failure!' : 'MERGE 2 sounds Success!');
+      print(success == 1 ? 'Failure!' : 'Success!');
       setState(() {
         _progressVisible = false;
       });

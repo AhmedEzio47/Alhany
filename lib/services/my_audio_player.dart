@@ -27,13 +27,12 @@ class MyAudioPlayer with ChangeNotifier {
 
   initSoundPlayer() {
     soundPlayer = SoundPlayer.noUI();
-
     soundPlayer.onStarted = ({wasUser}) => onPlayingStarted();
     disposition = soundPlayer.dispositionStream();
   }
 
   Future play({index, Function onPlayingStarted}) async {
-    print('In play:' + soundPlayer.playerState.toString());
+    print(soundPlayer.playerState.toString());
 
     if (soundPlayer.isPaused) {
       await soundPlayer.resume();
@@ -46,7 +45,7 @@ class MyAudioPlayer with ChangeNotifier {
     } else {
       _track = Track.fromURL(url ?? urlList[index]);
     }
-    await soundPlayer.play(_track);
+    soundPlayer.play(_track);
 
     this.onPlayingStarted = onPlayingStarted;
     print('audio url: $url');
@@ -57,9 +56,9 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   Future stop() async {
-    print('In stop:' + soundPlayer.playerState.toString());
+    print(soundPlayer.playerState.toString());
     try {
-      //await soundPlayer.release();
+      await soundPlayer.release();
       await soundPlayer.stop();
       notifyListeners();
       if (onComplete != null &&
@@ -70,20 +69,20 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   Future pause() async {
-    print('In pause:' + soundPlayer.playerState.toString());
+    print(soundPlayer.playerState.toString());
     if (soundPlayer.isPlaying) {
       await soundPlayer.pause();
-      notifyListeners();
     }
-  }
-
-  seek(Duration p) async {
-    await soundPlayer.seekTo(p);
     notifyListeners();
   }
 
-  next() async {
-    await soundPlayer.stop();
+  seek(Duration p) {
+    soundPlayer.seekTo(p);
+    notifyListeners();
+  }
+
+  next() {
+    soundPlayer.stop();
 
     if (this.index < urlList.length - 1)
       this.index++;
@@ -93,8 +92,8 @@ class MyAudioPlayer with ChangeNotifier {
     play(index: this.index);
   }
 
-  prev() async {
-    await soundPlayer.stop();
+  prev() {
+    soundPlayer.stop();
 
     if (this.index > 0)
       this.index--;
