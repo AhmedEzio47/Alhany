@@ -310,14 +310,15 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initCamera();
       }
 
-      await myAudioPlayer.play();
-      try {
-        await _initializeControllerFuture;
-        await cameraController.startVideoRecording(recordingFilePath);
-      } catch (ex) {
-        AppUtil.showToast('Unexpected error, please try again');
-        Navigator.of(context).pop();
-      }
+      await myAudioPlayer.play(onPlayingStarted: () async {
+        try {
+          await _initializeControllerFuture;
+          await cameraController.startVideoRecording(recordingFilePath);
+        } catch (ex) {
+          AppUtil.showToast('Unexpected error, please try again');
+          Navigator.of(context).pop();
+        }
+      });
 
       _recordingTimer();
     } else {}
@@ -471,47 +472,48 @@ class _MelodyPageState extends State<MelodyPage> {
           language(
               en: 'Please hold on, it\'s not stuck',
               ar: 'برجاء الإنتظار جاري معالجة الفيديو'));
-      success = await flutterFFmpeg.execute(
-          '-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}extracted_audio.mp3');
-      print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
-
-      success = await flutterFFmpeg.execute(
-          '-i $melodyPath -af "adelay=700:all=true" ${appTempDirectoryPath}added_silence.mp3');
-      print(success == 1
-          ? 'Added 1 s silence Failure!'
-          : 'Added 1 s silence Success!');
-
-      //Navigator.of(context).pop();
-      //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
-      success = await flutterFFmpeg.execute(
-          "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i ${appTempDirectoryPath}added_silence.mp3 -filter_complex amerge=inputs=2 -shortest ${appTempDirectoryPath}final_audio.mp3");
-
-      _scaffoldKey.currentState?.removeCurrentSnackBar();
-
-      MediaInformation info = await _flutterFFprobe
-          .getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
-      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
-      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
-      print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
-
-      if (mounted) {
-        setState(() {
-          _progressVisible = true;
-        });
-      }
+      // success = await flutterFFmpeg.execute(
+      //     '-i $recordingFilePath -ac 2 -filter:a \"volume=3.5\" ${appTempDirectoryPath}extracted_audio.mp3');
+      // print(success == 1 ? 'EXTRACT Failure!' : 'EXTRACT Success!');
+      //
+      // success = await flutterFFmpeg.execute(
+      //     '-i $melodyPath -af "adelay=700:all=true" ${appTempDirectoryPath}added_silence.mp3');
+      // print(success == 1
+      //     ? 'Added 1 s silence Failure!'
+      //     : 'Added 1 s silence Success!');
+      //
+      // //Navigator.of(context).pop();
+      // //STEP 2:MERGE BOTH MELODY AND EXTRACTED AUDIO
+      // success = await flutterFFmpeg.execute(
+      //     "-y -i ${appTempDirectoryPath}extracted_audio.mp3 -i ${appTempDirectoryPath}added_silence.mp3 -filter_complex amerge=inputs=2 -shortest ${appTempDirectoryPath}final_audio.mp3");
+      //
+      // _scaffoldKey.currentState?.removeCurrentSnackBar();
+      //
+      // MediaInformation info = await _flutterFFprobe
+      //     .getMediaInformation('${appTempDirectoryPath}final_audio.mp3');
+      // _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      // _recordingDuration = double.parse(info.getMediaProperties()['duration']);
+      // print(success == 1 ? 'MERGE Failure!' : 'MERGE Success!');
+      //
+      // if (mounted) {
+      //   setState(() {
+      //     _progressVisible = true;
+      //   });
+      // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          "-y -i ${appTempDirectoryPath}final_audio.mp3 -i $recordingFilePath -map 0:a -map 1:v -shortest ${appTempDirectoryPath}final_video.mp4");
+          '-i $recordingFilePath -i $melodyPath -filter_complex "[1:a]volume=0.7,apad[A];[0:a]volume=2,[A]amerge[out]" -c:v copy -map 0:v -map [out] -y -shortest ${appTempDirectoryPath}final_video.mp4');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video
       success = await flutterFFmpeg.execute(
           "-i ${appTempDirectoryPath}final_video.mp4 -filter:v scale=720:-1 -c:a copy $mergedFilePath");
-      print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
+      print(success == 1 ? 'SCALE Failure!' : 'SCALE Success!');
 
       success = await flutterFFmpeg.execute(
           "-y -i $mergedFilePath -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");
       print(success == 1 ? 'THUMBNAIL Failure!' : 'THUMBNAIL Success!');
+      _scaffoldKey.currentState?.removeCurrentSnackBar();
       setState(() {
         _progressVisible = false;
       });
