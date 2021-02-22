@@ -8,7 +8,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/my_audio_player.dart';
+import 'package:Alhany/services/my_sounds_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -210,15 +210,15 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer =
-          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
-      myAudioPlayer.addListener(() {});
+      mySoundsPlayer = MySoundsPlayer(
+          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer.addListener(() {});
 
-      await myAudioPlayer.play(onPlayingStarted: () async {
+      await mySoundsPlayer.play(onPlayingStarted: () async {
         try {
           await recorder.startRecording();
         } catch (ex) {
-          await myAudioPlayer.stop();
+          await mySoundsPlayer.stop();
           AppUtil.showToast('Unexpected error. Please try again.');
           Navigator.of(context).pop();
         }
@@ -297,9 +297,9 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      myAudioPlayer =
-          MyAudioPlayer(url: melodyPath, onComplete: saveRecord, isLocal: true);
-      myAudioPlayer.addListener(() {});
+      mySoundsPlayer = MySoundsPlayer(
+          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer.addListener(() {});
 
       recordingFilePath += 'video_rec.mp4';
       try {
@@ -310,7 +310,7 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initCamera();
       }
 
-      await myAudioPlayer.play(onPlayingStarted: () async {
+      await mySoundsPlayer.play(onPlayingStarted: () async {
         try {
           await _initializeControllerFuture;
           await cameraController.startVideoRecording(recordingFilePath);
@@ -324,7 +324,7 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {}
   }
 
-  MyAudioPlayer myAudioPlayer;
+  MySoundsPlayer mySoundsPlayer;
 
   Widget _headphonesDialog() {
     return Container(
@@ -395,7 +395,7 @@ class _MelodyPageState extends State<MelodyPage> {
     });
     MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
-    await myAudioPlayer.stop();
+    await mySoundsPlayer.stop();
 
     try {
       if (_type == Types.AUDIO) {
