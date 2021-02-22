@@ -138,8 +138,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () async {
-              Navigator.of(context).push(
-                  WebViewModal(url: 'https://skippar.com/privacy-policy/'));
+              Navigator.of(context)
+                  .push(WebViewModal(url: Strings.privacy_policy_link));
             },
             title: Text(
               language(ar: 'سياسة الخصوصية', en: 'Privacy policy'),
@@ -149,6 +149,22 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
             leading: Icon(
               Icons.privacy_tip_outlined,
+              color: MyColors.primaryColor,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
+              Navigator.of(context)
+                  .push(WebViewModal(url: Strings.terms_of_service_link));
+            },
+            title: Text(
+              language(ar: 'شروط الخدمة', en: 'Terms of Service'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.assignment_sharp,
               color: MyColors.primaryColor,
             ),
           ),

@@ -458,7 +458,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
-          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.4\":duration=first:dropout_transition=1 $mergedFilePath");
+          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.8\":duration=first:dropout_transition=1 $mergedFilePath");
       print(success == 1 ? 'Failure!' : 'Success!');
       setState(() {
         _progressVisible = false;
@@ -502,7 +502,7 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=0.5[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=0.8[a2]; [a1][a2]amerge,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -map 1:v -map "[out]" -c:v copy -c:a aac -shortest ${appTempDirectoryPath}final_video.mp4');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=0.8[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=4[a2]; [a1][a2]amerge,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -map 1:v -map "[out]" -c:v copy -c:a aac -shortest ${appTempDirectoryPath}final_video.mp4');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video

@@ -920,8 +920,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     Navigator.of(context).push(WebViewModal(
-                                        url:
-                                            'https://skippar.com/privacy-policy/'));
+                                        url: Strings.terms_of_service_link));
                                     print('Terms of Service"');
                                   }),
                             TextSpan(text: ' and that you have read our '),
@@ -931,8 +930,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     Navigator.of(context).push(WebViewModal(
-                                        url:
-                                            'https://skippar.com/privacy-policy/'));
+                                        url: Strings.privacy_policy_link));
                                     print('Privacy Policy"');
                                   }),
                           ],

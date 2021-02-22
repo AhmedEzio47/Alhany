@@ -92,4 +92,10 @@ class Strings {
 
   static const en_leave_reply = 'Leave a reply...';
   static const ar_leave_reply = '...اترك ردا';
+
+  //Links
+  static const privacy_policy_link =
+      'https://www.alhaniiraq.com/privacy-policy/';
+  static const terms_of_service_link =
+      'https://www.alhaniiraq.com/terms-of-service/';
 }
