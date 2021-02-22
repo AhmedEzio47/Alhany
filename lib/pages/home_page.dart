@@ -471,120 +471,105 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _melodiesPage() {
-    return SingleChildScrollView(
-      controller: _melodiesPageScrollController,
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height, // or something similar :)
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: Constants.language == 'en'
-              ? CrossAxisAlignment.start
-              : CrossAxisAlignment.end,
-          children: [
-            Container(
-              height: 140,
-              child: Row(
-                children: [
-                  Flexible(
-                    fit: FlexFit.tight,
-                    flex: 3,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      color: Colors.black26,
-                      child: ListView.builder(
-                          itemCount: _singers.length + 1,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            return index < _singers.length
-                                ? InkWell(
-                                    onTap: () {
-                                      Navigator.of(context).pushNamed(
-                                          '/singer-page',
-                                          arguments: {
-                                            'singer': _singers[index],
-                                            'data_type': DataTypes.MELODIES
-                                          });
-                                    },
-                                    child: Container(
-                                      height: 120,
-                                      width: 120,
-                                      child: Column(
-                                        children: [
-                                          CachedImage(
-                                            width: 100,
-                                            height: 100,
-                                            imageShape: BoxShape.circle,
-                                            imageUrl: _singers[index].imageUrl,
-                                            defaultAssetImage:
-                                                Strings.default_profile_image,
-                                          ),
-                                          Text(
-                                            _singers[index].name,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.visible,
-                                            style: TextStyle(
-                                                color: MyColors.textLightColor),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : _singers.length == 15
-                                    ? InkWell(
-                                        onTap: () {
-                                          Navigator.of(context)
-                                              .pushNamed('/singers-page');
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 8.0,
-                                              left: 8.0,
-                                              bottom: 70),
-                                          child: Center(
-                                              child: Container(
-                                            padding: EdgeInsets.all(8),
-                                            color: MyColors.lightPrimaryColor,
-                                            child: Text(
-                                              'VIEW ALL',
+    return SizedBox(
+      height: MediaQuery.of(context).size.height, // or something similar :)
+      child: CustomScrollView(
+        controller: _melodiesPageScrollController,
+        slivers: [
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                height: 140,
+                child: Row(
+                  children: [
+                    Flexible(
+                      fit: FlexFit.tight,
+                      flex: 3,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        color: Colors.black26,
+                        child: ListView.builder(
+                            itemCount: _singers.length + 1,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              return index < _singers.length
+                                  ? InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed(
+                                            '/singer-page',
+                                            arguments: {
+                                              'singer': _singers[index],
+                                              'data_type': DataTypes.MELODIES
+                                            });
+                                      },
+                                      child: Container(
+                                        height: 120,
+                                        width: 120,
+                                        child: Column(
+                                          children: [
+                                            CachedImage(
+                                              width: 100,
+                                              height: 100,
+                                              imageShape: BoxShape.circle,
+                                              imageUrl:
+                                                  _singers[index].imageUrl,
+                                              defaultAssetImage:
+                                                  Strings.default_profile_image,
+                                            ),
+                                            Text(
+                                              _singers[index].name,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.visible,
                                               style: TextStyle(
                                                   color:
-                                                      MyColors.darkPrimaryColor,
-                                                  decoration:
-                                                      TextDecoration.underline),
-                                            ),
-                                          )),
+                                                      MyColors.textLightColor),
+                                            )
+                                          ],
                                         ),
-                                      )
-                                    : Container();
-                          }),
+                                      ),
+                                    )
+                                  : _singers.length == 15
+                                      ? InkWell(
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pushNamed('/singers-page');
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 8.0,
+                                                left: 8.0,
+                                                bottom: 70),
+                                            child: Center(
+                                                child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              color: MyColors.lightPrimaryColor,
+                                              child: Text(
+                                                'VIEW ALL',
+                                                style: TextStyle(
+                                                    color: MyColors
+                                                        .darkPrimaryColor,
+                                                    decoration: TextDecoration
+                                                        .underline),
+                                              ),
+                                            )),
+                                          ),
+                                        )
+                                      : Container();
+                            }),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            // Flexible(
-            //     fit: FlexFit.tight,flex: 1, child:               Container(
-            //   margin: EdgeInsets.symmetric(horizontal: 0),
-            //   transform: Matrix4.translationValues(0.0, -30.0, 0.0),
-            //   padding: EdgeInsets.symmetric(horizontal: 16),
-            //   color: MyColors.lightPrimaryColor,
-            //   width: MediaQuery.of(context).size.width,
-            //   alignment: Alignment.centerRight,
-            //   child: Text(
-            //     language(en: 'Latest records', ar: 'آخر المنشورات'),
-            //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            //   ),
-            // ),
-            // ),
-            Flexible(
-                fit: FlexFit.loose,
-                flex: 8,
-                child: MediaQuery.removePadding(
-                    context: context, removeTop: true, child: recordListView()))
-          ],
-        ),
+            ]),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              MediaQuery.removePadding(
+                  context: context, removeTop: true, child: recordListView())
+            ]),
+          ),
+        ],
       ),
     );
   }
