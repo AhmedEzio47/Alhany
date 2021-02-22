@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:video_player/video_player.dart';
 
+import '../app_util.dart';
 import 'app_page.dart';
 
 VideoPlayerController _controller;
@@ -156,9 +157,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
     });
   }
 
-  void _goToMelodyPage() {
-    Navigator.of(context)
-        .pushNamed('/melody-page', arguments: {'melody': widget.melody});
+  void _goToMelodyPage() async {
+    Navigator.of(context).pushNamed('/melody-page',
+        arguments: {'melody': widget.melody, 'type': Types.AUDIO});
   }
 
   Record _record;
@@ -564,8 +565,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
           child: Align(
             alignment: Alignment.topLeft,
             child: InkWell(
-              onTap: () => Navigator.of(context).pushNamed('/melody-page',
-                  arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
+              onTap: () => _goToMelodyPage(),
               child: Container(
                 padding: EdgeInsets.only(bottom: 20),
                 child: Column(

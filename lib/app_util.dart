@@ -10,6 +10,7 @@ import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info/device_info.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -504,6 +505,36 @@ class AppUtil with ChangeNotifier {
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
         Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
     Constants.isFacebookOrGoogleUser = false;
+  }
+
+  static Future<bool> checkSysVersionForMelodyPage() async {
+    if (Platform.isAndroid) {
+      var androidInfo = await DeviceInfoPlugin().androidInfo;
+      var release = androidInfo.version.release;
+      var sdkInt = androidInfo.version.sdkInt;
+      var manufacturer = androidInfo.manufacturer;
+      var model = androidInfo.model;
+      print('Android $release (SDK $sdkInt), $manufacturer $model');
+      if (double.parse(release) < 8) {
+        return false;
+      }
+      return true;
+      // Android 9 (SDK 28), Xiaomi Redmi Note 7
+    }
+
+    if (Platform.isIOS) {
+      var iosInfo = await DeviceInfoPlugin().iosInfo;
+      var systemName = iosInfo.systemName;
+      var version = iosInfo.systemVersion;
+      var name = iosInfo.name;
+      var model = iosInfo.model;
+      print('$systemName $version, $name $model');
+      if (double.parse(version) < 12) {
+        return false;
+      }
+      return true;
+      // iOS 13.1, iPhone 11 Pro Max iPhone
+    }
   }
 }
 

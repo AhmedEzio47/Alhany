@@ -26,6 +26,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart' as video_player;
 
+import '../app_util.dart';
+
 enum Types { VIDEO, AUDIO }
 
 class MelodyPage extends StatefulWidget {
@@ -1182,11 +1184,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           value: Constants.currentMelodyLevel ?? _dropdownValue,
                           onChanged: (choice) async {
                             Constants.currentMelodyLevel = choice;
-                            Navigator.of(context).pushReplacementNamed(
-                                '/melody-page',
-                                arguments: {
-                                  'melody': widget.melody,
-                                });
+                            _goToMelodyPage(Types.AUDIO);
                           },
                           items: (widget.melody.levelUrls.keys.toList())
                               .map<DropdownMenuItem<dynamic>>((dynamic value) {
@@ -1337,6 +1335,16 @@ class _MelodyPageState extends State<MelodyPage> {
                   ),
                 ],
                 onChanged: (type) async {
+                  if (type == Types.VIDEO) {
+                    bool canRecord =
+                        await AppUtil.checkSysVersionForMelodyPage();
+                    if (!canRecord) {
+                      AppUtil.showToast(language(
+                          en: 'Unsupported device', ar: 'جهازك غير مدعوم'));
+                      return;
+                    }
+                  }
+
                   setState(() {
                     _type = type;
                   });
@@ -1351,6 +1359,21 @@ class _MelodyPageState extends State<MelodyPage> {
         ],
       ),
     );
+  }
+
+  void _goToMelodyPage(Types type) async {
+    if (type == Types.AUDIO)
+      Navigator.of(context).pushNamed('/melody-page',
+          arguments: {'melody': widget.melody, 'type': type});
+    else {
+      bool canRecord = await AppUtil.checkSysVersionForMelodyPage();
+      if (canRecord)
+        Navigator.of(context).pushNamed('/melody-page',
+            arguments: {'melody': widget.melody, 'type': type});
+      else
+        AppUtil.showToast(
+            language(en: 'Unsupported device', ar: 'جهازك غير مدعوم'));
+    }
   }
 
   Widget progressPage() {

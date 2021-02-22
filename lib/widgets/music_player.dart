@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:stripe_payment/stripe_payment.dart';
 
+import '../pages/melody_page.dart';
 import 'custom_modal.dart';
 
 typedef void OnError(Exception exception);
@@ -166,6 +167,23 @@ class _MusicPlayerState extends State<MusicPlayer> {
     await myAudioPlayer.stop();
   }
 
+  void _goToMelodyPage(Types type) async {
+    Navigator.of(context).pushNamed('/melody-page',
+        arguments: {'melody': widget.melody, 'type': type});
+    // if (type == Types.AUDIO)
+    //   Navigator.of(context).pushNamed('/melody-page',
+    //       arguments: {'melody': widget.melody, 'type': type});
+    // else {
+    //   bool canRecord = await AppUtil.checkSysVersionForMelodyPage();
+    //   if (canRecord)
+    //     Navigator.of(context).pushNamed('/melody-page',
+    //         arguments: {'melody': widget.melody, 'type': type});
+    //   else
+    //     AppUtil.showToast(
+    //         language(en: 'Unsupported device', ar: 'جهازك غير مدعوم'));
+    // }
+  }
+
   NumberFormat _numberFormatter = new NumberFormat("##");
 
   Widget _buildPlayer() => Container(
@@ -295,11 +313,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melody?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melody,
-                                  'type': Types.AUDIO
-                                }),
+                                onTap: () => _goToMelodyPage(Types.AUDIO),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -332,13 +346,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melody?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                  '/melody-page',
-                                  arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.VIDEO
-                                  },
-                                ),
+                                onTap: () => _goToMelodyPage(Types.VIDEO),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
