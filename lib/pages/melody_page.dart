@@ -311,16 +311,17 @@ class _MelodyPageState extends State<MelodyPage> {
       }
 
       print('started playing melody');
-      await mySoundsPlayer.play(onPlayingStarted: () async {
-        print('started video recording');
-        try {
-          await _initializeControllerFuture;
-          await cameraController.startVideoRecording(recordingFilePath);
-        } catch (ex) {
-          AppUtil.showToast('Unexpected error, please try again');
-          Navigator.of(context).pop();
-        }
+      Future.delayed(Duration(milliseconds: 550), () async {
+        await mySoundsPlayer.play();
       });
+      print('started video recording');
+      try {
+        await _initializeControllerFuture;
+        await cameraController.startVideoRecording(recordingFilePath);
+      } catch (ex) {
+        AppUtil.showToast('Unexpected error, please try again');
+        Navigator.of(context).pop();
+      }
 
       _recordingTimer();
     } else {}
