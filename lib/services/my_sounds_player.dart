@@ -42,9 +42,10 @@ class MySoundsPlayer with ChangeNotifier {
     } else {
       _track = Track.fromURL(url ?? urlList[index]);
     }
-    soundPlayer.play(_track);
-
     this.onPlayingStarted = onPlayingStarted;
+
+    await soundPlayer.play(_track);
+
     print('audio url: $url');
     if (index == null) {
       index = this.index;

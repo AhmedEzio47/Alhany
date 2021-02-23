@@ -310,7 +310,9 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initCamera();
       }
 
+      print('started playing melody');
       await mySoundsPlayer.play(onPlayingStarted: () async {
+        print('started video recording');
         try {
           await _initializeControllerFuture;
           await cameraController.startVideoRecording(recordingFilePath);
