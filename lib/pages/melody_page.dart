@@ -123,8 +123,15 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {
       url = widget.melody.levelUrls.values.elementAt(0).toString();
     }
-
-    String filePath = await AppUtil.downloadFile(url);
+    String filePath;
+    try {
+      filePath = await AppUtil.downloadFile(url);
+    } catch (ex) {
+      print('Melody download error:${ex.toString()}');
+      AppUtil.showToast('Error, please try again.');
+      Navigator.of(context).pop();
+      return;
+    }
 
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     //print("File Duration: ${info.getMediaProperties()['duration']}");
@@ -311,7 +318,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
 
       print('started playing melody');
-      Future.delayed(Duration(milliseconds: 550), () async {
+      Future.delayed(Duration(milliseconds: 750), () async {
         await mySoundsPlayer.play();
       });
       print('started video recording');
@@ -461,7 +468,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
-          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"7 0.8\":duration=first:dropout_transition=1 $mergedFilePath");
+          "-i $recordingFilePath -i $melodyPath -filter_complex amix=inputs=2:weights=\"${Constants.voiceVolume} ${Constants.musicVolume}\":duration=first:dropout_transition=1 $mergedFilePath");
       print(success == 1 ? 'Failure!' : 'Success!');
       setState(() {
         _progressVisible = false;
@@ -505,7 +512,7 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=0.8[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=5[a2]; [a1][a2]amerge,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -map 1:v -map [out] -c:v copy -c:a libmp3lame -shortest $mergedFilePath');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -map 1:v -map [out] -c:v copy -c:a libmp3lame -shortest $mergedFilePath');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       // //Scale video
@@ -996,12 +1003,12 @@ class _MelodyPageState extends State<MelodyPage> {
                                     // });
                                   }
                                 : null,
-                            color: MyColors.primaryColor,
+                            color: MyColors.accentColor,
                             child: Text(
                               imageVideoPath == null
                                   ? 'Choose Image & Submit'
                                   : 'Done',
-                              style: TextStyle(color: MyColors.textLightColor),
+                              style: TextStyle(color: MyColors.textDarkColor),
                             ),
                           ),
                           SizedBox(
@@ -1012,10 +1019,10 @@ class _MelodyPageState extends State<MelodyPage> {
                               await AppUtil.deleteFiles();
                               Navigator.of(context).pop();
                             },
-                            color: MyColors.primaryColor,
+                            color: MyColors.accentColor,
                             child: Text(
                               'Cancel',
-                              style: TextStyle(color: MyColors.textLightColor),
+                              style: TextStyle(color: MyColors.textDarkColor),
                             ),
                           ),
                         ],
@@ -1049,7 +1056,7 @@ class _MelodyPageState extends State<MelodyPage> {
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, "/", (r) => false);
                               },
-                              color: MyColors.primaryColor,
+                              color: MyColors.accentColor,
                               child: Text(
                                 'Submit',
                                 style:
@@ -1065,11 +1072,10 @@ class _MelodyPageState extends State<MelodyPage> {
                                 await AppUtil.deleteFiles();
                                 Navigator.of(context).pop();
                               },
-                              color: MyColors.primaryColor,
+                              color: MyColors.accentColor,
                               child: Text(
                                 'Cancel',
-                                style:
-                                    TextStyle(color: MyColors.textLightColor),
+                                style: TextStyle(color: MyColors.textDarkColor),
                               ),
                             ),
                           ],

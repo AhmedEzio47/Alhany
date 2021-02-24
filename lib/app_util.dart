@@ -340,8 +340,8 @@ class AppUtil with ChangeNotifier {
   static showLoader(BuildContext context) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
-            loaderBackground: MyColors.primaryColor,
-            iconColor: MyColors.iconLightColor,
+            loaderBackground: MyColors.accentColor,
+            iconColor: MyColors.primaryColor,
             icon: Icons.music_note,
             animationType: "full_flip")));
   }
