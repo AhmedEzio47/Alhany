@@ -629,7 +629,7 @@ class _ProfilePageState extends State<ProfilePage>
     await checkIfUserIsFollowed();
 
     Navigator.of(context).pop();
-    AppUtil.showToast('User unfollowed');
+    AppUtil.showToast(language(en: 'User unfollowed', ar: 'تم إلغاء المتابعة'));
   }
 
   void followUser() async {
@@ -639,7 +639,7 @@ class _ProfilePageState extends State<ProfilePage>
     await checkIfUserIsFollowed();
 
     Navigator.of(context).pop();
-    AppUtil.showToast('User followed');
+    AppUtil.showToast(language(en: 'User followed', ar: 'تمت المتابعة'));
   }
 
   Widget _currentPage() {
@@ -741,7 +741,8 @@ class _ProfilePageState extends State<ProfilePage>
     }
     if (validUsername != null) {
       if (_usernameController.text != _user.username) {
-        AppUtil.showToast('Invalid Username!');
+        AppUtil.showToast(
+            language(en: 'Invalid Username!', ar: 'اسم المستخدم غير مسموح'));
       }
       isValidUsername = false;
     }
@@ -782,7 +783,7 @@ class _ProfilePageState extends State<ProfilePage>
     } else if (bottomSheet.source == ImageSource.camera) {
       image = await AppUtil.takePhoto();
     } else {
-      AppUtil.showToast('Nothing chosen');
+      AppUtil.showToast(language(en: 'Nothing chosen', ar: 'لم تختر شيئا'));
       return;
     }
     AppUtil.showLoader(context);
@@ -804,7 +805,7 @@ class _ProfilePageState extends State<ProfilePage>
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       AppUtil.showToast(
-        "Username is Required",
+        language(en: "Username is Required", ar: 'اسم المستخدم مطلوب'),
       );
       setState(() {
         errorMsgUsername = "Username is Required";

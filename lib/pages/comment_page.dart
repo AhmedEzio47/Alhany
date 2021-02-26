@@ -16,7 +16,8 @@ class CommentPage extends StatefulWidget {
   final Record record;
   final News news;
   final Comment comment;
-  const CommentPage({Key key, this.record, this.news, this.comment}) : super(key: key);
+  const CommentPage({Key key, this.record, this.news, this.comment})
+      : super(key: key);
 
   @override
   _CommentPageState createState() => _CommentPageState();
@@ -39,7 +40,8 @@ class _CommentPageState extends State<CommentPage> {
           widget.record?.id ?? widget.news?.id,
           widget.record != null ? 'record_comment' : 'news_comment');
 
-      await AppUtil.checkIfContainsMention(_replyController.text, widget.record?.id);
+      await AppUtil.checkIfContainsMention(
+          _replyController.text, widget.record?.id);
 
       _onBackPressed();
     } else {
@@ -49,10 +51,11 @@ class _CommentPageState extends State<CommentPage> {
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
-            content: new Text("A comment can't be empty!"),
+            content: new Text(language(
+                en: "A comment can't be empty!", ar: 'التعليق لا يكون فارغا')),
             actions: <Widget>[
               new FlatButton(
-                child: new Text("Ok"),
+                child: new Text(language(en: "Ok", ar: 'موافق')),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -69,8 +72,10 @@ class _CommentPageState extends State<CommentPage> {
   Timestamp lastVisiblePostSnapShot;
 
   getReplies() async {
-    List<Comment> replies = await DatabaseService.getCommentReplies(widget.comment.id,
-        recordId: widget.record?.id, newsId: widget.news?.id);
+    List<Comment> replies = await DatabaseService.getCommentReplies(
+        widget.comment.id,
+        recordId: widget.record?.id,
+        newsId: widget.news?.id);
 
     setState(() {
       _replies = replies;
@@ -79,7 +84,8 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   nextReplies() async {
-    List<Comment> replies = await DatabaseService.getNextCommentReplies(widget.comment.id, lastVisiblePostSnapShot,
+    List<Comment> replies = await DatabaseService.getNextCommentReplies(
+        widget.comment.id, lastVisiblePostSnapShot,
         recordId: widget.record?.id, newsId: widget.news?.id);
     if (replies.length > 0) {
       setState(() {
@@ -93,11 +99,13 @@ class _CommentPageState extends State<CommentPage> {
   void initState() {
     _repliesScrollController
       ..addListener(() {
-        if (_repliesScrollController.offset >= _repliesScrollController.position.maxScrollExtent &&
+        if (_repliesScrollController.offset >=
+                _repliesScrollController.position.maxScrollExtent &&
             !_repliesScrollController.position.outOfRange) {
           print('reached the bottom');
           nextReplies();
-        } else if (_repliesScrollController.offset <= _repliesScrollController.position.minScrollExtent &&
+        } else if (_repliesScrollController.offset <=
+                _repliesScrollController.position.minScrollExtent &&
             !_repliesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -134,7 +142,8 @@ class _CommentPageState extends State<CommentPage> {
           decoration: BoxDecoration(
             color: MyColors.primaryColor,
             image: DecorationImage(
-              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              colorFilter: new ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
               image: AssetImage(Strings.default_bg),
               fit: BoxFit.cover,
             ),
@@ -164,16 +173,22 @@ class _CommentPageState extends State<CommentPage> {
                   }),
               Container(
                 margin: EdgeInsets.only(left: 8, right: 8, top: 8),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(30.0), color: MyColors.lightPrimaryColor),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30.0),
+                    color: MyColors.lightPrimaryColor),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextField(
                       style: TextStyle(color: MyColors.textLightColor),
-                      textAlign: Constants.language == 'ar' ? TextAlign.right : TextAlign.left,
+                      textAlign: Constants.language == 'ar'
+                          ? TextAlign.right
+                          : TextAlign.left,
                       controller: _replyController,
                       decoration: InputDecoration(
                         hintStyle: TextStyle(color: MyColors.textLightColor),
-                        hintText: language(en: Strings.en_leave_reply, ar: Strings.ar_leave_reply),
+                        hintText: language(
+                            en: Strings.en_leave_reply,
+                            ar: Strings.ar_leave_reply),
                         suffix: Constants.language == 'en' ? sendBtn() : null,
                         prefix: Constants.language == 'ar' ? sendBtn() : null,
                       )),
@@ -200,7 +215,8 @@ class _CommentPageState extends State<CommentPage> {
                             future: DatabaseService.getUserWithId(
                               comment.commenterID,
                             ),
-                            builder: (BuildContext context, AsyncSnapshot snapshot) {
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }

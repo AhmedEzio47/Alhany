@@ -659,7 +659,8 @@ class _HomePageState extends State<HomePage>
     if (currentBackPressTime == null ||
         now.difference(currentBackPressTime) > Duration(seconds: 2)) {
       currentBackPressTime = now;
-      AppUtil.showToast('Press back again to exit');
+      AppUtil.showToast(
+          language(en: 'Press back again to exit', ar: 'اضغط مرة أخرى للخروج'));
       return Future.value(false);
     }
     return Future.value(true);
@@ -690,7 +691,8 @@ class _HomePageState extends State<HomePage>
           RaisedButton(
             onPressed: () async {
               if (_categoryController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter a name');
+                AppUtil.showToast(language(
+                    en: 'Please enter a name', ar: 'من فضلك ادخل اسم'));
                 return;
               }
               Navigator.of(context).pop();
@@ -706,7 +708,8 @@ class _HomePageState extends State<HomePage>
                 'name': _categoryController.text,
                 'search': searchList(_categoryController.text),
               });
-              AppUtil.showToast('Name Updated');
+              AppUtil.showToast(
+                  language(en: 'Name Updated', ar: 'تم تحديث الإسم'));
               Navigator.of(context).pop();
               Navigator.of(context).pushReplacementNamed('/');
             },

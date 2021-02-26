@@ -137,7 +137,7 @@ class PostBottomSheet {
           RaisedButton(
             onPressed: () async {
               if (_commentController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter some text');
+                AppUtil.showToast(language(en: 'Please enter some text', ar: 'من فضلك لا تترك الخانة فارغة'));
                 return;
               }
               Navigator.of(context).pop();
@@ -186,7 +186,7 @@ class PostBottomSheet {
           RaisedButton(
             onPressed: () async {
               if (_commentController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter some text');
+                AppUtil.showToast(language(en: 'Please enter some text', ar: 'من فضلك لا تترك الخانة فارغة);
                 return;
               }
               Navigator.of(context).pop();

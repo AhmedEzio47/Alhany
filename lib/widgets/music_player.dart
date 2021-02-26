@@ -623,7 +623,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
           RaisedButton(
             onPressed: () async {
               if (_nameController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter a name');
+                AppUtil.showToast(
+                    language(en: 'Please enter a name', ar: 'قم ادخال اسم'));
                 return;
               }
               Navigator.of(context).pop();
@@ -667,7 +668,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 .doc(singer.id)
                 .update({'melodies': FieldValue.increment(-1)});
           }
-          AppUtil.showToast('Deleted!');
+          AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
           Navigator.of(context).pop();
           Navigator.of(context).pop();
         },
@@ -705,7 +706,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
         print(token.tokenId);
       } else {
         token.tokenId = 'already purchased';
-        AppUtil.showToast('already purchased');
+        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
       }
     }
     if (token.tokenId != null) {
@@ -738,7 +739,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             .doc(widget.melody.id)
             .set({'timestamp': FieldValue.serverTimestamp()});
         Navigator.of(context).pop();
-        AppUtil.showToast('Downloaded!');
+        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
         Navigator.of(context).pushNamed('/downloads');
       } else {
         Navigator.of(context).pop();

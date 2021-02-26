@@ -122,11 +122,15 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         User user = await DatabaseService.getUserWithEmail(_email);
         if (user.id == null) {
           print('Email is not registered!');
-          AppUtil.showToast('Email is not registered!');
+          AppUtil.showToast(language(
+              en: 'Email is not registered!',
+              ar: 'البريد الالكتروني غير مسجل'));
         } else {
           await firebaseAuth.sendPasswordResetEmail(email: _email);
           print('Password reset e-mail sent');
-          AppUtil.showToast('Password reset e-mail sent');
+          AppUtil.showToast(language(
+              en: 'Password reset e-mail sent',
+              ar: ' تم اإرسالة رسالة إعادة تعيين كلمة المرور'));
           Navigator.of(context).pop();
         }
 

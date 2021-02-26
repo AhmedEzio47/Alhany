@@ -52,7 +52,8 @@ class _DownloadsPageState extends State<DownloadsPage> {
               });
 
               AppUtil.showLoader(context);
-              AppUtil.showToast('Decrypting, please wait!');
+              AppUtil.showToast(language(
+                  en: 'Decrypting, please wait!', ar: 'برجاء الانتظار'));
               await playAllSongs();
               Navigator.of(context).pop();
             },

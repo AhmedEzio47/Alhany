@@ -151,7 +151,9 @@ class CommentBottomSheet {
             ? Container()
             : _widgetBottomSheetRow(
                 context, Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${user.username}', onPressed: () async {
+                text: language(
+                    en: 'Unfollow ${user.username}',
+                    ar: 'إلغاء الماتبعة'), onPressed: () async {
                 unfollowUser(context, user);
               }),
 
@@ -207,7 +209,9 @@ class CommentBottomSheet {
           RaisedButton(
             onPressed: () async {
               if (_commentController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter some text');
+                AppUtil.showToast(language(
+                    en: 'Please enter some text',
+                    ar: 'من فضلك لا تترك الخانة فارغة'));
                 return;
               }
               Navigator.of(context).pop();
@@ -256,7 +260,9 @@ class CommentBottomSheet {
           RaisedButton(
             onPressed: () async {
               if (_commentController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter some text');
+                AppUtil.showToast(language(
+                    en: 'Please enter some text',
+                    ar: 'من فضلك لا تترك الخانة فارغة'));
                 return;
               }
               Navigator.of(context).pop();
@@ -291,7 +297,9 @@ class CommentBottomSheet {
         padding: const EdgeInsets.all(16.0),
         child: new AlertDialog(
           title: new Text('Are you sure?'),
-          content: new Text('Do you really want to unfollow ${user.username}?'),
+          content: new Text(language(
+              en: 'Do you really want to unfollow ${user.username}?',
+              ar: 'هل أنت متأكد من إلغاء المتابعة؟')),
           actions: <Widget>[
             new GestureDetector(
               onTap: () =>

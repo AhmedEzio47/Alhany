@@ -435,7 +435,9 @@ class _MelodyPageState extends State<MelodyPage> {
         await cameraController.stopVideoRecording();
       }
     } catch (ex) {
-      AppUtil.showToast('Unknown error, please try again.');
+      AppUtil.showToast(language(
+          en: 'Unknown error, please try again.',
+          ar: 'حدث خطأ، برجاء المحاولة مرة أخرى'));
       Navigator.of(context).pop();
     }
     //TODO use in case of need of conversion

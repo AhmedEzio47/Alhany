@@ -317,7 +317,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             await Constants.currentFirebaseUser
                                 .sendEmailVerification();
                             Navigator.of(context).pop();
-                            AppUtil.showToast('Verification email sent');
+                            AppUtil.showToast(language(en: 'Verification email sent', ar: 'تم ارسال رسالة التفعيل'));
                           }
                         },
                       ),
@@ -1083,7 +1083,7 @@ class _WelcomePageState extends State<WelcomePage> {
       }
     } else if (_currentPage == 2) {
       if (!_isTermsOfTermsAgreed) {
-        AppUtil.showToast('Please agree to terms of use.');
+        AppUtil.showToast(language(en: 'Please agree to terms of use.', ar: 'من فضلك وافق على سياسة الخصوصية'));
         Navigator.of(context).pop();
         return;
       }

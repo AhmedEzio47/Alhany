@@ -62,10 +62,11 @@ class _RecordPageState extends State<RecordPage> {
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
-            content: new Text("A comment can't be empty!"),
+            content: new Text(language(
+                en: "A comment can't be empty!", ar: 'التعليق لا يكون فارغا')),
             actions: <Widget>[
               new FlatButton(
-                child: new Text("Ok"),
+                child: new Text(language(en: "Ok", ar: 'موافق')),
                 onPressed: () {
                   Constants.currentRoute = '';
                   Navigator.of(context).pop();

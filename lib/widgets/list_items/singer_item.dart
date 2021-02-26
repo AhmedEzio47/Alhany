@@ -105,7 +105,7 @@ class _SingerItemState extends State<SingerItem> {
     String url = await AppUtil()
         .uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
     await singersRef.doc(widget.singer.id).update({'image_url': url});
-    AppUtil.showToast('Image updated!');
+    AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
   }
 
   editName() async {
@@ -133,7 +133,8 @@ class _SingerItemState extends State<SingerItem> {
           RaisedButton(
             onPressed: () async {
               if (_nameController.text.trim().isEmpty) {
-                AppUtil.showToast('Please enter a name');
+                AppUtil.showToast(
+                    language(en: 'Please enter a name', ar: 'قم ادخال اسم'));
                 return;
               }
               Navigator.of(context).pop();
@@ -142,7 +143,8 @@ class _SingerItemState extends State<SingerItem> {
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
-              AppUtil.showToast('Name Updated');
+              AppUtil.showToast(
+                  language(en: 'Name Updated', ar: 'تم تعديل الاسم'));
               Navigator.of(context).pop();
             },
             color: MyColors.primaryColor,
@@ -170,7 +172,7 @@ class _SingerItemState extends State<SingerItem> {
             await storageRef.child('/singers_images/$fileName').delete();
           }
           await singersRef.doc(widget.singer.id).delete();
-          AppUtil.showToast('Deleted!');
+          AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
           Navigator.of(context).pop();
         },
         secondBtnText: 'No',

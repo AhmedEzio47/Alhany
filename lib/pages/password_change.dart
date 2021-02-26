@@ -148,7 +148,8 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
         if (_newPassword.isNotEmpty && _confirmPassword.isNotEmpty) {
           await _changePassword();
         } else {
-          AppUtil.showToast('Please fill fields above!');
+          AppUtil.showToast(language(
+              en: 'Please fill fields above!', ar: 'من فضلك املأ كل الخانات'));
         }
       },
       child: Container(
@@ -272,7 +273,9 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
       print('authResult: ${ex.toString()}');
 
       if (ex.code == 'ERROR_WRONG_PASSWORD') {
-        AppUtil.showToast('Current Password is not correct!');
+        AppUtil.showToast(language(
+            en: 'Current Password is not correct!',
+            ar: 'كلمة المرور الحالية غير صحيحة'));
         Navigator.of(context).pop();
         return;
       }
@@ -284,18 +287,22 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
       String errorCode = await baseAuth.changePassword(_newPassword);
       print('change pass error: $errorCode');
       if (errorCode == null) {
-        AppUtil.showToast('Password changed successfully');
+        AppUtil.showToast(language(
+            en: 'Password changed successfully',
+            ar: 'تم تغيير كلمة المرور بنجاح'));
         firebaseAuth.signOut();
         Navigator.of(context).pushReplacementNamed('/login',
             arguments: {'on_sign_up_callback': false});
       } else {
         if (errorCode == 'ERROR_WEAK_PASSWORD') {
-          AppUtil.showToast('Weak password!');
+          AppUtil.showToast(
+              language(en: 'Weak password!', ar: 'كلمة مرور ضعيفة'));
         }
       }
     } else {
       if (_newPassword != _confirmPassword) {
-        AppUtil.showToast("Passwords don't match");
+        AppUtil.showToast(language(
+            en: "Passwords don't match", ar: 'كلمتا المرور غير متطابقتان'));
         myFocusNodeNewPassword.requestFocus();
       } else {}
     }
