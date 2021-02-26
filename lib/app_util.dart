@@ -85,7 +85,7 @@ class AppUtil with ChangeNotifier {
             fontFamily: "WorkSansSemiBold"),
       ),
       backgroundColor: MyColors.accentColor,
-      duration: Duration(minutes: 5),
+      duration: Duration(minutes: 15),
     ));
   }
 
@@ -337,13 +337,15 @@ class AppUtil with ChangeNotifier {
     return image;
   }
 
-  static showLoader(BuildContext context) {
+  static showLoader(BuildContext context, {String message}) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
-            loaderBackground: MyColors.accentColor,
-            iconColor: MyColors.primaryColor,
-            icon: Icons.music_note,
-            animationType: "full_flip")));
+      loaderBackground: MyColors.accentColor,
+      iconColor: MyColors.primaryColor,
+      icon: Icons.music_note,
+      animationType: "full_flip",
+      message: message,
+    )));
   }
 
   static String formatTimestamp(Timestamp timestamp) {

@@ -24,6 +24,7 @@ import 'package:path/path.dart' as path;
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:random_string/random_string.dart';
+import 'package:screen/screen.dart';
 import 'package:video_player/video_player.dart' as video_player;
 
 enum Types { VIDEO, AUDIO }
@@ -113,7 +114,8 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future _downloadMelody() async {
-    AppUtil.showLoader(context);
+    AppUtil.showLoader(context,
+        message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
 
     String url;
     if (widget.melody.audioUrl != null) {
@@ -128,7 +130,8 @@ class _MelodyPageState extends State<MelodyPage> {
       filePath = await AppUtil.downloadFile(url);
     } catch (ex) {
       print('Melody download error:${ex.toString()}');
-      AppUtil.showToast('Error, please try again.');
+      AppUtil.showToast(language(
+          en: 'Error, please try again.', ar: 'حدث خطأ برجاء إعادة المحاولة'));
       Navigator.of(context).pop();
       return;
     }
@@ -164,15 +167,16 @@ class _MelodyPageState extends State<MelodyPage> {
         if (status == PermissionStatus.neverAskAgain) {
           AppUtil.showAlertDialog(
               context: context,
-              message:
-                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
-              firstBtnText: 'Go to settings',
+              message: language(
+                  en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+                  ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+              firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
                 PermissionHandler().openAppSettings();
                 return;
               },
-              secondBtnText: 'Cancel',
+              secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
               secondFunc: () {
                 Navigator.of(context).pop();
               });
@@ -180,14 +184,15 @@ class _MelodyPageState extends State<MelodyPage> {
           AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
-            firstBtnText: 'Give Permission',
+            message: language(
+                en: 'You must grant this microphone access to be able to use this feature.',
+                ar: 'من فضلك قم بالسماح باستخدام الميكروفون من أجل استخدام هذه الخاصية'),
+            firstBtnText: language(en: 'Give Permission', ar: 'السماح'),
             firstFunc: () async {
               Navigator.of(context).pop(false);
               await _recordAudio();
             },
-            secondBtnText: 'Leave',
+            secondBtnText: language(en: 'Leave', ar: 'خروج'),
             secondFunc: () async {
               print('Mic permission denied');
               Navigator.of(context).pop();
@@ -226,7 +231,9 @@ class _MelodyPageState extends State<MelodyPage> {
           await recorder.startRecording();
         } catch (ex) {
           await mySoundsPlayer.stop();
-          AppUtil.showToast('Unexpected error. Please try again.');
+          AppUtil.showToast(language(
+              en: 'Unexpected error. Please try again.!',
+              ar: 'حدث خطأ برجاء إعادء المحاولة'));
           Navigator.of(context).pop();
         }
       });
@@ -252,15 +259,16 @@ class _MelodyPageState extends State<MelodyPage> {
         if (status == PermissionStatus.neverAskAgain) {
           AppUtil.showAlertDialog(
               context: context,
-              message:
-                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
-              firstBtnText: 'Go to settings',
+              message: language(
+                  en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+                  ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+              firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
                 PermissionHandler().openAppSettings();
                 return;
               },
-              secondBtnText: 'Cancel',
+              secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
               secondFunc: () {
                 Navigator.of(context).pop();
               });
@@ -268,14 +276,15 @@ class _MelodyPageState extends State<MelodyPage> {
           AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this microphone access to be able to use this feature.',
-            firstBtnText: 'Give Permission',
+            message: language(
+                en: 'You must grant this microphone access to be able to use this feature.',
+                ar: 'من فضلك قم بالسماح باستخدام الميكروفون من أجل استخدام هذه الخاصية'),
+            firstBtnText: language(en: 'Give Permission', ar: 'السماح'),
             firstFunc: () async {
               Navigator.of(context).pop(false);
               await _recordVideo();
             },
-            secondBtnText: 'Leave',
+            secondBtnText: language(en: 'Leave', ar: 'خروج'),
             secondFunc: () async {
               print('Mic permission denied');
               Navigator.of(context).pop();
@@ -318,7 +327,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
 
       print('started playing melody');
-      Future.delayed(Duration(milliseconds: 500), () async {
+      Future.delayed(Duration(milliseconds: 480), () async {
         await mySoundsPlayer.play();
       });
       print('started video recording');
@@ -326,7 +335,9 @@ class _MelodyPageState extends State<MelodyPage> {
         await _initializeControllerFuture;
         await cameraController.startVideoRecording(recordingFilePath);
       } catch (ex) {
-        AppUtil.showToast('Unexpected error, please try again');
+        AppUtil.showToast(language(
+            en: 'Unexpected error, please try again',
+            ar: 'خطأ غير متوفع، برجاء إعادة المحاولة'));
         Navigator.of(context).pop();
       }
 
@@ -358,7 +369,9 @@ class _MelodyPageState extends State<MelodyPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'For optimal result, please put some headphones.',
+                    language(
+                        en: 'For optimal result, please put some headphones.',
+                        ar: 'من أجل نتيجة أفضل، من فضلك ضع سماعات أذن.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 16,
@@ -371,27 +384,31 @@ class _MelodyPageState extends State<MelodyPage> {
             Positioned.fill(
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: OutlineButton(
-                  borderSide: const BorderSide(
-                    color: Colors.black87,
-                    style: BorderStyle.solid,
-                    width: 1,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: MaterialButton(
+                    color: Colors.white,
+                    // borderSide: const BorderSide(
+                    //   color: Colors.black87,
+                    //   style: BorderStyle.solid,
+                    //   width: 1,
+                    // ),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20.0)),
+                    child: Text('OK',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: MyColors.textDarkColor,
+                            fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                      print('hey I\'m here');
+                      setState(() {
+                        _countDownVisible = true;
+                      });
+                      _countDown();
+                    },
                   ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20.0)),
-                  child: Text('OK',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: MyColors.textDarkColor,
-                          fontWeight: FontWeight.bold)),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                    print('hey I\'m here');
-                    setState(() {
-                      _countDownVisible = true;
-                    });
-                    _countDown();
-                  },
                 ),
               ),
             )
@@ -411,9 +428,9 @@ class _MelodyPageState extends State<MelodyPage> {
       if (_type == Types.AUDIO) {
         String result = await recorder.stopRecording();
         recordingFilePath = result;
-        String url = await AppUtil().uploadFile(File(recordingFilePath),
-            context, 'tests/test${path.extension(recordingFilePath)}');
-        print('test url:' + url);
+        // String url = await AppUtil().uploadFile(File(recordingFilePath),
+        //     context, 'tests/test${path.extension(recordingFilePath)}');
+        // print('test url:' + url);
       } else {
         await cameraController.stopVideoRecording();
       }
@@ -605,37 +622,7 @@ class _MelodyPageState extends State<MelodyPage> {
               ),
             ),
           )
-        :
-        // : InkWell(
-        //     onTap: _videoController.value.isPlaying
-        //         ? () => setState(() {
-        //               _isVideoPlaying = false;
-        //               _videoController.pause();
-        //             })
-        //         : null,
-        //     child: Container(
-        //       height: 40,
-        //       width: 40,
-        //       decoration: BoxDecoration(
-        //         shape: BoxShape.circle,
-        //         color: Colors.grey.shade300,
-        //         boxShadow: [
-        //           BoxShadow(
-        //             color: Colors.black54,
-        //             spreadRadius: 2,
-        //             blurRadius: 4,
-        //             offset: Offset(0, 2), // changes position of shadow
-        //           ),
-        //         ],
-        //       ),
-        //       child: Icon(
-        //         Icons.pause,
-        //         color: MyColors.primaryColor,
-        //         size: 35,
-        //       ),
-        //     ),
-        //   );
-        Container();
+        : Container();
   }
 
   bool isStoragePermissionGranted = false;
@@ -654,15 +641,16 @@ class _MelodyPageState extends State<MelodyPage> {
         if (status == PermissionStatus.neverAskAgain) {
           AppUtil.showAlertDialog(
               context: context,
-              message:
-                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
-              firstBtnText: 'Go to settings',
+              message: language(
+                  en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+                  ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+              firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
                 PermissionHandler().openAppSettings();
                 return;
               },
-              secondBtnText: 'Cancel',
+              secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
               secondFunc: () {
                 Navigator.of(context).pop();
               });
@@ -670,14 +658,15 @@ class _MelodyPageState extends State<MelodyPage> {
           AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this storage access to be able to use this feature.',
-            firstBtnText: 'Give Permission',
+            message: language(
+                en: 'You must grant this microphone access to be able to use this feature.',
+                ar: 'من فضلك قم بالسماح باستخدام الميكروفون من أجل استخدام هذه الخاصية'),
+            firstBtnText: language(en: 'Give Permission', ar: 'السماح'),
             firstFunc: () async {
               Navigator.of(context).pop(false);
               await createAppFolder();
             },
-            secondBtnText: 'Leave',
+            secondBtnText: language(en: 'Leave', ar: 'خروج'),
             secondFunc: () async {
               print('storage permission denied');
               Navigator.of(context).pop();
@@ -702,7 +691,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
   double _progress = 0;
   submitRecord() async {
-    AppUtil.showLoader(context);
+    AppUtil.showLoader(context,
+        message: language(en: 'Uploading video', ar: 'جاري الآن رفع الفيديو'));
     setState(() {
       _progressVisible = true;
     });
@@ -750,7 +740,7 @@ class _MelodyPageState extends State<MelodyPage> {
     await AppUtil.deleteFiles();
     Navigator.of(context).pop();
 
-    AppUtil.showToast('Submitted!');
+    AppUtil.showToast(language(en: 'Submitted!', ar: 'تم الرفع'));
   }
 
   initRecorder() async {
@@ -771,15 +761,16 @@ class _MelodyPageState extends State<MelodyPage> {
     if (status == PermissionStatus.neverAskAgain) {
       AppUtil.showAlertDialog(
           context: context,
-          message:
-              'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
-          firstBtnText: 'Go to settings',
+          message: language(
+              en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+              ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+          firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
           firstFunc: () {
             Navigator.of(context).pop();
             PermissionHandler().openAppSettings();
             return;
           },
-          secondBtnText: 'Cancel',
+          secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
           secondFunc: () {
             Navigator.of(context).pop();
           });
@@ -833,7 +824,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController.dispose();
       print('camera disposed');
     }
-    recorder.dispose();
+    if (recorder != null) recorder.dispose();
     super.dispose();
   }
 
@@ -854,60 +845,63 @@ class _MelodyPageState extends State<MelodyPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onBackPressed,
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: Colors.black,
-        body: choosingImage
-            ? choosingImagePage(context)
-            : _progressVisible
-                ? progressPage()
-                : recordingStatus == RecordingStatus.Recording &&
-                        _type == Types.VIDEO
-                    ? videoRecordingPage()
-                    : mainPage(),
-        floatingActionButton: !_progressVisible && !choosingImage
-            ? FloatingActionButton(
-                onPressed: () async {
-                  if (recordingStatus == RecordingStatus.Recording) {
-                    await saveRecord();
-                  } else {
-                    if ((await PermissionsService().hasStoragePermission()) &&
-                        (await PermissionsService()
-                            .hasMicrophonePermission())) {
-                      await createAppFolder();
-                      //await AppUtil.createAppDirectory();
-                      recordingFilePath = appTempDirectoryPath;
-                      melodyPath = appTempDirectoryPath;
-                      mergedFilePath = appTempDirectoryPath;
-                      await _downloadMelody();
+      child: SafeArea(
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.black,
+          body: choosingImage
+              ? choosingImagePage(context)
+              : _progressVisible
+                  ? progressPage()
+                  : recordingStatus == RecordingStatus.Recording &&
+                          _type == Types.VIDEO
+                      ? videoRecordingPage()
+                      : mainPage(),
+          floatingActionButton: !_progressVisible && !choosingImage
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    if (recordingStatus == RecordingStatus.Recording) {
+                      await saveRecord();
+                    } else {
+                      if ((await PermissionsService().hasStoragePermission()) &&
+                          (await PermissionsService()
+                              .hasMicrophonePermission())) {
+                        await createAppFolder();
+                        //await AppUtil.createAppDirectory();
+                        recordingFilePath = appTempDirectoryPath;
+                        melodyPath = appTempDirectoryPath;
+                        mergedFilePath = appTempDirectoryPath;
+                        await _downloadMelody();
 
-                      Navigator.of(context).push(CustomModal(
-                        child: _headphonesDialog(),
-                      ));
+                        Navigator.of(context).push(CustomModal(
+                          child: _headphonesDialog(),
+                        ));
+                      }
+                      if (!await PermissionsService().hasStoragePermission()) {
+                        await PermissionsService().requestStoragePermission(
+                          context,
+                        );
+                      }
+                      if (!await PermissionsService()
+                          .hasMicrophonePermission()) {
+                        await PermissionsService().requestMicrophonePermission(
+                          context,
+                        );
+                      }
                     }
-                    if (!await PermissionsService().hasStoragePermission()) {
-                      await PermissionsService().requestStoragePermission(
-                        context,
-                      );
-                    }
-                    if (!await PermissionsService().hasMicrophonePermission()) {
-                      await PermissionsService().requestMicrophonePermission(
-                        context,
-                      );
-                    }
-                  }
-                },
-                child: Icon(
-                  recordingStatus == RecordingStatus.Recording
-                      ? Icons.stop
-                      : _type == Types.VIDEO
-                          ? Icons.videocam
-                          : Icons.mic,
-                  color: MyColors.primaryColor,
-                  size: 30,
-                ),
-              )
-            : null,
+                  },
+                  child: Icon(
+                    recordingStatus == RecordingStatus.Recording
+                        ? Icons.stop
+                        : _type == Types.VIDEO
+                            ? Icons.videocam
+                            : Icons.mic,
+                    color: MyColors.primaryColor,
+                    size: 30,
+                  ),
+                )
+              : null,
+        ),
       ),
     );
   }
@@ -975,8 +969,9 @@ class _MelodyPageState extends State<MelodyPage> {
                                         '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:trunc(ow/a/2)*2,format=yuv420p\" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath');
                                     print('conversion success:$success');
                                     if (success != 0) {
-                                      AppUtil.showToast(
-                                          'Unexpected error, please try another image');
+                                      AppUtil.showToast(language(
+                                          en: 'Unexpected error, please try another image',
+                                          ar: 'حدث خطأ، من فضلك قم بتجربة صورة أخرى'));
                                       Navigator.of(context).pop();
                                       return;
                                     }
@@ -1006,8 +1001,10 @@ class _MelodyPageState extends State<MelodyPage> {
                             color: MyColors.accentColor,
                             child: Text(
                               imageVideoPath == null
-                                  ? 'Choose Image & Submit'
-                                  : 'Done',
+                                  ? language(
+                                      en: 'Choose Image & Submit',
+                                      ar: 'اختيار صورة')
+                                  : language(en: 'Done', ar: 'تم'),
                               style: TextStyle(color: MyColors.textDarkColor),
                             ),
                           ),
@@ -1021,7 +1018,7 @@ class _MelodyPageState extends State<MelodyPage> {
                             },
                             color: MyColors.accentColor,
                             child: Text(
-                              'Cancel',
+                              language(en: 'Cancel', ar: 'إلغاء'),
                               style: TextStyle(color: MyColors.textDarkColor),
                             ),
                           ),
@@ -1058,9 +1055,8 @@ class _MelodyPageState extends State<MelodyPage> {
                               },
                               color: MyColors.accentColor,
                               child: Text(
-                                'Submit',
-                                style:
-                                    TextStyle(color: MyColors.textLightColor),
+                                language(en: 'Submit', ar: 'رفع'),
+                                style: TextStyle(color: MyColors.textDarkColor),
                               ),
                             ),
                             SizedBox(
@@ -1074,7 +1070,7 @@ class _MelodyPageState extends State<MelodyPage> {
                               },
                               color: MyColors.accentColor,
                               child: Text(
-                                'Cancel',
+                                language(en: 'Cancel', ar: 'إلغاء'),
                                 style: TextStyle(color: MyColors.textDarkColor),
                               ),
                             ),
@@ -1113,7 +1109,7 @@ class _MelodyPageState extends State<MelodyPage> {
           alignment: Alignment.bottomCenter,
           child: Container(
               color: Colors.transparent,
-              height: 200,
+              height: MediaQuery.of(context).size.height * .8 / 2,
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
                 child: Center(
@@ -1245,50 +1241,6 @@ class _MelodyPageState extends State<MelodyPage> {
                   ),
                 ),
               ),
-              // InkWell(
-              //   onTap: () async {
-              //     if (recordingStatus == RecordingStatus.Recording) {
-              //       await saveRecord();
-              //     } else {
-              //       if ((await PermissionsService().hasStoragePermission()) &&
-              //           (await PermissionsService().hasMicrophonePermission())) {
-              //         Navigator.of(context).push(CustomModal(
-              //           child: _headphonesDialog(),
-              //         ));
-              //       }
-              //       if (!await PermissionsService().hasStoragePermission()) {
-              //         await PermissionsService().requestStoragePermission();
-              //       }
-              //       if (!await PermissionsService().hasMicrophonePermission()) {
-              //         await PermissionsService().requestMicrophonePermission();
-              //       }
-              //     }
-              //   },
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //       color: Colors.grey.shade300,
-              //       shape: BoxShape.circle,
-              //       boxShadow: [
-              //         BoxShadow(
-              //           color: Colors.black54,
-              //           spreadRadius: 4,
-              //           blurRadius: 6,
-              //           offset: Offset(0, 3), // changes position of shadow
-              //         ),
-              //       ],
-              //     ),
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(15.0),
-              //       child: Icon(
-              //         recordingStatus == RecordingStatus.Recording
-              //             ? Icons.stop
-              //             : _type == Types.VIDEO ? Icons.videocam : Icons.mic,
-              //         color: MyColors.primaryColor,
-              //         size: 30,
-              //       ),
-              //     ),
-              //   ),
-              // ),
               SizedBox(height: 10)
             ],
           ),
@@ -1316,11 +1268,11 @@ class _MelodyPageState extends State<MelodyPage> {
               : Container(),
           Positioned.fill(
               child: Padding(
-            padding: const EdgeInsets.only(top: 80, left: 10),
+            padding: const EdgeInsets.only(top: 80, left: 15),
             child: Align(
               alignment: Alignment.topLeft,
               child: Text(
-                'Views: ${widget.melody.views ?? 0}',
+                '${language(en: 'Views', ar: 'مشاهدات')}: ${widget.melody.views ?? 0}',
                 style: TextStyle(color: MyColors.textLightColor),
               ),
             ),
@@ -1337,11 +1289,11 @@ class _MelodyPageState extends State<MelodyPage> {
                 value: _type,
                 items: [
                   DropdownMenuItem(
-                    child: Text('Audio'),
+                    child: Text(language(en: 'Audio', ar: 'صوت')),
                     value: Types.AUDIO,
                   ),
                   DropdownMenuItem(
-                    child: Text('Video'),
+                    child: Text(language(en: 'Video', ar: 'فيديو')),
                     value: Types.VIDEO,
                   ),
                 ],
@@ -1396,7 +1348,9 @@ class _MelodyPageState extends State<MelodyPage> {
             height: 15,
           ),
           Text(
-            'Please wait this may take some time.',
+            language(
+                en: 'Please wait this may take some time.',
+                ar: 'من فضلك انتظر سيأخذ ذلك بعض الوقت'),
             style: TextStyle(color: MyColors.textLightColor),
           )
         ],
@@ -1467,15 +1421,16 @@ class _MelodyPageState extends State<MelodyPage> {
         if (status == PermissionStatus.neverAskAgain) {
           AppUtil.showAlertDialog(
               context: context,
-              message:
-                  'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
-              firstBtnText: 'Go to settings',
+              message: language(
+                  en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+                  ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+              firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
                 PermissionHandler().openAppSettings();
                 return;
               },
-              secondBtnText: 'Cancel',
+              secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
               secondFunc: () {
                 Navigator.of(context).pop();
               });
@@ -1483,14 +1438,15 @@ class _MelodyPageState extends State<MelodyPage> {
           AppUtil.showAlertDialog(
             context: context,
             heading: 'info',
-            message:
-                'You must grant this camera access to be able to use this feature.',
-            firstBtnText: 'Give Permission',
+            message: language(
+                en: 'You must grant this microphone access to be able to use this feature.',
+                ar: 'من فضلك قم بالسماح باستخدام الميكروفون من أجل استخدام هذه الخاصية'),
+            firstBtnText: language(en: 'Give Permission', ar: 'السماح'),
             firstFunc: () async {
               Navigator.of(context).pop(false);
               await _initCamera();
             },
-            secondBtnText: 'Leave',
+            secondBtnText: language(en: 'Leave', ar: 'خروج'),
             secondFunc: () async {
               print('camera permission denied');
               Navigator.of(context).pop();
@@ -1514,12 +1470,38 @@ class _MelodyPageState extends State<MelodyPage> {
           enableAudio: true);
       print('Camera: $cameraController');
       _initializeControllerFuture = cameraController.initialize();
+
+      // Prevent screen from going into sleep mode:
+      Screen.keepOn(true);
     }
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async {
+    List executions = await flutterFFmpeg.listExecutions();
+    print('executions length:${executions.length}');
+
     if (recordingStatus != RecordingStatus.Recording) {
-      Navigator.of(context).pop();
+      if (executions.isNotEmpty) {
+        AppUtil.showAlertDialog(
+            context: context,
+            message: language(
+                en: 'Ongoing video encoding, sure to quit?',
+                ar: 'جاري معالجة الفيديو، هل ترغب ف الإلغاء والخروح؟'),
+            firstBtnText: language(en: 'Yes', ar: 'نعم'),
+            firstFunc: () {
+              flutterFFmpeg.cancel();
+              Screen.keepOn(false);
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+            secondBtnText: language(en: 'No', ar: 'لا'),
+            secondFunc: () {
+              Navigator.of(context).pop();
+            });
+      } else {
+        Screen.keepOn(false);
+        Navigator.of(context).pop();
+      }
     }
   }
 }

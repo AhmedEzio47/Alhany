@@ -87,19 +87,21 @@ class PostBottomSheet {
             Icons.delete_forever,
             color: MyColors.iconLightColor,
           ),
-          text: 'Delete Post',
+          text: language(en: 'Delete Post', ar: 'مسح الفيديو'),
           onPressed: () async {
             AppUtil.showAlertDialog(
                 context: context,
-                message: 'Are you sure to delete this post?',
-                firstBtnText: 'Yes',
+                message: language(
+                    en: 'Are you sure to delete this post?',
+                    ar: 'هل أنت متاكد من مسح الفيديو؟'),
+                firstBtnText: language(en: 'Yes', ar: 'نعم '),
                 firstFunc: () async {
                   AppUtil.showLoader(context);
                   await DatabaseService.deletePost(
                       recordId: record?.id, newsId: news?.id);
                   Navigator.of(context).pushReplacementNamed('/');
                 },
-                secondBtnText: 'No',
+                secondBtnText: language(en: 'No', ar: 'لا '),
                 secondFunc: () => Navigator.of(context).pop());
           },
           isEnable: true,

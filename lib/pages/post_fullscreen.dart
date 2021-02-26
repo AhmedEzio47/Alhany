@@ -211,9 +211,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
     }
     _controller = VideoPlayerController.network(url)
       ..addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
+        // if (mounted) {
+        //   setState(() {});
+        // }
       })
       ..setLooping(false)
       ..initialize().then((value) {

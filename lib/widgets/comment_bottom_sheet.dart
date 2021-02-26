@@ -32,7 +32,10 @@ class CommentBottomSheet {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.arrow_drop_down),
+          child: Icon(
+            Icons.arrow_drop_down,
+            color: MyColors.textLightColor,
+          ),
         ));
   }
 
@@ -98,7 +101,7 @@ class CommentBottomSheet {
                   Icons.edit,
                   color: MyColors.darkPrimaryColor,
                 ),
-                text: 'Edit Comment',
+                text: language(en: 'Edit Comment', ar: 'تعديل'),
                 onPressed: () {
                   if (parentComment == null) {
 //                    Navigator.of(context)
@@ -121,7 +124,7 @@ class CommentBottomSheet {
                   Icons.delete_forever,
                   color: MyColors.iconLightColor,
                 ),
-                text: 'Delete Comment',
+                text: language(en: 'Delete Comment', ar: 'حذف'),
                 onPressed: () async {
                   await _deleteComment(context, comment.id,
                       parentComment == null ? null : parentComment.id,
@@ -367,7 +370,9 @@ class CommentBottomSheet {
         padding: const EdgeInsets.all(16.0),
         child: new AlertDialog(
           title: new Text('Are you sure?'),
-          content: new Text('Do you really want to delete this comment?'),
+          content: new Text(language(
+              en: 'Do you really want to delete this comment?',
+              ar: 'هل أنت متاكد من مسح التعليق؟')),
           actions: <Widget>[
             new GestureDetector(
               onTap: () =>
@@ -375,7 +380,7 @@ class CommentBottomSheet {
                   Navigator.of(context).pop(),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text("NO"),
+                child: Text(language(en: 'No', ar: 'لا ')),
               ),
             ),
             SizedBox(height: 16),
@@ -397,7 +402,7 @@ class CommentBottomSheet {
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text("YES"),
+                child: Text(language(en: 'Yes', ar: 'نعم ')),
               ),
             ),
           ],
