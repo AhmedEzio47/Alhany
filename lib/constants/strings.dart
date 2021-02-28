@@ -38,7 +38,7 @@ class Strings {
   static const String stripeSecret =
       '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';
   // static const merchantId = "05674331101508648233";
-  static const merchantId = "Live";
+  static const merchantId = "merchant.devyat.com.alhani";
 
   //File encryption key
   static const encryption_key = 'Zjssy8Zsn38cjDSldzZDamfJ381xDgPm';
