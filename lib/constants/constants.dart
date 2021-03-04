@@ -33,7 +33,7 @@ class Constants {
   static user_model.User currentUser;
   static User currentFirebaseUser;
 
-  static user_model.User startUser;
+  static user_model.User starUser;
   static bool isAdmin;
 
   static String currentMelodyLevel;

@@ -1,8 +1,9 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/user_model.dart' as user_model;
 import 'package:Alhany/pages/app_page.dart';
-import 'package:Alhany/pages/welcome_page.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
@@ -29,7 +30,13 @@ class _RootPageState extends State<RootPage> {
   @override
   void initState() {
     getLanguage();
+    getStarUser();
     super.initState();
+  }
+
+  getStarUser() async {
+    user_model.User star = await DatabaseService.getUserWithId(Strings.starId);
+    Constants.starUser = star;
   }
 
   getLanguage() async {
@@ -63,7 +70,8 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
       case AuthStatus.NOT_LOGGED_IN:
-        return WelcomePage();
+        //return WelcomePage();
+        return AudioServiceWidget(child: AppPage());
       case AuthStatus.LOGGED_IN:
         return AudioServiceWidget(child: AppPage());
     }

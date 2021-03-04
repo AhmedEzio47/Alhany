@@ -330,7 +330,7 @@ class _SingerPageState extends State<SingerPage>
                 ),
               ),
             ),
-            Constants.isAdmin
+            Constants.isAdmin ?? false
                 ? Positioned.fill(
                     child: Align(
                     alignment: Alignment.topRight,

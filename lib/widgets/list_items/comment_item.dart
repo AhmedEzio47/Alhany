@@ -324,7 +324,7 @@ class _CommentItem2State extends State<CommentItem2> {
       });
 
       await NotificationHandler.sendNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           'New Comment Like',
           Constants.currentUser.name + ' likes your comment',
           record?.id ?? news?.id,
@@ -418,7 +418,7 @@ class _CommentItem2State extends State<CommentItem2> {
       });
 
       await NotificationHandler.sendNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           'New Comment Like',
           Constants.currentUser.name + ' likes your comment',
           record?.id ?? news?.id,

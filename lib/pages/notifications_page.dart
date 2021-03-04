@@ -1,4 +1,6 @@
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/notification_model.dart' as notification_model;
@@ -28,75 +30,73 @@ class _NotificationsPageState extends State<NotificationsPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            _notifications.length > 0
-                ? Container(
-                    height: MediaQuery.of(context).size.height,
-                    decoration: BoxDecoration(
-                      color: MyColors.primaryColor,
-                      image: DecorationImage(
-                        colorFilter: new ColorFilter.mode(
-                            Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                        image: AssetImage(Strings.default_bg),
-                        fit: BoxFit.cover,
+            Container(
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                color: MyColors.primaryColor,
+                image: DecorationImage(
+                  colorFilter: new ColorFilter.mode(
+                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  image: AssetImage(Strings.default_bg),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: authStatus == AuthStatus.NOT_LOGGED_IN
+                  ? Center(
+                      child: Text(
+                        language(
+                            en: 'Please log in to see page content',
+                            ar: 'من فضلك قم بتسجيل الدخول لترى محتوى الصفحة'),
+                        style: TextStyle(color: MyColors.textLightColor),
                       ),
-                    ),
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 50),
-                        child: ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: _notifications.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            notification_model.Notification notification =
-                                _notifications[index];
+                    )
+                  : _notifications.length > 0
+                      ? SingleChildScrollView(
+                          controller: _scrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 50),
+                            child: ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              scrollDirection: Axis.vertical,
+                              shrinkWrap: true,
+                              itemCount: _notifications.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                notification_model.Notification notification =
+                                    _notifications[index];
 
-                            return FutureBuilder(
-                                future: DatabaseService.getUserWithId(
-                                    notification.sender),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return SizedBox.shrink();
-                                  }
-                                  User sender = snapshot.data;
-                                  return Column(
-                                    children: <Widget>[
-                                      NotificationItem(
-                                        key: ValueKey(notification.id),
-                                        notification: notification,
-                                        image: sender.profileImageUrl,
-                                        senderName: sender.username,
-                                        counter: 0,
-                                      ),
-                                      Divider(height: .5, color: Colors.grey)
-                                    ],
-                                  );
-                                });
-                          },
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(
-                    height: MediaQuery.of(context).size.height,
-                    decoration: BoxDecoration(
-                      color: MyColors.primaryColor,
-                      image: DecorationImage(
-                        colorFilter: new ColorFilter.mode(
-                            Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                        image: AssetImage(Strings.default_bg),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Center(
-                        child: Text(
-                      'No notifications yet',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    )),
-                  ),
+                                return FutureBuilder(
+                                    future: DatabaseService.getUserWithId(
+                                        notification.sender),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return SizedBox.shrink();
+                                      }
+                                      User sender = snapshot.data;
+                                      return Column(
+                                        children: <Widget>[
+                                          NotificationItem(
+                                            key: ValueKey(notification.id),
+                                            notification: notification,
+                                            image: sender.profileImageUrl,
+                                            senderName: sender.username,
+                                            counter: 0,
+                                          ),
+                                          Divider(
+                                              height: .5, color: Colors.grey)
+                                        ],
+                                      );
+                                    });
+                              },
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                          'No notifications yet',
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        )),
+            ),
             Positioned.fill(
                 child: Align(
               child: RegularAppbar(

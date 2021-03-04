@@ -295,10 +295,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melody?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melody,
-                                  'type': Types.AUDIO
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  Navigator.of(context).pushNamed(
+                                    '/melody-page',
+                                    arguments: {
+                                      'melody': widget.melody,
+                                      'type': Types.VIDEO
+                                    },
+                                  );
                                 }),
                                 child: Container(
                                   height: widget.btnSize,
@@ -332,13 +337,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melody?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                  '/melody-page',
-                                  arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.VIDEO
-                                  },
-                                ),
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  Navigator.of(context).pushNamed(
+                                    '/melody-page',
+                                    arguments: {
+                                      'melody': widget.melody,
+                                      'type': Types.VIDEO
+                                    },
+                                  );
+                                }),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -470,7 +478,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget downloadOrOptions() {
-    return Constants.isAdmin
+    return Constants.isAdmin ?? false
         ? Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Container(

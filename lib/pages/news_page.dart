@@ -35,7 +35,7 @@ class _NewsPageState extends State<NewsPage> {
           newsId: widget.news.id);
 
       await NotificationHandler.sendNotification(
-          Constants.startUser.id,
+          Constants.starUser.id,
           Constants.currentUser.name + ' commented on your post',
           _commentController.text,
           widget.news.id,

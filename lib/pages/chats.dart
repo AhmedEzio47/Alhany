@@ -1,4 +1,6 @@
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/models/user_model.dart';
@@ -140,40 +142,53 @@ class _ChatsState extends State<Chats>
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 70),
-                child: _chats.length > 0
-                    ? ListView.separated(
-                        padding: EdgeInsets.all(10),
-                        separatorBuilder: (BuildContext context, int index) {
-                          return Align(
-                            alignment: Alignment.centerRight,
-                            child: Container(
-                              height: 0.5,
-                              width: MediaQuery.of(context).size.width / 1.3,
-                              child: Divider(),
-                            ),
-                          );
-                        },
-                        itemCount:
-                            !_searching ? _chats.length : _filteredChats.length,
-                        itemBuilder: !_searching
-                            ? (BuildContext context, int index) {
-                                ChatItem chat = _chats[index];
-                                return chat;
-                              }
-                            : (BuildContext context, int index) {
-                                ChatItem chat = _filteredChats[index];
-                                return chat;
+              child: authStatus == AuthStatus.NOT_LOGGED_IN
+                  ? Center(
+                      child: Text(
+                        language(
+                            en: 'Please log in to see page content',
+                            ar: 'من فضلك قم بتسجيل الدخول لترى محتوى الصفحة'),
+                        style: TextStyle(color: MyColors.textLightColor),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 70),
+                      child: _chats.length > 0
+                          ? ListView.separated(
+                              padding: EdgeInsets.all(10),
+                              separatorBuilder:
+                                  (BuildContext context, int index) {
+                                return Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    height: 0.5,
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.3,
+                                    child: Divider(),
+                                  ),
+                                );
                               },
-                      )
-                    : Center(
-                        child: Text(
-                        'No chats yet',
-                        style: TextStyle(
-                            fontSize: 20, color: MyColors.textInactiveColor),
-                      )),
-              ),
+                              itemCount: !_searching
+                                  ? _chats.length
+                                  : _filteredChats.length,
+                              itemBuilder: !_searching
+                                  ? (BuildContext context, int index) {
+                                      ChatItem chat = _chats[index];
+                                      return chat;
+                                    }
+                                  : (BuildContext context, int index) {
+                                      ChatItem chat = _filteredChats[index];
+                                      return chat;
+                                    },
+                            )
+                          : Center(
+                              child: Text(
+                              'No chats yet',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: MyColors.textInactiveColor),
+                            )),
+                    ),
             ),
             Positioned.fill(
                 child: Padding(

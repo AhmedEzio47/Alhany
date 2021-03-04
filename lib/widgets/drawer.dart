@@ -31,8 +31,12 @@ class _BuildDrawerState extends State<BuildDrawer> {
               children: <Widget>[
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()));
+                    AppUtil.executeFunctionIfLoggedIn(context, () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProfilePage()));
+                    });
                   },
                   child: CircleAvatar(
                     radius: 50.0,
@@ -80,46 +84,51 @@ class _BuildDrawerState extends State<BuildDrawer> {
               color: MyColors.primaryColor,
             ),
           ),
-          (!Constants.isFacebookOrGoogleUser) ?? false
+          authStatus == AuthStatus.LOGGED_IN
+              ? (!Constants.isFacebookOrGoogleUser) ?? false
+                  ? ListTile(
+                      onTap: () async {
+                        try {
+                          Navigator.of(context).pushNamed('/change-email');
+                        } catch (e) {
+                          print('Sign out: $e');
+                        }
+                      },
+                      title: Text(
+                        language(
+                            en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
+                        style: TextStyle(
+                          color: MyColors.primaryColor,
+                        ),
+                      ),
+                      leading: Icon(
+                        Icons.alternate_email,
+                        color: MyColors.primaryColor,
+                      ),
+                    )
+                  : Container()
+              : Container(),
+          authStatus == AuthStatus.LOGGED_IN
               ? ListTile(
                   onTap: () async {
                     try {
-                      Navigator.of(context).pushNamed('/change-email');
+                      Navigator.of(context).pushNamed('/password-change');
                     } catch (e) {
                       print('Sign out: $e');
                     }
                   },
                   title: Text(
-                    language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
+                    language(en: 'Change Password', ar: 'تغيير كلمة المرور'),
                     style: TextStyle(
                       color: MyColors.primaryColor,
                     ),
                   ),
                   leading: Icon(
-                    Icons.alternate_email,
+                    Icons.lock,
                     color: MyColors.primaryColor,
                   ),
                 )
               : Container(),
-          ListTile(
-            onTap: () async {
-              try {
-                Navigator.of(context).pushNamed('/password-change');
-              } catch (e) {
-                print('Sign out: $e');
-              }
-            },
-            title: Text(
-              language(en: 'Change Password', ar: 'تغيير كلمة المرور'),
-              style: TextStyle(
-                color: MyColors.primaryColor,
-              ),
-            ),
-            leading: Icon(
-              Icons.lock,
-              color: MyColors.primaryColor,
-            ),
-          ),
           ListTile(
             onTap: () async {
               await AppUtil.switchLanguage();
@@ -168,46 +177,67 @@ class _BuildDrawerState extends State<BuildDrawer> {
               color: MyColors.primaryColor,
             ),
           ),
-          ListTile(
-            onTap: () async {
-              try {
-                // String token = await FirebaseMessaging().getToken();
-                // usersRef
-                //     .document(Constants.currentUserID)
-                //     .collection('tokens')
-                //     .document(token)
-                //     .updateData({
-                //   'modifiedAt': FieldValue.serverTimestamp(),
-                //   'signed': false
-                // });
+          authStatus == AuthStatus.LOGGED_IN
+              ? ListTile(
+                  onTap: () async {
+                    try {
+                      // String token = await FirebaseMessaging().getToken();
+                      // usersRef
+                      //     .document(Constants.currentUserID)
+                      //     .collection('tokens')
+                      //     .document(token)
+                      //     .updateData({
+                      //   'modifiedAt': FieldValue.serverTimestamp(),
+                      //   'signed': false
+                      // });
 
-                await firebaseAuth.signOut();
+                      await firebaseAuth.signOut();
 
-                setState(() {
-                  Constants.currentFirebaseUser = null;
-                  Constants.currentUserID = null;
-                  Constants.currentUser = null;
-                  authStatus = AuthStatus.NOT_LOGGED_IN;
-                });
+                      setState(() {
+                        Constants.currentFirebaseUser = null;
+                        Constants.currentUserID = null;
+                        Constants.currentUser = null;
+                        authStatus = AuthStatus.NOT_LOGGED_IN;
+                      });
 
-                print('Now, authStatus = $authStatus');
-                Navigator.of(context).pushReplacementNamed('/');
-                //moveUserTo(context: context, widget: LoginPage());
-              } catch (e) {
-                print('Sign out: $e');
-              }
-            },
-            title: Text(
-              language(ar: 'تسجيل الخروج', en: 'Sign Out'),
-              style: TextStyle(
-                color: MyColors.primaryColor,
-              ),
-            ),
-            leading: Icon(
-              Icons.power_settings_new,
-              color: MyColors.primaryColor,
-            ),
-          ),
+                      print('Now, authStatus = $authStatus');
+                      Navigator.of(context).pushReplacementNamed('/');
+                      //moveUserTo(context: context, widget: LoginPage());
+                    } catch (e) {
+                      print('Sign out: $e');
+                    }
+                  },
+                  title: Text(
+                    language(ar: 'تسجيل الخروج', en: 'Sign Out'),
+                    style: TextStyle(
+                      color: MyColors.primaryColor,
+                    ),
+                  ),
+                  leading: Icon(
+                    Icons.power_settings_new,
+                    color: MyColors.primaryColor,
+                  ),
+                )
+              : ListTile(
+                  onTap: () async {
+                    try {
+                      Navigator.of(context)
+                          .pushReplacementNamed('/welcome-page');
+                    } catch (e) {
+                      print('Log In: $e');
+                    }
+                  },
+                  title: Text(
+                    language(ar: 'تسجيل الدخول', en: 'Log In'),
+                    style: TextStyle(
+                      color: MyColors.primaryColor,
+                    ),
+                  ),
+                  leading: Icon(
+                    Icons.power_settings_new,
+                    color: MyColors.primaryColor,
+                  ),
+                ),
         ],
       ),
     );

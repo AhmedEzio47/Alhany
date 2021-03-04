@@ -71,7 +71,7 @@ class DatabaseService {
   static Future<List<Melody>> getStarMelodies() async {
     QuerySnapshot melodiesSnapshot = await melodiesRef
         .where('is_song', isEqualTo: false)
-        .where('author_id', isEqualTo: Constants.startUser.id)
+        .where('author_id', isEqualTo: Constants.starUser.id)
         .limit(20)
         .orderBy('timestamp', descending: true)
         .get();

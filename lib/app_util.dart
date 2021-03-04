@@ -58,6 +58,24 @@ class AppUtil with ChangeNotifier {
   static user_model.User fullscreenSinger;
   static Melody fullscreenMelody;
 
+  static executeFunctionIfLoggedIn(BuildContext context, Function function) {
+    if (authStatus == AuthStatus.LOGGED_IN) {
+      function();
+    } else {
+      showAlertDialog(
+          context: context,
+          message: language(
+              en: 'You need to log in to be able to do this',
+              ar: 'يجب أن تقوم بتسجيل الدخول للقيام بذلك'),
+          firstBtnText: language(en: 'Login In', ar: 'تسجيل الدخول'),
+          firstFunc: () {
+            Navigator.of(context).pushReplacementNamed('/welcome-page');
+          },
+          secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
+          secondFunc: () => Navigator.of(context).pop());
+    }
+  }
+
   goToFullscreen(Record record, user_model.User user, Melody melody) {
     fullscreenRecord = record;
     fullscreenSinger = user;
@@ -496,13 +514,10 @@ class AppUtil with ChangeNotifier {
     user_model.User loggedInUser =
         await DatabaseService.getUserWithId(user?.uid);
 
-    user_model.User star = await DatabaseService.getUserWithId(Strings.starId);
-
     Constants.currentUser = loggedInUser;
     Constants.currentFirebaseUser = user;
     Constants.currentUserID = user?.uid;
     authStatus = AuthStatus.LOGGED_IN;
-    Constants.startUser = star;
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
         Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
     Constants.isFacebookOrGoogleUser = false;

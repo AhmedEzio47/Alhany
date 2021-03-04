@@ -249,7 +249,7 @@ class _HomePageState extends State<HomePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Constants.isAdmin
+                      Constants.isAdmin ?? false
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
