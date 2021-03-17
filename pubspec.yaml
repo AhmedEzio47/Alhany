@@ -45,7 +45,7 @@ dependencies:
   camera: ^0.5.8+11
   #camera_fix_exception: ^0.4.0+5
   badges: ^1.1.0
-  audio_service: ^0.15.3
+  audio_service: ^0.16.2+1
   audio_session: ^0.0.9
   firebase_dynamic_links:
   share: ^0.6.3+4
@@ -61,6 +61,7 @@ dependencies:
   #flutter_imagepress: ^0.7.0
   flutter_webview_plugin:
   screen: ^0.0.5
+  rxdart: ^0.25.0
 
 dev_dependencies:
   flutter_test:

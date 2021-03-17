@@ -42,7 +42,6 @@ android {
         applicationId "com.devyat.alhani"
         minSdkVersion 24
         targetSdkVersion 30
-        shrinkResources false // AUDIO_SERVICE
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
@@ -60,6 +59,8 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            shrinkResources false // AUDIO_SERVICE
+
         }
     }
 }

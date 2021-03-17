@@ -8,9 +8,11 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/services/audio_background_service.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:rxdart/rxdart.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 import 'custom_modal.dart';
@@ -26,6 +29,11 @@ typedef void OnError(Exception exception);
 
 enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
+
+// NOTE: Your entrypoint MUST be a top-level function.
+void _audioPlayerTaskEntrypoint() async {
+  AudioServiceBackground.run(() => AudioPlayerTask());
+}
 
 class MusicPlayer extends StatefulWidget {
   final String url;
@@ -106,6 +114,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void initState() {
+    AudioService.start(
+      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
+      androidNotificationChannelName: 'Audio Service Demo',
+      // Enable this if you want the Android service to exit the foreground state on pause.
+      //androidStopForegroundOnPause: true,
+      androidNotificationColor: 0xFF2196f3,
+      androidNotificationIcon: 'mipmap/ic_launcher',
+      androidEnableQueue: true,
+    );
     if (widget.melody?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -235,24 +252,31 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           overlayShape:
                               RoundSliderOverlayShape(overlayRadius: 16.0),
                         ),
-                        child: Slider(
-                            activeColor: MyColors.darkPrimaryColor,
-                            inactiveColor: Colors.grey.shade300,
-                            value: myAudioPlayer.position?.inMilliseconds
-                                    ?.toDouble() ??
-                                0.0,
-                            onChanged: (double value) {
-                              myAudioPlayer
-                                  .seek(Duration(seconds: value ~/ 1000));
+                        child: StreamBuilder(
+                          stream: _mediaStateStream,
+                          builder: (context, snapshot) {
+                            final mediaState = snapshot.data;
+                            return Slider(
+                                activeColor: MyColors.darkPrimaryColor,
+                                inactiveColor: Colors.grey.shade300,
+                                value: myAudioPlayer.position?.inMilliseconds
+                                        ?.toDouble() ??
+                                    0.0,
+                                onChanged: (value) {
+                                  AudioService.seekTo(
+                                      Duration(seconds: value ~/ 1000));
 
-                              if (!isPlaying) {
-                                play();
-                              }
-                            },
-                            min: 0.0,
-                            max: _duration != null
-                                ? _duration?.inMilliseconds?.toDouble()
-                                : 1.7976931348623157e+308)),
+                                  // if (!isPlaying) {
+                                  //   play();
+                                  // }
+                                },
+                                min: 0.0,
+                                max: mediaState?.mediaItem?.duration != null
+                                    ? mediaState?.mediaItem?.duration
+                                        ?.toDouble()
+                                    : 1.7976931348623157e+308);
+                          },
+                        )),
                   ),
                   SizedBox(
                     width: 10,
@@ -384,61 +408,85 @@ class _MusicPlayerState extends State<MusicPlayer> {
         ),
       );
 
+  /// A stream reporting the combined state of the current queue and the current
+  /// media item within that queue.
+  Stream<QueueState> get _queueStateStream =>
+      Rx.combineLatest2<List<MediaItem>, MediaItem, QueueState>(
+          AudioService.queueStream,
+          AudioService.currentMediaItemStream,
+          (queue, mediaItem) => QueueState(queue, mediaItem));
+
+  /// A stream reporting the combined state of the current media item and its
+  /// current position.
+  Stream<MediaState> get _mediaStateStream =>
+      Rx.combineLatest2<MediaItem, Duration, MediaState>(
+          AudioService.currentMediaItemStream,
+          AudioService.positionStream,
+          (mediaItem, position) => MediaState(mediaItem, position));
+
   @override
   Widget build(BuildContext context) {
     return _buildPlayer();
   }
 
   Widget playPauseBtn() {
-    return !isPlaying
-        ? InkWell(
-            onTap: () => isPlaying ? null : play(),
-            child: Container(
-              height: widget.btnSize,
-              width: widget.btnSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
+    return StreamBuilder(
+      stream: AudioService.playbackStateStream
+          .map((state) => state.playing)
+          .distinct(),
+      builder: (context, snapshot) {
+        final playing = snapshot.data ?? false;
+        return playing
+            ? InkWell(
+                onTap: AudioService.play,
+                child: Container(
+                  height: widget.btnSize,
+                  width: widget.btnSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade300,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black54,
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Icon(
-                Icons.play_arrow,
-                size: widget.btnSize - 5,
-                color: MyColors.primaryColor,
-              ),
-            ),
-          )
-        : InkWell(
-            onTap: isPlaying ? () => pause() : null,
-            child: Container(
-              height: widget.btnSize,
-              width: widget.btnSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
+                  child: Icon(
+                    Icons.play_arrow,
+                    size: widget.btnSize - 5,
+                    color: MyColors.primaryColor,
                   ),
-                ],
-              ),
-              child: Icon(
-                Icons.pause,
-                color: MyColors.primaryColor,
-                size: widget.btnSize - 5,
-              ),
-            ),
-          );
+                ),
+              )
+            : InkWell(
+                onTap: AudioService.pause,
+                child: Container(
+                  height: widget.btnSize,
+                  width: widget.btnSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade300,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black54,
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.pause,
+                    color: MyColors.primaryColor,
+                    size: widget.btnSize - 5,
+                  ),
+                ),
+              );
+      },
+    );
   }
 
   Widget favouriteBtn() {
@@ -758,33 +806,40 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget nextBtn() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: InkWell(
-        onTap: () => next(),
-        child: Container(
-          height: widget.btnSize,
-          width: widget.btnSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey.shade300,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black54,
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: Offset(0, 2), // changes position of shadow
+    return StreamBuilder(
+        stream: _queueStateStream,
+        builder: (context, snapshot) {
+          final queueState = snapshot.data;
+          final queue = queueState?.queue ?? [];
+          final mediaItem = queueState?.mediaItem;
+          return Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: InkWell(
+              onTap: mediaItem == queue.last ? null : AudioService.skipToNext,
+              child: Container(
+                height: widget.btnSize,
+                width: widget.btnSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade300,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black54,
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.skip_next,
+                  size: widget.btnSize - 5,
+                  color: MyColors.primaryColor,
+                ),
               ),
-            ],
-          ),
-          child: Icon(
-            Icons.skip_next,
-            size: widget.btnSize - 5,
-            color: MyColors.primaryColor,
-          ),
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   next() {
@@ -792,33 +847,41 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   previousBtn() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: InkWell(
-        onTap: () => previous(),
-        child: Container(
-          height: widget.btnSize,
-          width: widget.btnSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey.shade300,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black54,
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: Offset(0, 2), // changes position of shadow
+    return StreamBuilder(
+        stream: _queueStateStream,
+        builder: (context, snapshot) {
+          final queueState = snapshot.data;
+          final queue = queueState?.queue ?? [];
+          final mediaItem = queueState?.mediaItem;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap:
+                  mediaItem == queue.first ? null : AudioService.skipToPrevious,
+              child: Container(
+                height: widget.btnSize,
+                width: widget.btnSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade300,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black54,
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.skip_previous,
+                  size: widget.btnSize - 5,
+                  color: MyColors.primaryColor,
+                ),
               ),
-            ],
-          ),
-          child: Icon(
-            Icons.skip_previous,
-            size: widget.btnSize - 5,
-            color: MyColors.primaryColor,
-          ),
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   previous() {
