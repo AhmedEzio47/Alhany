@@ -8,19 +8,15 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
-import 'package:Alhany/services/audio_background_service.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
-import 'package:audio_service/audio_service.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:audio_manager/audio_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:rxdart/rxdart.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 import 'custom_modal.dart';
@@ -29,11 +25,6 @@ typedef void OnError(Exception exception);
 
 enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
-
-// NOTE: Your entrypoint MUST be a top-level function.
-void _audioPlayerTaskEntrypoint() async {
-  AudioServiceBackground.run(() => AudioPlayerTask());
-}
 
 class MusicPlayer extends StatefulWidget {
   final String url;
@@ -73,17 +64,15 @@ class MusicPlayer extends StatefulWidget {
 class _MusicPlayerState extends State<MusicPlayer> {
   _MusicPlayerState();
 
-  MyAudioPlayer myAudioPlayer;
+  // get isPlaying => AudioManager.instance.isPlaying == true;
+  // get isPaused => AudioManager.instance.isPlaying == false;
 
-  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
-  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
-
-  get durationText => myAudioPlayer.duration != null
-      ? myAudioPlayer.duration.toString().split('.').first
+  get durationText => AudioManager.instance.duration != null
+      ? AudioManager.instance.duration.toString().split('.').first
       : '';
 
-  get positionText => myAudioPlayer.position != null
-      ? myAudioPlayer.position.toString().split('.').first
+  get positionText => AudioManager.instance.position != null
+      ? AudioManager.instance.position.toString().split('.').first
       : '';
 
   bool isMuted = false;
@@ -114,15 +103,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void initState() {
-    AudioService.start(
-      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-      androidNotificationChannelName: 'Audio Service Demo',
-      // Enable this if you want the Android service to exit the foreground state on pause.
-      //androidStopForegroundOnPause: true,
-      androidNotificationColor: 0xFF2196f3,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-      androidEnableQueue: true,
-    );
+    super.initState();
     if (widget.melody?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -137,17 +118,21 @@ class _MusicPlayerState extends State<MusicPlayer> {
         language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     }
-    super.initState();
     initAudioPlayer();
   }
 
   @override
   void dispose() {
-    myAudioPlayer.stop();
+    AudioManager.instance.stop();
+    AudioManager.instance.release();
     super.dispose();
   }
 
   Duration _duration;
+  Duration _position;
+  double _slider;
+  bool isPlaying = AudioManager.instance.isPlaying ?? false;
+  bool isLoading = AudioManager.instance.isLoading ?? false;
 
   void initAudioPlayer() async {
     List<String> urlList;
@@ -157,30 +142,103 @@ class _MusicPlayerState extends State<MusicPlayer> {
         urlList.add(melody.audioUrl);
       }
     }
-    myAudioPlayer = MyAudioPlayer(
-        url: widget.url,
-        urlList: urlList,
-        isLocal: widget.isLocal,
-        onComplete: widget.onComplete);
-    myAudioPlayer.addListener(() {
-      if (mounted) {
-        setState(() {
-          _duration = myAudioPlayer.duration;
-        });
+    // List<AudioInfo> _list = [];
+    //
+    // if (widget.melodyList != null) {
+    //   widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
+    //       title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
+    // } else {
+    //   _list.add(AudioInfo(widget.melody.audioUrl,
+    //       title: widget.melody.name,
+    //       desc: widget.melody.singer,
+    //       coverUrl: widget.melody.imageUrl));
+    // }
+    // AudioManager.instance.audioList = _list;
+    AudioManager.instance.intercepter = false;
+    AudioManager.instance.play(auto: false);
+
+    AudioManager.instance.onEvents((events, args) {
+      print("$events, $args");
+      switch (events) {
+        case AudioManagerEvents.start:
+          print(
+              "start load data callback, curIndex is ${AudioManager.instance.curIndex}");
+          _position = AudioManager.instance.position;
+          _duration = AudioManager.instance.duration;
+          isLoading = AudioManager.instance.isLoading;
+          _slider = 0;
+          setState(() {});
+          break;
+        case AudioManagerEvents.ready:
+          print("ready to play");
+          // _error = null;
+          // _sliderVolume = AudioManager.instance.volume;
+          _position = AudioManager.instance.position;
+          _duration = AudioManager.instance.duration;
+          isLoading = AudioManager.instance.isLoading;
+          setState(() {});
+          // if you need to seek times, must after AudioManagerEvents.ready event invoked
+          // AudioManager.instance.seekTo(Duration(seconds: 10));
+          break;
+        case AudioManagerEvents.seekComplete:
+          _position = AudioManager.instance.position;
+          _slider = _position.inMilliseconds / _duration.inMilliseconds;
+          setState(() {});
+          print("seek event is completed. position is [$args]/ms");
+          break;
+        case AudioManagerEvents.buffering:
+          print("buffering $args");
+          break;
+        case AudioManagerEvents.playstatus:
+          isPlaying = AudioManager.instance.isPlaying;
+          setState(() {});
+          break;
+        case AudioManagerEvents.timeupdate:
+          _position = AudioManager.instance.position;
+          _slider = _position.inMilliseconds / _duration.inMilliseconds;
+          setState(() {});
+          AudioManager.instance.updateLrc(args["position"].toString());
+          break;
+        case AudioManagerEvents.error:
+          //_error = args;
+          setState(() {});
+          break;
+        case AudioManagerEvents.ended:
+          isLoading = AudioManager.instance.isLoading;
+          AudioManager.instance.next();
+          break;
+        case AudioManagerEvents.volumeChange:
+          //_sliderVolume = AudioManager.instance.volume;
+          setState(() {});
+          break;
+        default:
+          break;
       }
+    });
+    AudioManager.instance
+        .start(
+            widget.url,
+            // "network format resource"
+            // "local resource (file://${file.path})"
+            widget.title,
+            desc: widget.melody.singer,
+            auto: true,
+            cover: widget.melody.imageUrl)
+        .then((err) {
+      print(err);
     });
   }
 
   Future play() async {
-    myAudioPlayer.play();
+    AudioManager.instance.playOrPause();
   }
 
   Future pause() async {
-    await myAudioPlayer.pause();
+    await AudioManager.instance.playOrPause();
   }
 
   Future stop() async {
-    await myAudioPlayer.stop();
+    await AudioManager.instance.stop();
   }
 
   NumberFormat _numberFormatter = new NumberFormat("##");
@@ -202,7 +260,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               widget.melodyList != null
                   ? Text(
-                      widget.melodyList[myAudioPlayer.index].name,
+                      widget.melodyList[AudioManager.instance.curIndex].name,
                       style: TextStyle(
                           color: MyColors.textLightColor,
                           fontSize: 16,
@@ -230,9 +288,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         ? playPauseBtn()
                         : Container(),
                   ),
-                  myAudioPlayer.position != null
+                  _position != null
                       ? Text(
-                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
+                          '${_numberFormatter.format(_position.inMinutes)}:${_numberFormatter.format(_position.inSeconds % 60)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
@@ -252,38 +310,39 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           overlayShape:
                               RoundSliderOverlayShape(overlayRadius: 16.0),
                         ),
-                        child: StreamBuilder(
-                          stream: _mediaStateStream,
-                          builder: (context, snapshot) {
-                            final mediaState = snapshot.data;
-                            return Slider(
-                                activeColor: MyColors.darkPrimaryColor,
-                                inactiveColor: Colors.grey.shade300,
-                                value: myAudioPlayer.position?.inMilliseconds
-                                        ?.toDouble() ??
-                                    0.0,
-                                onChanged: (value) {
-                                  AudioService.seekTo(
-                                      Duration(seconds: value ~/ 1000));
+                        child: Slider(
+                          activeColor: MyColors.darkPrimaryColor,
+                          inactiveColor: Colors.grey.shade300,
+                          value: (_slider ?? 0) >= 0 &&
+                                  (_slider ?? 0) <= _duration.inMilliseconds
+                              ? _slider
+                              : 0,
+                          onChanged: (value) {
+                            setState(() {
+                              _slider = value;
+                            });
+                          },
+                          onChangeEnd: (double value) {
+                            if (_duration != null) {
+                              Duration msec = Duration(
+                                  milliseconds:
+                                      (_duration.inMilliseconds * value)
+                                          .round());
+                              AudioManager.instance.seekTo(msec);
+                            }
 
-                                  // if (!isPlaying) {
-                                  //   play();
-                                  // }
-                                },
-                                min: 0.0,
-                                max: mediaState?.mediaItem?.duration != null
-                                    ? mediaState?.mediaItem?.duration
-                                        ?.toDouble()
-                                    : 1.7976931348623157e+308);
+                            if (!isPlaying) {
+                              play();
+                            }
                           },
                         )),
                   ),
                   SizedBox(
                     width: 10,
                   ),
-                  myAudioPlayer.duration != null
+                  _duration != null
                       ? Text(
-                          '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          '${_numberFormatter.format(_duration?.inMinutes ?? 0)}:${_numberFormatter.format((_duration?.inSeconds ?? 0) % 60)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
@@ -408,37 +467,33 @@ class _MusicPlayerState extends State<MusicPlayer> {
         ),
       );
 
-  /// A stream reporting the combined state of the current queue and the current
-  /// media item within that queue.
-  Stream<QueueState> get _queueStateStream =>
-      Rx.combineLatest2<List<MediaItem>, MediaItem, QueueState>(
-          AudioService.queueStream,
-          AudioService.currentMediaItemStream,
-          (queue, mediaItem) => QueueState(queue, mediaItem));
-
-  /// A stream reporting the combined state of the current media item and its
-  /// current position.
-  Stream<MediaState> get _mediaStateStream =>
-      Rx.combineLatest2<MediaItem, Duration, MediaState>(
-          AudioService.currentMediaItemStream,
-          AudioService.positionStream,
-          (mediaItem, position) => MediaState(mediaItem, position));
-
   @override
   Widget build(BuildContext context) {
     return _buildPlayer();
   }
 
   Widget playPauseBtn() {
-    return StreamBuilder(
-      stream: AudioService.playbackStateStream
-          .map((state) => state.playing)
-          .distinct(),
-      builder: (context, snapshot) {
-        final playing = snapshot.data ?? false;
-        return playing
+    return isLoading
+        ? Container(
+            height: widget.btnSize,
+            width: widget.btnSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey.shade300,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black54,
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: Offset(0, 2), // changes position of shadow
+                ),
+              ],
+            ),
+            child: CircularProgressIndicator(),
+          )
+        : !isPlaying
             ? InkWell(
-                onTap: AudioService.play,
+                onTap: () => isPlaying ? null : play(),
                 child: Container(
                   height: widget.btnSize,
                   width: widget.btnSize,
@@ -462,7 +517,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 ),
               )
             : InkWell(
-                onTap: AudioService.pause,
+                onTap: isPlaying ? () => pause() : null,
                 child: Container(
                   height: widget.btnSize,
                   width: widget.btnSize,
@@ -485,22 +540,20 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ),
                 ),
               );
-      },
-    );
   }
 
   Widget favouriteBtn() {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: InkWell(
-        onTap: () async {
+        onTap: () => AppUtil.executeFunctionIfLoggedIn(context, () async {
           _isFavourite
               ? await DatabaseService.deleteMelodyFromFavourites(
                   widget.melody.id)
               : await DatabaseService.addMelodyToFavourites(widget.melody.id);
 
           await isFavourite();
-        },
+        }),
         child: Container(
           height: widget.btnSize,
           width: widget.btnSize,
@@ -806,85 +859,70 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget nextBtn() {
-    return StreamBuilder(
-        stream: _queueStateStream,
-        builder: (context, snapshot) {
-          final queueState = snapshot.data;
-          final queue = queueState?.queue ?? [];
-          final mediaItem = queueState?.mediaItem;
-          return Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: InkWell(
-              onTap: mediaItem == queue.last ? null : AudioService.skipToNext,
-              child: Container(
-                height: widget.btnSize,
-                width: widget.btnSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey.shade300,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black54,
-                      spreadRadius: 2,
-                      blurRadius: 4,
-                      offset: Offset(0, 2), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.skip_next,
-                  size: widget.btnSize - 5,
-                  color: MyColors.primaryColor,
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: InkWell(
+        onTap: () => next(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
               ),
-            ),
-          );
-        });
+            ],
+          ),
+          child: Icon(
+            Icons.skip_next,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
   }
 
   next() {
-    myAudioPlayer.next();
+    AudioManager.instance.next();
   }
 
   previousBtn() {
-    return StreamBuilder(
-        stream: _queueStateStream,
-        builder: (context, snapshot) {
-          final queueState = snapshot.data;
-          final queue = queueState?.queue ?? [];
-          final mediaItem = queueState?.mediaItem;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: InkWell(
-              onTap:
-                  mediaItem == queue.first ? null : AudioService.skipToPrevious,
-              child: Container(
-                height: widget.btnSize,
-                width: widget.btnSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey.shade300,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black54,
-                      spreadRadius: 2,
-                      blurRadius: 4,
-                      offset: Offset(0, 2), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.skip_previous,
-                  size: widget.btnSize - 5,
-                  color: MyColors.primaryColor,
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: InkWell(
+        onTap: () => previous(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
               ),
-            ),
-          );
-        });
+            ],
+          ),
+          child: Icon(
+            Icons.skip_previous,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
   }
 
   previous() {
-    myAudioPlayer.prev();
+    AudioManager.instance.previous();
   }
 }

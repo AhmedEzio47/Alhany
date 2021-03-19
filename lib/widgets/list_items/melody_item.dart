@@ -1,3 +1,4 @@
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
@@ -96,7 +97,8 @@ class _MelodyItemState extends State<MelodyItem> {
           ),
           trailing: widget.melody?.isSong ?? false
               ? InkWell(
-                  onTap: () async {
+                  onTap: () =>
+                      AppUtil.executeFunctionIfLoggedIn(context, () async {
                     _isFavourite
                         ? await DatabaseService.deleteMelodyFromFavourites(
                             widget.melody.id)
@@ -104,7 +106,7 @@ class _MelodyItemState extends State<MelodyItem> {
                             widget.melody.id);
 
                     await isFavourite();
-                  },
+                  }),
                   child: Container(
                     width: 80,
                     child: Row(
