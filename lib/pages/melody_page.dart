@@ -560,7 +560,7 @@ class _MelodyPageState extends State<MelodyPage> {
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
         key: ValueKey('preview'),
-        url: mergedFilePath,
+        melodyList: [Melody(audioUrl: mergedFilePath)],
         isLocal: true,
         backColor: MyColors.primaryColor,
         initialDuration: duration,
@@ -834,11 +834,10 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       melodyPlayer = new MusicPlayer(
         key: ValueKey('main'),
-        url: url,
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
         initialDuration: widget.melody.duration,
-        melody: widget.melody,
+        melodyList: [widget.melody],
       );
     });
   }

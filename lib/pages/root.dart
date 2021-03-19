@@ -30,6 +30,18 @@ class _RootPageState extends State<RootPage> {
   void initState() {
     getLanguage();
     getStarUser();
+    // AudioManager.instance
+    //     .start(
+    //         _list[index].url,
+    //         // "network format resource"
+    //         // "local resource (file://${file.path})"
+    //         _list[index].title ?? '',
+    //         desc: _list[index].desc ?? '',
+    //         auto: true,
+    //         cover: _list[index].coverUrl ?? '')
+    //     .then((err) {
+    //   print(err);
+    // });
     super.initState();
   }
 

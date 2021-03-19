@@ -451,16 +451,16 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              setState(() {
-                musicPlayer = MusicPlayer(
-                  url: _records[index].url,
-                  backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                  btnSize: 35,
-                  initialDuration: _records[index].duration,
-                  playBtnPosition: PlayBtnPosition.left,
-                );
-                _isPlaying = true;
-              });
+              // setState(() {
+              //   musicPlayer = MusicPlayer(
+              //     url: _records[index].url,
+              //     backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+              //     btnSize: 35,
+              //     initialDuration: _records[index].duration,
+              //     playBtnPosition: PlayBtnPosition.left,
+              //   );
+              //   _isPlaying = true;
+              // });
             },
             child: RecordItem(
               key: ValueKey(_records[index].id),
@@ -595,9 +595,8 @@ class _HomePageState extends State<HomePage>
                   //   musicPlayer.stop();
                   // }
                   musicPlayer = MusicPlayer(
-                    melody: _favourites[index],
+                    melodyList: [_favourites[index]],
                     key: ValueKey(_favourites[index].id),
-                    url: _favourites[index].audioUrl,
                     backColor: Colors.white.withOpacity(.4),
                     initialDuration: _favourites[index].duration,
                     title: _favourites[index].name,

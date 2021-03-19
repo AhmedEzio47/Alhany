@@ -721,13 +721,13 @@ class _ProfilePageState extends State<ProfilePage>
                           // if (musicPlayer != null) {
                           //   musicPlayer.stop();
                           // }
-                          musicPlayer = MusicPlayer(
-                            url: _records[index].url,
-                            backColor: Colors.white.withOpacity(.4),
-                          );
-                          setState(() {
-                            _isPlaying = true;
-                          });
+                          // musicPlayer = MusicPlayer(
+                          //   url: _records[index].url,
+                          //   backColor: Colors.white.withOpacity(.4),
+                          // );
+                          // setState(() {
+                          //   _isPlaying = true;
+                          // });
                         },
                         child: RecordItem(
                           record: _records[index],
@@ -753,10 +753,9 @@ class _ProfilePageState extends State<ProfilePage>
                       // }
                       musicPlayer = MusicPlayer(
                         key: ValueKey(_favourites[index].id),
-                        melody: _favourites[index],
+                        melodyList: [_favourites[index]],
                         title: _favourites[index].name,
                         initialDuration: _favourites[index].duration,
-                        url: _favourites[index].audioUrl,
                         backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                       );
                       setState(() {

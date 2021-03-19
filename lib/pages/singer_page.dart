@@ -143,8 +143,7 @@ class _SingerPageState extends State<SingerPage>
                 setState(() {
                   musicPlayer = MusicPlayer(
                     key: ValueKey(_songs[index].id),
-                    melody: _songs[index],
-                    url: _songs[index].audioUrl,
+                    melodyList: [_songs[index]],
                     backColor: MyColors.lightPrimaryColor,
                     title: _songs[index].name,
                     initialDuration: _songs[index].duration,
@@ -181,8 +180,7 @@ class _SingerPageState extends State<SingerPage>
                 setState(() {
                   musicPlayer = MusicPlayer(
                     key: ValueKey(_melodies[index].id),
-                    melody: _melodies[index],
-                    url: _melodies[index].audioUrl,
+                    melodyList: [_melodies[index]],
                     backColor: MyColors.lightPrimaryColor,
                     title: _melodies[index].name,
                     initialDuration: _melodies[index].duration,

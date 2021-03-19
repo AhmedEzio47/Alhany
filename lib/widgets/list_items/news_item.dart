@@ -3,6 +3,7 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
@@ -421,7 +422,13 @@ class _NewsItemState extends State<NewsItem> {
         );
       case 'audio':
         return MusicPlayer(
-          url: widget.news.contentUrl,
+          melodyList: [
+            Melody(
+              audioUrl: widget.news.contentUrl,
+              singer: Constants.starUser.name,
+              imageUrl: Constants.starUser.profileImageUrl,
+            ),
+          ],
           backColor: Colors.transparent,
           btnSize: 26,
           initialDuration: widget.news.duration,

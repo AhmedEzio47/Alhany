@@ -27,7 +27,6 @@ enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
-  final String url;
   final List<Melody> melodyList;
   final Color backColor;
   final Function onComplete;
@@ -39,18 +38,14 @@ class MusicPlayer extends StatefulWidget {
   final bool isCompact;
   final bool isRecordBtnVisible;
 
-  final Melody melody;
-
   MusicPlayer(
       {Key key,
-      this.url,
       this.backColor,
       this.onComplete,
       this.isLocal = false,
       this.title,
       this.btnSize = 40.0,
       this.initialDuration,
-      this.melody,
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
       this.melodyList,
@@ -80,11 +75,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   bool _isFavourite = false;
 
+  int index = 0;
+
   isFavourite() async {
     bool isFavourite = (await usersRef
             .doc(Constants.currentUserID)
             .collection('favourites')
-            .doc(widget.melody?.id)
+            .doc(widget.melodyList[index]?.id)
             .get())
         .exists;
 
@@ -104,7 +101,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   void initState() {
     super.initState();
-    if (widget.melody?.isSong ?? true) {
+    if (widget.melodyList[index]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
@@ -131,32 +128,24 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
   Duration _position;
   double _slider;
-  bool isPlaying = AudioManager.instance.isPlaying ?? false;
-  bool isLoading = AudioManager.instance.isLoading ?? false;
+  bool isPlaying = AudioManager.instance.isPlaying ?? true;
 
   void initAudioPlayer() async {
-    List<String> urlList;
-    if (widget.melodyList != null) {
-      urlList = [];
-      for (Melody melody in widget.melodyList) {
-        urlList.add(melody.audioUrl);
-      }
-    }
-    // List<AudioInfo> _list = [];
-    //
+    // List<String> urlList;
     // if (widget.melodyList != null) {
-    //   widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
-    //       title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
-    // } else {
-    //   _list.add(AudioInfo(widget.melody.audioUrl,
-    //       title: widget.melody.name,
-    //       desc: widget.melody.singer,
-    //       coverUrl: widget.melody.imageUrl));
+    //   urlList = [];
+    //   for (Melody melody in widget.melodyList) {
+    //     urlList.add(melody.audioUrl);
+    //   }
     // }
-    // AudioManager.instance.audioList = _list;
-    AudioManager.instance.intercepter = false;
-    AudioManager.instance.play(auto: false);
+    List<AudioInfo> _list = [];
 
+    widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
+        title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
+
+    AudioManager.instance.audioList = _list;
+    AudioManager.instance.intercepter = true;
+    AudioManager.instance.play(auto: true);
     AudioManager.instance.onEvents((events, args) {
       print("$events, $args");
       switch (events) {
@@ -165,7 +154,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
               "start load data callback, curIndex is ${AudioManager.instance.curIndex}");
           _position = AudioManager.instance.position;
           _duration = AudioManager.instance.duration;
-          isLoading = AudioManager.instance.isLoading;
           _slider = 0;
           setState(() {});
           break;
@@ -175,7 +163,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
           // _sliderVolume = AudioManager.instance.volume;
           _position = AudioManager.instance.position;
           _duration = AudioManager.instance.duration;
-          isLoading = AudioManager.instance.isLoading;
           setState(() {});
           // if you need to seek times, must after AudioManagerEvents.ready event invoked
           // AudioManager.instance.seekTo(Duration(seconds: 10));
@@ -197,15 +184,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
           _position = AudioManager.instance.position;
           _slider = _position.inMilliseconds / _duration.inMilliseconds;
           setState(() {});
-          AudioManager.instance.updateLrc(args["position"].toString());
+          //AudioManager.instance.updateLrc(args["position"].toString());
           break;
         case AudioManagerEvents.error:
           //_error = args;
+          print('Error: $args');
           setState(() {});
           break;
         case AudioManagerEvents.ended:
-          isLoading = AudioManager.instance.isLoading;
-          AudioManager.instance.next();
+          next();
           break;
         case AudioManagerEvents.volumeChange:
           //_sliderVolume = AudioManager.instance.volume;
@@ -215,18 +202,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
           break;
       }
     });
-    AudioManager.instance
-        .start(
-            widget.url,
-            // "network format resource"
-            // "local resource (file://${file.path})"
-            widget.title,
-            desc: widget.melody.singer,
-            auto: true,
-            cover: widget.melody.imageUrl)
-        .then((err) {
-      print(err);
-    });
+    // await AudioManager.instance
+    //     .start(
+    //         _list[index].url,
+    //         // "network format resource"
+    //         // "local resource (file://${file.path})"
+    //         _list[index].title ?? '',
+    //         desc: _list[index].desc ?? '',
+    //         auto: true,
+    //         cover: _list[index].coverUrl ?? '')
+    //     .then((err) {
+    //   print(err);
+    // });
   }
 
   Future play() async {
@@ -260,7 +247,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               widget.melodyList != null
                   ? Text(
-                      widget.melodyList[AudioManager.instance.curIndex].name,
+                      widget.melodyList[index].name,
                       style: TextStyle(
                           color: MyColors.textLightColor,
                           fontSize: 16,
@@ -313,8 +300,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         child: Slider(
                           activeColor: MyColors.darkPrimaryColor,
                           inactiveColor: Colors.grey.shade300,
-                          value: (_slider ?? 0) >= 0 &&
-                                  (_slider ?? 0) <= _duration.inMilliseconds
+                          value: (_slider ?? double.infinity) >= 0 &&
+                                      (_slider ?? double.infinity) <=
+                                          _duration?.inMilliseconds ??
+                                  double.maxFinite
                               ? _slider
                               : 0,
                           onChanged: (value) {
@@ -363,19 +352,21 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        (widget.melody?.isSong ?? false)
+                        (widget.melodyList[index]?.isSong ?? false)
                             ? favouriteBtn()
                             : Container(),
-                        widget.melodyList != null ? previousBtn() : Container(),
+                        widget.melodyList.length > 1
+                            ? previousBtn()
+                            : Container(),
                         playPauseBtn(),
-                        widget.melodyList != null ? nextBtn() : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        widget.melodyList.length > 1 ? nextBtn() : Container(),
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
@@ -383,7 +374,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                   Navigator.of(context).pushNamed(
                                     '/melody-page',
                                     arguments: {
-                                      'melody': widget.melody,
+                                      'melody': widget.melodyList[index],
                                       'type': Types.VIDEO
                                     },
                                   );
@@ -411,13 +402,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
@@ -425,7 +416,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                   Navigator.of(context).pushNamed(
                                     '/melody-page',
                                     arguments: {
-                                      'melody': widget.melody,
+                                      'melody': widget.melodyList[index],
                                       'type': Types.VIDEO
                                     },
                                   );
@@ -473,73 +464,55 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget playPauseBtn() {
-    return isLoading
-        ? Container(
-            height: widget.btnSize,
-            width: widget.btnSize,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey.shade300,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black54,
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 2), // changes position of shadow
-                ),
-              ],
+    return !isPlaying
+        ? InkWell(
+            onTap: () => isPlaying ? null : play(),
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.play_arrow,
+                size: widget.btnSize - 5,
+                color: MyColors.primaryColor,
+              ),
             ),
-            child: CircularProgressIndicator(),
           )
-        : !isPlaying
-            ? InkWell(
-                onTap: () => isPlaying ? null : play(),
-                child: Container(
-                  height: widget.btnSize,
-                  width: widget.btnSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.shade300,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54,
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: Offset(0, 2), // changes position of shadow
-                      ),
-                    ],
+        : InkWell(
+            onTap: isPlaying ? () => pause() : null,
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
                   ),
-                  child: Icon(
-                    Icons.play_arrow,
-                    size: widget.btnSize - 5,
-                    color: MyColors.primaryColor,
-                  ),
-                ),
-              )
-            : InkWell(
-                onTap: isPlaying ? () => pause() : null,
-                child: Container(
-                  height: widget.btnSize,
-                  width: widget.btnSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.shade300,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54,
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: Offset(0, 2), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.pause,
-                    color: MyColors.primaryColor,
-                    size: widget.btnSize - 5,
-                  ),
-                ),
-              );
+                ],
+              ),
+              child: Icon(
+                Icons.pause,
+                color: MyColors.primaryColor,
+                size: widget.btnSize - 5,
+              ),
+            ),
+          );
   }
 
   Widget favouriteBtn() {
@@ -549,8 +522,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
         onTap: () => AppUtil.executeFunctionIfLoggedIn(context, () async {
           _isFavourite
               ? await DatabaseService.deleteMelodyFromFavourites(
-                  widget.melody.id)
-              : await DatabaseService.addMelodyToFavourites(widget.melody.id);
+                  widget.melodyList[index].id)
+              : await DatabaseService.addMelodyToFavourites(
+                  widget.melodyList[index].id);
 
           await isFavourite();
         }),
@@ -623,7 +597,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           )
-        : widget.melody?.authorId != null ?? false
+        : widget.melodyList[index]?.authorId != null ?? false
             ? Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: InkWell(
@@ -680,12 +654,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
         break;
 
       case Strings.ar_edit_lyrics:
-        Navigator.of(context)
-            .pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
         break;
       case Strings.ar_edit_lyrics:
-        Navigator.of(context)
-            .pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
         break;
     }
   }
@@ -694,22 +668,24 @@ class _MusicPlayerState extends State<MusicPlayer> {
     File image = await AppUtil.pickImageFromGallery();
     String ext = path.extension(image.path);
 
-    if (widget.melody.imageUrl != null) {
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
+    if (widget.melodyList[index].imageUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(
+          widget.melodyList[index].imageUrl);
       await storageRef.child('/melodies_images/$fileName').delete();
     }
 
-    String url = await AppUtil()
-        .uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
-    await melodiesRef.doc(widget.melody.id).update({'image_url': url});
+    String url = await AppUtil().uploadFile(
+        image, context, '/melodies_images/${widget.melodyList[index].id}$ext');
+    await melodiesRef
+        .doc(widget.melodyList[index].id)
+        .update({'image_url': url});
     AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }
 
   TextEditingController _nameController = TextEditingController();
   editName() async {
     setState(() {
-      _nameController.text = widget.melody.name;
+      _nameController.text = widget.melodyList[index].name;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -738,7 +714,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await melodiesRef.doc(widget.melody.id).update({
+              await melodiesRef.doc(widget.melodyList[index].id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -765,10 +741,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
         firstFunc: () async {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
-          await DatabaseService.deleteMelody(widget.melody);
-          Singer singer =
-              await DatabaseService.getSingerWithName(widget.melody.singer);
-          if (widget.melody.isSong) {
+          await DatabaseService.deleteMelody(widget.melodyList[index]);
+          Singer singer = await DatabaseService.getSingerWithName(
+              widget.melodyList[index].singer);
+          if (widget.melodyList[index].isSong) {
             await singersRef
                 .doc(singer.id)
                 .update({'songs': FieldValue.increment(-1)});
@@ -789,25 +765,26 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   void _downloadMelody() async {
     Token token = Token();
-    if (widget.melody.price == null || widget.melody.price == '0') {
+    if (widget.melodyList[index].price == null ||
+        widget.melodyList[index].price == '0') {
       token.tokenId = 'free';
     } else {
       DocumentSnapshot doc = await usersRef
           .doc(Constants.currentUserID)
           .collection('downloads')
-          .doc(widget.melody.id)
+          .doc(widget.melodyList[index].id)
           .get();
       bool alreadyDownloaded = doc.exists;
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
         final success = await Navigator.of(context).pushNamed('/payment-home',
-            arguments: {'amount': widget.melody.price});
+            arguments: {'amount': widget.melodyList[index].price});
         if (success) {
           usersRef
               .doc(Constants.currentUserID)
               .collection('downloads')
-              .doc(widget.melody.id)
+              .doc(widget.melodyList[index].id)
               .set({'timestamp': FieldValue.serverTimestamp()});
         }
         token.tokenId = 'purchased';
@@ -822,30 +799,30 @@ class _MusicPlayerState extends State<MusicPlayer> {
       AppUtil.showLoader(context);
       await AppUtil.createAppDirectory();
       String path;
-      if (widget.melody.audioUrl != null) {
-        path =
-            await AppUtil.downloadFile(widget.melody.audioUrl, encrypt: true);
+      if (widget.melodyList[index].audioUrl != null) {
+        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
+            encrypt: true);
       } else {
         path = await AppUtil.downloadFile(
-            widget.melody.levelUrls.values.elementAt(0),
+            widget.melodyList[index].levelUrls.values.elementAt(0),
             encrypt: true);
       }
 
       Melody melody = Melody(
-          id: widget.melody.id,
-          authorId: widget.melody.authorId,
-          duration: widget.melody.duration,
-          imageUrl: widget.melody.imageUrl,
-          name: widget.melody.name,
+          id: widget.melodyList[index].id,
+          authorId: widget.melodyList[index].authorId,
+          duration: widget.melodyList[index].duration,
+          imageUrl: widget.melodyList[index].imageUrl,
+          name: widget.melodyList[index].name,
           audioUrl: path);
       Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(widget.melody.id);
+          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
       if (storedMelody == null) {
         await MelodySqlite.insert(melody);
         await usersRef
             .doc(Constants.currentUserID)
             .collection('downloads')
-            .doc(widget.melody.id)
+            .doc(widget.melodyList[index].id)
             .set({'timestamp': FieldValue.serverTimestamp()});
         Navigator.of(context).pop();
         AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
@@ -889,6 +866,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   next() {
+    if (this.index < widget.melodyList.length - 1)
+      this.index++;
+    else
+      this.index = 0;
     AudioManager.instance.next();
   }
 
@@ -923,6 +904,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   previous() {
+    if (this.index > 0)
+      this.index--;
+    else
+      this.index = widget.melodyList.length - 1;
     AudioManager.instance.previous();
   }
 }
