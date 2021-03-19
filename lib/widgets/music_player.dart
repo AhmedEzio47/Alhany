@@ -138,14 +138,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
     //     urlList.add(melody.audioUrl);
     //   }
     // }
-    List<AudioInfo> _list = [];
+    if (widget.melodyList.length > 1) {
+      List<AudioInfo> _list = [];
 
-    widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
-        title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
+      widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
+          title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
 
-    AudioManager.instance.audioList = _list;
+      AudioManager.instance.audioList = _list;
+    }
     AudioManager.instance.intercepter = true;
-    AudioManager.instance.play(auto: true);
+    AudioManager.instance.play(auto: false);
     AudioManager.instance.onEvents((events, args) {
       print("$events, $args");
       switch (events) {
@@ -202,18 +204,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
           break;
       }
     });
-    // await AudioManager.instance
-    //     .start(
-    //         _list[index].url,
-    //         // "network format resource"
-    //         // "local resource (file://${file.path})"
-    //         _list[index].title ?? '',
-    //         desc: _list[index].desc ?? '',
-    //         auto: true,
-    //         cover: _list[index].coverUrl ?? '')
-    //     .then((err) {
-    //   print(err);
-    // });
+    await AudioManager.instance
+        .start(
+            widget.melodyList[index].audioUrl,
+            // "network format resource"
+            // "local resource (file://${file.path})"
+            widget.melodyList[index].name ?? '',
+            desc: widget.melodyList[index].singer ?? '',
+            auto: false,
+            cover: widget.melodyList[index].imageUrl ?? '')
+        .then((err) {
+      print(err);
+    });
   }
 
   Future play() async {
@@ -247,7 +249,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               widget.melodyList != null
                   ? Text(
-                      widget.melodyList[index].name,
+                      widget.melodyList[index].name ?? '',
                       style: TextStyle(
                           color: MyColors.textLightColor,
                           fontSize: 16,
