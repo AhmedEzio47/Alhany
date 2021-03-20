@@ -125,10 +125,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
     super.dispose();
   }
 
-  Duration _duration;
-  Duration _position;
-  double _slider;
-  bool isPlaying = AudioManager.instance.isPlaying ?? true;
+  Duration _duration = Duration(milliseconds: 0);
+  Duration _position = Duration(milliseconds: 0);
+  double _slider = 0.0;
+  bool isPlaying = AudioManager.instance.isPlaying ?? false;
 
   void initAudioPlayer() async {
     // List<String> urlList;
@@ -146,7 +146,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
       AudioManager.instance.audioList = _list;
     }
-    AudioManager.instance.intercepter = true;
+    AudioManager.instance.intercepter = false;
     AudioManager.instance.play(auto: false);
     AudioManager.instance.onEvents((events, args) {
       print("$events, $args");
@@ -204,6 +204,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
           break;
       }
     });
+
     await AudioManager.instance
         .start(
             widget.melodyList[index].audioUrl,
@@ -302,10 +303,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         child: Slider(
                           activeColor: MyColors.darkPrimaryColor,
                           inactiveColor: Colors.grey.shade300,
-                          value: (_slider ?? double.infinity) >= 0 &&
-                                      (_slider ?? double.infinity) <=
-                                          _duration?.inMilliseconds ??
-                                  double.maxFinite
+                          value: ((_slider ?? 1.7976931348623157e+308) >= 0 &&
+                                  (_slider ?? 1.7976931348623157e+308) <=
+                                      (_duration?.inMilliseconds ??
+                                          1.7976931348623157e+308))
                               ? _slider
                               : 0,
                           onChanged: (value) {
@@ -377,7 +378,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                     '/melody-page',
                                     arguments: {
                                       'melody': widget.melodyList[index],
-                                      'type': Types.VIDEO
+                                      'type': Types.AUDIO
                                     },
                                   );
                                 }),
