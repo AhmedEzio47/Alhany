@@ -128,7 +128,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration = Duration(milliseconds: 0);
   Duration _position = Duration(milliseconds: 0);
   double _slider = 0.0;
-  bool isPlaying = AudioManager.instance.isPlaying ?? false;
+  bool isPlaying = false;
 
   void initAudioPlayer() async {
     // List<String> urlList;
@@ -147,7 +147,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       AudioManager.instance.audioList = _list;
     }
     AudioManager.instance.intercepter = false;
-    AudioManager.instance.play(auto: false);
+    //AudioManager.instance.play(auto: false);
     AudioManager.instance.onEvents((events, args) {
       print("$events, $args");
       switch (events) {

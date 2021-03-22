@@ -560,7 +560,13 @@ class _MelodyPageState extends State<MelodyPage> {
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
         key: ValueKey('preview'),
-        melodyList: [Melody(audioUrl: mergedFilePath)],
+        melodyList: [
+          Melody(
+              audioUrl: 'file://${mergedFilePath}',
+              name: 'Preview',
+              singer: 'Preview',
+              imageUrl: '')
+        ],
         isLocal: true,
         backColor: MyColors.primaryColor,
         initialDuration: duration,
