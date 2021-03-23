@@ -46,7 +46,7 @@ dependencies:
   #camera_fix_exception: ^0.4.0+5
   badges: ^1.1.0
   #audio_service: ^0.16.2+1
-  audio_session: ^0.0.9
+  audio_session: ^0.0.10
   firebase_dynamic_links:
   share: ^0.6.3+4
   linked_scroll_controller: ^0.1.2
@@ -63,6 +63,8 @@ dependencies:
   screen: ^0.0.5
   #rxdart: ^0.25.0
   audio_manager: ^0.7.3
+  just_audio: ^0.6.15+1
+  audio_service: ^0.16.2+1
 
 dev_dependencies:
   flutter_test:
