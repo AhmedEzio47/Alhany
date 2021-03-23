@@ -317,6 +317,10 @@ class _HomePageState extends State<HomePage>
                                                     });
                                               },
                                               child: Container(
+                                                key: ValueKey(_categorySingers[
+                                                            _categories[index]]
+                                                        [index2]
+                                                    .id),
                                                 height: Sizes.singer_box,
                                                 width: Sizes.singer_box,
                                                 child: Column(
@@ -503,6 +507,7 @@ class _HomePageState extends State<HomePage>
                                             });
                                       },
                                       child: Container(
+                                        key: ValueKey(_singers[index].id),
                                         height: 120,
                                         width: 120,
                                         child: Column(

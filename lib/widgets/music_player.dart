@@ -131,14 +131,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   void initAudioPlayer() async {
     List<String> urlList;
-    if (widget.melodyList.length > 1) {
-      urlList = [];
-      for (Melody melody in widget.melodyList) {
-        urlList.add(melody.audioUrl);
-      }
+
+    urlList = [];
+    for (Melody melody in widget.melodyList) {
+      urlList.add(melody.audioUrl);
     }
+
     myAudioPlayer = MyAudioPlayer(
-        url: widget.melodyList[0].audioUrl,
         urlList: urlList,
         isLocal: widget.isLocal,
         onComplete: widget.onComplete);

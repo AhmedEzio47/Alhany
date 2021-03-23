@@ -13,14 +13,11 @@ class MyAudioPlayer with ChangeNotifier {
 
   Duration duration;
   Duration position;
-
-  final String url;
   final List<String> urlList;
   final Function onComplete;
   final bool isLocal;
 
-  MyAudioPlayer(
-      {this.url, this.urlList, this.isLocal = false, this.onComplete}) {
+  MyAudioPlayer({this.urlList, this.isLocal = false, this.onComplete}) {
     initAudioPlayer();
   }
 
@@ -70,12 +67,11 @@ class MyAudioPlayer with ChangeNotifier {
     };
   }
 
-  Future play({index}) async {
-    print('audio url: $url');
+  Future play({index = 0}) async {
     if (index == null) {
       index = this.index;
     }
-    await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
+    await advancedPlayer.play(urlList[index], isLocal: isLocal);
     playerState = AudioPlayerState.PLAYING;
     notifyListeners();
   }

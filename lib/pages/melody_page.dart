@@ -5,9 +5,8 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/main.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/models/singer_model.dart';
-import 'package:Alhany/pages/root.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_sounds_player.dart';
@@ -421,9 +420,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
   Future saveRecord() async {
     _canFloat = true;
-    Singer singer =
-        await DatabaseService.getSingerWithName(widget.melody.singer);
-    PIPView.of(_context).presentBelow(RootPage());
+    // Singer singer =
+    //     await DatabaseService.getSingerWithName(widget.melody.singer);
+    PIPView.of(_context).presentBelow(MyApp());
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
     });
@@ -857,74 +856,76 @@ class _MelodyPageState extends State<MelodyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PIPView(builder: (context, isFloating) {
-      _context = context;
-      return WillPopScope(
-        onWillPop: _onBackPressed,
-        child: SafeArea(
-          child: Scaffold(
-            resizeToAvoidBottomInset: !isFloating,
-            key: _scaffoldKey,
-            backgroundColor: Colors.black,
-            body: choosingImage
-                ? choosingImagePage(context)
-                : _progressVisible
-                    ? progressPage()
-                    : recordingStatus == RecordingStatus.Recording &&
-                            _type == Types.VIDEO
-                        ? videoRecordingPage()
-                        : mainPage(),
-            floatingActionButton: !_progressVisible && !choosingImage
-                ? FloatingActionButton(
-                    onPressed: () async {
-                      if (recordingStatus == RecordingStatus.Recording) {
-                        await saveRecord();
-                      } else {
-                        if ((await PermissionsService()
-                                .hasStoragePermission()) &&
-                            (await PermissionsService()
-                                .hasMicrophonePermission())) {
-                          await createAppFolder();
-                          //await AppUtil.createAppDirectory();
-                          recordingFilePath = appTempDirectoryPath;
-                          melodyPath = appTempDirectoryPath;
-                          mergedFilePath = appTempDirectoryPath;
-                          await _downloadMelody();
+    return PIPView(
+      builder: (context, isFloating) {
+        _context = context;
+        return WillPopScope(
+          onWillPop: _onBackPressed,
+          child: SafeArea(
+            child: Scaffold(
+              resizeToAvoidBottomInset: !isFloating,
+              key: _scaffoldKey,
+              backgroundColor: Colors.black,
+              body: choosingImage
+                  ? choosingImagePage(context)
+                  : _progressVisible
+                      ? progressPage()
+                      : recordingStatus == RecordingStatus.Recording &&
+                              _type == Types.VIDEO
+                          ? videoRecordingPage()
+                          : mainPage(),
+              floatingActionButton: !_progressVisible && !choosingImage
+                  ? FloatingActionButton(
+                      onPressed: () async {
+                        if (recordingStatus == RecordingStatus.Recording) {
+                          await saveRecord();
+                        } else {
+                          if ((await PermissionsService()
+                                  .hasStoragePermission()) &&
+                              (await PermissionsService()
+                                  .hasMicrophonePermission())) {
+                            await createAppFolder();
+                            //await AppUtil.createAppDirectory();
+                            recordingFilePath = appTempDirectoryPath;
+                            melodyPath = appTempDirectoryPath;
+                            mergedFilePath = appTempDirectoryPath;
+                            await _downloadMelody();
 
-                          Navigator.of(context).push(CustomModal(
-                            child: _headphonesDialog(),
-                          ));
+                            Navigator.of(context).push(CustomModal(
+                              child: _headphonesDialog(),
+                            ));
+                          }
+                          if (!await PermissionsService()
+                              .hasStoragePermission()) {
+                            await PermissionsService().requestStoragePermission(
+                              context,
+                            );
+                          }
+                          if (!await PermissionsService()
+                              .hasMicrophonePermission()) {
+                            await PermissionsService()
+                                .requestMicrophonePermission(
+                              context,
+                            );
+                          }
                         }
-                        if (!await PermissionsService()
-                            .hasStoragePermission()) {
-                          await PermissionsService().requestStoragePermission(
-                            context,
-                          );
-                        }
-                        if (!await PermissionsService()
-                            .hasMicrophonePermission()) {
-                          await PermissionsService()
-                              .requestMicrophonePermission(
-                            context,
-                          );
-                        }
-                      }
-                    },
-                    child: Icon(
-                      recordingStatus == RecordingStatus.Recording
-                          ? Icons.stop
-                          : _type == Types.VIDEO
-                              ? Icons.videocam
-                              : Icons.mic,
-                      color: MyColors.primaryColor,
-                      size: 30,
-                    ),
-                  )
-                : null,
+                      },
+                      child: Icon(
+                        recordingStatus == RecordingStatus.Recording
+                            ? Icons.stop
+                            : _type == Types.VIDEO
+                                ? Icons.videocam
+                                : Icons.mic,
+                        color: MyColors.primaryColor,
+                        size: 30,
+                      ),
+                    )
+                  : null,
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   BuildContext _context;
@@ -1501,7 +1502,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   Future<bool> _onBackPressed() async {
     if (_canFloat) {
-      PIPView.of(_context).presentBelow(RootPage());
+      PIPView.of(_context).presentBelow(MyApp());
     } else {
       Navigator.of(context).pop();
     }
