@@ -7,7 +7,6 @@ import 'package:Alhany/pages/app_page.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -83,9 +82,9 @@ class _RootPageState extends State<RootPage> {
         return buildWaitingScreen();
       case AuthStatus.NOT_LOGGED_IN:
         //return WelcomePage();
-        return AudioServiceWidget(child: AppPage());
+        return AppPage();
       case AuthStatus.LOGGED_IN:
-        return AudioServiceWidget(child: AppPage());
+        return AppPage();
     }
     return null;
   }

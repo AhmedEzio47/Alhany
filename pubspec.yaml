@@ -62,9 +62,10 @@ dependencies:
   flutter_webview_plugin:
   screen: ^0.0.5
   #rxdart: ^0.25.0
-  audio_manager: ^0.7.3
-  just_audio: ^0.6.15+1
-  audio_service: ^0.16.2+1
+  #audio_manager: ^0.7.3
+  #just_audio: ^0.6.15+1
+  #audio_service: ^0.16.2+1
+  pip_view: ^0.9.5
 
 dev_dependencies:
   flutter_test:

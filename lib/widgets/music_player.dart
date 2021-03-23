@@ -1,13 +1,26 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:io';
 
+import 'package:Alhany/app_util.dart';
+import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:audio_service/audio_service.dart';
-import 'package:audio_session/audio_session.dart';
+import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/pages/melody_page.dart';
+import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
+import 'package:Alhany/services/sqlite_service.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+import 'package:stripe_payment/stripe_payment.dart';
+
+import 'custom_modal.dart';
 
 typedef void OnError(Exception exception);
 
@@ -45,511 +58,774 @@ class MusicPlayer extends StatefulWidget {
 }
 
 class _MusicPlayerState extends State<MusicPlayer> {
-  @override
-  void initState() {
-    super.initState();
-    initService();
+  _MusicPlayerState();
+
+  MyAudioPlayer myAudioPlayer;
+
+  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
+  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
+
+  get durationText => myAudioPlayer.duration != null
+      ? myAudioPlayer.duration.toString().split('.').first
+      : '';
+
+  get positionText => myAudioPlayer.position != null
+      ? myAudioPlayer.position.toString().split('.').first
+      : '';
+
+  bool isMuted = false;
+  List<String> choices;
+
+  bool _isFavourite = false;
+
+  isFavourite() async {
+    bool isFavourite = (await usersRef
+            .doc(Constants.currentUserID)
+            .collection('favourites')
+            .doc(widget.melodyList[index]?.id)
+            .get())
+        .exists;
+
+    if (mounted) {
+      setState(() {
+        _isFavourite = isFavourite;
+      });
+    }
   }
 
-  initService() async {
-    widget.melodyList.forEach((element) {
-      mediaItems.add(MediaItem(
-          id: element.audioUrl,
-          artist: element.singer,
-          title: element.name,
-          album: element.singer));
-    });
-    //AudioService.connect();
-    await AudioService.start(
-      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-      androidNotificationChannelName: 'Audio Service Demo',
-      // Enable this if you want the Android service to exit the foreground state on pause.
-      //androidStopForegroundOnPause: true,
-      androidNotificationColor: 0xFF2196f3,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-      androidEnableQueue: true,
-    );
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    await isFavourite();
   }
+
+  int index = 0;
+
+  @override
+  void initState() {
+    if (widget.melodyList[index]?.isSong ?? true) {
+      choices = [
+        language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
+        language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
+        language(en: Strings.en_delete, ar: Strings.ar_delete)
+      ];
+    } else {
+      choices = [
+        language(en: Strings.en_edit_lyrics, ar: Strings.ar_edit_lyrics),
+        language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
+        language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
+        language(en: Strings.en_delete, ar: Strings.ar_delete)
+      ];
+    }
+    super.initState();
+    initAudioPlayer();
+  }
+
+  @override
+  void dispose() {
+    myAudioPlayer.stop();
+    super.dispose();
+  }
+
+  Duration _duration;
+
+  void initAudioPlayer() async {
+    List<String> urlList;
+    if (widget.melodyList.length > 1) {
+      urlList = [];
+      for (Melody melody in widget.melodyList) {
+        urlList.add(melody.audioUrl);
+      }
+    }
+    myAudioPlayer = MyAudioPlayer(
+        url: widget.melodyList[0].audioUrl,
+        urlList: urlList,
+        isLocal: widget.isLocal,
+        onComplete: widget.onComplete);
+    myAudioPlayer.addListener(() {
+      if (mounted) {
+        setState(() {
+          _duration = myAudioPlayer.duration;
+          index = myAudioPlayer.index;
+        });
+      }
+    });
+  }
+
+  Future play() async {
+    myAudioPlayer.play();
+  }
+
+  Future pause() async {
+    await myAudioPlayer.pause();
+  }
+
+  Future stop() async {
+    await myAudioPlayer.stop();
+  }
+
+  NumberFormat _numberFormatter = new NumberFormat("##");
+
+  Widget _buildPlayer() => Container(
+        padding: EdgeInsets.all(0),
+        child: Padding(
+          padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: new BorderRadius.circular(20.0),
+              color: widget.backColor,
+            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 5,
+                    ),
+              widget.melodyList.length > 1
+                  ? Text(
+                      widget.melodyList[myAudioPlayer.index].name,
+                      style: TextStyle(
+                          color: MyColors.textLightColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    )
+                  : widget.title != null
+                      ? Text(
+                          widget.title,
+                          style: TextStyle(
+                              color: MyColors.textLightColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        )
+                      : Container(),
+              Row(
+                children: [
+                  widget.isCompact
+                      ? Container()
+                      : SizedBox(
+                          height: 10,
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: widget.playBtnPosition == PlayBtnPosition.left
+                        ? playPauseBtn()
+                        : Container(),
+                  ),
+                  myAudioPlayer.position != null
+                      ? Text(
+                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        )
+                      : Text(
+                          '0:0',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 5.0,
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                          overlayShape:
+                              RoundSliderOverlayShape(overlayRadius: 16.0),
+                        ),
+                        child: Slider(
+                            activeColor: MyColors.darkPrimaryColor,
+                            inactiveColor: Colors.grey.shade300,
+                            value: myAudioPlayer.position?.inMilliseconds
+                                    ?.toDouble() ??
+                                0.0,
+                            onChanged: (double value) {
+                              myAudioPlayer
+                                  .seek(Duration(seconds: value ~/ 1000));
+
+                              if (!isPlaying) {
+                                play();
+                              }
+                            },
+                            min: 0.0,
+                            max: _duration != null
+                                ? _duration?.inMilliseconds?.toDouble()
+                                : 1.7976931348623157e+308)),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  myAudioPlayer.duration != null
+                      ? Text(
+                          '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        )
+                      : Text(
+                          '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
+                          style: TextStyle(color: MyColors.textLightColor),
+                        ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+              widget.isCompact
+                  ? Container()
+                  : SizedBox(
+                      height: 10,
+                    ),
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        (widget.melodyList[index]?.isSong ?? false)
+                            ? favouriteBtn()
+                            : Container(),
+                        widget.melodyList.length > 1
+                            ? previousBtn()
+                            : Container(),
+                        playPauseBtn(),
+                        widget.melodyList.length > 1 ? nextBtn() : Container(),
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? InkWell(
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  Navigator.of(context).pushNamed(
+                                    '/melody-page',
+                                    arguments: {
+                                      'melody': widget.melodyList[index],
+                                      'type': Types.AUDIO
+                                    },
+                                  );
+                                }),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.mic,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? SizedBox(
+                                width: 20,
+                              )
+                            : Container(),
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                                widget.isRecordBtnVisible)
+                            ? InkWell(
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  Navigator.of(context).pushNamed(
+                                    '/melody-page',
+                                    arguments: {
+                                      'melody': widget.melodyList[index],
+                                      'type': Types.VIDEO
+                                    },
+                                  );
+                                }),
+                                child: Container(
+                                  height: widget.btnSize,
+                                  width: widget.btnSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade300,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black54,
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.videocam,
+                                    color: MyColors.primaryColor,
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                        Constants.currentRoute != '/downloads'
+                            ? downloadOrOptions()
+                            : Container()
+                      ],
+                    )
+                  : Container(),
+              widget.playBtnPosition == PlayBtnPosition.bottom
+                  ? SizedBox(height: 10)
+                  : Container()
+            ]),
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: StreamBuilder<bool>(
-        stream: AudioService.runningStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.active) {
-            // Don't show anything until we've ascertained whether or not the
-            // service is running, since we want to show a different UI in
-            // each case.
-            return SizedBox();
-          }
-          final running = snapshot.data ?? false;
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // UI to show when we're running, i.e. player state/controls.
+    return _buildPlayer();
+  }
 
-              // Queue display/controls.
-              StreamBuilder<QueueState>(
-                stream: _queueStateStream,
-                builder: (context, snapshot) {
-                  final queueState = snapshot.data;
-                  final queue = queueState?.queue ?? [];
-                  final mediaItem = queueState?.mediaItem;
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (queue != null && queue.isNotEmpty)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.skip_previous),
-                              iconSize: 64.0,
-                              onPressed: mediaItem == queue.first
-                                  ? null
-                                  : AudioService.skipToPrevious,
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.skip_next),
-                              iconSize: 64.0,
-                              onPressed: mediaItem == queue.last
-                                  ? null
-                                  : AudioService.skipToNext,
-                            ),
-                          ],
-                        ),
-                      if (mediaItem?.title != null) Text(mediaItem.title),
-                    ],
-                  );
-                },
+  Widget playPauseBtn() {
+    return !isPlaying
+        ? InkWell(
+            onTap: () => isPlaying ? null : play(),
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
               ),
-              // Play/pause/stop buttons.
-              StreamBuilder<bool>(
-                stream: AudioService.playbackStateStream
-                    .map((state) => state.playing)
-                    .distinct(),
-                builder: (context, snapshot) {
-                  final playing = snapshot.data ?? false;
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (playing) pauseButton() else playButton(),
-                      stopButton(),
-                    ],
-                  );
-                },
+              child: Icon(
+                Icons.play_arrow,
+                size: widget.btnSize - 5,
+                color: MyColors.primaryColor,
               ),
-              // A seek bar.
-              StreamBuilder<MediaState>(
-                stream: _mediaStateStream,
-                builder: (context, snapshot) {
-                  final mediaState = snapshot.data;
-                  return SeekBar(
-                    duration: mediaState?.mediaItem?.duration ?? Duration.zero,
-                    position: mediaState?.position ?? Duration.zero,
-                    onChangeEnd: (newPosition) {
-                      AudioService.seekTo(newPosition);
-                    },
-                  );
-                },
+            ),
+          )
+        : InkWell(
+            onTap: isPlaying ? () => pause() : null,
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
               ),
-              // Display the processing state.
-              StreamBuilder<AudioProcessingState>(
-                stream: AudioService.playbackStateStream
-                    .map((state) => state.processingState)
-                    .distinct(),
-                builder: (context, snapshot) {
-                  final processingState =
-                      snapshot.data ?? AudioProcessingState.none;
-                  return Text(
-                      "Processing state: ${describeEnum(processingState)}");
-                },
+              child: Icon(
+                Icons.pause,
+                color: MyColors.primaryColor,
+                size: widget.btnSize - 5,
               ),
-              // Display the latest custom event.
-              StreamBuilder(
-                stream: AudioService.customEventStream,
-                builder: (context, snapshot) {
-                  return Text("custom event: ${snapshot.data}");
-                },
-              ),
-              // Display the notification click status.
-              StreamBuilder<bool>(
-                stream: AudioService.notificationClickEventStream,
-                builder: (context, snapshot) {
-                  return Text(
-                    'Notification Click Status: ${snapshot.data}',
-                  );
-                },
+            ),
+          );
+  }
+
+  Widget favouriteBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: InkWell(
+        onTap: () async {
+          _isFavourite
+              ? await DatabaseService.deleteMelodyFromFavourites(
+                  widget.melodyList[index].id)
+              : await DatabaseService.addMelodyToFavourites(
+                  widget.melodyList[index].id);
+
+          await isFavourite();
+        },
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
               ),
             ],
-          );
-        },
+          ),
+          child: Icon(
+            _isFavourite ? Icons.favorite : Icons.favorite_border,
+            color: MyColors.primaryColor,
+          ),
+        ),
       ),
     );
   }
 
-  /// A stream reporting the combined state of the current media item and its
-  /// current position.
-  Stream<MediaState> get _mediaStateStream =>
-      Rx.combineLatest2<MediaItem, Duration, MediaState>(
-          AudioService.currentMediaItemStream,
-          AudioService.positionStream,
-          (mediaItem, position) => MediaState(mediaItem, position));
-
-  /// A stream reporting the combined state of the current queue and the current
-  /// media item within that queue.
-  Stream<QueueState> get _queueStateStream =>
-      Rx.combineLatest2<List<MediaItem>, MediaItem, QueueState>(
-          AudioService.queueStream,
-          AudioService.currentMediaItemStream,
-          (queue, mediaItem) => QueueState(queue, mediaItem));
-
-  IconButton playButton() => IconButton(
-        icon: Icon(Icons.play_arrow),
-        iconSize: 64.0,
-        onPressed: AudioService.play,
-      );
-
-  IconButton pauseButton() => IconButton(
-        icon: Icon(Icons.pause),
-        iconSize: 64.0,
-        onPressed: AudioService.pause,
-      );
-
-  IconButton stopButton() => IconButton(
-        icon: Icon(Icons.stop),
-        iconSize: 64.0,
-        onPressed: AudioService.stop,
-      );
-}
-
-class QueueState {
-  final List<MediaItem> queue;
-  final MediaItem mediaItem;
-
-  QueueState(this.queue, this.mediaItem);
-}
-
-class MediaState {
-  final MediaItem mediaItem;
-  final Duration position;
-
-  MediaState(this.mediaItem, this.position);
-}
-
-class SeekBar extends StatefulWidget {
-  final Duration duration;
-  final Duration position;
-  final ValueChanged<Duration> onChanged;
-  final ValueChanged<Duration> onChangeEnd;
-
-  SeekBar({
-    @required this.duration,
-    @required this.position,
-    this.onChanged,
-    this.onChangeEnd,
-  });
-
-  @override
-  _SeekBarState createState() => _SeekBarState();
-}
-
-class _SeekBarState extends State<SeekBar> {
-  double _dragValue;
-  bool _dragging = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final value = min(_dragValue ?? widget.position?.inMilliseconds?.toDouble(),
-        widget.duration.inMilliseconds.toDouble());
-    if (_dragValue != null && !_dragging) {
-      _dragValue = null;
-    }
-    return Stack(
-      children: [
-        Slider(
-          min: 0.0,
-          max: widget.duration.inMilliseconds.toDouble(),
-          value: value,
-          onChanged: (value) {
-            if (!_dragging) {
-              _dragging = true;
-            }
-            setState(() {
-              _dragValue = value;
-            });
-            if (widget.onChanged != null) {
-              widget.onChanged(Duration(milliseconds: value.round()));
-            }
-          },
-          onChangeEnd: (value) {
-            if (widget.onChangeEnd != null) {
-              widget.onChangeEnd(Duration(milliseconds: value.round()));
-            }
-            _dragging = false;
-          },
-        ),
-        Positioned(
-          right: 16.0,
-          bottom: 0.0,
-          child: Text(
-              RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
-                      .firstMatch("$_remaining")
-                      ?.group(1) ??
-                  '$_remaining',
-              style: Theme.of(context).textTheme.caption),
-        ),
-      ],
-    );
+  Widget downloadOrOptions() {
+    return Constants.isAdmin ?? false
+        ? Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Container(
+              height: widget.btnSize,
+              width: widget.btnSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: PopupMenuButton<String>(
+                child: Icon(
+                  Icons.more_vert,
+                  color: MyColors.primaryColor,
+                  size: widget.btnSize - 5,
+                ),
+                color: MyColors.accentColor,
+                elevation: 0,
+                onCanceled: () {
+                  print('You have not chosen anything');
+                },
+                onSelected: _select,
+                itemBuilder: (BuildContext context) {
+                  return choices.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(
+                        choice,
+                        style: TextStyle(color: MyColors.primaryColor),
+                      ),
+                    );
+                  }).toList();
+                },
+              ),
+            ),
+          )
+        : widget.melodyList[index]?.authorId != null ?? false
+            ? Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: InkWell(
+                  onTap: () async {
+                    _downloadMelody();
+                  },
+                  child: Container(
+                    height: widget.btnSize,
+                    width: widget.btnSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey.shade300,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black54,
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: Offset(0, 2), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.file_download,
+                      color: MyColors.primaryColor,
+                      size: widget.btnSize - 10,
+                    ),
+                  ),
+                ),
+              )
+            : Container();
   }
 
-  Duration get _remaining => widget.duration - widget.position;
-}
+  void _select(String value) async {
+    switch (value) {
+      case Strings.en_edit_image:
+        await editImage();
+        break;
+      case Strings.ar_edit_image:
+        await editImage();
+        break;
 
-// NOTE: Your entrypoint MUST be a top-level function.
-void _audioPlayerTaskEntrypoint() async {
-  AudioServiceBackground.run(() => AudioPlayerTask());
-}
+      case Strings.en_edit_name:
+        await editName();
+        break;
+      case Strings.ar_edit_name:
+        await editName();
+        break;
 
-/// This task defines logic for playing a list of podcast episodes.
-class AudioPlayerTask extends BackgroundAudioTask {
-  List<MediaItem> _mediaLibrary;
-  AudioPlayer _player = new AudioPlayer();
-  AudioProcessingState _skipState;
-  Seeker _seeker;
-  StreamSubscription<PlaybackEvent> _eventSubscription;
+      case Strings.en_delete:
+        await deleteMelody();
+        break;
+      case Strings.ar_delete:
+        await deleteMelody();
+        break;
 
-  List<MediaItem> get queue => _mediaLibrary;
-  int get index => _player.currentIndex;
-  MediaItem get mediaItem => index == null ? null : queue[index];
+      case Strings.ar_edit_lyrics:
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
+        break;
+      case Strings.ar_edit_lyrics:
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
+        break;
+    }
+  }
 
-  @override
-  Future<void> onStart(Map<String, dynamic> params) async {
-    // We configure the audio session for speech since we're playing a podcast.
-    // You can also put this in your app's initialisation if your app doesn't
-    // switch between two types of audio as this example does.
-    _mediaLibrary = mediaItems;
-    final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration.music());
-    // Broadcast media item changes.
-    _player.currentIndexStream.listen((index) {
-      if (index != null) AudioServiceBackground.setMediaItem(queue[index]);
+  editImage() async {
+    File image = await AppUtil.pickImageFromGallery();
+    String ext = path.extension(image.path);
+
+    if (widget.melodyList[index].imageUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(
+          widget.melodyList[index].imageUrl);
+      await storageRef.child('/melodies_images/$fileName').delete();
+    }
+
+    String url = await AppUtil().uploadFile(
+        image, context, '/melodies_images/${widget.melodyList[index].id}$ext');
+    await melodiesRef
+        .doc(widget.melodyList[index].id)
+        .update({'image_url': url});
+    AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
+  }
+
+  TextEditingController _nameController = TextEditingController();
+  editName() async {
+    setState(() {
+      _nameController.text = widget.melodyList[index].name;
     });
-    // Propagate all events from the audio player to AudioService clients.
-    _eventSubscription = _player.playbackEventStream.listen((event) {
-      _broadcastState();
-    });
-    // Special processing for state transitions.
-    _player.processingStateStream.listen((state) {
-      switch (state) {
-        case ProcessingState.completed:
-          // In this example, the service stops when reaching the end.
-          onStop();
-          break;
-        case ProcessingState.ready:
-          // If we just came from skipping between tracks, clear the skip
-          // state now that we're ready to play.
-          _skipState = null;
-          break;
-        default:
-          break;
-      }
-    });
-
-    // Load and broadcast the queue
-    AudioServiceBackground.setQueue(queue);
-    try {
-      await _player.setAudioSource(ConcatenatingAudioSource(
-        children:
-            queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
-      ));
-      // In this example, we automatically start playing on start.
-      onPlay();
-    } catch (e) {
-      print("Error: $e");
-      onStop();
-    }
+    Navigator.of(context).push(CustomModal(
+        child: Container(
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _nameController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(hintText: 'New name'),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_nameController.text.trim().isEmpty) {
+                AppUtil.showToast(
+                    language(en: 'Please enter a name', ar: 'قم ادخال اسم'));
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              await melodiesRef.doc(widget.melodyList[index].id).update({
+                'name': _nameController.text,
+                'search': searchList(_nameController.text),
+              });
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pop();
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              language(en: Strings.en_update, ar: Strings.ar_update),
+              style: TextStyle(color: MyColors.textLightColor),
+            ),
+          )
+        ],
+      ),
+    )));
   }
 
-  @override
-  Future<void> onSkipToQueueItem(String mediaId) async {
-    // Then default implementations of onSkipToNext and onSkipToPrevious will
-    // delegate to this method.
-    final newIndex = queue.indexWhere((item) => item.id == mediaId);
-    if (newIndex == -1) return;
-    // During a skip, the player may enter the buffering state. We could just
-    // propagate that state directly to AudioService clients but AudioService
-    // has some more specific states we could use for skipping to next and
-    // previous. This variable holds the preferred state to send instead of
-    // buffering during a skip, and it is cleared as soon as the player exits
-    // buffering (see the listener in onStart).
-    _skipState = newIndex > index
-        ? AudioProcessingState.skippingToNext
-        : AudioProcessingState.skippingToPrevious;
-    // This jumps to the beginning of the queue item at newIndex.
-    _player.seek(Duration.zero, index: newIndex);
-    // Demonstrate custom events.
-    AudioServiceBackground.sendCustomEvent('skip to $newIndex');
+  deleteMelody() async {
+    AppUtil.showAlertDialog(
+        context: context,
+        message: 'Are you sure you want to delete this melody?',
+        firstBtnText: 'Yes',
+        firstFunc: () async {
+          Navigator.of(context).pop();
+          AppUtil.showLoader(context);
+          await DatabaseService.deleteMelody(widget.melodyList[index]);
+          Singer singer = await DatabaseService.getSingerWithName(
+              widget.melodyList[index].singer);
+          if (widget.melodyList[index].isSong) {
+            await singersRef
+                .doc(singer.id)
+                .update({'songs': FieldValue.increment(-1)});
+          } else {
+            await singersRef
+                .doc(singer.id)
+                .update({'melodies': FieldValue.increment(-1)});
+          }
+          AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+        },
+        secondBtnText: 'No',
+        secondFunc: () {
+          Navigator.of(context).pop();
+        });
   }
 
-  @override
-  Future<void> onPlay() => _player.play();
-
-  @override
-  Future<void> onPause() => _player.pause();
-
-  @override
-  Future<void> onSeekTo(Duration position) => _player.seek(position);
-
-  @override
-  Future<void> onFastForward() => _seekRelative(fastForwardInterval);
-
-  @override
-  Future<void> onRewind() => _seekRelative(-rewindInterval);
-
-  @override
-  Future<void> onSeekForward(bool begin) async => _seekContinuously(begin, 1);
-
-  @override
-  Future<void> onSeekBackward(bool begin) async => _seekContinuously(begin, -1);
-
-  @override
-  Future<void> onStop() async {
-    await _player.dispose();
-    _eventSubscription.cancel();
-    // It is important to wait for this state to be broadcast before we shut
-    // down the task. If we don't, the background task will be destroyed before
-    // the message gets sent to the UI.
-    await _broadcastState();
-    // Shut down this task
-    await super.onStop();
-  }
-
-  /// Jumps away from the current position by [offset].
-  Future<void> _seekRelative(Duration offset) async {
-    var newPosition = _player.position + offset;
-    // Make sure we don't jump out of bounds.
-    if (newPosition < Duration.zero) newPosition = Duration.zero;
-    if (newPosition > mediaItem.duration) newPosition = mediaItem.duration;
-    // Perform the jump via a seek.
-    await _player.seek(newPosition);
-  }
-
-  /// Begins or stops a continuous seek in [direction]. After it begins it will
-  /// continue seeking forward or backward by 10 seconds within the audio, at
-  /// intervals of 1 second in app time.
-  void _seekContinuously(bool begin, int direction) {
-    _seeker?.stop();
-    if (begin) {
-      _seeker = Seeker(_player, Duration(seconds: 10 * direction),
-          Duration(seconds: 1), mediaItem)
-        ..start();
-    }
-  }
-
-  /// Broadcasts the current state to all clients.
-  Future<void> _broadcastState() async {
-    await AudioServiceBackground.setState(
-      controls: [
-        MediaControl.skipToPrevious,
-        if (_player.playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
-        MediaControl.skipToNext,
-      ],
-      systemActions: [
-        MediaAction.seekTo,
-        MediaAction.seekForward,
-        MediaAction.seekBackward,
-      ],
-      androidCompactActions: [0, 1, 3],
-      processingState: _getProcessingState(),
-      playing: _player.playing,
-      position: _player.position,
-      bufferedPosition: _player.bufferedPosition,
-      speed: _player.speed,
-    );
-  }
-
-  /// Maps just_audio's processing state into into audio_service's playing
-  /// state. If we are in the middle of a skip, we use [_skipState] instead.
-  AudioProcessingState _getProcessingState() {
-    if (_skipState != null) return _skipState;
-    switch (_player.processingState) {
-      case ProcessingState.idle:
-        return AudioProcessingState.stopped;
-      case ProcessingState.loading:
-        return AudioProcessingState.connecting;
-      case ProcessingState.buffering:
-        return AudioProcessingState.buffering;
-      case ProcessingState.ready:
-        return AudioProcessingState.ready;
-      case ProcessingState.completed:
-        return AudioProcessingState.completed;
-      default:
-        throw Exception("Invalid state: ${_player.processingState}");
-    }
-  }
-}
-
-List<MediaItem> mediaItems = [];
-
-/// An object that performs interruptable sleep.
-class Sleeper {
-  Completer _blockingCompleter;
-
-  /// Sleep for a duration. If sleep is interrupted, a
-  /// [SleeperInterruptedException] will be thrown.
-  Future<void> sleep([Duration duration]) async {
-    _blockingCompleter = Completer();
-    if (duration != null) {
-      await Future.any([Future.delayed(duration), _blockingCompleter.future]);
+  void _downloadMelody() async {
+    Token token = Token();
+    if (widget.melodyList[index].price == null ||
+        widget.melodyList[index].price == '0') {
+      token.tokenId = 'free';
     } else {
-      await _blockingCompleter.future;
+      DocumentSnapshot doc = await usersRef
+          .doc(Constants.currentUserID)
+          .collection('downloads')
+          .doc(widget.melodyList[index].id)
+          .get();
+      bool alreadyDownloaded = doc.exists;
+      print('alreadyDownloaded: $alreadyDownloaded');
+
+      if (!alreadyDownloaded) {
+        final success = await Navigator.of(context).pushNamed('/payment-home',
+            arguments: {'amount': widget.melodyList[index].price});
+        if (success) {
+          usersRef
+              .doc(Constants.currentUserID)
+              .collection('downloads')
+              .doc(widget.melodyList[index].id)
+              .set({'timestamp': FieldValue.serverTimestamp()});
+        }
+        token.tokenId = 'purchased';
+
+        print(token.tokenId);
+      } else {
+        token.tokenId = 'already purchased';
+        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
+      }
     }
-    final interrupted = _blockingCompleter.isCompleted;
-    _blockingCompleter = null;
-    if (interrupted) {
-      throw SleeperInterruptedException();
+    if (token.tokenId != null) {
+      AppUtil.showLoader(context);
+      await AppUtil.createAppDirectory();
+      String path;
+      if (widget.melodyList[index].audioUrl != null) {
+        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
+            encrypt: true);
+      } else {
+        path = await AppUtil.downloadFile(
+            widget.melodyList[index].levelUrls.values.elementAt(0),
+            encrypt: true);
+      }
+
+      Melody melody = Melody(
+          id: widget.melodyList[index].id,
+          authorId: widget.melodyList[index].authorId,
+          duration: widget.melodyList[index].duration,
+          imageUrl: widget.melodyList[index].imageUrl,
+          name: widget.melodyList[index].name,
+          audioUrl: path);
+      Melody storedMelody =
+          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
+      if (storedMelody == null) {
+        await MelodySqlite.insert(melody);
+        await usersRef
+            .doc(Constants.currentUserID)
+            .collection('downloads')
+            .doc(widget.melodyList[index].id)
+            .set({'timestamp': FieldValue.serverTimestamp()});
+        Navigator.of(context).pop();
+        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
+        Navigator.of(context).pushNamed('/downloads');
+      } else {
+        Navigator.of(context).pop();
+        AppUtil.showToast('Already downloaded!');
+        Navigator.of(context).pushNamed('/downloads');
+      }
     }
   }
 
-  /// Interrupt any sleep that's underway.
-  void interrupt() {
-    if (_blockingCompleter?.isCompleted == false) {
-      _blockingCompleter.complete();
-    }
-  }
-}
-
-class SleeperInterruptedException {}
-
-class Seeker {
-  final AudioPlayer player;
-  final Duration positionInterval;
-  final Duration stepInterval;
-  final MediaItem mediaItem;
-  bool _running = false;
-
-  Seeker(
-    this.player,
-    this.positionInterval,
-    this.stepInterval,
-    this.mediaItem,
-  );
-
-  start() async {
-    _running = true;
-    while (_running) {
-      Duration newPosition = player.position + positionInterval;
-      if (newPosition < Duration.zero) newPosition = Duration.zero;
-      if (newPosition > mediaItem.duration) newPosition = mediaItem.duration;
-      player.seek(newPosition);
-      await Future.delayed(stepInterval);
-    }
+  Widget nextBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: InkWell(
+        onTap: () => next(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.skip_next,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
   }
 
-  stop() {
-    _running = false;
+  next() {
+    myAudioPlayer.next();
+  }
+
+  previousBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: InkWell(
+        onTap: () => previous(),
+        child: Container(
+          height: widget.btnSize,
+          width: widget.btnSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade300,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 2), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.skip_previous,
+            size: widget.btnSize - 5,
+            color: MyColors.primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  previous() {
+    myAudioPlayer.prev();
   }
 }
