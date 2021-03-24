@@ -72,10 +72,17 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void _goToMelodyPage() {
-    AppUtil.executeFunctionIfLoggedIn(
-        context,
-        () => Navigator.of(context).pushNamed('/melody-page',
-            arguments: {'melody': _melody, 'type': Types.AUDIO}));
+    AppUtil.executeFunctionIfLoggedIn(context, () {
+      if (!Constants.ongoingEncoding) {
+        Navigator.of(context).pushNamed('/melody-page',
+            arguments: {'melody': _melody, 'type': Types.AUDIO});
+      } else {
+        AppUtil.showToast(language(
+            ar: 'من فضلك قم برفع الفيديو السابق أولا',
+            en: 'Please upload the previous video first'));
+      }
+      ;
+    });
   }
 
   Future<void> likeBtnHandler(Record record) async {

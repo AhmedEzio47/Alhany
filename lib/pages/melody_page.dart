@@ -419,7 +419,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future saveRecord() async {
-    _canFloat = true;
+    Constants.ongoingEncoding = true;
     // Singer singer =
     //     await DatabaseService.getSingerWithName(widget.melody.singer);
     PIPView.of(_context).presentBelow(MyApp());
@@ -929,7 +929,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   BuildContext _context;
-  bool _canFloat = false;
+  // bool _canFloat = false;
   bool _isPreviewVideoPlaying = false;
   choosingImagePage(BuildContext context) {
     return Container(
@@ -960,6 +960,8 @@ class _MelodyPageState extends State<MelodyPage> {
                           RaisedButton(
                             onPressed: imageVideoPath == null
                                 ? () async {
+                                    Constants.ongoingEncoding = false;
+
                                     _image = await AppUtil
                                         .pickCompressedImageFromGallery();
                                     // FileStat s = await pickedImage.stat();
@@ -1037,6 +1039,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           ),
                           RaisedButton(
                             onPressed: () async {
+                              Constants.ongoingEncoding = false;
                               await AppUtil.deleteFiles();
                               Navigator.of(context).pop();
                             },
@@ -1072,6 +1075,8 @@ class _MelodyPageState extends State<MelodyPage> {
                           children: [
                             RaisedButton(
                               onPressed: () async {
+                                Constants.ongoingEncoding = false;
+
                                 //Navigator.of(context).pop(false);
                                 await submitRecord();
                                 Navigator.pushNamedAndRemoveUntil(
@@ -1088,6 +1093,8 @@ class _MelodyPageState extends State<MelodyPage> {
                             ),
                             RaisedButton(
                               onPressed: () async {
+                                Constants.ongoingEncoding = false;
+
                                 await _videoController.pause();
                                 await AppUtil.deleteFiles();
                                 Navigator.of(context).pop();
@@ -1501,7 +1508,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future<bool> _onBackPressed() async {
-    if (_canFloat) {
+    if (Constants.ongoingEncoding) {
       PIPView.of(_context).presentBelow(MyApp());
     } else {
       Navigator.of(context).pop();

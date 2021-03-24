@@ -49,4 +49,6 @@ class Constants {
   static double voiceVolume = 7;
 
   static int endPositionOffsetInMilliSeconds = 600;
+
+  static bool ongoingEncoding = false;
 }

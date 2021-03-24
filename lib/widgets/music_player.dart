@@ -296,13 +296,17 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
                                     context, () {
-                                  Navigator.of(context).pushNamed(
-                                    '/melody-page',
-                                    arguments: {
+                                  if (!Constants.ongoingEncoding) {
+                                    Navigator.of(context)
+                                        .pushNamed('/melody-page', arguments: {
                                       'melody': widget.melodyList[index],
                                       'type': Types.AUDIO
-                                    },
-                                  );
+                                    });
+                                  } else {
+                                    AppUtil.showToast(language(
+                                        ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                        en: 'Please upload the previous video first'));
+                                  }
                                 }),
                                 child: Container(
                                   height: widget.btnSize,
@@ -338,13 +342,17 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
                                     context, () {
-                                  Navigator.of(context).pushNamed(
-                                    '/melody-page',
-                                    arguments: {
+                                  if (!Constants.ongoingEncoding) {
+                                    Navigator.of(context)
+                                        .pushNamed('/melody-page', arguments: {
                                       'melody': widget.melodyList[index],
                                       'type': Types.VIDEO
-                                    },
-                                  );
+                                    });
+                                  } else {
+                                    AppUtil.showToast(language(
+                                        ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                        en: 'Please upload the previous video first'));
+                                  }
                                 }),
                                 child: Container(
                                   height: widget.btnSize,

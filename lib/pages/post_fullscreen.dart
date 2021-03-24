@@ -157,8 +157,14 @@ class _PostFullscreenState extends State<PostFullscreen> {
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context)
-        .pushNamed('/melody-page', arguments: {'melody': widget.melody});
+    if (!Constants.ongoingEncoding) {
+      Navigator.of(context).pushNamed('/melody-page',
+          arguments: {'melody': widget.melody, 'type': Types.AUDIO});
+    } else {
+      AppUtil.showToast(language(
+          ar: 'من فضلك قم برفع الفيديو السابق أولا',
+          en: 'Please upload the previous video first'));
+    }
   }
 
   Record _record;
@@ -567,8 +573,18 @@ class _PostFullscreenState extends State<PostFullscreen> {
           child: Align(
             alignment: Alignment.topLeft,
             child: InkWell(
-              onTap: () => Navigator.of(context).pushNamed('/melody-page',
-                  arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
+              onTap: () {
+                if (!Constants.ongoingEncoding) {
+                  Navigator.of(context).pushNamed('/melody-page', arguments: {
+                    'melody': widget.melody,
+                    'type': Types.AUDIO
+                  });
+                } else {
+                  AppUtil.showToast(language(
+                      ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                      en: 'Please upload the previous video first'));
+                }
+              },
               child: Container(
                 padding: EdgeInsets.only(bottom: 20),
                 child: Column(
