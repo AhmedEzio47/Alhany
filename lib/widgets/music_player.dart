@@ -11,6 +11,7 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
+import 'package:audio_manager/audio_manager.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -62,18 +63,26 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   MyAudioPlayer myAudioPlayer;
 
-  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
-  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
+  get isPlaying => widget.isLocal
+      ? myAudioPlayer.playerState == AudioPlayerState.PLAYING
+      : _isPlaying;
 
-  get durationText => myAudioPlayer.duration != null
-      ? myAudioPlayer.duration.toString().split('.').first
-      : '';
+  get durationText => widget.isLocal
+      ? myAudioPlayer.duration != null
+          ? myAudioPlayer.duration.toString().split('.').first
+          : ''
+      : AudioManager.instance.duration != null
+          ? AudioManager.instance.duration.toString().split('.').first
+          : '';
 
-  get positionText => myAudioPlayer.position != null
-      ? myAudioPlayer.position.toString().split('.').first
-      : '';
+  get positionText => widget.isLocal
+      ? myAudioPlayer.position != null
+          ? myAudioPlayer.position.toString().split('.').first
+          : ''
+      : AudioManager.instance.position != null
+          ? AudioManager.instance.position.toString().split('.').first
+          : '';
 
-  bool isMuted = false;
   List<String> choices;
 
   bool _isFavourite = false;
@@ -103,6 +112,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void initState() {
+    super.initState();
+
     if (widget.melodyList[index]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -117,17 +128,28 @@ class _MusicPlayerState extends State<MusicPlayer> {
         language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     }
-    super.initState();
-    initAudioPlayer();
+
+    if (widget.isLocal)
+      initAudioPlayer();
+    else
+      initAudioManager();
   }
 
   @override
   void dispose() {
-    myAudioPlayer.stop();
+    if (widget.isLocal)
+      myAudioPlayer.stop();
+    else {
+      AudioManager.instance.stop();
+      AudioManager.instance.release();
+    }
     super.dispose();
   }
 
-  Duration _duration;
+  Duration _duration = Duration(milliseconds: 0);
+  Duration _position = Duration(milliseconds: 0);
+  double _slider = 0.0;
+  bool _isPlaying = false;
 
   void initAudioPlayer() async {
     List<String> urlList;
@@ -151,16 +173,104 @@ class _MusicPlayerState extends State<MusicPlayer> {
     });
   }
 
+  void initAudioManager() async {
+    if (widget.melodyList.length > 1) {
+      List<AudioInfo> _list = [];
+
+      widget.melodyList.forEach((item) => _list.add(AudioInfo(item.audioUrl,
+          title: item.name, desc: item.singer, coverUrl: item.imageUrl)));
+
+      AudioManager.instance.audioList = _list;
+    }
+    AudioManager.instance.intercepter = true;
+    //AudioManager.instance.play(auto: false);
+    AudioManager.instance.onEvents((events, args) {
+      print("$events, $args");
+      switch (events) {
+        case AudioManagerEvents.start:
+          print(
+              "start load data callback, curIndex is ${AudioManager.instance.curIndex}");
+          _position = AudioManager.instance.position;
+          _duration = AudioManager.instance.duration;
+          _slider = 0;
+          setState(() {});
+          break;
+        case AudioManagerEvents.ready:
+          print("ready to play");
+          // _error = null;
+          // _sliderVolume = AudioManager.instance.volume;
+          _position = AudioManager.instance.position;
+          _duration = AudioManager.instance.duration;
+          setState(() {});
+          // if you need to seek times, must after AudioManagerEvents.ready event invoked
+          // AudioManager.instance.seekTo(Duration(seconds: 10));
+          break;
+        case AudioManagerEvents.seekComplete:
+          _position = AudioManager.instance.position;
+          _slider = _position.inMilliseconds / _duration.inMilliseconds;
+          setState(() {});
+          print("seek event is completed. position is [$args]/ms");
+          break;
+        case AudioManagerEvents.buffering:
+          print("buffering $args");
+          break;
+        case AudioManagerEvents.playstatus:
+          _isPlaying = AudioManager.instance.isPlaying;
+          setState(() {});
+          break;
+        case AudioManagerEvents.timeupdate:
+          _position = AudioManager.instance.position;
+          _slider = _position.inMilliseconds / _duration.inMilliseconds;
+          setState(() {});
+          //AudioManager.instance.updateLrc(args["position"].toString());
+          break;
+        case AudioManagerEvents.error:
+          //_error = args;
+          print('Error: $args');
+          setState(() {});
+          break;
+        case AudioManagerEvents.ended:
+          next();
+          break;
+        case AudioManagerEvents.volumeChange:
+          //_sliderVolume = AudioManager.instance.volume;
+          setState(() {});
+          break;
+        default:
+          break;
+      }
+    });
+
+    await AudioManager.instance
+        .start(widget.melodyList[index].audioUrl,
+            widget.melodyList[index].name ?? '',
+            desc: widget.melodyList[index].singer ?? '',
+            auto: false,
+            cover: widget.melodyList[index].imageUrl ?? '')
+        .then((err) {
+      print(err);
+    });
+  }
+
   Future play() async {
-    myAudioPlayer.play();
+    if (widget.isLocal)
+      myAudioPlayer.play();
+    else
+      AudioManager.instance.playOrPause();
   }
 
   Future pause() async {
-    await myAudioPlayer.pause();
+    if (widget.isLocal)
+      await myAudioPlayer.pause();
+    else
+      AudioManager.instance.playOrPause();
   }
 
   Future stop() async {
-    await myAudioPlayer.stop();
+    if (widget.isLocal)
+      await myAudioPlayer.stop();
+    else
+      await AudioManager.instance.stop();
   }
 
   NumberFormat _numberFormatter = new NumberFormat("##");
@@ -182,7 +292,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               widget.melodyList.length > 1
                   ? Text(
-                      widget.melodyList[myAudioPlayer.index].name,
+                      widget.melodyList[index].name,
                       style: TextStyle(
                           color: MyColors.textLightColor,
                           fontSize: 16,
@@ -210,59 +320,110 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         ? playPauseBtn()
                         : Container(),
                   ),
-                  myAudioPlayer.position != null
-                      ? Text(
-                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
-                          style: TextStyle(color: MyColors.textLightColor),
-                        )
-                      : Text(
-                          '0:0',
-                          style: TextStyle(color: MyColors.textLightColor),
-                        ),
+                  widget.isLocal
+                      ? myAudioPlayer?.position != null
+                          ? Text(
+                              '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                          : Text(
+                              '0:0',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                      : _position != null
+                          ? Text(
+                              '${_numberFormatter.format(_position.inMinutes)}:${_numberFormatter.format(_position.inSeconds % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                          : Text(
+                              '0:0',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
                   SizedBox(
                     width: 10,
                   ),
                   Expanded(
                     flex: 9,
                     child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 5.0,
-                          thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 8.0),
-                          overlayShape:
-                              RoundSliderOverlayShape(overlayRadius: 16.0),
-                        ),
-                        child: Slider(
-                            activeColor: MyColors.darkPrimaryColor,
-                            inactiveColor: Colors.grey.shade300,
-                            value: myAudioPlayer.position?.inMilliseconds
-                                    ?.toDouble() ??
-                                0.0,
-                            onChanged: (double value) {
-                              myAudioPlayer
-                                  .seek(Duration(seconds: value ~/ 1000));
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 5.0,
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 16.0),
+                      ),
+                      child: widget.isLocal
+                          ? Slider(
+                              activeColor: MyColors.darkPrimaryColor,
+                              inactiveColor: Colors.grey.shade300,
+                              value: myAudioPlayer.position?.inMilliseconds
+                                      ?.toDouble() ??
+                                  0.0,
+                              onChanged: (double value) {
+                                myAudioPlayer
+                                    .seek(Duration(seconds: value ~/ 1000));
 
-                              if (!isPlaying) {
-                                play();
-                              }
-                            },
-                            min: 0.0,
-                            max: _duration != null
-                                ? _duration?.inMilliseconds?.toDouble()
-                                : 1.7976931348623157e+308)),
+                                if (!isPlaying) {
+                                  play();
+                                }
+                              },
+                              min: 0.0,
+                              max: _duration != null
+                                  ? _duration?.inMilliseconds?.toDouble()
+                                  : 1.7976931348623157e+308)
+                          : Slider(
+                              activeColor: MyColors.darkPrimaryColor,
+                              inactiveColor: Colors.grey.shade300,
+                              value: ((_slider ?? 1.7976931348623157e+308) >=
+                                          0 &&
+                                      (_slider ?? 1.7976931348623157e+308) <=
+                                          (_duration?.inMilliseconds ??
+                                              1.7976931348623157e+308))
+                                  ? _slider
+                                  : 0,
+                              onChanged: (value) {
+                                setState(() {
+                                  _slider = value;
+                                });
+                              },
+                              onChangeEnd: (double value) {
+                                if (_duration != null) {
+                                  Duration msec = Duration(
+                                      milliseconds:
+                                          (_duration.inMilliseconds * value)
+                                              .round());
+                                  AudioManager.instance.seekTo(msec);
+                                }
+
+                                if (!isPlaying) {
+                                  play();
+                                }
+                              },
+                            ),
+                    ),
                   ),
                   SizedBox(
                     width: 10,
                   ),
-                  myAudioPlayer.duration != null
-                      ? Text(
-                          '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
-                          style: TextStyle(color: MyColors.textLightColor),
-                        )
-                      : Text(
-                          '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
-                          style: TextStyle(color: MyColors.textLightColor),
-                        ),
+                  widget.isLocal
+                      ? myAudioPlayer.duration != null
+                          ? Text(
+                              '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                          : Text(
+                              '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                      : _duration != null
+                          ? Text(
+                              '${_numberFormatter.format(_duration?.inMinutes ?? 0)}:${_numberFormatter.format((_duration?.inSeconds ?? 0) % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            )
+                          : Text(
+                              '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
                   SizedBox(
                     width: 10,
                   ),
@@ -799,7 +960,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   next() {
-    myAudioPlayer.next();
+    if (widget.isLocal)
+      myAudioPlayer.next();
+    else {
+      if (this.index < widget.melodyList.length - 1)
+        this.index++;
+      else
+        this.index = 0;
+      setState(() {});
+      AudioManager.instance.next();
+    }
   }
 
   previousBtn() {
@@ -833,6 +1003,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   previous() {
-    myAudioPlayer.prev();
+    if (widget.isLocal)
+      myAudioPlayer.prev();
+    else {
+      if (this.index > 0)
+        this.index--;
+      else
+        this.index = widget.melodyList.length - 1;
+      setState(() {});
+      AudioManager.instance.previous();
+    }
   }
 }

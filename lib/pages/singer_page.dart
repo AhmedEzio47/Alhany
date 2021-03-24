@@ -206,168 +206,177 @@ class _SingerPageState extends State<SingerPage>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isPlaying = false;
-                });
-              },
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  gradient: new LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      MyColors.primaryColor,
-                    ],
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: SafeArea(
+        child: Scaffold(
+          body: Stack(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isPlaying = false;
+                  });
+                },
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    gradient: new LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black,
+                        MyColors.primaryColor,
+                      ],
+                    ),
+                    color: MyColors.primaryColor,
+                    image: DecorationImage(
+                      colorFilter: new ColorFilter.mode(
+                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                      image: AssetImage(Strings.default_bg),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  color: MyColors.primaryColor,
-                  image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(
-                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                    image: AssetImage(Strings.default_bg),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: CustomScrollView(
-                  slivers: [
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        Container(
-                          height: 200,
-                          child: Stack(
-                            children: [
-                              CachedImage(
-                                height: 200,
-                                width: MediaQuery.of(context).size.width,
-                                defaultAssetImage: Strings.default_cover_image,
-                                imageUrl: widget.singer.coverUrl,
-                                imageShape: BoxShape.rectangle,
-                              ),
-                              Positioned.fill(
-                                  child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, bottom: 16),
-                                child: Align(
-                                  alignment: Alignment.bottomLeft,
-                                  child: CachedImage(
-                                    height: 100,
-                                    width: 100,
-                                    defaultAssetImage:
-                                        Strings.default_profile_image,
-                                    imageUrl: widget.singer.imageUrl,
-                                    imageShape: BoxShape.circle,
-                                  ),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildListDelegate([
+                          Container(
+                            height: 200,
+                            child: Stack(
+                              children: [
+                                CachedImage(
+                                  height: 200,
+                                  width: MediaQuery.of(context).size.width,
+                                  defaultAssetImage:
+                                      Strings.default_cover_image,
+                                  imageUrl: widget.singer.coverUrl,
+                                  imageShape: BoxShape.rectangle,
                                 ),
-                              )),
-                              Positioned.fill(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                Positioned.fill(
+                                    child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 16.0, bottom: 16),
                                   child: Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 4, horizontal: 16),
-                                      color: Colors.black.withOpacity(.6),
-                                      child: Text(
-                                        widget.singer.name,
-                                        style: TextStyle(
-                                            fontSize: 22,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                    alignment: Alignment.bottomLeft,
+                                    child: CachedImage(
+                                      height: 100,
+                                      width: 100,
+                                      defaultAssetImage:
+                                          Strings.default_profile_image,
+                                      imageUrl: widget.singer.imageUrl,
+                                      imageShape: BoxShape.circle,
+                                    ),
+                                  ),
+                                )),
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 16),
+                                        color: Colors.black.withOpacity(.6),
+                                        child: Text(
+                                          widget.singer.name,
+                                          style: TextStyle(
+                                              fontSize: 22,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        widget.dataType == null
-                            ? TabBar(
-                                onTap: (index) {
-                                  setState(() {
-                                    //_isPlaying = false;
-                                    _page = index;
-                                  });
-                                },
-                                labelColor: MyColors.accentColor,
-                                unselectedLabelColor: Colors.grey,
-                                controller: _tabController,
-                                tabs: [
-                                    Tab(
-                                      text: language(
-                                          en: 'Melodies', ar: 'الألحان'),
-                                    ),
-                                    Tab(
-                                      text:
-                                          language(en: 'Songs', ar: 'الأغاني'),
-                                    ),
-                                  ])
-                            : Container(),
-                        _currentPage()
-                      ]),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: RegularAppbar(
-                  context,
-                  color: Colors.black,
-                  margin: 10,
-                ),
-              ),
-            ),
-            Constants.isAdmin ?? false
-                ? Positioned.fill(
-                    child: Align(
-                    alignment: Alignment.topRight,
-                    child: PopupMenuButton<String>(
-                      color: MyColors.accentColor,
-                      elevation: 0,
-                      onCanceled: () {
-                        print('You have not chosen anything');
-                      },
-                      tooltip: 'This is tooltip',
-                      onSelected: _select,
-                      itemBuilder: (BuildContext context) {
-                        return choices.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(
-                              choice,
-                              style: TextStyle(color: Colors.black),
+                                )
+                              ],
                             ),
-                          );
-                        }).toList();
-                      },
-                    ),
-                  ))
-                : Container(),
-            _isPlaying
-                ? Positioned.fill(
-                    child: Align(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: musicPlayer,
-                    ),
-                    alignment: Alignment.bottomCenter,
-                  ))
-                : Container(),
-          ],
+                          ),
+                          widget.dataType == null
+                              ? TabBar(
+                                  onTap: (index) {
+                                    setState(() {
+                                      //_isPlaying = false;
+                                      _page = index;
+                                    });
+                                  },
+                                  labelColor: MyColors.accentColor,
+                                  unselectedLabelColor: Colors.grey,
+                                  controller: _tabController,
+                                  tabs: [
+                                      Tab(
+                                        text: language(
+                                            en: 'Melodies', ar: 'الألحان'),
+                                      ),
+                                      Tab(
+                                        text: language(
+                                            en: 'Songs', ar: 'الأغاني'),
+                                      ),
+                                    ])
+                              : Container(),
+                          _currentPage()
+                        ]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: RegularAppbar(
+                    context,
+                    color: Colors.black,
+                    margin: 10,
+                  ),
+                ),
+              ),
+              Constants.isAdmin ?? false
+                  ? Positioned.fill(
+                      child: Align(
+                      alignment: Alignment.topRight,
+                      child: PopupMenuButton<String>(
+                        color: MyColors.accentColor,
+                        elevation: 0,
+                        onCanceled: () {
+                          print('You have not chosen anything');
+                        },
+                        tooltip: 'This is tooltip',
+                        onSelected: _select,
+                        itemBuilder: (BuildContext context) {
+                          return choices.map((String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(
+                                choice,
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ))
+                  : Container(),
+              _isPlaying
+                  ? Positioned.fill(
+                      child: Align(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: musicPlayer,
+                      ),
+                      alignment: Alignment.bottomCenter,
+                    ))
+                  : Container(),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<bool> _onBackPressed() {
+    Constants.currentRoute = '';
+    Navigator.of(context).pop();
   }
 
   var choices = ['Edit Image', 'Edit Name', 'Delete'];
