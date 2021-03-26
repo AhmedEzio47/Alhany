@@ -89,7 +89,7 @@ class _MelodyItemState extends State<MelodyItem> {
             imageShape: BoxShape.rectangle,
             defaultAssetImage: Strings.default_melody_image,
           ),
-          title: Text(widget.melody.name,
+          title: Text(widget.melody.name ?? '',
               style: TextStyle(color: MyColors.textLightColor)),
           subtitle: Text(
             _author?.name ?? widget.melody.singer ?? '',

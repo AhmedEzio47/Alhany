@@ -90,9 +90,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
       androidNotificationIcon: 'mipmap/ic_launcher',
       androidEnableQueue: true,
     );
-
-    await AudioService.customAction(
-        'addMediaSources', jsonEncode(melodiesMapList[0]));
+    await AudioService.customAction('clearMediaLibrary', []);
+    for (int i = 0; i < melodiesMapList.length; i++) {
+      await AudioService.customAction(
+          'addMediaSources', jsonEncode(melodiesMapList[i]));
+    }
   }
 
   @override
@@ -321,41 +323,44 @@ class _MusicPlayerState extends State<MusicPlayer> {
           );
         },
       );
-  Widget previousBtn() => StreamBuilder<QueueState>(
-        stream: _queueStateStream,
-        builder: (context, snapshot) {
-          final queueState = snapshot.data;
-          final queue = queueState?.queue ?? [];
-          final mediaItem = queueState?.mediaItem;
-          return (queue != null && queue.isNotEmpty)
-              ? Container(
-                  height: widget.btnSize,
-                  width: widget.btnSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.shade300,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54,
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: Offset(0, 2), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    child: Icon(
-                      Icons.skip_previous,
-                      size: widget.btnSize - 5,
-                      color: MyColors.primaryColor,
+  Widget previousBtn() => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: StreamBuilder<QueueState>(
+          stream: _queueStateStream,
+          builder: (context, snapshot) {
+            final queueState = snapshot.data;
+            final queue = queueState?.queue ?? [];
+            final mediaItem = queueState?.mediaItem;
+            return (queue != null && queue.isNotEmpty)
+                ? Container(
+                    height: widget.btnSize,
+                    width: widget.btnSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey.shade300,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black54,
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: Offset(0, 2), // changes position of shadow
+                        ),
+                      ],
                     ),
-                    onTap: mediaItem == queue.first
-                        ? null
-                        : AudioService.skipToPrevious,
-                  ),
-                )
-              : Container();
-        },
+                    child: InkWell(
+                      child: Icon(
+                        Icons.skip_previous,
+                        size: widget.btnSize - 5,
+                        color: MyColors.primaryColor,
+                      ),
+                      onTap: mediaItem == queue.first
+                          ? null
+                          : AudioService.skipToPrevious,
+                    ),
+                  )
+                : Container();
+          },
+        ),
       );
   Widget playPauseBtn() => StreamBuilder<bool>(
         stream: AudioService.playbackStateStream
@@ -371,41 +376,44 @@ class _MusicPlayerState extends State<MusicPlayer> {
           );
         },
       );
-  Widget nextBtn() => StreamBuilder<QueueState>(
-        stream: _queueStateStream,
-        builder: (context, snapshot) {
-          final queueState = snapshot.data;
-          final queue = queueState?.queue ?? [];
-          final mediaItem = queueState?.mediaItem;
-          return (queue != null && queue.isNotEmpty)
-              ? Container(
-                  height: widget.btnSize,
-                  width: widget.btnSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.shade300,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54,
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: Offset(0, 2), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    child: Icon(
-                      Icons.skip_next,
-                      color: MyColors.primaryColor,
-                      size: widget.btnSize - 5,
+  Widget nextBtn() => Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: StreamBuilder<QueueState>(
+          stream: _queueStateStream,
+          builder: (context, snapshot) {
+            final queueState = snapshot.data;
+            final queue = queueState?.queue ?? [];
+            final mediaItem = queueState?.mediaItem;
+            return (queue != null && queue.isNotEmpty)
+                ? Container(
+                    height: widget.btnSize,
+                    width: widget.btnSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey.shade300,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black54,
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: Offset(0, 2), // changes position of shadow
+                        ),
+                      ],
                     ),
-                    onTap: mediaItem == queue.last
-                        ? null
-                        : AudioService.skipToNext,
-                  ),
-                )
-              : Container();
-        },
+                    child: InkWell(
+                      child: Icon(
+                        Icons.skip_next,
+                        color: MyColors.primaryColor,
+                        size: widget.btnSize - 5,
+                      ),
+                      onTap: mediaItem == queue.last
+                          ? null
+                          : AudioService.skipToNext,
+                    ),
+                  )
+                : Container();
+          },
+        ),
       );
   bool _isFavourite = false;
 
@@ -929,6 +937,7 @@ class _SeekBarState extends State<SeekBar> {
                     ?.group(1) ??
                 '$_remaining',
             style: TextStyle(
+              fontSize: 12,
               color: MyColors.textLightColor,
             ),
           ),
@@ -945,9 +954,29 @@ void _audioPlayerTaskEntrypoint() async {
   AudioServiceBackground.run(() => AudioPlayerTask());
 }
 
+class MediaLibrary {
+  List<MediaItem> _items = [];
+  MediaLibrary(List<Melody> melodyList, {MediaLibrary oldOne}) {
+    if (oldOne != null) {
+      _items.addAll(oldOne.items);
+    }
+    melodyList.forEach((element) {
+      _items.add(MediaItem(
+          id: element.audioUrl,
+          album: element.singer,
+          title: element.name,
+          artist: element.singer,
+          duration: Duration(seconds: element.duration),
+          artUri: element.imageUrl));
+    });
+  }
+
+  List<MediaItem> get items => _items;
+}
+
 /// This task defines logic for playing a list of podcast episodes.
 class AudioPlayerTask extends BackgroundAudioTask {
-  var _mediaLibrary;
+  MediaLibrary _mediaLibrary;
   AudioPlayer _player = new AudioPlayer();
   AudioProcessingState _skipState;
   Seeker _seeker;
@@ -1005,7 +1034,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
         /// In this example, we automatically start playing on start.
         onPlay();
       } catch (e) {
-        print("Error: $e");
+        print("Audio Source Error: $e");
         onStop();
       }
     }
@@ -1017,8 +1046,9 @@ class AudioPlayerTask extends BackgroundAudioTask {
       case 'addMediaSources':
         Map<String, dynamic> decoded = jsonDecode(arguments);
 
-        Melody melodies = Melody.fromMap(decoded);
-        _mediaLibrary = MediaLibrary([melodies]);
+        Melody melody = Melody.fromMap(decoded);
+        _mediaLibrary = MediaLibrary([melody],
+            oldOne: _mediaLibrary != null ? _mediaLibrary : null);
         // Load and broadcast the queue
         AudioServiceBackground.setQueue(queue);
         try {
@@ -1028,9 +1058,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
                 .toList(),
           ));
         } catch (e) {
-          print("Error: $e");
+          print("Audio Source Error:: $e");
           onStop();
         }
+        break;
+      case 'clearMediaLibrary':
+        _mediaLibrary = null;
         break;
     }
   }
@@ -1181,22 +1214,6 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
 /// Provides access to a library of media items. In your app, this could come
 /// from a database or web service.
-class MediaLibrary {
-  List<MediaItem> _items = [];
-  MediaLibrary(List<Melody> melodyList) {
-    melodyList.forEach((element) {
-      _items.add(MediaItem(
-          id: element.audioUrl,
-          album: element.singer,
-          title: element.name,
-          artist: element.singer,
-          duration: Duration(seconds: element.duration),
-          artUri: element.imageUrl));
-    });
-  }
-
-  List<MediaItem> get items => _items;
-}
 
 /// An object that performs interruptable sleep.
 class Sleeper {

@@ -571,7 +571,8 @@ class _MelodyPageState extends State<MelodyPage> {
               audioUrl: mergedFilePath,
               name: 'Preview',
               singer: 'Preview',
-              imageUrl: '')
+              imageUrl: Strings.default_melody_image,
+              duration: duration)
         ],
         isLocal: true,
         backColor: MyColors.primaryColor,
