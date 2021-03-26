@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -27,7 +26,7 @@ import 'package:stripe_payment/stripe_payment.dart';
 enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
-class MusicPlayer extends StatefulWidget {
+class MyAudioService extends StatefulWidget {
   final List<Melody> melodyList;
   final Color backColor;
   final Function onComplete;
@@ -39,7 +38,7 @@ class MusicPlayer extends StatefulWidget {
   final bool isCompact;
   final bool isRecordBtnVisible;
 
-  MusicPlayer(
+  MyAudioService(
       {Key key,
       this.backColor,
       this.onComplete,
@@ -54,12 +53,12 @@ class MusicPlayer extends StatefulWidget {
       : super(key: key);
 
   @override
-  _MusicPlayerState createState() => _MusicPlayerState();
+  _MyAudioServiceState createState() => _MyAudioServiceState();
 }
 
-class _MusicPlayerState extends State<MusicPlayer> {
+class _MyAudioServiceState extends State<MyAudioService> {
   void initState() {
-    initAudioService();
+    melodyListx = widget.melodyList;
     if (widget.melodyList[audioServiceIndex]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -74,14 +73,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
         language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     }
-
-    super.initState();
-  }
-
-  initAudioService() async {
-    List<Map<String, dynamic>> melodiesMapList =
-        widget.melodyList.map((doc) => doc.toMap()).toList();
-    await AudioService.start(
+    AudioService.start(
       backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
       androidNotificationChannelName: 'Audio Service Demo',
       // Enable this if you want the Android service to exit the foreground state on pause.
@@ -90,9 +82,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       androidNotificationIcon: 'mipmap/ic_launcher',
       androidEnableQueue: true,
     );
-
-    await AudioService.customAction(
-        'addMediaSources', jsonEncode(melodiesMapList[0]));
+    super.initState();
   }
 
   @override
@@ -104,6 +94,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Audio Service Demo'),
+      ),
       body: Padding(
         padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
         child: Container(
@@ -945,7 +938,7 @@ void _audioPlayerTaskEntrypoint() async {
 
 /// This task defines logic for playing a list of podcast episodes.
 class AudioPlayerTask extends BackgroundAudioTask {
-  var _mediaLibrary;
+  final _mediaLibrary = MediaLibrary();
   AudioPlayer _player = new AudioPlayer();
   AudioProcessingState _skipState;
   Seeker _seeker;
@@ -962,9 +955,6 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // switch between two types of audio as this example does.
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.speech());
-
-    if (queue.length == 0) return;
-
     // Broadcast media item changes.
     _player.currentIndexStream.listen((index) {
       if (index != null) AudioServiceBackground.setMediaItem(queue[index]);
@@ -998,24 +988,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
         children:
             queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
       ));
-
-      /// In this example, we automatically start playing on start.
+      // In this example, we automatically start playing on start.
       onPlay();
     } catch (e) {
       print("Error: $e");
       onStop();
-    }
-  }
-
-  @override
-  Future<dynamic> onCustomAction(String name, dynamic arguments) {
-    switch (name) {
-      case 'addMediaSources':
-        Map<String, dynamic> decoded = jsonDecode(arguments);
-
-        Melody melodies = Melody.fromMap(decoded);
-        _mediaLibrary = MediaLibrary([melodies]);
-        break;
     }
   }
 
@@ -1141,34 +1118,33 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
 /// Provides access to a library of media items. In your app, this could come
 /// from a database or web service.
-//List<Melody> melodyListx
-// = [
-//   // Melody(
-//   //     audioUrl:
-//   //         'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/songs%2FtBZw7Aseel%20Hamem%20%26%20Hussin%20Ghazal%20-%20ady.wav?alt=media&token=76bde1cd-a1a3-4758-9edc-cdb229fd179d',
-//   //     imageUrl:
-//   //         'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/melodies_images%2FbsXuSAseel%20%26%20Hussin%20.jpg?alt=media&token=50662df3-f6ac-489d-a13d-28fe905c3c04',
-//   //     singer: 'اصيل ‏هميم ‏و ‏حسين ‏الغزال',
-//   //     name: 'عادي',
-//   //     duration: 165,
-//   //     isSong: true),
-//   // Melody(
-//   //     audioUrl:
-//   //         'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/songs%2FOoP1o_Aseel%20Hameem%20%26%20NASRAT%20ALBADER-Ale%20Ghumarny.wav?alt=media&token=f364dcc4-1db0-43f5-8380-f86a99ad6f08',
-//   //     imageUrl:
-//   //         'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/melodies_images%2FMdGwVNasrat%20-%20Aseel.jpg?alt=media&token=c04f8007-4f4f-4c5c-a4e6-694da2e7849a',
-//   //     singer: 'اصيل ‏هميم ‏و ‏نصرت ‏البدر',
-//   //     name: 'الي غمرني',
-//   //     duration: 223,
-//   //     isSong: true),
-// ];
+List<Melody> melodyListx = [
+  Melody(
+      audioUrl:
+          'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/songs%2FtBZw7Aseel%20Hamem%20%26%20Hussin%20Ghazal%20-%20ady.wav?alt=media&token=76bde1cd-a1a3-4758-9edc-cdb229fd179d',
+      imageUrl:
+          'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/melodies_images%2FbsXuSAseel%20%26%20Hussin%20.jpg?alt=media&token=50662df3-f6ac-489d-a13d-28fe905c3c04',
+      singer: 'اصيل ‏هميم ‏و ‏حسين ‏الغزال',
+      name: 'عادي',
+      duration: 165,
+      isSong: true),
+  Melody(
+      audioUrl:
+          'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/songs%2FOoP1o_Aseel%20Hameem%20%26%20NASRAT%20ALBADER-Ale%20Ghumarny.wav?alt=media&token=f364dcc4-1db0-43f5-8380-f86a99ad6f08',
+      imageUrl:
+          'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/melodies_images%2FMdGwVNasrat%20-%20Aseel.jpg?alt=media&token=c04f8007-4f4f-4c5c-a4e6-694da2e7849a',
+      singer: 'اصيل ‏هميم ‏و ‏نصرت ‏البدر',
+      name: 'الي غمرني',
+      duration: 223,
+      isSong: true),
+];
 
 /// Provides access to a library of media items. In your app, this could come
 /// from a database or web service.
 class MediaLibrary {
   List<MediaItem> _items = [];
-  MediaLibrary(List<Melody> melodyList) {
-    melodyList.forEach((element) {
+  MediaLibrary() {
+    melodyListx.forEach((element) {
       _items.add(MediaItem(
           id: element.audioUrl,
           album: element.singer,

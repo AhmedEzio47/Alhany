@@ -43,13 +43,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0-nullsafety.1"
-  audio_manager:
+  audio_service:
     dependency: "direct main"
     description:
-      name: audio_manager
+      name: audio_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.3"
+    version: "0.16.2+1"
   audio_session:
     dependency: "direct main"
     description:
@@ -349,6 +349,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  flutter_isolate:
+    dependency: transitive
+    description:
+      name: flutter_isolate
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0+15"
   flutter_local_notifications:
     dependency: "direct main"
     description:
@@ -389,6 +396,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_tts:
+    dependency: "direct main"
+    description:
+      name: flutter_tts
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.7"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -506,6 +520,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.2"
+  just_audio:
+    dependency: "direct main"
+    description:
+      name: just_audio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.15+1"
+  just_audio_platform_interface:
+    dependency: transitive
+    description:
+      name: just_audio_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
+  just_audio_web:
+    dependency: transitive
+    description:
+      name: just_audio_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3"
   linked_scroll_controller:
     dependency: "direct main"
     description:
@@ -710,7 +745,7 @@ packages:
     source: hosted
     version: "2.1.0"
   rxdart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: rxdart
       url: "https://pub.dartlang.org"

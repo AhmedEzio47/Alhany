@@ -3,6 +3,7 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/main.dart';
+import 'package:Alhany/pages/audio_service.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/web_browser/webview_modal.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -238,6 +239,28 @@ class _BuildDrawerState extends State<BuildDrawer> {
                     color: MyColors.primaryColor,
                   ),
                 ),
+          ListTile(
+            onTap: () async {
+              try {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return MyAudioService();
+                }));
+              } catch (e) {
+                print('Log In: $e');
+              }
+            },
+            title: Text(
+              'Audio Service',
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.audiotrack_outlined,
+              color: MyColors.primaryColor,
+            ),
+          ),
         ],
       ),
     );
