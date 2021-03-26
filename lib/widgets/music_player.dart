@@ -103,8 +103,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
+    return Container(
+      height: 200,
+      padding: EdgeInsets.all(0),
+      child: Padding(
         padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
         child: Container(
           decoration: BoxDecoration(
@@ -145,7 +147,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               ? playPauseBtn()
                               : Container(),
                         ),
-                        seekBar(),
+                        Expanded(flex: 9, child: seekBar()),
                       ],
                     ),
                     widget.isCompact
@@ -963,7 +965,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.speech());
 
-    if (queue.length == 0) return;
+    //if (queue.length == 0) return;
 
     // Broadcast media item changes.
     _player.currentIndexStream.listen((index) {
@@ -991,19 +993,21 @@ class AudioPlayerTask extends BackgroundAudioTask {
       }
     });
 
-    // Load and broadcast the queue
-    AudioServiceBackground.setQueue(queue);
-    try {
-      await _player.setAudioSource(ConcatenatingAudioSource(
-        children:
-            queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
-      ));
+    if (queue.length != 0) {
+      // Load and broadcast the queue
+      AudioServiceBackground.setQueue(queue);
+      try {
+        await _player.setAudioSource(ConcatenatingAudioSource(
+          children:
+              queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
+        ));
 
-      /// In this example, we automatically start playing on start.
-      onPlay();
-    } catch (e) {
-      print("Error: $e");
-      onStop();
+        /// In this example, we automatically start playing on start.
+        onPlay();
+      } catch (e) {
+        print("Error: $e");
+        onStop();
+      }
     }
   }
 
@@ -1015,6 +1019,18 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
         Melody melodies = Melody.fromMap(decoded);
         _mediaLibrary = MediaLibrary([melodies]);
+        // Load and broadcast the queue
+        AudioServiceBackground.setQueue(queue);
+        try {
+          _player.setAudioSource(ConcatenatingAudioSource(
+            children: queue
+                .map((item) => AudioSource.uri(Uri.parse(item.id)))
+                .toList(),
+          ));
+        } catch (e) {
+          print("Error: $e");
+          onStop();
+        }
         break;
     }
   }
