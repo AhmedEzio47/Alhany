@@ -11,6 +11,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:audio_service/audio_service.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as path;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
@@ -81,6 +83,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   initAudioService() async {
     List<Map<String, dynamic>> melodiesMapList =
         widget.melodyList.map((doc) => doc.toMap()).toList();
+    if (!AudioService.connected) await AudioService.connect();
     await AudioService.start(
       backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
       androidNotificationChannelName: 'Audio Service Demo',
@@ -105,191 +108,198 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      padding: EdgeInsets.all(0),
-      child: Padding(
-        padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: new BorderRadius.circular(20.0),
-            color: widget.backColor,
-          ),
-          child: Center(
-            child: StreamBuilder<bool>(
-              stream: AudioService.runningStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.active) {
-                  // Don't show anything until we've ascertained whether or not the
-                  // service is running, since we want to show a different UI in
-                  // each case.
-                  return SizedBox();
-                }
-                final running = snapshot.data ?? false;
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    widget.isCompact
-                        ? Container()
-                        : SizedBox(
-                            height: 5,
-                          ),
-                    songName(),
-                    Row(
+    return StreamBuilder<bool>(
+      stream: AudioService.runningStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.active) {
+          // Don't show anything until we've ascertained whether or not the
+          // service is running, since we want to show a different UI in
+          // each case.
+          return SizedBox();
+        }
+        final running = snapshot.data ?? false;
+        return running
+            ? Container(
+                height: 200,
+                padding: EdgeInsets.all(0),
+                child: Padding(
+                  padding: EdgeInsets.all(widget.isCompact ? 8 : 18),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: new BorderRadius.circular(20.0),
+                      color: widget.backColor,
+                    ),
+                    child: Center(
+                        child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        widget.isCompact
+                            ? Container()
+                            : SizedBox(
+                                height: 5,
+                              ),
+                        songName(),
+                        Row(
+                          children: [
+                            widget.isCompact
+                                ? Container()
+                                : SizedBox(
+                                    height: 10,
+                                  ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10.0),
+                              child:
+                                  widget.playBtnPosition == PlayBtnPosition.left
+                                      ? playPauseBtn()
+                                      : Container(),
+                            ),
+                            Expanded(flex: 9, child: seekBar()),
+                          ],
+                        ),
                         widget.isCompact
                             ? Container()
                             : SizedBox(
                                 height: 10,
                               ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10.0),
-                          child: widget.playBtnPosition == PlayBtnPosition.left
-                              ? playPauseBtn()
-                              : Container(),
-                        ),
-                        Expanded(flex: 9, child: seekBar()),
+                        widget.playBtnPosition == PlayBtnPosition.bottom
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  (widget.melodyList[audioServiceIndex]
+                                              ?.isSong ??
+                                          false)
+                                      ? favouriteBtn()
+                                      : Container(),
+                                  widget.melodyList.length > 1
+                                      ? previousBtn()
+                                      : Container(),
+                                  playPauseBtn(),
+                                  widget.melodyList.length > 1
+                                      ? nextBtn()
+                                      : Container(),
+                                  (!(widget.melodyList[audioServiceIndex]
+                                                  ?.isSong ??
+                                              true) &&
+                                          widget.isRecordBtnVisible)
+                                      ? SizedBox(
+                                          width: 20,
+                                        )
+                                      : Container(),
+                                  (!(widget.melodyList[audioServiceIndex]
+                                                  ?.isSong ??
+                                              true) &&
+                                          widget.isRecordBtnVisible)
+                                      ? InkWell(
+                                          onTap: () =>
+                                              AppUtil.executeFunctionIfLoggedIn(
+                                                  context, () {
+                                            if (!Constants.ongoingEncoding) {
+                                              Navigator.of(context).pushNamed(
+                                                  '/melody-page',
+                                                  arguments: {
+                                                    'melody': widget.melodyList[
+                                                        audioServiceIndex],
+                                                    'type': Types.AUDIO
+                                                  });
+                                            } else {
+                                              AppUtil.showToast(language(
+                                                  ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                                  en: 'Please upload the previous video first'));
+                                            }
+                                          }),
+                                          child: Container(
+                                            height: widget.btnSize,
+                                            width: widget.btnSize,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.grey.shade300,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black54,
+                                                  spreadRadius: 2,
+                                                  blurRadius: 4,
+                                                  offset: Offset(0,
+                                                      2), // changes position of shadow
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.mic,
+                                              color: MyColors.primaryColor,
+                                            ),
+                                          ),
+                                        )
+                                      : Container(),
+                                  (!(widget.melodyList[audioServiceIndex]
+                                                  ?.isSong ??
+                                              true) &&
+                                          widget.isRecordBtnVisible)
+                                      ? SizedBox(
+                                          width: 20,
+                                        )
+                                      : Container(),
+                                  (!(widget.melodyList[audioServiceIndex]
+                                                  ?.isSong ??
+                                              true) &&
+                                          widget.isRecordBtnVisible)
+                                      ? InkWell(
+                                          onTap: () =>
+                                              AppUtil.executeFunctionIfLoggedIn(
+                                                  context, () {
+                                            if (!Constants.ongoingEncoding) {
+                                              Navigator.of(context).pushNamed(
+                                                  '/melody-page',
+                                                  arguments: {
+                                                    'melody': widget.melodyList[
+                                                        audioServiceIndex],
+                                                    'type': Types.VIDEO
+                                                  });
+                                            } else {
+                                              AppUtil.showToast(language(
+                                                  ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                                  en: 'Please upload the previous video first'));
+                                            }
+                                          }),
+                                          child: Container(
+                                            height: widget.btnSize,
+                                            width: widget.btnSize,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.grey.shade300,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black54,
+                                                  spreadRadius: 2,
+                                                  blurRadius: 4,
+                                                  offset: Offset(0,
+                                                      2), // changes position of shadow
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.videocam,
+                                              color: MyColors.primaryColor,
+                                            ),
+                                          ),
+                                        )
+                                      : Container(),
+                                  Constants.currentRoute != '/downloads'
+                                      ? downloadOrOptions()
+                                      : Container()
+                                ],
+                              )
+                            : Container(),
+                        widget.playBtnPosition == PlayBtnPosition.bottom
+                            ? SizedBox(height: 10)
+                            : Container()
                       ],
-                    ),
-                    widget.isCompact
-                        ? Container()
-                        : SizedBox(
-                            height: 10,
-                          ),
-                    widget.playBtnPosition == PlayBtnPosition.bottom
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              (widget.melodyList[audioServiceIndex]?.isSong ??
-                                      false)
-                                  ? favouriteBtn()
-                                  : Container(),
-                              widget.melodyList.length > 1
-                                  ? previousBtn()
-                                  : Container(),
-                              playPauseBtn(),
-                              widget.melodyList.length > 1
-                                  ? nextBtn()
-                                  : Container(),
-                              (!(widget.melodyList[audioServiceIndex]?.isSong ??
-                                          true) &&
-                                      widget.isRecordBtnVisible)
-                                  ? SizedBox(
-                                      width: 20,
-                                    )
-                                  : Container(),
-                              (!(widget.melodyList[audioServiceIndex]?.isSong ??
-                                          true) &&
-                                      widget.isRecordBtnVisible)
-                                  ? InkWell(
-                                      onTap: () =>
-                                          AppUtil.executeFunctionIfLoggedIn(
-                                              context, () {
-                                        if (!Constants.ongoingEncoding) {
-                                          Navigator.of(context).pushNamed(
-                                              '/melody-page',
-                                              arguments: {
-                                                'melody': widget.melodyList[
-                                                    audioServiceIndex],
-                                                'type': Types.AUDIO
-                                              });
-                                        } else {
-                                          AppUtil.showToast(language(
-                                              ar: 'من فضلك قم برفع الفيديو السابق أولا',
-                                              en: 'Please upload the previous video first'));
-                                        }
-                                      }),
-                                      child: Container(
-                                        height: widget.btnSize,
-                                        width: widget.btnSize,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey.shade300,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black54,
-                                              spreadRadius: 2,
-                                              blurRadius: 4,
-                                              offset: Offset(0,
-                                                  2), // changes position of shadow
-                                            ),
-                                          ],
-                                        ),
-                                        child: Icon(
-                                          Icons.mic,
-                                          color: MyColors.primaryColor,
-                                        ),
-                                      ),
-                                    )
-                                  : Container(),
-                              (!(widget.melodyList[audioServiceIndex]?.isSong ??
-                                          true) &&
-                                      widget.isRecordBtnVisible)
-                                  ? SizedBox(
-                                      width: 20,
-                                    )
-                                  : Container(),
-                              (!(widget.melodyList[audioServiceIndex]?.isSong ??
-                                          true) &&
-                                      widget.isRecordBtnVisible)
-                                  ? InkWell(
-                                      onTap: () =>
-                                          AppUtil.executeFunctionIfLoggedIn(
-                                              context, () {
-                                        if (!Constants.ongoingEncoding) {
-                                          Navigator.of(context).pushNamed(
-                                              '/melody-page',
-                                              arguments: {
-                                                'melody': widget.melodyList[
-                                                    audioServiceIndex],
-                                                'type': Types.VIDEO
-                                              });
-                                        } else {
-                                          AppUtil.showToast(language(
-                                              ar: 'من فضلك قم برفع الفيديو السابق أولا',
-                                              en: 'Please upload the previous video first'));
-                                        }
-                                      }),
-                                      child: Container(
-                                        height: widget.btnSize,
-                                        width: widget.btnSize,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey.shade300,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black54,
-                                              spreadRadius: 2,
-                                              blurRadius: 4,
-                                              offset: Offset(0,
-                                                  2), // changes position of shadow
-                                            ),
-                                          ],
-                                        ),
-                                        child: Icon(
-                                          Icons.videocam,
-                                          color: MyColors.primaryColor,
-                                        ),
-                                      ),
-                                    )
-                                  : Container(),
-                              Constants.currentRoute != '/downloads'
-                                  ? downloadOrOptions()
-                                  : Container()
-                            ],
-                          )
-                        : Container(),
-                    widget.playBtnPosition == PlayBtnPosition.bottom
-                        ? SizedBox(height: 10)
-                        : Container()
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      ),
+                    )),
+                  ),
+                ),
+              )
+            : Container();
+      },
     );
   }
 
@@ -520,7 +530,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: InkWell(
                   onTap: () async {
-                    _downloadMelody();
+                    AppUtil.executeFunctionIfLoggedIn(context, () {
+                      _downloadMelody();
+                    });
                   },
                   child: Container(
                     height: widget.btnSize,
@@ -684,6 +696,70 @@ class _MusicPlayerState extends State<MusicPlayer> {
         });
   }
 
+  bool isStoragePermissionGranted = false;
+  createAppFolder() async {
+    if (await PermissionsService().hasStoragePermission()) {
+      setState(() {
+        isStoragePermissionGranted = true;
+      });
+      print('storage permission granted');
+    } else {
+      bool isGranted = await PermissionsService()
+          .requestStoragePermission(context, onPermissionDenied: () async {
+        PermissionStatus status = await PermissionsService()
+            .checkPermissionStatus(PermissionGroup.storage);
+
+        if (status == PermissionStatus.neverAskAgain) {
+          AppUtil.showAlertDialog(
+              context: context,
+              message: language(
+                  en: 'You have chosen to never ask for this permission again, please go to settings and choose permissions to allow this.',
+                  ar: 'لقد اخترت عدم طلب الإذن مرة أخرى، برجاء الذهاب للضبط وإعطاء الإذن'),
+              firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
+              firstFunc: () {
+                Navigator.of(context).pop();
+                PermissionHandler().openAppSettings();
+                return;
+              },
+              secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
+              secondFunc: () {
+                Navigator.of(context).pop();
+              });
+        } else if (status == PermissionStatus.denied)
+          AppUtil.showAlertDialog(
+            context: context,
+            heading: 'info',
+            message: language(
+                en: 'You must grant this microphone access to be able to use this feature.',
+                ar: 'من فضلك قم بالسماح باستخدام الميكروفون من أجل استخدام هذه الخاصية'),
+            firstBtnText: language(en: 'Give Permission', ar: 'السماح'),
+            firstFunc: () async {
+              Navigator.of(context).pop(false);
+              await createAppFolder();
+            },
+            secondBtnText: language(en: 'Leave', ar: 'خروج'),
+            secondFunc: () async {
+              print('storage permission denied');
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          );
+
+        print('storage permission denied');
+      });
+      setState(() {
+        isStoragePermissionGranted = isGranted;
+      });
+      return;
+    }
+
+    if (isStoragePermissionGranted) {
+      print('deleting temp files then creating an empty folder...');
+      await AppUtil.deleteFiles();
+      await AppUtil.createAppDirectory();
+    }
+  }
+
   void _downloadMelody() async {
     Token token = Token();
     if (widget.melodyList[audioServiceIndex].price == null ||
@@ -718,7 +794,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     }
     if (token.tokenId != null) {
       AppUtil.showLoader(context);
-      await AppUtil.createAppDirectory();
+      await createAppFolder();
       String path;
       if (widget.melodyList[audioServiceIndex].audioUrl != null) {
         path = await AppUtil.downloadFile(
@@ -992,7 +1068,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // You can also put this in your app's initialisation if your app doesn't
     // switch between two types of audio as this example does.
     final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration.speech());
+    await session.configure(AudioSessionConfiguration.music());
 
     //if (queue.length == 0) return;
 
@@ -1052,6 +1128,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
         // Load and broadcast the queue
         AudioServiceBackground.setQueue(queue);
         try {
+          print('Local File:${queue[0].id}');
           _player.setAudioSource(ConcatenatingAudioSource(
             children: queue
                 .map((item) => AudioSource.uri(Uri.parse(item.id)))

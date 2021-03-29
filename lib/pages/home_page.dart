@@ -16,6 +16,7 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../app_util.dart';
@@ -243,7 +244,7 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: Sizes.singer_box + 70,
+                  height: Sizes.singer_box + 90,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,15 +345,20 @@ class _HomePageState extends State<HomePage>
                                                       defaultAssetImage: Strings
                                                           .default_profile_image,
                                                     ),
-                                                    Text(
-                                                      _categorySingers[
-                                                                  _categories[
-                                                                      index]]
-                                                              [index2]
-                                                          ?.name,
-                                                      style: TextStyle(
-                                                        color: Colors
-                                                            .grey.shade300,
+                                                    Container(
+                                                      width: 100,
+                                                      child: Text(
+                                                        _categorySingers[
+                                                                    _categories[
+                                                                        index]]
+                                                                [index2]
+                                                            ?.name,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                          color: Colors
+                                                              .grey.shade300,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -483,7 +489,7 @@ class _HomePageState extends State<HomePage>
           SliverList(
             delegate: SliverChildListDelegate([
               Container(
-                height: 140,
+                height: 164,
                 child: Row(
                   children: [
                     Flexible(
@@ -521,13 +527,17 @@ class _HomePageState extends State<HomePage>
                                               defaultAssetImage:
                                                   Strings.default_profile_image,
                                             ),
-                                            Text(
-                                              _singers[index].name,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                  color:
-                                                      MyColors.textLightColor),
+                                            Container(
+                                              width: 100,
+                                              child: Text(
+                                                _singers[index].name,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.visible,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: MyColors
+                                                        .textLightColor),
+                                              ),
                                             )
                                           ],
                                         ),

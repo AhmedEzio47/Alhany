@@ -518,6 +518,7 @@ class AppUtil with ChangeNotifier {
     Constants.currentFirebaseUser = user;
     Constants.currentUserID = user?.uid;
     authStatus = AuthStatus.LOGGED_IN;
+    print('star id:${Strings.starId}');
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
         Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
     Constants.isFacebookOrGoogleUser = false;

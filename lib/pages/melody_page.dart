@@ -13,6 +13,7 @@ import 'package:Alhany/services/my_sounds_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
@@ -52,7 +53,7 @@ class _MelodyPageState extends State<MelodyPage> {
   bool isMicrophoneGranted = false;
 
   RecordingStatus recordingStatus = RecordingStatus.Unset;
-  MusicPlayer melodyPlayer;
+  Widget melodyPlayer;
   AudioRecorder recorder;
 
   String recordingFilePath;
@@ -564,7 +565,7 @@ class _MelodyPageState extends State<MelodyPage> {
     }
 
     if (_type == Types.AUDIO) {
-      melodyPlayer = MusicPlayer(
+      melodyPlayer = LocalMusicPlayer(
         key: ValueKey('preview'),
         melodyList: [
           Melody(

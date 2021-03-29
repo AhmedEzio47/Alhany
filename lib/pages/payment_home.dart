@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
-import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/services/payment_service.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +36,10 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
               color: MyColors.lightPrimaryColor,
               child: Text(
                 'You\'re going to pay : ${widget.amount} USD',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: MyColors.textLightColor),
               ),
             ),
             SizedBox(
@@ -101,7 +103,8 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
     switch (index) {
       case 0:
         StripeTransactionResponse response =
-            await PaymentService.payViaCreditCard(context, amount: widget.amount, currency: 'USD');
+            await PaymentService.payViaCreditCard(context,
+                amount: widget.amount, currency: 'USD');
         AppUtil.showToast(response.message);
         Navigator.of(context).pop(response.success);
         break;

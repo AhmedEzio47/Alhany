@@ -8,7 +8,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
 
@@ -182,7 +182,15 @@ class _DownloadsPageState extends State<DownloadsPage> {
     if (!_decryptedPaths.contains(path)) {
       _decryptedPaths.add(path);
     }
-    musicPlayer = MusicPlayer(
+    _downloads[index] = Melody(
+        id: _downloads[index].id,
+        isSong: _downloads[index].isSong,
+        duration: _downloads[index].duration,
+        name: _downloads[index].name,
+        singer: _downloads[index].singer,
+        audioUrl: path);
+
+    musicPlayer = LocalMusicPlayer(
       melodyList: [_downloads[index]],
       initialDuration: _downloads[index].duration,
       title: _downloads[index].name,
@@ -200,7 +208,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
       }
       decryptedDownload.add(song.copyWith(audioUrl: path));
     }
-    musicPlayer = MusicPlayer(
+    musicPlayer = LocalMusicPlayer(
       melodyList: decryptedDownload,
       initialDuration: decryptedDownload[0].duration,
       isLocal: true,
