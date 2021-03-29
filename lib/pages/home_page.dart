@@ -326,7 +326,7 @@ class _HomePageState extends State<HomePage>
                                                 width: Sizes.singer_box,
                                                 child: Column(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                      MainAxisAlignment.start,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
