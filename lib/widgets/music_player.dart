@@ -1043,7 +1043,8 @@ class MediaLibrary {
           title: element.name,
           artist: element.singer,
           duration: Duration(seconds: element.duration),
-          artUri: element.imageUrl));
+          artUri:
+              element.imageUrl ?? 'asset:///${Strings.default_melody_image}'));
     });
   }
 

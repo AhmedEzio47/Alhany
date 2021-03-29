@@ -707,8 +707,16 @@ class _MelodyPageState extends State<MelodyPage> {
 
   double _progress = 0;
   submitRecord() async {
-    AppUtil.showLoader(context,
-        message: language(en: 'Uploading video', ar: 'جاري الآن رفع الفيديو'));
+    PIPView.of(_context).presentBelow(MyApp());
+
+    // AppUtil.showLoader(context,
+    //     message: language(en: 'Uploading video', ar: 'جاري الآن رفع الفيديو'));
+    AppUtil.showFixedSnackBar(
+        context,
+        _scaffoldKey,
+        language(
+            en: 'Please hold on, uploading video',
+            ar: 'برجاء الإنتظار جاري رفع الفيديو'));
     setState(() {
       _progressVisible = true;
     });
@@ -966,6 +974,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
                                     _image = await AppUtil
                                         .pickCompressedImageFromGallery();
+                                    PIPView.of(_context).presentBelow(MyApp());
+
                                     // FileStat s = await pickedImage.stat();
                                     //
                                     // print('Non-Compressed file: ${s.size}');
