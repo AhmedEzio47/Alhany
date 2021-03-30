@@ -538,13 +538,13 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v copy -c:a libmp3lame -shortest ${appTempDirectoryPath}final_video.mp4');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -c:a libmp3lame -shortest $mergedFilePath');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video
-      success = await flutterFFmpeg.execute(
-          "-i ${appTempDirectoryPath}final_video.mp4 -map 0 -af \"equalizer=f=440:width_type=o:width=2:g=2\" -vf \"scale=720:trunc(ow/a/2)*2\" $mergedFilePath");
-      print(success == 1 ? 'SCALE Failure!' : 'SCALE Success!');
+      // success = await flutterFFmpeg.execute(
+      //     "-i ${appTempDirectoryPath}final_video.mp4 -map 0 -af \"equalizer=f=440:width_type=o:width=2:g=2\" -vf \"scale=720:trunc(ow/a/2)*2\" $mergedFilePath");
+      // print(success == 1 ? 'SCALE Failure!' : 'SCALE Success!');
 
       success = await flutterFFmpeg.execute(
           "-y -i $mergedFilePath -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");

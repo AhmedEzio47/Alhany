@@ -35,10 +35,6 @@ class _SingerItemState extends State<SingerItem> {
       width: MediaQuery.of(context).size.width,
       height: 70,
       child: ListTile(
-        onTap: () {
-          Navigator.of(context)
-              .pushNamed('/songs-page', arguments: {'singer': widget.singer});
-        },
         title: Text(
           widget.singer.name,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -71,7 +67,7 @@ class _SingerItemState extends State<SingerItem> {
                   }).toList();
                 },
               )
-            : null,
+            : SizedBox(),
       ),
     );
   }

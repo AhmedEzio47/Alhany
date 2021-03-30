@@ -407,36 +407,55 @@ class _PostFullscreenState extends State<PostFullscreen> {
                   _controller != null ? VideoPlayer(_controller) : Container(),
             )),
         Padding(
-          padding: EdgeInsets.only(bottom: 70),
+          padding: EdgeInsets.only(top: 90, left: 10),
+          child: Column(children: [Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationY(math.pi),
+              child: Icon(Icons.remove_red_eye,
+                  size: 35, color: Colors.white)),
+            Text('${_record?.views ?? widget.news?.views ?? 0}',
+                style: TextStyle(color: Colors.white))],),
+        ),
+        Padding(
+          padding: EdgeInsets.only(bottom: 10),
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Container(
               width: MediaQuery.of(context).size.width - 100,
-              height: 100,
+              height: 150,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  ListTile(leading: InkWell(
+                    onTap: () => _goToProfilePage(),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.white,
+                      child: CachedImage(
+                        key: ValueKey('profile'),
+                        height: 38,
+                        width: 38,
+                        imageShape: BoxShape.circle,
+                        defaultAssetImage:
+                        Strings.default_profile_image,
+                        imageUrl: widget.singer?.profileImageUrl ??
+                            Constants.starUser.profileImageUrl,
+                      ),
+                    ),
+                  ),
+                  title: _record != null ? Text(
+                    '${widget.singer?.name}',
+                    style: TextStyle(color: Colors.white),
+                  ) : Container(),
+                  subtitle: _record != null ? Text(
+                    '@${widget.singer?.username}',
+                    style: TextStyle(color: Colors.white),
+                  ) : Container(),),
                   _record != null
                       ? Padding(
-                          padding: EdgeInsets.only(left: 10, bottom: 10),
-                          child: Text(
-                            '@${widget.singer?.username}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        )
-                      : Container(),
-                  _record != null
-                      ? Padding(
-                          padding: EdgeInsets.only(left: 10, bottom: 10),
+                          padding: EdgeInsets.only(left: 20, bottom: 10),
                           child: Text.rich(
                             TextSpan(children: <TextSpan>[
-                              TextSpan(
-                                  text: '${widget.singer?.name}\n',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              TextSpan(
-                                  text: 'singed\n',
-                                  style: TextStyle(fontSize: 12)),
                               TextSpan(
                                   text: widget.melody?.name,
                                   style: TextStyle(fontWeight: FontWeight.bold))
@@ -450,7 +469,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
           ),
         ),
         Padding(
-            padding: EdgeInsets.only(bottom: 65, right: 10),
+            padding: EdgeInsets.only(bottom: 10, right: 10),
             child: Align(
               alignment: Alignment.bottomRight,
               child: Container(
@@ -459,45 +478,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 23),
-                      width: 40,
-                      height: 50,
-                      child: Stack(
-                        children: <Widget>[
-                          InkWell(
-                            onTap: () => _goToProfilePage(),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.white,
-                              child: CachedImage(
-                                key: ValueKey('profile'),
-                                height: 38,
-                                width: 38,
-                                imageShape: BoxShape.circle,
-                                defaultAssetImage:
-                                    Strings.default_profile_image,
-                                imageUrl: widget.singer?.profileImageUrl ??
-                                    Constants.starUser.profileImageUrl,
-                              ),
-                            ),
-                          ),
-                          _isFollowing
-                              ? Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: CircleAvatar(
-                                    radius: 10,
-                                    backgroundColor:
-                                        MyColors.primaryColor.withOpacity(1),
-                                    child: Center(
-                                        child: Icon(Icons.add,
-                                            size: 15, color: Colors.white)),
-                                  ),
-                                )
-                              : Container()
-                        ],
-                      ),
-                    ),
                     Container(
                       padding: EdgeInsets.only(bottom: 25),
                       child: Column(
@@ -553,21 +533,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Icon(Icons.remove_red_eye,
-                                  size: 35, color: Colors.white)),
-                          Text('${_record?.views ?? widget.news?.views ?? 0}',
-                              style: TextStyle(color: Colors.white))
-                        ],
                       ),
                     ),
                     InkWell(
