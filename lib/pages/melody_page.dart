@@ -336,7 +336,7 @@ class _MelodyPageState extends State<MelodyPage> {
       print('started video recording');
       try {
         await _initializeControllerFuture;
-        await cameraController.startVideoRecording(recordingFilePath);
+        await cameraController.startVideoRecording();
       } catch (ex) {
         AppUtil.showToast(language(
             en: 'Unexpected error, please try again',
@@ -439,7 +439,8 @@ class _MelodyPageState extends State<MelodyPage> {
         //     context, 'tests/test${path.extension(recordingFilePath)}');
         // print('test url:' + url);
       } else {
-        await cameraController.stopVideoRecording();
+        XFile result = await cameraController.stopVideoRecording();
+        recordingFilePath = result.path;
       }
     } catch (ex) {
       AppUtil.showToast(language(
@@ -1139,7 +1140,8 @@ class _MelodyPageState extends State<MelodyPage> {
               // If the Future is complete, display the preview.
               return Center(
                 child: AspectRatio(
-                    aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
+                    aspectRatio:
+                        1 / cameraController?.value?.aspectRatio ?? 16 / 9,
                     child: CameraPreview(cameraController)),
               );
             } else {
@@ -1512,6 +1514,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController = CameraController(cameras[1], ResolutionPreset.medium,
           enableAudio: true);
       print('Camera: $cameraController');
+      //cameraController.buildPreview();
       _initializeControllerFuture = cameraController.initialize();
 
       // Prevent screen from going into sleep mode:
