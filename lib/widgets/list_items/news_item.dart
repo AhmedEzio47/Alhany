@@ -188,7 +188,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                       ],
                     ),
-                    Constants.currentUserID == Strings.starId
+                    Constants.isAdmin
                         ? ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {

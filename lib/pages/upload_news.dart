@@ -198,7 +198,7 @@ class _UploadNewsState extends State<UploadNews> {
   _recordVideo() async {
     File video = await ImagePicker.pickVideo(source: ImageSource.camera);
     setState(() {
-      _contentFile = video;
+      if (video != null) _contentFile = video;
       _contentType = 'video';
     });
     getDuration(_contentFile.path);
@@ -220,7 +220,7 @@ class _UploadNewsState extends State<UploadNews> {
     });
 
     setState(() {
-      _contentFile = File(result);
+      if (result != null) _contentFile = File(result);
     });
     getDuration(_contentFile.path);
   }
@@ -240,7 +240,7 @@ class _UploadNewsState extends State<UploadNews> {
     }
 
     setState(() {
-      _contentFile = image;
+      if (image != null) _contentFile = image;
       _contentType = 'image';
     });
   }
@@ -248,7 +248,7 @@ class _UploadNewsState extends State<UploadNews> {
   _chooseAudio() async {
     File audio = await AppUtil.chooseAudio();
     setState(() {
-      _contentFile = audio;
+      if (audio != null) _contentFile = audio;
       _contentType = 'audio';
     });
     getDuration(_contentFile.path);
@@ -257,7 +257,7 @@ class _UploadNewsState extends State<UploadNews> {
   _chooseVideo() async {
     File video = await ImagePicker.pickVideo(source: ImageSource.gallery);
     setState(() {
-      _contentFile = video;
+      if (video != null) _contentFile = video;
       _contentType = 'video';
     });
     getDuration(_contentFile.path);
