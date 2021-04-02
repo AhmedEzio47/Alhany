@@ -141,7 +141,7 @@ class _NewsItemState extends State<NewsItem> {
               ? 320
               : 305,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.4),
+            color: Colors.white.withOpacity(.1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
