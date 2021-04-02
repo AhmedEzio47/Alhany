@@ -130,8 +130,9 @@ class _NewsItemState extends State<NewsItem> {
       child: InkWell(
         onTap: () {
           AppUtil.executeFunctionIfLoggedIn(context, () {
-            Navigator.of(context).pushNamed('/news-page',
-                arguments: {'news': widget.news, 'is_video_visible': true});
+            if (Constants.currentRoute != '/news-page')
+              Navigator.of(context).pushNamed('/news-page',
+                  arguments: {'news': widget.news, 'is_video_visible': true});
           });
         },
         child: Container(

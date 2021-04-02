@@ -113,8 +113,8 @@ class _CommentItem2State extends State<CommentItem2> {
                                         fontSize: 16)),
                                 TextSpan(
                                     text: ' @${widget.commenter.username}',
-                                    style: TextStyle(
-                                        color: MyColors.primaryColor)),
+                                    style:
+                                        TextStyle(color: Colors.grey.shade400)),
                               ],
                             ),
                           ),
@@ -171,8 +171,8 @@ class _CommentItem2State extends State<CommentItem2> {
                 children: [
                   Text(
                       '${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
-                      style: TextStyle(
-                          color: MyColors.primaryColor, fontSize: 12)),
+                      style:
+                          TextStyle(color: Colors.grey.shade400, fontSize: 12)),
                   Row(
                     children: [
                       InkWell(

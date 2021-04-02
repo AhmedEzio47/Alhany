@@ -228,7 +228,7 @@ class _NewsPageState extends State<NewsPage> {
                           alignment: Alignment.bottomCenter,
                           child: Container(
                             margin: EdgeInsets.only(
-                                left: 8, right: 8, top: 8, bottom: 8),
+                                left: 8, right: 8, top: 8, bottom: 40),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(30.0),
                                 color: MyColors.lightPrimaryColor),

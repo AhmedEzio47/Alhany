@@ -443,6 +443,7 @@ class AppUtil with ChangeNotifier {
 
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
+    if (timestamp == null) return '';
     var now = Timestamp.now().toDate();
     var date = new DateTime.fromMillisecondsSinceEpoch(
         timestamp.millisecondsSinceEpoch);
