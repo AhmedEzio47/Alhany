@@ -130,8 +130,9 @@ class _NewsItemState extends State<NewsItem> {
       child: InkWell(
         onTap: () {
           AppUtil.executeFunctionIfLoggedIn(context, () {
-            Navigator.of(context).pushNamed('/news-page',
-                arguments: {'news': widget.news, 'is_video_visible': true});
+            if (Constants.currentRoute != '/news-page')
+              Navigator.of(context).pushNamed('/news-page',
+                  arguments: {'news': widget.news, 'is_video_visible': true});
           });
         },
         child: Container(
@@ -140,7 +141,7 @@ class _NewsItemState extends State<NewsItem> {
               ? 320
               : 305,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.4),
+            color: Colors.white.withOpacity(.1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +188,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                       ],
                     ),
-                    Constants.currentUserID == Strings.starId
+                    Constants.isAdmin
                         ? ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {

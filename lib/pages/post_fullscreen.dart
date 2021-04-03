@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
-import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
@@ -15,7 +14,6 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
-import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -224,7 +222,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
-        print('aspect ration: ${_controller.value.aspectRatio}');
+        print('aspect ratio: ${_controller.value.aspectRatio}');
       });
   }
 
@@ -275,6 +273,26 @@ class _PostFullscreenState extends State<PostFullscreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        appBar: AppBar(
+          leading: Builder(
+              builder: (context) => InkWell(
+                  onTap: _onBackPressed,
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: MyColors.accentColor,
+                  ))),
+          title: Padding(
+            padding: const EdgeInsets.only(right: 75),
+            child: Center(
+              child: Container(
+                width: 120,
+                child: Image.asset(
+                  Strings.app_bar,
+                ),
+              ),
+            ),
+          ),
+        ),
         body: Stack(
           children: <Widget>[
             widget.record != null
@@ -348,24 +366,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         }),
                   )
                 : fullscreen(),
-            Positioned.fill(
-                child: Align(
-                    alignment: Alignment.topCenter,
-                    child: RegularAppbar(context,
-                        color: Colors.black,
-                        height: Sizes.appbar_height,
-                        margin: 25,
-                        leading: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: Builder(
-                                builder: (context) => InkWell(
-                                    onTap: _onBackPressed,
-                                    child: Icon(
-                                      Icons.arrow_back,
-                                      color: MyColors.accentColor,
-                                    )))))))
           ],
         ),
       ),
@@ -403,18 +403,25 @@ class _PostFullscreenState extends State<PostFullscreen> {
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child:
-                  _controller != null ? VideoPlayer(_controller) : Container(),
+              child: _controller != null
+                  ? AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller))
+                  : Container(),
             )),
         Padding(
           padding: EdgeInsets.only(top: 90, left: 10),
-          child: Column(children: [Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.rotationY(math.pi),
-              child: Icon(Icons.remove_red_eye,
-                  size: 35, color: Colors.white)),
-            Text('${_record?.views ?? widget.news?.views ?? 0}',
-                style: TextStyle(color: Colors.white))],),
+          child: Column(
+            children: [
+              Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: Icon(Icons.remove_red_eye,
+                      size: 35, color: Colors.white)),
+              Text('${_record?.views ?? widget.news?.views ?? 0}',
+                  style: TextStyle(color: Colors.white))
+            ],
+          ),
         ),
         Padding(
           padding: EdgeInsets.only(bottom: 10),
@@ -426,31 +433,36 @@ class _PostFullscreenState extends State<PostFullscreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ListTile(leading: InkWell(
-                    onTap: () => _goToProfilePage(),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.white,
-                      child: CachedImage(
-                        key: ValueKey('profile'),
-                        height: 38,
-                        width: 38,
-                        imageShape: BoxShape.circle,
-                        defaultAssetImage:
-                        Strings.default_profile_image,
-                        imageUrl: widget.singer?.profileImageUrl ??
-                            Constants.starUser.profileImageUrl,
+                  ListTile(
+                    leading: InkWell(
+                      onTap: () => _goToProfilePage(),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                        child: CachedImage(
+                          key: ValueKey('profile'),
+                          height: 38,
+                          width: 38,
+                          imageShape: BoxShape.circle,
+                          defaultAssetImage: Strings.default_profile_image,
+                          imageUrl: widget.singer?.profileImageUrl ??
+                              Constants.starUser.profileImageUrl,
+                        ),
                       ),
                     ),
+                    title: _record != null
+                        ? Text(
+                            '${widget.singer?.name}',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        : Container(),
+                    subtitle: _record != null
+                        ? Text(
+                            '@${widget.singer?.username}',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        : Container(),
                   ),
-                  title: _record != null ? Text(
-                    '${widget.singer?.name}',
-                    style: TextStyle(color: Colors.white),
-                  ) : Container(),
-                  subtitle: _record != null ? Text(
-                    '@${widget.singer?.username}',
-                    style: TextStyle(color: Colors.white),
-                  ) : Container(),),
                   _record != null
                       ? Padding(
                           padding: EdgeInsets.only(left: 20, bottom: 10),

@@ -1104,8 +1104,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
       AudioServiceBackground.setQueue(queue);
       try {
         await _player.setAudioSource(ConcatenatingAudioSource(
-          children:
-              queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
+          children: queue
+              .map((item) =>
+                  AudioSource.uri(Uri.parse(item.id.replaceAll(' ', '%20'))))
+              .toList(),
         ));
 
         /// In this example, we automatically start playing on start.
@@ -1132,7 +1134,8 @@ class AudioPlayerTask extends BackgroundAudioTask {
           print('Local File:${queue[0].id}');
           _player.setAudioSource(ConcatenatingAudioSource(
             children: queue
-                .map((item) => AudioSource.uri(Uri.parse(item.id)))
+                .map((item) =>
+                    AudioSource.uri(Uri.parse(item.id.replaceAll(' ', '%20'))))
                 .toList(),
           ));
         } catch (e) {
