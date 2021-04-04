@@ -16,6 +16,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
@@ -892,6 +893,7 @@ class _MelodyPageState extends State<MelodyPage> {
               floatingActionButton: !_progressVisible && !choosingImage
                   ? FloatingActionButton(
                       onPressed: () async {
+                        if (AudioService.running) AudioService.pause();
                         if (recordingStatus == RecordingStatus.Recording) {
                           await saveRecord();
                         } else {
