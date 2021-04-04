@@ -1,9 +1,9 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
-import 'package:Alhany/services/audio_recorder.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
@@ -15,18 +15,24 @@ class MyAudioPlayer with ChangeNotifier {
   Duration position;
   final List<String> urlList;
   final Function onComplete;
+  final Function onPlayingStarted;
   final bool isLocal;
 
-  MyAudioPlayer({this.urlList, this.isLocal = false, this.onComplete}) {
+  MyAudioPlayer(
+      {this.urlList,
+      this.isLocal = false,
+      this.onComplete,
+      this.onPlayingStarted}) {
     initAudioPlayer();
   }
 
   int index = 0;
 
+  bool onPlayingStartedCalled = false;
+
   initAudioPlayer() {
     advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: advancedPlayer);
-
     advancedPlayer.durationHandler = (d) {
       duration = d;
       notifyListeners();
@@ -34,6 +40,12 @@ class MyAudioPlayer with ChangeNotifier {
     };
 
     advancedPlayer.positionHandler = (p) {
+      if (onPlayingStarted != null) {
+        if (p > Duration(microseconds: 1) && !onPlayingStartedCalled) {
+          onPlayingStarted();
+          onPlayingStartedCalled = true;
+        }
+      }
       position = p;
       print('P:${p.inMilliseconds}');
       print('D:${duration.inMilliseconds}');

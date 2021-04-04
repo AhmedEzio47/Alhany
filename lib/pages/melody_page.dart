@@ -9,7 +9,7 @@ import 'package:Alhany/main.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/my_sounds_player.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -18,6 +18,7 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -225,21 +226,24 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      mySoundsPlayer = MySoundsPlayer(
-          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer = MyAudioPlayer(
+          urlList: [melodyPath],
+          onComplete: saveRecord,
+          isLocal: true,
+          onPlayingStarted: () async {
+            try {
+              await recorder.startRecording();
+            } catch (ex) {
+              await mySoundsPlayer.stop();
+              AppUtil.showToast(language(
+                  en: 'Unexpected error. Please try again.!',
+                  ar: 'حدث خطأ برجاء إعادء المحاولة'));
+              Navigator.of(context).pop();
+            }
+          });
       mySoundsPlayer.addListener(() {});
 
-      await mySoundsPlayer.play(onPlayingStarted: () async {
-        try {
-          await recorder.startRecording();
-        } catch (ex) {
-          await mySoundsPlayer.stop();
-          AppUtil.showToast(language(
-              en: 'Unexpected error. Please try again.!',
-              ar: 'حدث خطأ برجاء إعادء المحاولة'));
-          Navigator.of(context).pop();
-        }
-      });
+      await mySoundsPlayer.play();
 
       _recordingTimer();
     } else {}
@@ -316,8 +320,8 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      mySoundsPlayer = MySoundsPlayer(
-          url: melodyPath, onComplete: saveRecord, isLocal: true);
+      mySoundsPlayer = MyAudioPlayer(
+          urlList: [melodyPath], onComplete: saveRecord, isLocal: true);
       mySoundsPlayer.addListener(() {});
 
       recordingFilePath += 'video_rec.mp4';
@@ -348,7 +352,7 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {}
   }
 
-  MySoundsPlayer mySoundsPlayer;
+  MyAudioPlayer mySoundsPlayer;
 
   Widget _headphonesDialog() {
     return Container(
@@ -437,7 +441,7 @@ class _MelodyPageState extends State<MelodyPage> {
         recordingFilePath = result;
         // String url = await AppUtil().uploadFile(File(recordingFilePath),
         //     context, 'tests/test${path.extension(recordingFilePath)}');
-        // print('test url:' + url);
+        print('recorded path:' + result);
       } else {
         XFile result = await cameraController.stopVideoRecording();
         recordingFilePath = result.path;
