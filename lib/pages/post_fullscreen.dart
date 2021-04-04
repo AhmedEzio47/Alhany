@@ -354,6 +354,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           DatabaseService.incrementRecordViews(_record.id);
                           initVideoPlayer(_record.url);
                           getSinger();
+                          getMelodySinger();
                           isFollowing();
                           initLikes(record: _record, news: widget.news);
                           setState(() {
