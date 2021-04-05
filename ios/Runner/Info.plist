@@ -63,16 +63,16 @@
 		<key>NSAllowsArbitraryLoadsForMedia</key>
 		<true/>
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
-        <true/>
+		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>App need permission to access music library</string>
 	<key>NSCameraUsageDescription</key>
 	<string>App need permission to access camera.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>App need permission to access microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>App need permission to access photo library.</string>
-	<key>NSAppleMusicUsageDescription</key>
-    <string>App need permission to access music library</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

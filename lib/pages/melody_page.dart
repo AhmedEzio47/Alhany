@@ -488,10 +488,10 @@ class _MelodyPageState extends State<MelodyPage> {
       //     ? 'Added 1 s silence Failure!'
       //     : 'Added 1 s silence Success!');
 
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation('$recordingFilePath');
-      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
-      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
+      // MediaInformation info =
+      //     await _flutterFFprobe.getMediaInformation('$recordingFilePath');
+      // _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      // _recordingDuration = double.parse(info.getMediaProperties()['duration']);
 
       if (mounted) {
         setState(() {
@@ -1415,13 +1415,16 @@ class _MelodyPageState extends State<MelodyPage> {
     Timer.periodic(
       oneSec,
       (timer) {
+        if(counter > (_recordingDuration??0).toDouble())
+        _recordingDuration = counter.toDouble();
         //TODO trial
         // if (recordingStatus == RecordingStatus.Stopped) {
         //   timer.cancel();
         // }
         if (_type == Types.AUDIO) {
           if (counter >= _duration ||
-              recordingStatus == RecordingStatus.Stopped) {}
+              recordingStatus == RecordingStatus.Stopped) {
+          }
         } else {
           if (counter >= _duration &&
               recordingStatus == RecordingStatus.Recording) {
