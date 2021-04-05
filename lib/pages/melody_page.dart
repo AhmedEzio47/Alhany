@@ -544,7 +544,7 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-framerate 30 -i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -preset veryfast -c:a libmp3lame -shortest $mergedFilePath');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -preset veryfast -c:a libmp3lame -shortest $mergedFilePath');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video
@@ -1415,16 +1415,15 @@ class _MelodyPageState extends State<MelodyPage> {
     Timer.periodic(
       oneSec,
       (timer) {
-        if(counter > (_recordingDuration??0).toDouble())
-        _recordingDuration = counter.toDouble();
+        if (counter > (_recordingDuration ?? 0).toDouble())
+          _recordingDuration = counter.toDouble();
         //TODO trial
         // if (recordingStatus == RecordingStatus.Stopped) {
         //   timer.cancel();
         // }
         if (_type == Types.AUDIO) {
           if (counter >= _duration ||
-              recordingStatus == RecordingStatus.Stopped) {
-          }
+              recordingStatus == RecordingStatus.Stopped) {}
         } else {
           if (counter >= _duration &&
               recordingStatus == RecordingStatus.Recording) {

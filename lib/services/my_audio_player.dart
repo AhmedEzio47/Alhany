@@ -1,15 +1,16 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
-import 'package:audioplayers/audio_cache.dart';
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audio_cache.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+import 'package:just_audio/just_audio.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
-  AudioCache audioCache;
+  //AudioCache audioCache;
 
-  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+  get isPlaying => advancedPlayer.playing;
 
   Duration duration;
   Duration position;
@@ -30,16 +31,15 @@ class MyAudioPlayer with ChangeNotifier {
 
   bool onPlayingStartedCalled = false;
 
-  initAudioPlayer() {
+  initAudioPlayer() async {
     advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    advancedPlayer.durationHandler = (d) {
-      duration = d;
-      notifyListeners();
-      // print('my duration:$duration');
-    };
+    //audioCache = AudioCache(fixedPlayer: advancedPlayer);
+    if (isLocal)
+      duration = await advancedPlayer.setFilePath(urlList[index]);
+    else
+      duration = await advancedPlayer.setUrl(urlList[index]);
 
-    advancedPlayer.positionHandler = (p) {
+    advancedPlayer.positionStream.listen((p) {
       if (onPlayingStarted != null) {
         if (p > Duration(microseconds: 1) && !onPlayingStartedCalled) {
           onPlayingStarted();
@@ -76,21 +76,22 @@ class MyAudioPlayer with ChangeNotifier {
           stop();
         }
       }
-    };
+    });
   }
 
   Future play({index = 0}) async {
     if (index == null) {
       index = this.index;
     }
-    await advancedPlayer.play(urlList[index], isLocal: isLocal);
-    playerState = AudioPlayerState.PLAYING;
+
+    await advancedPlayer.play();
+
     notifyListeners();
   }
 
   Future stop() async {
-    await advancedPlayer.stop();
-    playerState = AudioPlayerState.STOPPED;
+    await advancedPlayer.pause();
+    await advancedPlayer.seek(Duration.zero);
     position = null;
     duration = null;
     notifyListeners();
@@ -102,7 +103,6 @@ class MyAudioPlayer with ChangeNotifier {
 
   Future pause() async {
     await advancedPlayer.pause();
-    playerState = AudioPlayerState.PAUSED;
     notifyListeners();
   }
 

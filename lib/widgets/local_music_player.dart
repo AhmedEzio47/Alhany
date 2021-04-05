@@ -11,7 +11,6 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -62,8 +61,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
 
   MyAudioPlayer myAudioPlayer;
 
-  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
-  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
+  get isPlaying => myAudioPlayer.isPlaying;
 
   get durationText => myAudioPlayer.duration != null
       ? myAudioPlayer.duration.toString().split('.').first
