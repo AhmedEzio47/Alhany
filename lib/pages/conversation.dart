@@ -9,7 +9,6 @@ import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/chat_bubble.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
@@ -530,84 +529,95 @@ class _ConversationState extends State<Conversation>
                                     maxLines: null,
                                   )
                                 : Text(recordTime),
-                            trailing: _typing
-                                ? IconButton(
-                                    icon: Icon(
-                                      Icons.send,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () async {
-                                      messageController.clear();
-                                      await DatabaseService.sendMessage(
-                                          widget.otherUid, 'text', messageText);
-                                    },
-                                  )
-                                : GestureDetector(
-                                    onLongPress: () async {
-                                      if (await PermissionsService()
-                                          .hasMicrophonePermission()) {
-                                        setState(() {
-                                          isMicrophoneGranted = true;
-                                        });
-                                      } else {
-                                        bool isGranted =
-                                            await PermissionsService()
-                                                .requestMicrophonePermission(
-                                                    context,
-                                                    onPermissionDenied: () {
-                                          AppUtil.showAlertDialog(
-                                              context: context,
-                                              heading: 'info',
-                                              message:
-                                                  'You must grant this microphone access to be able to use this feature.',
-                                              firstBtnText: 'OK',
-                                              firstFunc: () {
-                                                Navigator.of(context).pop();
-                                              });
-                                          print('Permission has been denied');
-                                        });
-                                        setState(() {
-                                          isMicrophoneGranted = isGranted;
-                                        });
-                                        return;
-                                      }
-
-                                      if (isMicrophoneGranted) {
-                                        setState(() {
-                                          _currentStatus =
-                                              RecordingStatus.Recording;
-                                        });
-                                        await initRecorder();
-                                        await recorder.startRecording();
-                                      } else {}
-                                    },
-                                    onLongPressEnd: (longPressDetails) async {
-                                      if (isMicrophoneGranted) {
-                                        setState(() {
-                                          _currentStatus =
-                                              RecordingStatus.Stopped;
-                                        });
-                                        String result =
-                                            await recorder.stopRecording();
-
-                                        //Storage path is voice_messages/sender_id/receiver_id/file
-                                        _url = await AppUtil().uploadFile(
-                                            File(result),
-                                            context,
-                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
-
-                                        await DatabaseService.sendMessage(
-                                            widget.otherUid, 'audio', _url);
-                                      }
-                                    },
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.mic,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: null,
-                                    ),
-                                  ),
+                            trailing: IconButton(
+                              icon: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                messageController.clear();
+                                await DatabaseService.sendMessage(
+                                    widget.otherUid, 'text', messageText);
+                              },
+                            ),
+                            // trailing: _typing
+                            //     ? IconButton(
+                            //         icon: Icon(
+                            //           Icons.send,
+                            //           color: Colors.white,
+                            //         ),
+                            //         onPressed: () async {
+                            //           messageController.clear();
+                            //           await DatabaseService.sendMessage(
+                            //               widget.otherUid, 'text', messageText);
+                            //         },
+                            //       )
+                            //     : GestureDetector(
+                            //         onLongPress: () async {
+                            //           if (await PermissionsService()
+                            //               .hasMicrophonePermission()) {
+                            //             setState(() {
+                            //               isMicrophoneGranted = true;
+                            //             });
+                            //           } else {
+                            //             bool isGranted =
+                            //                 await PermissionsService()
+                            //                     .requestMicrophonePermission(
+                            //                         context,
+                            //                         onPermissionDenied: () {
+                            //               AppUtil.showAlertDialog(
+                            //                   context: context,
+                            //                   heading: 'info',
+                            //                   message:
+                            //                       'You must grant this microphone access to be able to use this feature.',
+                            //                   firstBtnText: 'OK',
+                            //                   firstFunc: () {
+                            //                     Navigator.of(context).pop();
+                            //                   });
+                            //               print('Permission has been denied');
+                            //             });
+                            //             setState(() {
+                            //               isMicrophoneGranted = isGranted;
+                            //             });
+                            //             return;
+                            //           }
+                            //
+                            //           if (isMicrophoneGranted) {
+                            //             setState(() {
+                            //               _currentStatus =
+                            //                   RecordingStatus.Recording;
+                            //             });
+                            //             await initRecorder();
+                            //             await recorder.startRecording();
+                            //           } else {}
+                            //         },
+                            //         onLongPressEnd: (longPressDetails) async {
+                            //           if (isMicrophoneGranted) {
+                            //             setState(() {
+                            //               _currentStatus =
+                            //                   RecordingStatus.Stopped;
+                            //             });
+                            //             String result =
+                            //                 await recorder.stopRecording();
+                            //
+                            //             //Storage path is voice_messages/sender_id/receiver_id/file
+                            //             _url = await AppUtil().uploadFile(
+                            //                 File(result),
+                            //                 context,
+                            //                 'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
+                            //
+                            //             await DatabaseService.sendMessage(
+                            //                 widget.otherUid, 'audio', _url);
+                            //           }
+                            //         },
+                            //         child: IconButton(
+                            //           icon: Icon(
+                            //             Icons.mic,
+                            //             color: Colors.white,
+                            //           ),
+                            //           onPressed: null,
+                            //         ),
+                            //       ),
                           ),
                         ),
                       ],
