@@ -66,7 +66,8 @@ dependencies:
   flutter_tts: ^0.8.5
   rxdart: "0.25.0"
   audio_service:
-  pip_view: ^0.9.5
+  #pip_view: ^0.9.5
+  easy_pip: ^0.1.0
 
 dev_dependencies:
   flutter_test:
