@@ -54,7 +54,7 @@ class MyAudioPlayer with ChangeNotifier {
       if (duration.inMilliseconds - p.inMilliseconds <
           Constants.endPositionOffsetInMilliSeconds) {
         stop();
-        if (urlList != null) {
+        if (urlList.length > 1) {
           if (this.index < urlList.length - 1)
             this.index++;
           else
@@ -65,7 +65,7 @@ class MyAudioPlayer with ChangeNotifier {
           stop();
         }
       } else if (duration.inMilliseconds - p.inMilliseconds == 0) {
-        if (urlList != null) {
+        if (urlList.length > 1) {
           if (this.index < urlList.length - 1)
             this.index++;
           else
@@ -92,8 +92,8 @@ class MyAudioPlayer with ChangeNotifier {
   Future stop() async {
     await advancedPlayer.pause();
     await advancedPlayer.seek(Duration.zero);
-    position = null;
-    duration = null;
+    // position = null;
+    // duration = null;
     notifyListeners();
     if (onComplete != null &&
         MelodyPage.recordingStatus == RecordingStatus.Recording) {
