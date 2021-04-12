@@ -20,7 +20,7 @@ class SlideImages extends StatefulWidget {
 class _SlideImagesState extends State<SlideImages> {
   List<SlideImage> _slideImages = [];
   List<String> _choices = ['الصفحة الشخصية', 'صفحة الفنان'];
-  String _chosenPage;
+  String? _chosenPage;
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _SlideImagesState extends State<SlideImages> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: DropdownButton(
+            child: DropdownButton<dynamic>(
               hint: Text('Singer'),
               value: _chosenPage,
               onChanged: (text) async {
@@ -60,14 +60,14 @@ class _SlideImagesState extends State<SlideImages> {
           ),
           Expanded(
             child: ListView.builder(
-                itemCount: _slideImages?.length,
+                itemCount: _slideImages.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Stack(
                       children: [
                         CachedImage(
-                          imageUrl: _slideImages[index]?.url,
+                          imageUrl: _slideImages[index].url!,
                           height: 200,
                           imageShape: BoxShape.rectangle,
                           width: MediaQuery.of(context).size.width,
@@ -146,7 +146,7 @@ class _SlideImagesState extends State<SlideImages> {
 
   getSlideImages() async {
     List<SlideImage> slideImages =
-        await DatabaseService.getSlideImages(_chosenPage);
+        await DatabaseService.getSlideImages(_chosenPage!);
     setState(() {
       _slideImages = slideImages;
     });

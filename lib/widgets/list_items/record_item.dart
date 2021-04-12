@@ -16,17 +16,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class RecordItem extends StatefulWidget {
-  final Record record;
+  final Record? record;
 
-  const RecordItem({Key key, this.record}) : super(key: key);
+  const RecordItem({Key? key, this.record}) : super(key: key);
 
   @override
   _RecordItemState createState() => _RecordItemState();
 }
 
 class _RecordItemState extends State<RecordItem> {
-  User _singer;
-  Melody _melody;
+  User? _singer;
+  Melody? _melody;
 
   bool isLiked = false;
   bool isLikeEnabled = true;
@@ -38,7 +38,7 @@ class _RecordItemState extends State<RecordItem> {
   void initState() {
     getAuthor();
     getMelody();
-    initLikes(widget.record);
+    initLikes(widget.record!);
     super.initState();
   }
 
@@ -48,7 +48,7 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   getAuthor() async {
-    User author = await DatabaseService.getUserWithId(widget.record.singerId);
+    User author = await DatabaseService.getUserWithId(widget.record!.singerId!);
     if (mounted) {
       setState(() {
         _singer = author;
@@ -58,7 +58,7 @@ class _RecordItemState extends State<RecordItem> {
 
   getMelody() async {
     Melody melody =
-        await DatabaseService.getMelodyWithId(widget.record.melodyId);
+        await DatabaseService.getMelodyWithId(widget.record!.melodyId!);
     if (mounted) {
       setState(() {
         _melody = melody;
@@ -68,7 +68,7 @@ class _RecordItemState extends State<RecordItem> {
 
   void _goToProfilePage() {
     Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': widget.record.singerId});
+        arguments: {'user_id': widget.record!.singerId});
   }
 
   void _goToMelodyPage() {
@@ -101,7 +101,7 @@ class _RecordItemState extends State<RecordItem> {
           .update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
-          record.singerId, record.id, 'record_like');
+          record.singerId!, record.id!, 'record_like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -122,10 +122,10 @@ class _RecordItemState extends State<RecordItem> {
       });
 
       await NotificationHandler.sendNotification(
-          record.singerId,
+          record.singerId!,
           'New Record Like',
-          Constants.currentUser.name + ' likes your post',
-          record.id,
+          Constants.currentUser!.name! + ' likes your post',
+          record.id!,
           'record_like');
     }
     var recordMeta = await DatabaseService.getPostMeta(recordId: record.id);
@@ -136,11 +136,11 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void initLikes(Record record) async {
-    DocumentSnapshot likedSnapshot = await recordsRef
+    DocumentSnapshot? likedSnapshot = await recordsRef
         .doc(record.id)
         .collection('likes')
-        ?.doc(Constants.currentUserID)
-        ?.get();
+        .doc(Constants.currentUserID)
+        .get();
 
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -185,7 +185,7 @@ class _RecordItemState extends State<RecordItem> {
                             height: 25,
                             width: 25,
                             imageShape: BoxShape.circle,
-                            imageUrl: _singer?.profileImageUrl,
+                            imageUrl: _singer!.profileImageUrl!,
                             defaultAssetImage: Strings.default_profile_image,
                           ),
                           onTap: () => _goToProfilePage(),
@@ -222,8 +222,7 @@ class _RecordItemState extends State<RecordItem> {
                               ],
                             ),
                             Text(
-                              '${AppUtil.formatTimestamp(widget.record.timestamp)}' ??
-                                  '',
+                              '${AppUtil.formatTimestamp(widget.record!.timestamp!)}',
                               style: TextStyle(
                                   color: Colors.grey.shade300, fontSize: 12),
                             ),
@@ -231,7 +230,7 @@ class _RecordItemState extends State<RecordItem> {
                         ),
                       ],
                     ),
-                    widget.record.singerId == Constants.currentUserID
+                    widget.record!.singerId == Constants.currentUserID
                         ? ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {
@@ -258,14 +257,14 @@ class _RecordItemState extends State<RecordItem> {
                 children: [
                   Container(
                       height: 200,
-                      child: widget.record.thumbnailUrl != null
+                      child: widget.record!.thumbnailUrl != null
                           ? Stack(
                               children: [
                                 CachedImage(
                                   height: 200,
                                   width: MediaQuery.of(context).size.width,
                                   imageShape: BoxShape.rectangle,
-                                  imageUrl: widget.record.thumbnailUrl,
+                                  imageUrl: widget.record!.thumbnailUrl!,
                                   defaultAssetImage:
                                       Strings.default_cover_image,
                                 ),
@@ -310,7 +309,7 @@ class _RecordItemState extends State<RecordItem> {
                     child: Row(
                       children: [
                         Text(
-                          '${widget.record.likes ?? 0}',
+                          '${widget.record!.likes ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -319,7 +318,7 @@ class _RecordItemState extends State<RecordItem> {
                               color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.record.comments ?? 0}',
+                          '${widget.record!.comments ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -328,7 +327,7 @@ class _RecordItemState extends State<RecordItem> {
                               color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.record.shares ?? 0}',
+                          '${widget.record!.shares ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
@@ -348,7 +347,7 @@ class _RecordItemState extends State<RecordItem> {
                             AppUtil.executeFunctionIfLoggedIn(context,
                                 () async {
                               if (isLikeEnabled) {
-                                await likeBtnHandler(widget.record);
+                                await likeBtnHandler(widget.record!);
                               }
                             });
                           },
@@ -383,8 +382,8 @@ class _RecordItemState extends State<RecordItem> {
                           onTap: () =>
                               AppUtil.executeFunctionIfLoggedIn(context, () {
                             AppUtil.sharePost(
-                                ' ${_singer.name} singed ${_melody.name} ', '',
-                                recordId: widget.record.id);
+                                ' ${_singer!.name} singed ${_melody!.name} ', '',
+                                recordId: widget.record!.id);
                           }),
                           child: SizedBox(
                             child: Icon(
@@ -417,7 +416,7 @@ class _RecordItemState extends State<RecordItem> {
             'melody': _melody
           });
         } else {
-          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+          appPageUtil!.goToFullscreen(widget.record!, _singer!, _melody!);
         }
       },
       child: Container(
@@ -455,7 +454,7 @@ class _RecordItemState extends State<RecordItem> {
             'melody': _melody
           });
         } else {
-          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+          appPageUtil!.goToFullscreen(widget.record!, _singer!, _melody!);
         }
       },
       child: Container(

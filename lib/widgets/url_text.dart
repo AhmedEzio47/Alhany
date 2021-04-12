@@ -6,20 +6,20 @@ class UrlText extends StatelessWidget {
   final String text;
   final TextStyle style;
   final TextStyle urlStyle;
-  final Future Function(String) onHashTagPressed;
-  final Future Function(String) onMentionPressed;
+  final Future Function(String)? onHashTagPressed;
+  final Future Function(String)? onMentionPressed;
 
-  UrlText({this.text, this.style, this.urlStyle, this.onHashTagPressed, this.onMentionPressed, this.context});
+  UrlText({required this.text, required this.style, required this.urlStyle,  this.onHashTagPressed,  this.onMentionPressed, required this.context});
 
   List<InlineSpan> getTextSpans() {
-    List<InlineSpan> widgets = List<InlineSpan>();
+    List<InlineSpan> widgets = [];
     RegExp reg =
         RegExp(r"([#])\w+|([@])\w+|(https?|ftp|file|#)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]*");
     Iterable<Match> _matches = reg.allMatches(text);
-    List<_ResultMatch> resultMatches = List<_ResultMatch>();
+    List<_ResultMatch> resultMatches = [];
     int start = 0;
     for (Match match in _matches) {
-      if (match.group(0).isNotEmpty) {
+      if (match.group(0)!.isNotEmpty) {
         if (start != match.start) {
           _ResultMatch result1 = _ResultMatch();
           result1.isUrl = false;
@@ -29,7 +29,7 @@ class UrlText extends StatelessWidget {
 
         _ResultMatch result2 = _ResultMatch();
         result2.isUrl = true;
-        result2.text = match.group(0);
+        result2.text = match.group(0)!;
         resultMatches.add(result2);
         start = match.end;
       }
@@ -44,8 +44,8 @@ class UrlText extends StatelessWidget {
       if (result.isUrl) {
         widgets.add(_LinkTextSpan(
             context: this.context,
-            onHashTagPressed: onHashTagPressed,
-            onMentionPressed: onMentionPressed,
+            onHashTagPressed: onHashTagPressed!,
+            onMentionPressed: onMentionPressed!,
             text: result.text,
             style: urlStyle != null ? urlStyle : TextStyle(color: Colors.blue)));
       } else {
@@ -68,15 +68,15 @@ class _LinkTextSpan extends TextSpan {
   final Future Function(String) onHashTagPressed;
   final Future Function(String) onMentionPressed;
 
-  _LinkTextSpan({this.context, TextStyle style, String text, this.onHashTagPressed, this.onMentionPressed})
+  _LinkTextSpan({required this.context, TextStyle? style, String? text, required this.onHashTagPressed, required this.onMentionPressed})
       : super(
             style: style,
             text: text,
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                if (onHashTagPressed != null && (text.contains("#") || text.contains("#"))) {
+                if (onHashTagPressed != null && (text!.contains("#") || text.contains("#"))) {
                   onHashTagPressed(text);
-                } else if (onMentionPressed != null && (text.contains("@") || text.contains("@"))) {
+                } else if (onMentionPressed != null && (text!.contains("@") || text.contains("@"))) {
                   onMentionPressed(text);
                 } else {
                   print('text is $text');
@@ -88,6 +88,6 @@ class _LinkTextSpan extends TextSpan {
 }
 
 class _ResultMatch {
-  bool isUrl;
-  String text;
+  late bool isUrl;
+  late String text;
 }

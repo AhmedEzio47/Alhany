@@ -25,7 +25,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   List<String> _decryptedPaths = [];
 
   getDownloads() async {
-    List<Melody> downloads = await MelodySqlite.getDownloads();
+    List<Melody>? downloads = await MelodySqlite.getDownloads();
     setState(() {
       if (downloads != null) {
         _downloads = downloads;
@@ -178,7 +178,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playSong(int index) async {
-    String path = EncryptionService.decryptFile(_downloads[index].audioUrl);
+    String path = EncryptionService.decryptFile(_downloads[index].audioUrl!);
     if (!_decryptedPaths.contains(path)) {
       _decryptedPaths.add(path);
     }
@@ -192,8 +192,8 @@ class _DownloadsPageState extends State<DownloadsPage> {
 
     musicPlayer = LocalMusicPlayer(
       melodyList: [_downloads[index]],
-      initialDuration: _downloads[index].duration,
-      title: _downloads[index].name,
+      initialDuration: _downloads[index].duration!,
+      title: _downloads[index].name!,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );
@@ -202,7 +202,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   playAllSongs() {
     List<Melody> decryptedDownload = [];
     for (Melody song in _downloads) {
-      String path = EncryptionService.decryptFile(song.audioUrl);
+      String path = EncryptionService.decryptFile(song.audioUrl!);
       if (!_decryptedPaths.contains(path)) {
         _decryptedPaths.add(path);
       }
@@ -210,7 +210,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
     }
     musicPlayer = LocalMusicPlayer(
       melodyList: decryptedDownload,
-      initialDuration: decryptedDownload[0].duration,
+      initialDuration: decryptedDownload[0].duration!,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );

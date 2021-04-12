@@ -32,26 +32,26 @@ enum PlayBtnPosition { bottom, left }
 class MusicPlayer extends StatefulWidget {
   final List<Melody> melodyList;
   final Color backColor;
-  final Function onComplete;
+  final Function? onComplete;
   final bool isLocal;
-  final String title;
+  final String? title;
   final double btnSize;
-  final int initialDuration;
+  final int? initialDuration;
   final PlayBtnPosition playBtnPosition;
   final bool isCompact;
   final bool isRecordBtnVisible;
 
   MusicPlayer(
-      {Key key,
-      this.backColor,
+      {Key? key,
+      required this.backColor,
       this.onComplete,
       this.isLocal = false,
-      this.title,
+       this.title,
       this.btnSize = 40.0,
       this.initialDuration,
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
-      this.melodyList,
+      required this.melodyList,
       this.isRecordBtnVisible = false})
       : super(key: key);
 
@@ -62,7 +62,7 @@ class MusicPlayer extends StatefulWidget {
 class _MusicPlayerState extends State<MusicPlayer> {
   void initState() {
     initAudioService();
-    if (widget.melodyList[audioServiceIndex]?.isSong ?? true) {
+    if (widget.melodyList[audioServiceIndex].isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
@@ -167,7 +167,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   (widget.melodyList[audioServiceIndex]
-                                              ?.isSong ??
+                                              .isSong ??
                                           false)
                                       ? favouriteBtn()
                                       : Container(),
@@ -179,7 +179,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                       ? nextBtn()
                                       : Container(),
                                   (!(widget.melodyList[audioServiceIndex]
-                                                  ?.isSong ??
+                                                  .isSong ??
                                               true) &&
                                           widget.isRecordBtnVisible)
                                       ? SizedBox(
@@ -187,7 +187,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         )
                                       : Container(),
                                   (!(widget.melodyList[audioServiceIndex]
-                                                  ?.isSong ??
+                                                  .isSong ??
                                               true) &&
                                           widget.isRecordBtnVisible)
                                       ? InkWell(
@@ -232,7 +232,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         )
                                       : Container(),
                                   (!(widget.melodyList[audioServiceIndex]
-                                                  ?.isSong ??
+                                                  .isSong ??
                                               true) &&
                                           widget.isRecordBtnVisible)
                                       ? SizedBox(
@@ -240,7 +240,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                         )
                                       : Container(),
                                   (!(widget.melodyList[audioServiceIndex]
-                                                  ?.isSong ??
+                                                  .isSong ??
                                               true) &&
                                           widget.isRecordBtnVisible)
                                       ? InkWell(
@@ -311,7 +311,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
           final mediaItem = queueState?.mediaItem;
           return (mediaItem?.title != null)
               ? Text(
-                  mediaItem.title,
+                  mediaItem!.title,
                   style: TextStyle(
                       color: MyColors.textLightColor,
                       fontSize: 16,
@@ -431,7 +431,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     bool isFavourite = (await usersRef
             .doc(Constants.currentUserID)
             .collection('favourites')
-            .doc(widget.melodyList[audioServiceIndex]?.id)
+            .doc(widget.melodyList[audioServiceIndex].id)
             .get())
         .exists;
 
@@ -449,9 +449,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
         onTap: () async {
           _isFavourite
               ? await DatabaseService.deleteMelodyFromFavourites(
-                  widget.melodyList[audioServiceIndex].id)
+                  widget.melodyList[audioServiceIndex].id!)
               : await DatabaseService.addMelodyToFavourites(
-                  widget.melodyList[audioServiceIndex].id);
+                  widget.melodyList[audioServiceIndex].id!);
 
           await isFavourite();
         },
@@ -479,9 +479,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
     );
   }
 
-  List<String> choices;
+  late List<String> choices;
   Widget downloadOrOptions() {
-    return Constants.isAdmin ?? false
+    return Constants.isAdmin
         ? Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Container(
@@ -525,7 +525,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           )
-        : widget.melodyList[audioServiceIndex]?.authorId != null ?? false
+        : widget.melodyList[audioServiceIndex].authorId != null
             ? Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: InkWell(
@@ -600,7 +600,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
     if (widget.melodyList[audioServiceIndex].imageUrl != null) {
       String fileName = await AppUtil.getStorageFileNameFromUrl(
-          widget.melodyList[audioServiceIndex].imageUrl);
+          widget.melodyList[audioServiceIndex].imageUrl!);
       await storageRef.child('/melodies_images/$fileName').delete();
     }
 
@@ -615,7 +615,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   TextEditingController _nameController = TextEditingController();
   editName() async {
     setState(() {
-      _nameController.text = widget.melodyList[audioServiceIndex].name;
+      _nameController.text = widget.melodyList[audioServiceIndex].name!;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -676,8 +676,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
           await DatabaseService.deleteMelody(
               widget.melodyList[audioServiceIndex]);
           Singer singer = await DatabaseService.getSingerWithName(
-              widget.melodyList[audioServiceIndex].singer);
-          if (widget.melodyList[audioServiceIndex].isSong) {
+              widget.melodyList[audioServiceIndex].singer!);
+          if (widget.melodyList[audioServiceIndex].isSong!) {
             await singersRef
                 .doc(singer.id)
                 .update({'songs': FieldValue.increment(-1)});
@@ -775,9 +775,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
-        final success = await Navigator.of(context).pushNamed('/payment-home',
+         final   success = await Navigator.of(context).pushNamed('/payment-home',
             arguments: {'amount': widget.melodyList[audioServiceIndex].price});
-        if (success) {
+        if (success == true) {
           usersRef
               .doc(Constants.currentUserID)
               .collection('downloads')
@@ -798,11 +798,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
       String path;
       if (widget.melodyList[audioServiceIndex].audioUrl != null) {
         path = await AppUtil.downloadFile(
-            widget.melodyList[audioServiceIndex].audioUrl,
+            widget.melodyList[audioServiceIndex].audioUrl!,
             encrypt: true);
       } else {
         path = await AppUtil.downloadFile(
-            widget.melodyList[audioServiceIndex].levelUrls.values.elementAt(0),
+            widget.melodyList[audioServiceIndex].levelUrls!.values.elementAt(0),
             encrypt: true);
       }
 
@@ -813,8 +813,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
           imageUrl: widget.melodyList[audioServiceIndex].imageUrl,
           name: widget.melodyList[audioServiceIndex].name,
           audioUrl: path);
-      Melody storedMelody = await MelodySqlite.getMelodyWithId(
-          widget.melodyList[audioServiceIndex].id);
+      Melody? storedMelody = await MelodySqlite.getMelodyWithId(
+          widget.melodyList[audioServiceIndex].id!);
       if (storedMelody == null) {
         await MelodySqlite.insert(melody);
         await usersRef
@@ -836,18 +836,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
   /// A stream reporting the combined state of the current media item and its
   /// current position.
   Stream<MediaState> get _mediaStateStream =>
-      Rx.combineLatest2<MediaItem, Duration, MediaState>(
+      Rx.combineLatest2<MediaItem?, Duration, MediaState>(
           AudioService.currentMediaItemStream,
           AudioService.positionStream,
-          (mediaItem, position) => MediaState(mediaItem, position));
+          (mediaItem, position) => MediaState(mediaItem!, position));
 
   /// A stream reporting the combined state of the current queue and the current
   /// media item within that queue.
   Stream<QueueState> get _queueStateStream =>
-      Rx.combineLatest2<List<MediaItem>, MediaItem, QueueState>(
+      Rx.combineLatest2<List<MediaItem>?, MediaItem?, QueueState>(
           AudioService.queueStream,
           AudioService.currentMediaItemStream,
-          (queue, mediaItem) => QueueState(queue, mediaItem));
+          (queue, mediaItem) => QueueState(queue!, mediaItem!));
 
   RaisedButton audioPlayerButton() => startButton(
         'AudioPlayer',
@@ -946,12 +946,12 @@ class MediaState {
 class SeekBar extends StatefulWidget {
   final Duration duration;
   final Duration position;
-  final ValueChanged<Duration> onChanged;
-  final ValueChanged<Duration> onChangeEnd;
+  final ValueChanged<Duration>? onChanged;
+  final ValueChanged<Duration>? onChangeEnd;
 
   SeekBar({
-    @required this.duration,
-    @required this.position,
+    required this.duration,
+    required this.position,
     this.onChanged,
     this.onChangeEnd,
   });
@@ -961,12 +961,12 @@ class SeekBar extends StatefulWidget {
 }
 
 class _SeekBarState extends State<SeekBar> {
-  double _dragValue;
+  double? _dragValue;
   bool _dragging = false;
 
   @override
   Widget build(BuildContext context) {
-    final value = min(_dragValue ?? widget.position?.inMilliseconds?.toDouble(),
+    final value = min(_dragValue ?? widget.position.inMilliseconds.toDouble(),
         widget.duration.inMilliseconds.toDouble());
     if (_dragValue != null && !_dragging) {
       _dragValue = null;
@@ -993,12 +993,12 @@ class _SeekBarState extends State<SeekBar> {
                 _dragValue = value;
               });
               if (widget.onChanged != null) {
-                widget.onChanged(Duration(milliseconds: value.round()));
+                widget.onChanged!(Duration(milliseconds: value.round()));
               }
             },
             onChangeEnd: (value) {
               if (widget.onChangeEnd != null) {
-                widget.onChangeEnd(Duration(milliseconds: value.round()));
+                widget.onChangeEnd!(Duration(milliseconds: value.round()));
               }
               _dragging = false;
             },
@@ -1032,19 +1032,19 @@ void _audioPlayerTaskEntrypoint() async {
 
 class MediaLibrary {
   List<MediaItem> _items = [];
-  MediaLibrary(List<Melody> melodyList, {MediaLibrary oldOne}) {
+  MediaLibrary(List<Melody> melodyList, {MediaLibrary? oldOne}) {
     if (oldOne != null) {
       _items.addAll(oldOne.items);
     }
     melodyList.forEach((element) {
       _items.add(MediaItem(
-          id: element.audioUrl,
-          album: element.singer,
-          title: element.name,
+          id: element.audioUrl!,
+          album: element.singer!,
+          title: element.name!,
           artist: element.singer,
-          duration: Duration(seconds: element.duration),
+          duration: Duration(seconds: element.duration!),
           artUri:
-              element.imageUrl ?? 'asset:///${Strings.default_melody_image}'));
+              Uri.parse(element.imageUrl!) ));
     });
   }
 
@@ -1053,18 +1053,18 @@ class MediaLibrary {
 
 /// This task defines logic for playing a list of podcast episodes.
 class AudioPlayerTask extends BackgroundAudioTask {
-  MediaLibrary _mediaLibrary;
+  MediaLibrary? _mediaLibrary;
   AudioPlayer _player = new AudioPlayer();
-  AudioProcessingState _skipState;
-  Seeker _seeker;
-  StreamSubscription<PlaybackEvent> _eventSubscription;
+  AudioProcessingState? _skipState;
+  Seeker? _seeker;
+  StreamSubscription<PlaybackEvent>? _eventSubscription;
 
-  List<MediaItem> get queue => _mediaLibrary.items;
-  int get index => _player.currentIndex;
-  MediaItem get mediaItem => index == null ? null : queue[index];
+  List<MediaItem> get queue => _mediaLibrary!.items;
+  int? get index => _player.currentIndex;
+  MediaItem? get mediaItem => index == null ? null : queue[index!];
 
   @override
-  Future<void> onStart(Map<String, dynamic> params) async {
+  Future<void> onStart(Map<String, dynamic>? params) async {
     // We configure the audio session for speech since we're playing a podcast.
     // You can also put this in your app's initialisation if your app doesn't
     // switch between two types of audio as this example does.
@@ -1076,7 +1076,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // Broadcast media item changes.
     _player.currentIndexStream.listen((index) {
       if (index != null) AudioServiceBackground.setMediaItem(queue[index]);
-      audioServiceIndex = index;
+      audioServiceIndex = index!;
     });
     // Propagate all events from the audio player to AudioService clients.
     _eventSubscription = _player.playbackEventStream.listen((event) {
@@ -1120,7 +1120,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
-  Future<dynamic> onCustomAction(String name, dynamic arguments) {
+  Future<dynamic> onCustomAction(String? name, dynamic? arguments) async{
     switch (name) {
       case 'addMediaSources':
         Map<String, dynamic> decoded = jsonDecode(arguments);
@@ -1147,6 +1147,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
         _mediaLibrary = null;
         break;
     }
+    return true;
   }
 
   @override
@@ -1161,7 +1162,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // previous. This variable holds the preferred state to send instead of
     // buffering during a skip, and it is cleared as soon as the player exits
     // buffering (see the listener in onStart).
-    _skipState = newIndex > index
+    _skipState = newIndex > index!
         ? AudioProcessingState.skippingToNext
         : AudioProcessingState.skippingToPrevious;
     // This jumps to the beginning of the queue item at newIndex.
@@ -1194,7 +1195,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onStop() async {
     await _player.dispose();
-    _eventSubscription.cancel();
+    _eventSubscription!.cancel();
     // It is important to wait for this state to be broadcast before we shut
     // down the task. If we don't, the background task will be destroyed before
     // the message gets sent to the UI.
@@ -1208,7 +1209,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     var newPosition = _player.position + offset;
     // Make sure we don't jump out of bounds.
     if (newPosition < Duration.zero) newPosition = Duration.zero;
-    if (newPosition > mediaItem.duration) newPosition = mediaItem.duration;
+    if (newPosition > mediaItem!.duration!) newPosition = mediaItem!.duration!;
     // Perform the jump via a seek.
     await _player.seek(newPosition);
   }
@@ -1220,7 +1221,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     _seeker?.stop();
     if (begin) {
       _seeker = Seeker(_player, Duration(seconds: 10 * direction),
-          Duration(seconds: 1), mediaItem)
+          Duration(seconds: 1), mediaItem!)
         ..start();
     }
   }
@@ -1250,7 +1251,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   /// Maps just_audio's processing state into into audio_service's playing
   /// state. If we are in the middle of a skip, we use [_skipState] instead.
-  AudioProcessingState _getProcessingState() {
+  AudioProcessingState? _getProcessingState() {
     if (_skipState != null) return _skipState;
     switch (_player.processingState) {
       case ProcessingState.idle:
@@ -1298,18 +1299,18 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
 /// An object that performs interruptable sleep.
 class Sleeper {
-  Completer _blockingCompleter;
+  Completer? _blockingCompleter;
 
   /// Sleep for a duration. If sleep is interrupted, a
   /// [SleeperInterruptedException] will be thrown.
-  Future<void> sleep([Duration duration]) async {
+  Future<void> sleep([Duration? duration]) async {
     _blockingCompleter = Completer();
     if (duration != null) {
-      await Future.any([Future.delayed(duration), _blockingCompleter.future]);
+      await Future.any([Future.delayed(duration), _blockingCompleter!.future]);
     } else {
-      await _blockingCompleter.future;
+      await _blockingCompleter!.future;
     }
-    final interrupted = _blockingCompleter.isCompleted;
+    final interrupted = _blockingCompleter!.isCompleted;
     _blockingCompleter = null;
     if (interrupted) {
       throw SleeperInterruptedException();
@@ -1319,7 +1320,7 @@ class Sleeper {
   /// Interrupt any sleep that's underway.
   void interrupt() {
     if (_blockingCompleter?.isCompleted == false) {
-      _blockingCompleter.complete();
+      _blockingCompleter!.complete();
     }
   }
 }
@@ -1330,7 +1331,7 @@ class SleeperInterruptedException {}
 /// complete.
 class Tts {
   final FlutterTts _flutterTts = new FlutterTts();
-  Completer _speechCompleter;
+  Completer? _speechCompleter;
   bool _interruptRequested = false;
   bool _playing = false;
 
@@ -1347,7 +1348,7 @@ class Tts {
     if (!_interruptRequested) {
       _speechCompleter = Completer();
       await _flutterTts.speak(text);
-      await _speechCompleter.future;
+      await _speechCompleter!.future;
       _speechCompleter = null;
     }
     _playing = false;
@@ -1393,7 +1394,7 @@ class Seeker {
     while (_running) {
       Duration newPosition = player.position + positionInterval;
       if (newPosition < Duration.zero) newPosition = Duration.zero;
-      if (newPosition > mediaItem.duration) newPosition = mediaItem.duration;
+      if (newPosition > mediaItem.duration!) newPosition = mediaItem.duration!;
       player.seek(newPosition);
       await Future.delayed(stepInterval);
     }

@@ -14,22 +14,22 @@ import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
 class UploadSongs extends StatefulWidget {
-  final String singer;
+  final String? singer;
 
-  const UploadSongs({Key key, this.singer}) : super(key: key);
+  const UploadSongs({Key? key, this.singer}) : super(key: key);
   @override
   _UploadSongsState createState() => _UploadSongsState();
 }
 
 class _UploadSongsState extends State<UploadSongs> {
-  String _songName;
-  File _image;
+  String? _songName;
+  File? _image;
 
   List<String> _singersNames = [];
   //List<String> _categories = [];
 
-  String _singerName;
-  Singer _singer;
+  String? _singerName;
+  Singer? _singer;
   //String _category;
 
   TextEditingController _categoryController = TextEditingController();
@@ -39,7 +39,7 @@ class _UploadSongsState extends State<UploadSongs> {
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data()['name']);
+        _singersNames.add(doc.data()!['name']);
       });
     }
   }
@@ -108,7 +108,7 @@ class _UploadSongsState extends State<UploadSongs> {
                             });
                           },
                           child: Image.asset(Strings.default_melody_image))
-                      : Image.file(_image)),
+                      : Image.file(_image!)),
               SizedBox(
                 height: 10,
               ),
@@ -119,7 +119,7 @@ class _UploadSongsState extends State<UploadSongs> {
                   children: [
                     Expanded(
                       flex: 7,
-                      child: DropdownButton(
+                      child: DropdownButton<dynamic>(
                         hint: Text('Singer'),
                         value: _singerName,
                         onChanged: (text) async {
@@ -303,17 +303,17 @@ class _UploadSongsState extends State<UploadSongs> {
     MediaInformation info =
         await _flutterFFprobe.getMediaInformation(songFile.path);
     int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String songUrl =
         await AppUtil().uploadFile(songFile, context, '/songs/$id$ext');
-    String imageUrl;
+    String? imageUrl;
     if (_image != null) {
-      String ext = path.extension(_image.path);
+      String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image, context, '/melodies_images/$id$ext');
+          .uploadFile(_image!, context, '/melodies_images/$id$ext');
     }
 
     if (songUrl == '') {
@@ -336,7 +336,7 @@ class _UploadSongsState extends State<UploadSongs> {
       'duration': duration,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await singersRef.doc(_singer.id).update({'songs': FieldValue.increment(1)});
+    await singersRef.doc(_singer!.id).update({'songs': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -367,7 +367,7 @@ class _UploadSongsState extends State<UploadSongs> {
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(songFile.path);
       int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
+          double.parse(info.getMediaProperties()!['duration'].toString())
               .toInt();
 
       await melodiesRef.doc(id).set({
@@ -381,7 +381,7 @@ class _UploadSongsState extends State<UploadSongs> {
       });
     }
     await singersRef
-        .doc(_singer.id)
+        .doc(_singer!.id)
         .update({'songs': FieldValue.increment(songFiles.length)});
     AppUtil.showToast('Songs uploaded!');
     Navigator.of(context).pop();

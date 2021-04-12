@@ -5,6 +5,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/main.dart';
 import 'package:Alhany/pages/profile_page.dart';
 import 'package:Alhany/pages/web_browser/webview_modal.dart';
+import 'package:Alhany/widgets/cached_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -38,14 +39,11 @@ class _BuildDrawerState extends State<BuildDrawer> {
                               builder: (context) => ProfilePage()));
                     });
                   },
-                  child: CircleAvatar(
-                    radius: 50.0,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    backgroundImage:
-                        Constants.currentUser?.profileImageUrl != null
-                            ? CachedNetworkImageProvider(
-                                Constants.currentUser.profileImageUrl)
-                            : AssetImage(Strings.default_profile_image),
+                  child: CachedImage(
+                    height: 100.0,
+                    width: 100,imageShape: BoxShape.circle,
+                    imageUrl:Constants.currentUser!.profileImageUrl
+                        ,defaultAssetImage: Strings.default_profile_image,
                   ),
                 ),
                 Row(
@@ -85,7 +83,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
           ),
           authStatus == AuthStatus.LOGGED_IN
-              ? (!Constants.isFacebookOrGoogleUser) ?? false
+              ? (!Constants.isFacebookOrGoogleUser!)
                   ? ListTile(
                       onTap: () async {
                         try {

@@ -35,7 +35,7 @@ class RouteGenerator {
     final Map args = settings.arguments as Map;
     print('page:${settings.name}');
     Constants.currentRoute = settings.name;
-    Constants.routeStack.add(settings.name);
+    Constants.routeStack.add(settings.name!);
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => RootPage());
@@ -97,11 +97,11 @@ class RouteGenerator {
             builder: (_) => SongsPage(
                   singer: args['singer'],
                 ));
-      case '/lyrics-editor':
-        return MaterialPageRoute(
-            builder: (_) => LyricsEditor(
-                  melody: args['melody'],
-                ));
+      // case '/lyrics-editor':
+      //   return MaterialPageRoute(
+      //       builder: (_) => LyricsEditor(
+      //             melody: args['melody'],
+      //           ));
 
       case '/record-page':
         Constants.currentRoute = settings.name;

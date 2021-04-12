@@ -29,11 +29,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
   int _page = 0;
   bool _isPlaying = false;
 
-  PageController _pageController;
+  late PageController _pageController;
 
   TextEditingController _categoryController = TextEditingController();
 
@@ -227,7 +227,7 @@ class _HomePageState extends State<HomePage>
     }
     for (Category category in categories) {
       List<Singer> singers =
-          await DatabaseService.getSingersByCategory(category.name);
+          await DatabaseService.getSingersByCategory(category.name!);
       if (mounted) {
         setState(() {
           _categorySingers.putIfAbsent(category, () => singers);
@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage>
     return ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        itemCount: _categories?.length,
+        itemCount: _categories.length,
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
@@ -250,12 +250,12 @@ class _HomePageState extends State<HomePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Constants.isAdmin ?? false
+                      Constants.isAdmin
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  _categories[index].name,
+                                  _categories[index].name!,
                                   style: TextStyle(
                                       color: MyColors.textLightColor,
                                       fontSize: 22,
@@ -276,7 +276,7 @@ class _HomePageState extends State<HomePage>
                             )
                           : Center(
                               child: Text(
-                                _categories[index].name,
+                                _categories[index].name!,
                                 style: TextStyle(
                                     color: MyColors.textLightColor,
                                     fontSize: 22,
@@ -301,8 +301,8 @@ class _HomePageState extends State<HomePage>
                                     itemBuilder: (context, index2) {
                                       return index2 <
                                               _categorySingers[
-                                                      _categories[index]]
-                                                  ?.length
+                                                      _categories[index]]!
+                                                  .length
                                           ? InkWell(
                                               onTap: () {
                                                 Navigator.of(context).pushNamed(
@@ -311,7 +311,7 @@ class _HomePageState extends State<HomePage>
                                                       'singer':
                                                           _categorySingers[
                                                                   _categories[
-                                                                      index]]
+                                                                      index]]!
                                                               [index2],
                                                       'data_type':
                                                           DataTypes.SONGS
@@ -319,7 +319,7 @@ class _HomePageState extends State<HomePage>
                                               },
                                               child: Container(
                                                 key: ValueKey(_categorySingers[
-                                                            _categories[index]]
+                                                            _categories[index]]!
                                                         [index2]
                                                     .id),
                                                 height: Sizes.singer_box,
@@ -339,9 +339,9 @@ class _HomePageState extends State<HomePage>
                                                           BoxShape.rectangle,
                                                       imageUrl: _categorySingers[
                                                                   _categories[
-                                                                      index]]
+                                                                      index]]!
                                                               [index2]
-                                                          ?.imageUrl,
+                                                          .imageUrl!,
                                                       defaultAssetImage: Strings
                                                           .default_profile_image,
                                                     ),
@@ -350,9 +350,9 @@ class _HomePageState extends State<HomePage>
                                                       child: Text(
                                                         _categorySingers[
                                                                     _categories[
-                                                                        index]]
+                                                                        index]]!
                                                                 [index2]
-                                                            ?.name,
+                                                            .name!,
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
@@ -426,7 +426,7 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  Timestamp lastVisiblePostSnapShot;
+  late Timestamp lastVisiblePostSnapShot;
   List<Record> _records = [];
   getRecords() async {
     List<Record> records = await DatabaseService.getRecords();
@@ -434,7 +434,7 @@ class _HomePageState extends State<HomePage>
       setState(() {
         _records = records;
         if (_records.length > 0)
-          this.lastVisiblePostSnapShot = records.last.timestamp;
+          this.lastVisiblePostSnapShot = records.last.timestamp!;
       });
     }
   }
@@ -445,12 +445,12 @@ class _HomePageState extends State<HomePage>
     if (records.length > 0) {
       setState(() {
         records.forEach((element) => _records.add(element));
-        this.lastVisiblePostSnapShot = records.last.timestamp;
+        this.lastVisiblePostSnapShot = records.last.timestamp!;
       });
     }
   }
 
-  LinkedScrollControllerGroup _controllers;
+  late LinkedScrollControllerGroup _controllers;
   ScrollController _recordsScrollController = ScrollController();
   ScrollController _melodiesPageScrollController = ScrollController();
   recordListView() {
@@ -523,14 +523,14 @@ class _HomePageState extends State<HomePage>
                                               height: 100,
                                               imageShape: BoxShape.circle,
                                               imageUrl:
-                                                  _singers[index].imageUrl,
+                                                  _singers[index].imageUrl!,
                                               defaultAssetImage:
                                                   Strings.default_profile_image,
                                             ),
                                             Container(
                                               width: 100,
                                               child: Text(
-                                                _singers[index].name,
+                                                _singers[index].name!,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.visible,
                                                 textAlign: TextAlign.center,
@@ -682,7 +682,7 @@ class _HomePageState extends State<HomePage>
 
   editCategory(Category category) async {
     setState(() {
-      _categoryController.text = category.name;
+      _categoryController.text = category.name!;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -712,7 +712,7 @@ class _HomePageState extends State<HomePage>
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
               List<Singer> singers =
-                  await DatabaseService.getSingersByCategory(category.name);
+                  await DatabaseService.getSingersByCategory(category.name!);
               for (Singer singer in singers) {
                 await singersRef
                     .doc(singer.id)

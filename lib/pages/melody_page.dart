@@ -18,7 +18,6 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -34,18 +33,18 @@ import 'package:video_player/video_player.dart' as video_player;
 enum Types { VIDEO, AUDIO }
 
 class MelodyPage extends StatefulWidget {
-  final Melody melody;
+  final Melody? melody;
   final Types type;
-  static RecordingStatus recordingStatus = RecordingStatus.Unset;
+  static bool isRecording = false;
 
-  MelodyPage({Key key, this.melody, this.type = Types.VIDEO}) : super(key: key);
+  MelodyPage({Key? key, this.melody, this.type = Types.VIDEO}) : super(key: key);
 
   @override
   _MelodyPageState createState() => _MelodyPageState();
 }
 
 class _MelodyPageState extends State<MelodyPage> {
-  Types _type;
+  Types? _type;
   num _countDownStart = 3;
   String _countDownText = 'Get Ready';
 
@@ -53,28 +52,28 @@ class _MelodyPageState extends State<MelodyPage> {
 
   bool isMicrophoneGranted = false;
 
-  RecordingStatus recordingStatus = RecordingStatus.Unset;
-  Widget melodyPlayer;
-  AudioRecorder recorder;
+  bool _isRecording = false;
+  Widget? melodyPlayer;
+  AudioRecorder? recorder;
 
-  String recordingFilePath;
-  String melodyPath;
-  String mergedFilePath;
-  String imageVideoPath;
+  String recordingFilePath = '';
+  String melodyPath = '';
+  String mergedFilePath = '';
+  String imageVideoPath = '';
   //
   // FlutterFFmpeg flutterFFmpeg;
 
-  String _dropdownValue;
+  String? _dropdownValue;
 
   String _recordingText = '';
 
-  int _duration;
+  int? _duration;
 
-  video_player.VideoPlayerController _videoController;
+  video_player.VideoPlayerController? _videoController;
 
   bool _isVideoPlaying = false;
 
-  File _image;
+  File? _image;
 
   final FlutterFFmpegConfig _flutterFFmpegConfig = new FlutterFFmpegConfig();
   final FlutterFFmpeg flutterFFmpeg = new FlutterFFmpeg();
@@ -82,7 +81,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  double _recordingDuration;
+  double? _recordingDuration;
 
   bool _progressVisible = false;
   _countDown() {
@@ -122,12 +121,12 @@ class _MelodyPageState extends State<MelodyPage> {
         message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
 
     String url;
-    if (widget.melody.audioUrl != null) {
-      url = widget.melody.audioUrl;
+    if (widget.melody!.audioUrl != null) {
+      url = widget.melody!.audioUrl!;
     } else if (Constants.currentMelodyLevel != null) {
-      url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+      url = widget.melody!.levelUrls![Constants.currentMelodyLevel];
     } else {
-      url = widget.melody.levelUrls.values.elementAt(0).toString();
+      url = widget.melody!.levelUrls!.values.elementAt(0).toString();
     }
     String filePath;
     try {
@@ -143,7 +142,7 @@ class _MelodyPageState extends State<MelodyPage> {
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     //print("File Duration: ${info.getMediaProperties()['duration']}");
     _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
 
     setState(() {
       melodyPath = filePath;
@@ -157,7 +156,7 @@ class _MelodyPageState extends State<MelodyPage> {
     Navigator.of(context).pop();
   }
 
-  void _recordAudio() async {
+  _recordAudio() async {
     if (await PermissionsService().hasMicrophonePermission()) {
       setState(() {
         isMicrophoneGranted = true;
@@ -213,18 +212,18 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = RecordingStatus.Recording;
+        _isRecording = true;
       });
-      MelodyPage.recordingStatus = RecordingStatus.Recording;
+      MelodyPage.isRecording = true;
 
       await initRecorder();
       String url;
-      if (widget.melody.audioUrl != null) {
-        url = widget.melody.audioUrl;
+      if (widget.melody!.audioUrl != null) {
+        url = widget.melody!.audioUrl!;
       } else if (Constants.currentMelodyLevel != null) {
-        url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+        url = widget.melody!.levelUrls![Constants.currentMelodyLevel];
       } else {
-        url = widget.melody.levelUrls.values.elementAt(0).toString();
+        url = widget.melody!.levelUrls!.values.elementAt(0).toString();
       }
       mySoundsPlayer = MyAudioPlayer(
           urlList: [melodyPath],
@@ -232,27 +231,29 @@ class _MelodyPageState extends State<MelodyPage> {
           isLocal: true,
           onPlayingStarted: () async {
             try {
-              await recorder.startRecording();
+              await recorder!.startRecording();
             } catch (ex) {
-              await mySoundsPlayer.stop();
+              print('recent Error $ex');
+
+              await mySoundsPlayer!.stop();
               AppUtil.showToast(language(
                   en: 'Unexpected error. Please try again.!',
                   ar: 'حدث خطأ برجاء إعادء المحاولة'));
               Navigator.of(context).pop();
             }
           });
-      mySoundsPlayer.addListener(() {});
+      mySoundsPlayer!.addListener(() {});
 
-      await mySoundsPlayer.play();
+      await mySoundsPlayer!.play();
 
       _recordingTimer();
     } else {}
   }
 
-  CameraController cameraController;
-  Future<void> _initializeControllerFuture;
+  CameraController? cameraController;
+  Future<void>? _initializeControllerFuture;
 
-  void _recordVideo() async {
+  _recordVideo() async {
     if (await PermissionsService().hasMicrophonePermission()) {
       setState(() {
         isMicrophoneGranted = true;
@@ -308,21 +309,22 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = RecordingStatus.Recording;
+        _isRecording = true;
+
       });
-      MelodyPage.recordingStatus = RecordingStatus.Recording;
+      MelodyPage.isRecording = true;
 
       String url;
-      if (widget.melody.audioUrl != null) {
-        url = widget.melody.audioUrl;
+      if (widget.melody!.audioUrl != null) {
+        url = widget.melody!.audioUrl!;
       } else if (Constants.currentMelodyLevel != null) {
-        url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+        url = widget.melody!.levelUrls![Constants.currentMelodyLevel];
       } else {
-        url = widget.melody.levelUrls.values.elementAt(0).toString();
+        url = widget.melody!.levelUrls!.values.elementAt(0).toString();
       }
       mySoundsPlayer = MyAudioPlayer(
           urlList: [melodyPath], onComplete: saveRecord, isLocal: true);
-      mySoundsPlayer.addListener(() {});
+      mySoundsPlayer!.addListener(() {});
 
       recordingFilePath += 'video_rec.mp4';
       try {
@@ -335,12 +337,12 @@ class _MelodyPageState extends State<MelodyPage> {
 
       print('started playing melody');
       Future.delayed(Duration(milliseconds: 480), () async {
-        await mySoundsPlayer.play();
+        await mySoundsPlayer!.play();
       });
       print('started video recording');
       try {
         await _initializeControllerFuture;
-        await cameraController.startVideoRecording();
+        await cameraController!.startVideoRecording();
       } catch (ex) {
         AppUtil.showToast(language(
             en: 'Unexpected error, please try again',
@@ -352,7 +354,7 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {}
   }
 
-  MyAudioPlayer mySoundsPlayer;
+  MyAudioPlayer? mySoundsPlayer;
 
   Widget _headphonesDialog() {
     return Container(
@@ -429,24 +431,27 @@ class _MelodyPageState extends State<MelodyPage> {
     //     await DatabaseService.getSingerWithName(widget.melody.singer);
     PIPView.of(_context).presentBelow(MyApp());
     setState(() {
-      recordingStatus = RecordingStatus.Stopped;
-    });
-    MelodyPage.recordingStatus = RecordingStatus.Stopped;
+      _isRecording = false;
 
-    await mySoundsPlayer.stop();
+    });
+    MelodyPage.isRecording = false;
+
+    await mySoundsPlayer!.stop();
 
     try {
       if (_type == Types.AUDIO) {
-        String result = await recorder.stopRecording();
+        String result = await recorder!.stopRecording()??'';
         recordingFilePath = result;
         // String url = await AppUtil().uploadFile(File(recordingFilePath),
         //     context, 'tests/test${path.extension(recordingFilePath)}');
         print('recorded path:' + result);
       } else {
-        XFile result = await cameraController.stopVideoRecording();
+        XFile result = await cameraController!.stopVideoRecording();
         recordingFilePath = result.path;
       }
     } catch (ex) {
+      print('recent Error $ex');
+
       AppUtil.showToast(language(
           en: 'Unknown error, please try again.',
           ar: 'حدث خطأ، برجاء المحاولة مرة أخرى'));
@@ -487,10 +492,10 @@ class _MelodyPageState extends State<MelodyPage> {
       //     ? 'Added 1 s silence Failure!'
       //     : 'Added 1 s silence Success!');
 
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation('$recordingFilePath');
-      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
-      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
+      // MediaInformation info =
+      //     await _flutterFFprobe.getMediaInformation('$recordingFilePath');
+      // _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      // _recordingDuration = double.parse(info.getMediaProperties()['duration']);
 
       if (mounted) {
         setState(() {
@@ -543,7 +548,7 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-framerate 30 -i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -preset veryfast -c:a libmp3lame -shortest $mergedFilePath');
+          '-r 24 -i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -preset veryfast -c:a libmp3lame -shortest $mergedFilePath');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video
@@ -563,10 +568,11 @@ class _MelodyPageState extends State<MelodyPage> {
     try {
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(mergedFilePath);
-      duration = double.parse(info.getMediaProperties()['duration'].toString())
+      duration = double.parse(info.getMediaProperties()!['duration'].toString())
           .toInt();
     } catch (error) {
       duration = 0;
+      print('recent Error $error');
     }
 
     if (_type == Types.AUDIO) {
@@ -599,7 +605,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   void statisticsCallback(Statistics statistics) {
     try {
-      double progress = statistics.time / (_recordingDuration * 1000);
+      double progress = statistics.time / (_recordingDuration! * 1000);
 
       setState(() {
         if (progress > 1)
@@ -615,11 +621,11 @@ class _MelodyPageState extends State<MelodyPage> {
   Widget playPauseBtn() {
     return !_isVideoPlaying
         ? InkWell(
-            onTap: () => _videoController.value.isPlaying
+            onTap: () => _videoController!.value.isPlaying
                 ? null
                 : setState(() {
                     _isVideoPlaying = true;
-                    _videoController.play();
+                    _videoController!.play();
                   }),
             child: Container(
               height: 40,
@@ -731,26 +737,26 @@ class _MelodyPageState extends State<MelodyPage> {
     appUtil.addListener(() {
       if (mounted) {
         setState(() {
-          _progress = AppUtil.progress;
+          _progress = AppUtil.progress!;
         });
         print('Progress: ${_progress.toStringAsFixed(1)} %');
       }
     });
     if (_type == Types.VIDEO) {
       url = await appUtil.uploadFile(File(mergedFilePath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+          'records/${widget.melody!.id}/$recordId${path.extension(mergedFilePath)}');
     } else {
       url = await appUtil.uploadFile(File(imageVideoPath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
+          'records/${widget.melody!.id}/$recordId${path.extension(imageVideoPath)}');
     }
     if (_type == Types.VIDEO) {
       thumbnailUrl = await appUtil.uploadFile(
           File('${appTempDirectoryPath}thumbnail.png'),
           context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
+          'records_thumbnails/${widget.melody!.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
     } else {
-      thumbnailUrl = await appUtil.uploadFile(File(_image.path), context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(_image.path)}');
+      thumbnailUrl = await appUtil.uploadFile(File(_image!.path), context,
+          'records_thumbnails/${widget.melody!.id}/$recordId${path.extension(_image!.path)}');
     }
 
     if (mounted) {
@@ -762,10 +768,10 @@ class _MelodyPageState extends State<MelodyPage> {
     MediaInformation info = await _flutterFFprobe.getMediaInformation(
         _type == Types.VIDEO ? mergedFilePath : imageVideoPath);
     int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
 
     await DatabaseService.submitRecord(
-        widget.melody.id, recordId, url, thumbnailUrl, duration);
+        widget.melody!.id!, recordId, url, thumbnailUrl, duration);
     await AppUtil.deleteFiles();
     Navigator.of(context).pop();
 
@@ -774,7 +780,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initRecorder() async {
     //await AppUtil.createAppDirectory();
-    recordingFilePath = appTempDirectoryPath;
+    recordingFilePath = appTempDirectoryPath!;
     recorder = AudioRecorder();
   }
 
@@ -806,7 +812,7 @@ class _MelodyPageState extends State<MelodyPage> {
     }
     _videoController =
         video_player.VideoPlayerController.file(File(mergedFilePath));
-    await _videoController.initialize();
+    await _videoController!.initialize();
   }
 
   @override
@@ -816,9 +822,9 @@ class _MelodyPageState extends State<MelodyPage> {
       _type = widget.type;
     });
 
-    DatabaseService.incrementMelodyViews(widget.melody.id);
-    if (widget.melody.levelUrls != null) {
-      _dropdownValue = widget.melody.levelUrls.keys.elementAt(0);
+    DatabaseService.incrementMelodyViews(widget.melody!.id!);
+    if (widget.melody!.levelUrls != null) {
+      _dropdownValue = widget.melody!.levelUrls!.keys.elementAt(0);
     }
     prepareEnv();
   }
@@ -826,14 +832,14 @@ class _MelodyPageState extends State<MelodyPage> {
   prepareEnv() async {
     await createAppFolder();
 
-    if (widget.melody.audioUrl != null) {
-      await initMelodyPlayer(widget.melody.audioUrl);
+    if (widget.melody!.audioUrl != null) {
+      await initMelodyPlayer(widget.melody!.audioUrl!);
     } else if (Constants.currentMelodyLevel != null) {
       await initMelodyPlayer(
-          widget.melody.levelUrls[Constants.currentMelodyLevel]);
+          widget.melody!.levelUrls![Constants.currentMelodyLevel]);
     } else {
       await initMelodyPlayer(
-          widget.melody.levelUrls.values.elementAt(0).toString());
+          widget.melody!.levelUrls!.values.elementAt(0).toString());
     }
 
     if (_type == Types.VIDEO) {
@@ -844,16 +850,16 @@ class _MelodyPageState extends State<MelodyPage> {
   @override
   dispose() {
     if (_videoController != null) {
-      _videoController.dispose();
+      _videoController!.dispose();
     }
 
     print('trying to dispose camera');
     if (cameraController != null) {
       print('disposing camera');
-      cameraController.dispose();
+      cameraController!.dispose();
       print('camera disposed');
     }
-    if (recorder != null) recorder.dispose();
+    if (recorder != null) recorder!.dispose();
     super.dispose();
   }
 
@@ -863,8 +869,8 @@ class _MelodyPageState extends State<MelodyPage> {
         key: ValueKey('main'),
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
-        initialDuration: widget.melody.duration,
-        melodyList: [widget.melody],
+        initialDuration: widget.melody!.duration,
+        melodyList: [widget.melody!],
       );
     });
   }
@@ -885,14 +891,14 @@ class _MelodyPageState extends State<MelodyPage> {
                   ? choosingImagePage(context)
                   : _progressVisible
                       ? progressPage()
-                      : recordingStatus == RecordingStatus.Recording &&
+                      : _isRecording == true &&
                               _type == Types.VIDEO
                           ? videoRecordingPage()
                           : mainPage(),
               floatingActionButton: !_progressVisible && !choosingImage
                   ? FloatingActionButton(
                       onPressed: () async {
-                        if (recordingStatus == RecordingStatus.Recording) {
+                        if (_isRecording == true) {
                           await saveRecord();
                         } else {
                           if ((await PermissionsService()
@@ -901,9 +907,9 @@ class _MelodyPageState extends State<MelodyPage> {
                                   .hasMicrophonePermission())) {
                             await createAppFolder();
                             //await AppUtil.createAppDirectory();
-                            recordingFilePath = appTempDirectoryPath;
-                            melodyPath = appTempDirectoryPath;
-                            mergedFilePath = appTempDirectoryPath;
+                            recordingFilePath = appTempDirectoryPath!;
+                            melodyPath = appTempDirectoryPath!;
+                            mergedFilePath = appTempDirectoryPath!;
                             await _downloadMelody();
 
                             Navigator.of(context).push(CustomModal(
@@ -926,7 +932,7 @@ class _MelodyPageState extends State<MelodyPage> {
                         }
                       },
                       child: Icon(
-                        recordingStatus == RecordingStatus.Recording
+                        _isRecording == true
                             ? Icons.stop
                             : _type == Types.VIDEO
                                 ? Icons.videocam
@@ -943,7 +949,7 @@ class _MelodyPageState extends State<MelodyPage> {
     );
   }
 
-  BuildContext _context;
+  BuildContext? _context;
   // bool _canFloat = false;
   bool _isPreviewVideoPlaying = false;
   choosingImagePage(BuildContext context) {
@@ -1007,9 +1013,9 @@ class _MelodyPageState extends State<MelodyPage> {
                                         .enableStatisticsCallback(
                                             this.statisticsCallback);
                                     print(
-                                        'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
+                                        'mergedFilePath + $mergedFilePath + _image.path + ${_image!.path} + imageVideoPath + $imageVideoPath');
                                     int success = await flutterFFmpeg.execute(
-                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=480:trunc(ow/a/2)*2\" -c:v libx264 -preset veryfast -c:a copy -shortest $imageVideoPath');
+                                        '-loop 1 -i ${_image!.path} -i $mergedFilePath -vf \"scale=480:trunc(ow/a/2)*2\" -c:v libx264 -preset veryfast -c:a copy -shortest $imageVideoPath');
                                     print('conversion success:$success');
                                     if (success != 0) {
                                       AppUtil.showToast(language(
@@ -1074,8 +1080,8 @@ class _MelodyPageState extends State<MelodyPage> {
               : Stack(
                   children: [
                     AspectRatio(
-                      aspectRatio: _videoController.value.aspectRatio,
-                      child: video_player.VideoPlayer(_videoController),
+                      aspectRatio: _videoController!.value.aspectRatio,
+                      child: video_player.VideoPlayer(_videoController!),
                     ),
                     Positioned.fill(
                         child: Align(
@@ -1112,7 +1118,7 @@ class _MelodyPageState extends State<MelodyPage> {
                               onPressed: () async {
                                 Constants.ongoingEncoding = false;
 
-                                await _videoController.pause();
+                                await _videoController!.pause();
                                 await AppUtil.deleteFiles();
                                 Navigator.of(context).pop();
                               },
@@ -1145,8 +1151,8 @@ class _MelodyPageState extends State<MelodyPage> {
               return Center(
                 child: AspectRatio(
                     aspectRatio:
-                        1 / cameraController?.value?.aspectRatio ?? 16 / 9,
-                    child: CameraPreview(cameraController)),
+                        1 / cameraController!.value.aspectRatio ,
+                    child: CameraPreview(cameraController!)),
               );
             } else {
               // Otherwise, display a loading indicator.
@@ -1163,7 +1169,7 @@ class _MelodyPageState extends State<MelodyPage> {
               child: SingleChildScrollView(
                 child: Center(
                   child: HtmlWidget(
-                    widget.melody.lyrics ?? '',
+                    widget.melody!.lyrics ?? '',
                     textStyle:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     customStylesBuilder: (e) {
@@ -1221,14 +1227,14 @@ class _MelodyPageState extends State<MelodyPage> {
                     width: 100,
                     height: 100,
                     defaultAssetImage: Strings.default_melody_image,
-                    imageUrl: widget.melody.imageUrl,
+                    imageUrl: widget.melody!.imageUrl!,
                     imageShape: BoxShape.rectangle,
                   ),
                   SizedBox(
                     width: 10,
                   ),
-                  widget.melody.levelUrls != null
-                      ? DropdownButton(
+                  widget.melody!.levelUrls != null
+                      ? DropdownButton<dynamic?>(
                           dropdownColor: MyColors.lightPrimaryColor,
                           iconEnabledColor: MyColors.iconLightColor,
                           style: TextStyle(
@@ -1242,7 +1248,7 @@ class _MelodyPageState extends State<MelodyPage> {
                                   'melody': widget.melody,
                                 });
                           },
-                          items: (widget.melody.levelUrls.keys.toList())
+                          items: (widget.melody!.levelUrls!.keys.toList())
                               .map<DropdownMenuItem<dynamic>>((dynamic value) {
                             return DropdownMenuItem<dynamic>(
                               value: value,
@@ -1259,7 +1265,7 @@ class _MelodyPageState extends State<MelodyPage> {
                 height: 10,
               ),
               Text(
-                widget.melody.name,
+                widget.melody!.name!,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -1268,7 +1274,7 @@ class _MelodyPageState extends State<MelodyPage> {
               SizedBox(
                 height: 10,
               ),
-              recordingStatus != RecordingStatus.Recording
+              _isRecording == true
                   ? melodyPlayer ?? Container()
                   : _recordingTimerText(),
               Expanded(
@@ -1279,7 +1285,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: SingleChildScrollView(
                     child: Center(
                       child: HtmlWidget(
-                        widget.melody.lyrics ?? '',
+                        widget.melody!.lyrics ?? '',
                         textStyle: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                         customStylesBuilder: (e) {
@@ -1321,7 +1327,7 @@ class _MelodyPageState extends State<MelodyPage> {
             child: Align(
               alignment: Alignment.topLeft,
               child: Text(
-                '${language(en: 'Views', ar: 'مشاهدات')}: ${widget.melody.views ?? 0}',
+                '${language(en: 'Views', ar: 'مشاهدات')}: ${widget.melody!.views ?? 0}',
                 style: TextStyle(color: MyColors.textLightColor),
               ),
             ),
@@ -1348,7 +1354,7 @@ class _MelodyPageState extends State<MelodyPage> {
                 ],
                 onChanged: (type) async {
                   setState(() {
-                    _type = type;
+                    _type = type as Types;
                   });
                   print('Type: $_type');
                   if (_type == Types.VIDEO) {
@@ -1413,16 +1419,18 @@ class _MelodyPageState extends State<MelodyPage> {
     Timer.periodic(
       oneSec,
       (timer) {
+        if (counter > (_recordingDuration ?? 0).toDouble())
+          _recordingDuration = counter.toDouble();
         //TODO trial
         // if (recordingStatus == RecordingStatus.Stopped) {
         //   timer.cancel();
         // }
         if (_type == Types.AUDIO) {
-          if (counter >= _duration ||
-              recordingStatus == RecordingStatus.Stopped) {}
+          if (counter >= _duration! ||
+              _isRecording == false) {}
         } else {
-          if (counter >= _duration &&
-              recordingStatus == RecordingStatus.Recording) {
+          if (counter >= _duration! &&
+              _isRecording == true) {
             saveRecord();
             counter = 0;
             timer.cancel();
@@ -1434,7 +1442,7 @@ class _MelodyPageState extends State<MelodyPage> {
           try {
             setState(() {
               _recordingText =
-                  '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
+                  '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration! ~/ 60} : ${_duration! % 60}';
             });
           } catch (ex) {
             timer.cancel();
@@ -1455,7 +1463,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   bool isCameraPermissionGranted = false;
-  void _initCamera() async {
+  _initCamera() async {
     if (await PermissionsService().hasCameraPermission()) {
       setState(() {
         isCameraPermissionGranted = true;
@@ -1512,14 +1520,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isCameraPermissionGranted) {
       if (cameraController != null) {
-        await cameraController.dispose();
+        await cameraController!.dispose();
       }
       cameras = await availableCameras();
-      cameraController = CameraController(cameras[1], ResolutionPreset.medium,
+      cameraController = CameraController(cameras![1], ResolutionPreset.medium,
           enableAudio: true);
       print('Camera: $cameraController');
       //cameraController.buildPreview();
-      _initializeControllerFuture = cameraController.initialize();
+      _initializeControllerFuture = cameraController!.initialize();
 
       // Prevent screen from going into sleep mode:
       Screen.keepOn(true);
@@ -1558,5 +1566,6 @@ class _MelodyPageState extends State<MelodyPage> {
     //     Navigator.of(context).pop();
     //   }
     // }
+    return true;
   }
 }

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 Widget customInkWell(
-    {Widget child,
-    BuildContext context,
-    Function(bool, int) function1,
-    Function onPressed,
+    {Widget? child,
+    BuildContext? context,
+    Function(bool, int)? function1,
+    Function? onPressed,
     bool isEnable = false,
     int no = 0,
     Color color = Colors.transparent,
-    Color splashColor,
-    BorderRadius radius}) {
+    Color? splashColor,
+    BorderRadius? radius}) {
   if (splashColor == null) {
-    splashColor = Theme.of(context).primaryColorLight;
+    splashColor = Theme.of(context!).primaryColorLight;
   }
   if (radius == null) {
     radius = BorderRadius.circular(0);

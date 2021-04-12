@@ -3,14 +3,14 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
 class CachedImage extends StatefulWidget {
-  final String imageUrl;
-  final BoxShape imageShape;
-  final double width;
-  final double height;
-  final String defaultAssetImage;
+  final String? imageUrl;
+  final BoxShape? imageShape;
+  final double? width;
+  final double? height;
+  final String? defaultAssetImage;
 
   const CachedImage({
-    Key key,
+    Key? key,
     this.imageUrl,
     this.imageShape,
     this.width,
@@ -26,7 +26,7 @@ class _CachedImageState extends State<CachedImage> {
   @override
   Widget build(BuildContext context) {
     return _cacheRoundedImage(
-        widget.imageUrl, widget.imageShape, widget.width, widget.height, widget.defaultAssetImage);
+        widget.imageUrl!, widget.imageShape!, widget.width!, widget.height!, widget.defaultAssetImage!);
   }
 
   Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width, double height, String defaultAssetImage) {

@@ -26,20 +26,20 @@ class EncryptionService {
     AesCrypt crypt = AesCrypt();
     crypt.setOverwriteMode(AesCryptOwMode.on);
     crypt.setPassword('my cool password');
-    String encFilepath;
+    String? encFilepath;
     try {
       encFilepath = crypt.encryptFileSync(path);
       print('The encryption has been completed successfully.');
       print('Encrypted file: $encFilepath');
     } catch (e) {
-      if (e.type == AesCryptExceptionType.destFileExists) {
+      if (e == AesCryptExceptionType.destFileExists) {
         print('The encryption has been completed unsuccessfully.');
-        print(e.message);
+        print(e);
       } else {
         return 'ERROR';
       }
     }
-    return encFilepath;
+    return encFilepath!;
   }
 
   static String decryptFile(String path) {

@@ -43,16 +43,16 @@ class _ChatsState extends State<Chats>
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
     User user = await DatabaseService.getUserWithId(uid);
-    Message message = await DatabaseService.getLastMessage(user.id);
+    Message? message = await DatabaseService.getLastMessage(user.id!);
+    chatItem = ChatItem(
+      key: ValueKey(uid),
+      dp: user.profileImageUrl!,
+      name: user.name!,
+      isOnline: user.online == 'online',
+      msg: message ?? Message(message: 'No messages yet'),
+      counter: 0,
+    );
     setState(() {
-      chatItem = ChatItem(
-        key: ValueKey(uid),
-        dp: user.profileImageUrl,
-        name: user.name,
-        isOnline: user.online == 'online',
-        msg: message ?? 'No messages yet',
-        counter: 0,
-      );
       _chats.add(chatItem);
     });
 
@@ -69,11 +69,11 @@ class _ChatsState extends State<Chats>
     int n = _chats.length;
     for (int i = 0; i < n - 1; i++) {
       for (int j = 0; j < n - i - 1; j++) {
-        var current = _chats[j].msg.timestamp;
+        var current = _chats[j].msg!.timestamp;
         if (current == null) {
           current = Timestamp.fromDate(DateTime.now());
         }
-        var next = _chats[j + 1].msg.timestamp;
+        var next = _chats[j + 1].msg!.timestamp;
         if (next == null) {
           next = Timestamp.fromDate(DateTime.now());
         }
@@ -231,7 +231,7 @@ class _ChatsState extends State<Chats>
                       });
                     }
                     _chats.forEach((chatItem) {
-                      if (chatItem.name
+                      if (chatItem.name!
                           .toLowerCase()
                           .contains(text.toLowerCase())) {
                         setState(() {
@@ -267,9 +267,10 @@ class _ChatsState extends State<Chats>
     );
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async {
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/app-page');
+    return true;
   }
 
   @override

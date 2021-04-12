@@ -15,9 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 class RecordPage extends StatefulWidget {
-  final Record record;
+  final Record? record;
   final bool isVideoVisible;
-  const RecordPage({Key key, this.record, this.isVideoVisible = true})
+  const RecordPage({Key? key, this.record, this.isVideoVisible = true})
       : super(key: key);
   @override
   _RecordPageState createState() => _RecordPageState();
@@ -25,10 +25,10 @@ class RecordPage extends StatefulWidget {
 
 class _RecordPageState extends State<RecordPage> {
   TextEditingController _commentController = TextEditingController();
-  User _singer;
+  User? _singer;
 
   getSinger() async {
-    User singer = await DatabaseService.getUserWithId(widget.record.singerId);
+    User singer = await DatabaseService.getUserWithId(widget.record!.singerId!);
     setState(() {
       _singer = singer;
     });
@@ -41,18 +41,18 @@ class _RecordPageState extends State<RecordPage> {
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(
         _commentController.text,
-        recordId: widget.record.id,
+        recordId: widget.record!.id,
       );
 
       await NotificationHandler.sendNotification(
-          widget.record.singerId,
-          Constants.currentUser.name + ' commented on your post',
+          widget.record!.singerId!,
+          Constants.currentUser!.name! + ' commented on your post',
           _commentController.text,
-          widget.record.id,
+          widget.record!.id!,
           'record_comment');
 
       await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.record.id);
+          _commentController.text, widget.record!.id);
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
@@ -85,7 +85,7 @@ class _RecordPageState extends State<RecordPage> {
 
   getComments() async {
     List<Comment> comments =
-        await DatabaseService.getComments(recordId: widget.record.id);
+        await DatabaseService.getComments(recordId: widget.record!.id);
     setState(() {
       _comments = comments;
     });
@@ -93,20 +93,20 @@ class _RecordPageState extends State<RecordPage> {
 
   getAllComments() async {
     List<Comment> comments =
-        await DatabaseService.getAllComments(recordId: widget.record.id);
+        await DatabaseService.getAllComments(recordId: widget.record!.id);
     setState(() {
       _comments = comments;
     });
   }
 
-  LinkedScrollControllerGroup _controllers;
+  LinkedScrollControllerGroup? _controllers;
   ScrollController _commentsScrollController = ScrollController();
   ScrollController _pageScrollController = ScrollController();
   @override
   void initState() {
     _controllers = LinkedScrollControllerGroup();
-    _commentsScrollController = _controllers.addAndGet();
-    _pageScrollController = _controllers.addAndGet();
+    _commentsScrollController = _controllers!.addAndGet();
+    _pageScrollController = _controllers!.addAndGet();
     getComments();
     getSinger();
     super.initState();
@@ -173,7 +173,7 @@ class _RecordPageState extends State<RecordPage> {
                                 delegate: SliverChildListDelegate([
                                   widget.isVideoVisible
                                       ? RecordItem(
-                                          record: widget.record,
+                                          record: widget.record!,
                                         )
                                       : Container(),
                                   ListView.separated(
@@ -196,7 +196,7 @@ class _RecordPageState extends State<RecordPage> {
                                             ? FutureBuilder(
                                                 future: DatabaseService
                                                     .getUserWithId(
-                                                  comment.commenterID,
+                                                  comment.commenterID!,
                                                 ),
                                                 builder: (BuildContext context,
                                                     AsyncSnapshot snapshot) {
@@ -208,7 +208,7 @@ class _RecordPageState extends State<RecordPage> {
                                                   //print('commenter: $commenter and comment: $comment');
 
                                                   return CommentItem2(
-                                                    record: widget.record,
+                                                    record: widget.record!,
                                                     comment: comment,
                                                     commenter: commenter,
                                                     isReply: false,
@@ -297,9 +297,10 @@ class _RecordPageState extends State<RecordPage> {
     super.dispose();
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async{
     Constants.currentRoute = '';
     Constants.routeStack.removeLast();
     Navigator.of(context).pop();
+    return true;
   }
 }

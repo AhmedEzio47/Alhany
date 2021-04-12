@@ -17,8 +17,8 @@ final singersRef = firestore.collection('singers');
 final categoriesRef = firestore.collection('categories');
 final newsRef = firestore.collection('news');
 final slideImagesRef = firestore.collection('slide_images');
-List<CameraDescription> cameras;
-Widget musicPlayer;
+List<CameraDescription>? cameras;
+Widget? musicPlayer;
 
 enum AuthStatus {
   NOT_DETERMINED,
@@ -29,21 +29,21 @@ enum AuthStatus {
 AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 
 class Constants {
-  static String currentUserID;
-  static user_model.User currentUser;
-  static User currentFirebaseUser;
+  static String? currentUserID;
+  static user_model.User? currentUser;
+  static User? currentFirebaseUser;
 
-  static user_model.User starUser;
+  static user_model.User? starUser;
   static bool isAdmin = false;
 
-  static String currentMelodyLevel;
+  static String? currentMelodyLevel;
 
-  static String currentRoute;
+  static String? currentRoute;
   static List<String> routeStack = [];
 
-  static String language;
+  static String? language;
 
-  static bool isFacebookOrGoogleUser;
+  static bool? isFacebookOrGoogleUser;
 
   static double musicVolume = 0.9;
   static double voiceVolume = 7;

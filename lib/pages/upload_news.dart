@@ -22,11 +22,11 @@ class UploadNews extends StatefulWidget {
 enum Types { RECORD_VIDEO, RECORD_AUDIO, IMAGE, CHOOSE_AUDIO, CHOOSE_VIDEO }
 
 class _UploadNewsState extends State<UploadNews> {
-  Types _type;
+  Types? _type;
   bool isRecording = false;
-  String _contentType;
+  String? _contentType;
 
-  File _contentFile;
+  File? _contentFile;
 
   TextEditingController _textController = TextEditingController();
 
@@ -88,7 +88,7 @@ class _UploadNewsState extends State<UploadNews> {
               ],
               onChanged: (type) {
                 setState(() {
-                  _type = type;
+                  _type = type as Types;
                 });
               },
             ),
@@ -141,7 +141,7 @@ class _UploadNewsState extends State<UploadNews> {
 
   @override
   void dispose() {
-    recorder.dispose();
+    recorder!.dispose();
     super.dispose();
   }
 
@@ -192,21 +192,21 @@ class _UploadNewsState extends State<UploadNews> {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
   }
 
   _recordVideo() async {
-    File video = await ImagePicker.pickVideo(source: ImageSource.camera);
+    PickedFile? video = await ImagePicker().getVideo(source: ImageSource.camera);
     setState(() {
-      if (video != null) _contentFile = video;
+      if (video != null) _contentFile = File(video.path);
       _contentType = 'video';
     });
-    getDuration(_contentFile.path);
+    getDuration(_contentFile!.path);
   }
 
-  AudioRecorder recorder;
+  AudioRecorder? recorder;
   _recordAudio() async {
-    recorder.startRecording();
+    recorder!.startRecording();
     setState(() {
       isRecording = true;
     });
@@ -214,7 +214,7 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _stopAudioRecording() async {
-    String result = await recorder.stopRecording();
+    String? result = await recorder!.stopRecording();
     setState(() {
       isRecording = false;
     });
@@ -222,7 +222,7 @@ class _UploadNewsState extends State<UploadNews> {
     setState(() {
       if (result != null) _contentFile = File(result);
     });
-    getDuration(_contentFile.path);
+    getDuration(_contentFile!.path);
   }
 
   _pickImage() async {
@@ -251,16 +251,16 @@ class _UploadNewsState extends State<UploadNews> {
       if (audio != null) _contentFile = audio;
       _contentType = 'audio';
     });
-    getDuration(_contentFile.path);
+    getDuration(_contentFile!.path);
   }
 
   _chooseVideo() async {
-    File video = await ImagePicker.pickVideo(source: ImageSource.gallery);
+    PickedFile? video = await ImagePicker().getVideo(source: ImageSource.gallery);
     setState(() {
-      if (video != null) _contentFile = video;
+      if (video != null) _contentFile = File(video.path);
       _contentType = 'video';
     });
-    getDuration(_contentFile.path);
+    getDuration(_contentFile!.path);
   }
 
   _submit() async {
@@ -270,9 +270,9 @@ class _UploadNewsState extends State<UploadNews> {
     }
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String ext = path.extension(_contentFile.path);
+    String ext = path.extension(_contentFile!.path);
     String url =
-        await AppUtil().uploadFile(_contentFile, context, 'news/$id$ext');
+        await AppUtil().uploadFile(_contentFile!, context, 'news/$id$ext');
     await newsRef.doc(id).set({
       'text': _textController.text,
       'content_url': url,

@@ -16,7 +16,7 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  bool emailVerified;
+  bool? emailVerified;
 
   AuthStatus _authStatus = AuthStatus.NOT_DETERMINED;
 
@@ -51,7 +51,7 @@ class _RootPageState extends State<RootPage> {
   }
 
   getLanguage() async {
-    String language = await AppUtil.getLanguage();
+    String language = await AppUtil.getLanguage()??'ar';
     if (language == null) {
       Constants.language = 'ar';
     } else {
@@ -86,19 +86,18 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.LOGGED_IN:
         return AppPage();
     }
-    return null;
   }
 
   Future authAssignment() async {
     User user = await Auth().getCurrentUser();
 
-    if (user?.uid != null &&
-        ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
+    if (user.uid != null &&
+        ((await DatabaseService.getUserWithId(user.uid)).id != null)) {
       AppUtil.setUserVariablesByFirebaseUser(user);
       setState(() {
         _authStatus = AuthStatus.LOGGED_IN;
       });
-    } else if (user?.uid != null && !(user.emailVerified)) {
+    } else if (user.uid != null && !(user.emailVerified)) {
       print('!(user.isEmailVerified) = ${!(user.emailVerified)}');
       setState(() {
         _authStatus = AuthStatus.NOT_LOGGED_IN;

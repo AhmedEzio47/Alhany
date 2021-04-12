@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
 class SingerItem extends StatefulWidget {
-  final Singer singer;
+  final Singer? singer;
 
-  const SingerItem({Key key, this.singer}) : super(key: key);
+  const SingerItem({Key? key, this.singer}) : super(key: key);
   @override
   _SingerItemState createState() => _SingerItemState();
 }
@@ -36,11 +36,11 @@ class _SingerItemState extends State<SingerItem> {
       height: 70,
       child: ListTile(
         title: Text(
-          widget.singer.name,
+          widget.singer!.name!,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         leading: CachedImage(
-          imageUrl: widget.singer.imageUrl,
+          imageUrl: widget.singer!.imageUrl!,
           defaultAssetImage: Strings.default_profile_image,
           imageShape: BoxShape.rectangle,
           height: 50,
@@ -92,21 +92,21 @@ class _SingerItemState extends State<SingerItem> {
     File image = await AppUtil.pickImageFromGallery();
     String ext = path.extension(image.path);
 
-    if (widget.singer.imageUrl != null) {
+    if (widget.singer!.imageUrl != null) {
       String fileName =
-          await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+          await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
     String url = await AppUtil()
-        .uploadFile(image, context, '/singers_images/${widget.singer.id}$ext');
-    await singersRef.doc(widget.singer.id).update({'image_url': url});
+        .uploadFile(image, context, '/singers_images/${widget.singer!.id}$ext');
+    await singersRef.doc(widget.singer!.id).update({'image_url': url});
     AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
   }
 
   editName() async {
     setState(() {
-      _nameController.text = widget.singer.name;
+      _nameController.text = widget.singer!.name!;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -135,7 +135,7 @@ class _SingerItemState extends State<SingerItem> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await singersRef.doc(widget.singer.id).update({
+              await singersRef.doc(widget.singer!.id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -162,12 +162,12 @@ class _SingerItemState extends State<SingerItem> {
         firstFunc: () async {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
-          if (widget.singer.imageUrl != null) {
+          if (widget.singer!.imageUrl != null) {
             String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.singer.imageUrl);
+                await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
             await storageRef.child('/singers_images/$fileName').delete();
           }
-          await singersRef.doc(widget.singer.id).delete();
+          await singersRef.doc(widget.singer!.id).delete();
           AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
           Navigator.of(context).pop();
         },

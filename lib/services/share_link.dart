@@ -22,7 +22,7 @@ class DynamicLinks {
       link: uri,
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
@@ -47,7 +47,7 @@ class DynamicLinks {
       link: Uri.parse('$_urlPrefix/users/${args["userId"]}'),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
@@ -72,7 +72,7 @@ class DynamicLinks {
       link: Uri.parse('$_urlPrefix/games/${args["gameId"]}'),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),

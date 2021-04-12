@@ -1,6 +1,6 @@
 const String appName_ar = 'ألحاني';
 const String appName = 'Alhany';
-String appTempDirectoryPath;
+String? appTempDirectoryPath;
 
 class Strings {
   static const String default_profile_image =

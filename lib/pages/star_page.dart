@@ -25,9 +25,9 @@ class StarPage extends StatefulWidget {
 class _StarPageState extends State<StarPage>
     with SingleTickerProviderStateMixin {
   ScrollController _melodiesScrollController = ScrollController();
-  TabController _tabController;
+  TabController? _tabController;
   int _page = 0;
-  Timestamp lastVisiblePostSnapShot;
+  Timestamp? lastVisiblePostSnapShot;
 
   Color _searchColor = Colors.grey.shade300;
 
@@ -60,7 +60,7 @@ class _StarPageState extends State<StarPage>
 
   nextMelodies() async {
     List<Melody> melodies =
-        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot!);
     if (melodies.length > 0) {
       setState(() {
         melodies.forEach((element) => _melodies.add(element));
@@ -183,9 +183,9 @@ class _StarPageState extends State<StarPage>
                                       ),
                                       itemCount: _slideImages.length,
                                       itemBuilder:
-                                          (BuildContext context, int index) =>
+                                          (BuildContext context, int index, int useless) =>
                                               CachedImage(
-                                        imageUrl: _slideImages[index]?.url,
+                                        imageUrl: _slideImages[index].url!,
                                         height: 200,
                                         imageShape: BoxShape.rectangle,
                                         width:
@@ -198,7 +198,7 @@ class _StarPageState extends State<StarPage>
                               SizedBox(
                                 height: 10,
                               ),
-                              Constants.isAdmin ?? false
+                              Constants.isAdmin
                                   ? Center(
                                       child: InkWell(
                                           onTap: () => Navigator.of(context)
@@ -223,7 +223,7 @@ class _StarPageState extends State<StarPage>
                                       height: 60,
                                       imageShape: BoxShape.circle,
                                       imageUrl:
-                                          Constants.starUser?.profileImageUrl,
+                                          Constants.starUser!.profileImageUrl!,
                                       defaultAssetImage:
                                           Strings.default_profile_image,
                                     ),
@@ -266,7 +266,7 @@ class _StarPageState extends State<StarPage>
                               MediaQuery.removePadding(
                                   context: context,
                                   removeTop: true,
-                                  child: _currentPage())
+                                  child: _currentPage()?? Container())
                             ]),
                           ),
                         ],
@@ -289,7 +289,7 @@ class _StarPageState extends State<StarPage>
             ],
           ),
         ),
-        floatingActionButton: Constants.isAdmin ?? false
+        floatingActionButton: Constants.isAdmin
             ? FloatingActionButton(
                 backgroundColor: Colors.white,
                 child: Icon(
@@ -349,7 +349,7 @@ class _StarPageState extends State<StarPage>
     }
   }
 
-  Widget _currentPage() {
+  Widget? _currentPage() {
     switch (_page) {
       case 1:
         getNews();
@@ -490,8 +490,9 @@ class _StarPageState extends State<StarPage>
     ));
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async{
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/app-page');
+    return true;
   }
 }

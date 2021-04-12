@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MelodySqlite {
-  static Database db;
+  static Database? db;
   static String tableName = 'melody';
 
   static Future open() async {
@@ -34,18 +34,18 @@ class MelodySqlite {
   }
 
   static Future<int> insert(Melody melody) async {
-    if (db == null || !db.isOpen) {
+    if (db == null || !db!.isOpen) {
       await open();
     }
-    Map melodyMap = melody.toMap();
-    return await db.insert(tableName, melodyMap);
+    Map<String, Object> melodyMap = melody.toMap();
+    return await db!.insert(tableName, melodyMap);
   }
 
-  static Future<Melody> getMelodyWithId(String id) async {
-    if (db == null || !db.isOpen) {
+  static Future<Melody?> getMelodyWithId(String id) async {
+    if (db == null || !db!.isOpen) {
       await open();
     }
-    List<Map> maps = await db.query(tableName,
+    List<Map<String, dynamic>> maps = await db!.query(tableName,
         columns: [
           'id',
           'name',
@@ -64,25 +64,25 @@ class MelodySqlite {
   }
 
   static Future<int> delete(String id) async {
-    if (db == null || !db.isOpen) {
+    if (db == null || !db!.isOpen) {
       await open();
     }
-    return await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
+    return await db!.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
 
   static Future<int> update(Melody melody) async {
-    if (db == null || !db.isOpen) {
+    if (db == null || !db!.isOpen) {
       await open();
     }
-    return await db.update(tableName, melody.toMap(),
+    return await db!.update(tableName, melody.toMap(),
         where: 'id = ?', whereArgs: [melody.id]);
   }
 
-  static Future<List<Melody>> getDownloads() async {
-    if (db == null || !db.isOpen) {
+  static Future<List<Melody>?> getDownloads() async {
+    if (db == null || !db!.isOpen) {
       await open();
     }
-    List<Map> maps = await db.query(
+    List<Map<String, dynamic>> maps = await db!.query(
       tableName,
       columns: [
         'id',
@@ -102,5 +102,5 @@ class MelodySqlite {
     return null;
   }
 
-  static Future close() async => db.close();
+  static Future close() async => db!.close();
 }

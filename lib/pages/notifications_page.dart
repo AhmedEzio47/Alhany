@@ -21,7 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   List<notification_model.Notification> _notifications = [];
   ScrollController _scrollController = ScrollController();
 
-  Timestamp lastVisibleNotificationSnapShot;
+  Timestamp? lastVisibleNotificationSnapShot;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                                 return FutureBuilder(
                                     future: DatabaseService.getUserWithId(
-                                        notification.sender),
+                                        notification.sender!),
                                     builder: (BuildContext context,
                                         AsyncSnapshot snapshot) {
                                       if (!snapshot.hasData) {
@@ -78,8 +78,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                           NotificationItem(
                                             key: ValueKey(notification.id),
                                             notification: notification,
-                                            image: sender.profileImageUrl,
-                                            senderName: sender.username,
+                                            image: sender.profileImageUrl!,
+                                            senderName: sender.username!,
                                             counter: 0,
                                           ),
                                           Divider(
@@ -141,7 +141,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void nextNotifications() async {
     var notifications = await DatabaseService.getNextNotifications(
-        lastVisibleNotificationSnapShot);
+        lastVisibleNotificationSnapShot!);
     if (notifications.length > 0) {
       setState(() {
         notifications.forEach((element) => _notifications.add(element));
@@ -169,8 +169,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _setupFeed();
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async{
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/home');
+    return true;
   }
 }

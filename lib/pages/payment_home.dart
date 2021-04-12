@@ -7,9 +7,9 @@ import 'package:Alhany/services/payment_service.dart';
 import 'package:flutter/material.dart';
 
 class PaymentHomePage extends StatefulWidget {
-  final String amount;
+  final String? amount;
 
-  const PaymentHomePage({Key key, this.amount}) : super(key: key);
+  const PaymentHomePage({Key? key, this.amount}) : super(key: key);
   @override
   _PaymentHomePageState createState() => _PaymentHomePageState();
 }
@@ -51,7 +51,7 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
                 child: ListView.separated(
                     itemBuilder: (context, index) {
                       dynamic icon;
-                      Text text;
+                      Text? text;
                       switch (index) {
                         case 0:
                           icon = Icon(
@@ -104,17 +104,17 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
       case 0:
         StripeTransactionResponse response =
             await PaymentService.payViaCreditCard(context,
-                amount: widget.amount, currency: 'USD');
-        AppUtil.showToast(response.message);
+                amount: widget.amount!, currency: 'USD');
+        AppUtil.showToast(response.message!);
         Navigator.of(context).pop(response.success);
         break;
       case 1:
         StripeTransactionResponse response = await PaymentService.nativePayment(
           context,
-          widget.amount,
+          widget.amount!,
           'Songs Name',
         );
-        AppUtil.showToast(response.message);
+        AppUtil.showToast(response.message!);
         Navigator.of(context).pop(response.success);
         break;
     }

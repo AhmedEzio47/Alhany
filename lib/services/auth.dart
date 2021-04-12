@@ -11,13 +11,13 @@ Future<User> getCurrentUser() async {
 }
 
 abstract class BaseAuth {
-  Future<User> signInWithEmailAndPassword(String email, String password);
-  Future<User> signInWithApple();
-  Future<User> signInWithCredential(AuthCredential authCredential);
+  Future<User?> signInWithEmailAndPassword(String? email, String? password);
+  Future<User?> signInWithApple();
+  Future<User?> signInWithCredential(AuthCredential? authCredential);
 
-  Future<String> signIn(String email, String password);
+  Future<String?> signIn(String email, String password);
 
-  Future<String> signUp(String username, String email, String password);
+  Future<String?> signUp(String? username, String? email, String? password);
 
   // Future<String> currentUser();
 
@@ -31,7 +31,7 @@ abstract class BaseAuth {
 
   Future<void> changeEmail(String email);
 
-  Future<String> changePassword(String password);
+  Future<String?> changePassword(String password);
 
   Future<void> deleteUser();
 
@@ -41,7 +41,7 @@ abstract class BaseAuth {
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  Future<User> signInWithApple({List<Scope> scopes = const []}) async {
+  Future<User?> signInWithApple({List<Scope> scopes = const []}) async {
     // 1. perform the sign-in request
     final result = await AppleSignIn.performRequests(
         [AppleIdRequest(requestedScopes: scopes)]);
@@ -56,11 +56,11 @@ class Auth implements BaseAuth {
               String.fromCharCodes(appleIdCredential.authorizationCode),
         );
         final authResult = await _firebaseAuth.signInWithCredential(credential);
-        final firebaseUser = authResult.user;
+        final User? firebaseUser = authResult.user;
         if (scopes.contains(Scope.fullName)) {
           final displayName =
               '${appleIdCredential.fullName.givenName} ${appleIdCredential.fullName.familyName}';
-          await firebaseUser.updateProfile(displayName: displayName);
+          await firebaseUser!.updateProfile(displayName: displayName);
         }
         return firebaseUser;
       case AuthorizationStatus.error:
@@ -80,10 +80,10 @@ class Auth implements BaseAuth {
   }
 
   @override
-  Future<User> signInWithEmailAndPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(String? email, String? password) async {
     try {
-      final User user = (await _firebaseAuth.signInWithEmailAndPassword(
-              email: email, password: password))
+      final User? user = (await _firebaseAuth.signInWithEmailAndPassword(
+              email: email!, password: password!))
           .user;
       return user;
     } catch (error) {
@@ -97,10 +97,10 @@ class Auth implements BaseAuth {
     return null;
   }
 
-  Future<User> signInWithCredential(AuthCredential authCredential) async {
+  Future<User?> signInWithCredential(AuthCredential? authCredential) async {
     try {
-      final User user =
-          (await _firebaseAuth.signInWithCredential(authCredential)).user;
+      final User? user =
+          (await _firebaseAuth.signInWithCredential(authCredential!)).user;
       return user;
     } catch (error) {
       if ((error as FirebaseAuthException).code ==
@@ -114,20 +114,20 @@ class Auth implements BaseAuth {
   }
 
   @override
-  Future<String> signIn(String email, String password) async {
-    User user = (await _firebaseAuth.signInWithEmailAndPassword(
+  Future<String?> signIn(String email, String password) async {
+    User? user = (await _firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password))
         .user;
-    if (user.emailVerified) return user.uid;
+    if (user!.emailVerified) return user.uid;
     return null;
   }
 
   // ignore: missing_return
-  Future<String> signUp(String username, String email, String password) async {
-    User user;
+  Future<String?> signUp(String? username, String? email, String? password) async {
+    User? user;
     try {
       user = (await _firebaseAuth.createUserWithEmailAndPassword(
-              email: email, password: password))
+              email: email!, password: password!))
           .user;
     } catch (signUpError) {
       if (signUpError is PlatformException) {
@@ -145,11 +145,11 @@ class Auth implements BaseAuth {
     }
 
     try {
-      await user.sendEmailVerification();
+      await user!.sendEmailVerification();
       return user.uid;
     } catch (e) {
       print("An error occurred while trying to send verification email");
-      print(e.message);
+      print(e);
     }
   }
 
@@ -160,7 +160,7 @@ class Auth implements BaseAuth {
   // }
 
   Future<User> getCurrentUser() async {
-    User user = await _firebaseAuth.currentUser;
+    User user = await _firebaseAuth.currentUser!;
     return user;
   }
 
@@ -169,18 +169,18 @@ class Auth implements BaseAuth {
   }
 
   Future<void> sendEmailVerification() async {
-    User user = await _firebaseAuth.currentUser;
+    User user = await _firebaseAuth.currentUser!;
     user.sendEmailVerification();
   }
 
   Future<bool> isEmailVerified() async {
-    User user = await _firebaseAuth.currentUser;
+    User user = await _firebaseAuth.currentUser!;
     return user.emailVerified;
   }
 
   @override
   Future<void> changeEmail(String email) async {
-    User user = await _firebaseAuth.currentUser;
+    User user = await _firebaseAuth.currentUser!;
     user.updateEmail(email).then((_) {
       print("Successfully changed email");
     }).catchError((error) {
@@ -190,21 +190,21 @@ class Auth implements BaseAuth {
   }
 
   @override
-  Future<String> changePassword(String password) async {
+  Future<String?> changePassword(String password) async {
     try {
-      User user = await _firebaseAuth.currentUser;
+      User user = await _firebaseAuth.currentUser!;
       await user.updatePassword(password);
       print("Successfully changed password");
       return null;
     } catch (error) {
-      print("Password can't be changed " + error.code);
-      return error.code;
+      print("Password can't be changed " + error.toString());
+      return error.toString();
     }
   }
 
   @override
   Future<void> deleteUser() async {
-    User user = await _firebaseAuth.currentUser;
+    User user = await _firebaseAuth.currentUser!;
     user.delete().then((_) {
       print("Succesfull user deleted");
     }).catchError((error) {

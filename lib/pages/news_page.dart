@@ -13,11 +13,11 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
 
 class NewsPage extends StatefulWidget {
-  final News news;
+  final News? news;
 
   final bool isVideoVisible;
 
-  const NewsPage({Key key, this.news, this.isVideoVisible = true})
+  const NewsPage({Key? key, this.news, this.isVideoVisible = true})
       : super(key: key);
   @override
   _NewsPageState createState() => _NewsPageState();
@@ -32,17 +32,17 @@ class _NewsPageState extends State<NewsPage> {
 
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(_commentController.text,
-          newsId: widget.news.id);
+          newsId: widget.news!.id);
 
       await NotificationHandler.sendNotification(
-          Constants.starUser.id,
-          Constants.currentUser.name + ' commented on your post',
+          Constants.starUser!.id!,
+          Constants.currentUser!.name! + ' commented on your post',
           _commentController.text,
-          widget.news.id,
+          widget.news!.id!,
           'news_comment');
 
       await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.news.id);
+          _commentController.text, widget.news!.id);
 
       Constants.currentRoute = '';
       Navigator.pop(context);
@@ -75,7 +75,7 @@ class _NewsPageState extends State<NewsPage> {
 
   getComments() async {
     List<Comment> comments =
-        await DatabaseService.getComments(newsId: widget.news.id);
+        await DatabaseService.getComments(newsId: widget.news!.id);
     setState(() {
       _comments = comments;
     });
@@ -83,7 +83,7 @@ class _NewsPageState extends State<NewsPage> {
 
   getAllComments() async {
     List<Comment> comments =
-        await DatabaseService.getAllComments(newsId: widget.news.id);
+        await DatabaseService.getAllComments(newsId: widget.news!.id);
     setState(() {
       _comments = comments;
     });
@@ -151,7 +151,7 @@ class _NewsPageState extends State<NewsPage> {
                                 delegate: SliverChildListDelegate([
                                   widget.isVideoVisible
                                       ? NewsItem(
-                                          news: widget.news,
+                                          news: widget.news!,
                                         )
                                       : Container(),
                                   ListView.separated(
@@ -174,7 +174,7 @@ class _NewsPageState extends State<NewsPage> {
                                             ? FutureBuilder(
                                                 future: DatabaseService
                                                     .getUserWithId(
-                                                  comment.commenterID,
+                                                  comment.commenterID!,
                                                 ),
                                                 builder: (BuildContext context,
                                                     AsyncSnapshot snapshot) {
@@ -186,7 +186,7 @@ class _NewsPageState extends State<NewsPage> {
                                                   //print('commenter: $commenter and comment: $comment');
 
                                                   return CommentItem2(
-                                                    news: widget.news,
+                                                    news: widget.news!,
                                                     comment: comment,
                                                     commenter: commenter,
                                                     isReply: false,
@@ -268,8 +268,9 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async{
     Constants.currentRoute = '';
     Navigator.of(context).pop();
+    return true;
   }
 }

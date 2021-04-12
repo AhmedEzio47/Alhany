@@ -20,22 +20,22 @@ class UploadSingleLevelMelody extends StatefulWidget {
 }
 
 class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
-  String _melodyName;
-  File _image;
-  String _price;
+  String? _melodyName;
+  File? _image;
+  String? _price;
 
   List<String> _singersNames = [];
   List<Singer> _singers = [];
 
-  String _singerName;
-  Singer _singer;
+  String? _singerName;
+  Singer? _singer;
 
   getSingers() async {
     _singersNames = [];
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data()['name']);
+        _singersNames.add(doc.data()!['name']);
       });
     }
   }
@@ -71,7 +71,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                             });
                           },
                           child: Image.asset(Strings.default_melody_image))
-                      : Image.file(_image)),
+                      : Image.file(_image!)),
               Text(
                 'Note: Price and singer applies for both single and multiple melodies',
                 style: TextStyle(color: MyColors.accentColor),
@@ -94,7 +94,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                 children: [
                   Expanded(
                     flex: 6,
-                    child: DropdownButton(
+                    child: DropdownButton<dynamic>(
                       hint: Text('Singer'),
                       value: _singerName,
                       onChanged: (text) async {
@@ -202,17 +202,17 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     MediaInformation info =
         await _flutterFFprobe.getMediaInformation(melodyFile.path);
     int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String melodyUrl =
         await AppUtil().uploadFile(melodyFile, context, '/melodies/$id$ext');
-    String imageUrl;
+    String? imageUrl;
     if (_image != null) {
-      String ext = path.extension(_image.path);
+      String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image, context, '/melodies_images/$id$ext');
+          .uploadFile(_image!, context, '/melodies_images/$id$ext');
     }
 
     if (melodyUrl == '') {
@@ -238,7 +238,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     });
     if (_singer != null) {
       await singersRef
-          .doc(_singer.id)
+          .doc(_singer!.id)
           .update({'melodies': FieldValue.increment(1)});
     }
 
@@ -266,7 +266,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(melodyFile.path);
       int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
+          double.parse(info.getMediaProperties()!['duration'].toString())
               .toInt();
 
       await melodiesRef.doc(id).set({
@@ -281,7 +281,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
         'timestamp': FieldValue.serverTimestamp()
       });
       await singersRef
-          .doc(_singer.id)
+          .doc(_singer!.id)
           .update({'melodies': FieldValue.increment(melodiesFiles.length)});
     }
     AppUtil.showToast(language(en: 'Melodies uploaded!', ar: 'تم رفع الألحان'));

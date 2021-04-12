@@ -3,7 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsService {
   final PermissionHandler _permissionHandler = PermissionHandler();
-  BuildContext _context;
+  BuildContext? _context;
   Future<bool> _requestPermission(PermissionGroup permission) async {
     var result = await _permissionHandler.requestPermissions([permission]);
     if (result[permission] == PermissionStatus.granted) {
@@ -21,7 +21,7 @@ class PermissionsService {
 
   /// Requests the users permission to read their contacts.
   Future<bool> requestContactsPermission(BuildContext context,
-      {Function onPermissionDenied}) async {
+      {Function? onPermissionDenied}) async {
     this._context = context;
     var granted = await _requestPermission(PermissionGroup.contacts);
     if (!granted && onPermissionDenied != null) {
@@ -32,7 +32,7 @@ class PermissionsService {
 
   /// Requests the users permission to read/write to the storage.
   Future<bool> requestStoragePermission(BuildContext context,
-      {Function onPermissionDenied}) async {
+      {Function? onPermissionDenied}) async {
     this._context = context;
     var granted = await _requestPermission(PermissionGroup.storage);
     if (!granted && onPermissionDenied != null) {
@@ -43,7 +43,7 @@ class PermissionsService {
 
   /// Requests the users permission to read their microphone.
   Future<bool> requestMicrophonePermission(BuildContext context,
-      {Function onPermissionDenied}) async {
+      {Function? onPermissionDenied}) async {
     this._context = context;
     var granted = await _requestPermission(PermissionGroup.microphone);
     if (!granted && onPermissionDenied != null) {
@@ -54,7 +54,7 @@ class PermissionsService {
 
   /// Requests the users permission to their camera.
   Future<bool> requestCameraPermission(BuildContext context,
-      {Function onPermissionDenied}) async {
+      {Function? onPermissionDenied}) async {
     this._context = context;
     var granted = await _requestPermission(PermissionGroup.camera);
     if (!granted && onPermissionDenied != null) {
@@ -65,7 +65,7 @@ class PermissionsService {
 
   /// Requests the users permission to read their location when the app is in use
   Future<bool> requestLocationPermission(BuildContext context,
-      {Function onPermissionDenied}) async {
+      {Function? onPermissionDenied}) async {
     this._context = context;
     var granted = await _requestPermission(PermissionGroup.location);
     if (!granted && onPermissionDenied != null) {

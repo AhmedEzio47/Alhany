@@ -38,7 +38,7 @@ class _WelcomePageState extends State<WelcomePage> {
   final FocusNode myFocusNodeName = FocusNode();
   final FocusNode myFocusNodeConfirmPassword = FocusNode();
 
-  int _currentPage;
+  int? _currentPage;
   String _userId = "";
 
   TextEditingController _nameController = TextEditingController();
@@ -314,7 +314,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             Navigator.of(context).pushNamed('/password-reset');
                           } else {
                             AppUtil.showLoader(context);
-                            await Constants.currentFirebaseUser
+                            await Constants.currentFirebaseUser!
                                 .sendEmailVerification();
                             Navigator.of(context).pop();
                             AppUtil.showToast(language(en: 'Verification email sent', ar: 'تم ارسال رسالة التفعيل'));
@@ -427,7 +427,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                           child: new FlatButton(
                                             onPressed: () async {
                                               print('trying to login with fb');
-                                              User user =
+                                              User? user =
                                                   await signInWithFacebook();
                                               if (user != null) {
                                                 await AppUtil
@@ -630,7 +630,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           style: apple.ButtonStyle.black,
                           type: apple.ButtonType.signIn,
                           onPressed: () async {
-                            User user = await _signInWithApple(context);
+                            User? user = await _signInWithApple(context);
                             if (user != null) {
                               await AppUtil.setUserVariablesByFirebaseUser(
                                   user);
@@ -1102,7 +1102,7 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future _signUp() async {
-    final BaseAuth auth = AuthProvider.of(context).auth;
+    final BaseAuth auth = AuthProvider.of(context)!.auth!;
 
     String validEmail = AppUtil.validateEmail(_emailController.text);
 
@@ -1111,8 +1111,8 @@ class _WelcomePageState extends State<WelcomePage> {
     if (validEmail == null &&
         _passwordController.text == _confirmPasswordController.text) {
       // Validation Passed
-      _userId = await auth.signUp(_nameController.text, _emailController.text,
-          _passwordController.text);
+      _userId = (await auth.signUp(_nameController.text, _emailController.text,
+          _passwordController.text))!;
 
       if (_userId == 'Email is already in use') {
         AppUtil.showToast(
@@ -1156,20 +1156,21 @@ class _WelcomePageState extends State<WelcomePage> {
   Future _login() async {
     final appleSignInIsAvailable =
         Provider.of<AppleSignInAvailable>(context, listen: false);
-    final BaseAuth auth = AuthProvider.of(context).auth;
+    final BaseAuth auth = AuthProvider.of(context)!.auth!;
+
 
     try {
-      User user = await auth.signInWithEmailAndPassword(
-          _emailController.text, _passwordController.text);
+      User user = (await auth.signInWithEmailAndPassword(
+          _emailController.text, _passwordController.text))!;
       _userId = user.uid;
       user_model.User temp = await DatabaseService.getUserWithId(_userId);
 
       if (user.emailVerified && temp.id == null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        String name = prefs.getString('name');
+        String? name = prefs.getString('name');
         String username = await _createUsername();
         await DatabaseService.addUserToDatabase(
-            _userId, user.email, name, username);
+            _userId, user.email!, name!, username);
 
         //TODO saveToken();
 
@@ -1218,8 +1219,9 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<User> signInWithGoogle() async {
-    final BaseAuth auth = AuthProvider.of(context).auth;
-    final GoogleSignInAccount googleSignInAccount =
+    final BaseAuth auth = AuthProvider.of(context)!.auth!;
+
+    final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
       AppUtil.showToast(language(
@@ -1227,17 +1229,17 @@ class _WelcomePageState extends State<WelcomePage> {
           ar: 'خطأ غير معروف، رجاءا استخدام طريقة أخرى'));
     });
     final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+        await googleSignInAccount!.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final User user = await auth.signInWithCredential(credential);
+    final User user = (await auth.signInWithCredential(credential))!;
     setState(() {
-      _nameController.text = user.displayName;
-      _emailController.text = user.email;
+      _nameController.text = user.displayName!;
+      _emailController.text = user.email!;
     });
     assert(!user.isAnonymous);
     assert(await user.getIdToken() != null);
@@ -1295,21 +1297,22 @@ class _WelcomePageState extends State<WelcomePage> {
   //   // and you can now set this as the app's session
   //   print(session);
   // }
-  Future<User> _signInWithApple(BuildContext context) async {
+  Future<User?> _signInWithApple(BuildContext context) async {
     try {
-      final BaseAuth auth = AuthProvider.of(context).auth;
+      final BaseAuth auth = AuthProvider.of(context)!.auth!;
+
       final user = await auth.signInWithApple();
       setState(() {
-        _nameController.text = user.displayName;
-        _emailController.text = user.email;
+        _nameController.text = user!.displayName!;
+        _emailController.text = user.email!;
       });
-      assert(!user.isAnonymous);
-      assert(await user.getIdToken() != null);
+      assert(!user!.isAnonymous);
+      assert(await user!.getIdToken() != null);
 
       final User currentUser = await auth.getCurrentUser();
-      assert(user.uid == currentUser.uid);
+      assert(user!.uid == currentUser.uid);
 
-      print('uid: ${user.uid}');
+      print('uid: ${user!.uid}');
       return user;
     } catch (e) {
       // TODO: Show alert here
@@ -1317,27 +1320,28 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  Future<User> signInWithFacebook() async {
-    final BaseAuth auth = AuthProvider.of(context).auth;
+  Future<User?> signInWithFacebook() async {
+    final BaseAuth auth = AuthProvider.of(context)!.auth!;
+
 
     final FacebookLoginResult result = await FacebookLogin().logIn(
         permissions: [
           FacebookPermission.email,
           FacebookPermission.publicProfile
         ]);
-    User user;
+    User? user;
 
     switch (result.status) {
-      case FacebookLoginStatus.Success:
-        FacebookAccessToken facebookAccessToken = result.accessToken;
+      case FacebookLoginStatus.success:
+        FacebookAccessToken facebookAccessToken = result.accessToken!;
         final AuthCredential credential =
             FacebookAuthProvider.credential(facebookAccessToken.token);
         user = await auth.signInWithCredential(credential);
 
-        print('${user.displayName} signed in');
+        print('${user!.displayName} signed in');
         setState(() {
-          _nameController.text = user.displayName;
-          _emailController.text = user.email;
+          _nameController.text = user!.displayName!;
+          _emailController.text = user.email!;
         });
         print('${user.photoURL} FACEBOOK PHOTO');
         assert(!user.isAnonymous);
@@ -1346,10 +1350,10 @@ class _WelcomePageState extends State<WelcomePage> {
         final User currentUser = await auth.getCurrentUser();
         assert(user.uid == currentUser.uid);
         break;
-      case FacebookLoginStatus.Cancel:
+      case FacebookLoginStatus.cancel:
         print('Cancelled');
         break;
-      case FacebookLoginStatus.Error:
+      case FacebookLoginStatus.error:
         print('Facebook login Error');
         break;
     }

@@ -31,9 +31,9 @@ saveToken() async {
   if (Constants.currentUserID == null) return;
   String token;
   if (Platform.isIOS || Platform.isMacOS) {
-    token = await FirebaseMessaging.instance.getAPNSToken();
+    token = (await FirebaseMessaging.instance.getAPNSToken())!;
   } else {
-    token = await FirebaseMessaging.instance.getToken();
+    token = (await FirebaseMessaging.instance.getToken())!;
   }
   usersRef
       .doc(Constants.currentUserID)
@@ -42,8 +42,8 @@ saveToken() async {
       .set({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
 }
 
-List<String> searchList(String text) {
-  if (text == null || text.isEmpty) return null;
+List<String> searchList(String? text) {
+  if (text == null || text.isEmpty) return [];
   List<String> list = [];
   for (int i = 1; i <= text.length; i++) {
     list.add(text.substring(0, i).toLowerCase());
@@ -52,11 +52,11 @@ List<String> searchList(String text) {
 }
 
 class AppUtil with ChangeNotifier {
-  static double progress;
+  static double? progress;
   static bool fullScreenPage = false;
-  static Record fullscreenRecord;
-  static user_model.User fullscreenSinger;
-  static Melody fullscreenMelody;
+  static Record? fullscreenRecord;
+  static user_model.User? fullscreenSinger;
+  static Melody? fullscreenMelody;
 
   static executeFunctionIfLoggedIn(BuildContext context, Function function) {
     if (authStatus == AuthStatus.LOGGED_IN) {
@@ -93,7 +93,7 @@ class AppUtil with ChangeNotifier {
       GlobalKey<ScaffoldState> _scaffoldKey, String text) {
     FocusScope.of(context).requestFocus(new FocusNode());
     _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+    _scaffoldKey.currentState!.showSnackBar(new SnackBar(
       content: new Text(
         text,
         textAlign: TextAlign.center,
@@ -108,15 +108,15 @@ class AppUtil with ChangeNotifier {
   }
 
   static showAlertDialog({
-    @required BuildContext context,
-    String heading,
-    String message,
-    String firstBtnText,
-    String secondBtnText,
-    String thirdBtnText,
-    Function firstFunc,
-    Function secondFunc,
-    Function thirdFunc,
+    required BuildContext context,
+    String? heading,
+    String? message,
+    String? firstBtnText,
+    String? secondBtnText,
+    String? thirdBtnText,
+    Function? firstFunc,
+    Function? secondFunc,
+    Function? thirdFunc,
   }) {
     showDialog(
         context: context,
@@ -124,20 +124,20 @@ class AppUtil with ChangeNotifier {
           return AlertDialog(
             title: heading != null ? Text(heading) : null,
             content: Text(
-              message,
+              message!,
               textAlign: TextAlign.center,
             ),
             actions: <Widget>[
               MaterialButton(
-                onPressed: firstFunc,
+                onPressed: firstFunc!(),
                 child: Text(
-                  firstBtnText,
+                  firstBtnText!,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               secondBtnText != null
                   ? MaterialButton(
-                      onPressed: secondFunc,
+                      onPressed: secondFunc!(),
                       child: Text(
                         secondBtnText,
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -146,7 +146,7 @@ class AppUtil with ChangeNotifier {
                   : Container(),
               thirdBtnText != null
                   ? MaterialButton(
-                      onPressed: thirdFunc,
+                      onPressed: thirdFunc!(),
                       child: Text(
                         thirdBtnText,
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -168,7 +168,7 @@ class AppUtil with ChangeNotifier {
     }
     if (appTempDirectoryPath != '' && appTempDirectoryPath != null) {
       print('deleting temp files');
-      final dir = Directory(appTempDirectoryPath);
+      final dir = Directory(appTempDirectoryPath!);
       await dir.delete(recursive: true);
       appTempDirectoryPath = '';
       //await AppUtil.createAppDirectory();
@@ -187,23 +187,23 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future chooseAudio({bool multiple = false}) async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    FilePickerResult result = (await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
           'mp3',
           'wav',
         ],
-        allowMultiple: multiple);
+        allowMultiple: multiple))!;
 
     if (result != null) {
       if (multiple) {
         List<File> files = [];
         result.files.forEach((file) {
-          files.add(File(file.path));
+          files.add(File(file.path!));
         });
         return files;
       } else {
-        File file = File(result.files.single.path);
+        File file = File(result.files.single.path!);
         return file;
       }
     }
@@ -212,23 +212,23 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future chooseVideo({bool multiple = false}) async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    FilePickerResult result = (await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
           'mp4',
           'avi',
         ],
-        allowMultiple: multiple);
+        allowMultiple: multiple))!;
 
     if (result != null) {
       if (multiple) {
         List<File> files = [];
         result.files.forEach((file) {
-          files.add(File(file.path));
+          files.add(File(file.path!));
         });
         return files;
       } else {
-        File file = File(result.files.single.path);
+        File file = File(result.files.single.path!);
         return file;
       }
     }
@@ -237,22 +237,22 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> pickImageFromGallery() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    FilePickerResult result = (await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png'],
-        allowCompression: true);
+        allowCompression: true))!;
 
     if (result != null) {
-      File file = File(result.files.single.path);
+      File file = File(result.files.single.path!);
       return file;
     }
 
-    return null;
+    return File('');
   }
 
   static pickCompressedImageFromGallery() async {
-    File pickedFile = await ImagePicker.pickImage(
-        source: ImageSource.gallery, imageQuality: 50);
+    PickedFile pickedFile = (await ImagePicker().getImage(
+        source: ImageSource.gallery, imageQuality: 50))!;
     return pickedFile;
   }
 
@@ -282,11 +282,11 @@ class AppUtil with ChangeNotifier {
   static Future<String> downloadFile(String url, {bool encrypt = false}) async {
     var firstPath = appTempDirectoryPath;
 
-    var response = await get(url);
+    var response = await get(Uri.parse(url));
     var contentDisposition = response.headers['content-disposition'];
     String fileName =
         await getStorageFileNameFromContentDisposition(contentDisposition);
-    String filePathAndName = firstPath + fileName;
+    String filePathAndName = firstPath! + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
     await file.writeAsBytes(response.bodyBytes);
@@ -297,9 +297,9 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {
-    var response = await get(url);
+    var response = await get(Uri.parse(url));
     var contentDisposition = response.headers['content-disposition'];
-    String fileName = contentDisposition
+    String fileName = contentDisposition!
         .split('filename*=utf-8')
         .last
         .replaceAll(RegExp('%20'), ' ')
@@ -350,19 +350,19 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> takePhoto() async {
-    File image = await ImagePicker.pickImage(
-        source: ImageSource.camera, imageQuality: 80);
-    return image;
+    PickedFile image = (await ImagePicker().getImage(
+        source: ImageSource.camera, imageQuality: 80))!;
+    return File(image.path);
   }
 
-  static showLoader(BuildContext context, {String message}) {
+  static showLoader(BuildContext context, {String? message}) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
       loaderBackground: MyColors.accentColor,
       iconColor: MyColors.primaryColor,
       icon: Icons.music_note,
       animationType: "full_flip",
-      message: message,
+      message: message!,
     )));
   }
 
@@ -421,12 +421,12 @@ class AppUtil with ChangeNotifier {
           language(en: "Invalid Email", ar: 'البريد الإلكتروني غير صحيح'));
       return "Invalid Email";
     }
-    return null;
+    return '';
   }
 
   static switchLanguage() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String language = sharedPreferences.getString('language');
+    String language = sharedPreferences.getString('language')!;
     if (language == 'ar') {
       sharedPreferences.setString('language', 'en');
       Constants.language = 'en';
@@ -436,7 +436,7 @@ class AppUtil with ChangeNotifier {
     }
   }
 
-  static Future<String> getLanguage() async {
+  static Future<String?> getLanguage() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences.getString('language');
   }
@@ -475,35 +475,35 @@ class AppUtil with ChangeNotifier {
     return time;
   }
 
-  static checkIfContainsMention(String text, String recordId) async {
+  static checkIfContainsMention(String text, String? recordId) async {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         user_model.User user =
             await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
-            user.id,
+            user.id!,
             'New mention',
-            Constants.currentUser.username + ' mentioned you',
-            recordId,
+            Constants.currentUser!.username! + ' mentioned you',
+            recordId!,
             'mention');
       }
     });
   }
 
   static Future<File> recordVideo(Duration maxDuration) async {
-    File video = await ImagePicker.pickVideo(
+    PickedFile video = (await ImagePicker().getVideo(
         source: ImageSource.camera,
         maxDuration: maxDuration,
-        preferredCameraDevice: CameraDevice.front);
-    return video;
+        preferredCameraDevice: CameraDevice.front))!;
+    return File(video.path);
   }
 
   static sharePost(String postText, String imageUrl,
-      {String recordId, String newsId}) async {
+      {String? recordId, String? newsId}) async {
     var postLink = await DynamicLinks.createPostDynamicLink({
-      'recordId': recordId,
-      'newsId': newsId,
+      'recordId': recordId!,
+      'newsId': newsId!,
       'text': postText,
       'imageUrl': imageUrl
     });
@@ -513,11 +513,11 @@ class AppUtil with ChangeNotifier {
 
   static setUserVariablesByFirebaseUser(User user) async {
     user_model.User loggedInUser =
-        await DatabaseService.getUserWithId(user?.uid);
+        await DatabaseService.getUserWithId(user.uid);
 
     Constants.currentUser = loggedInUser;
     Constants.currentFirebaseUser = user;
-    Constants.currentUserID = user?.uid;
+    Constants.currentUserID = user.uid;
     authStatus = AuthStatus.LOGGED_IN;
     print('star id:${Strings.starId}');
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
@@ -526,7 +526,7 @@ class AppUtil with ChangeNotifier {
   }
 }
 
-String language({String ar, String en}) {
+String language({required String ar, required String en}) {
   if (Constants.language == 'ar') {
     return ar;
   } else {

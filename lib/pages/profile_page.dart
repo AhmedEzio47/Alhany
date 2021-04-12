@@ -27,9 +27,9 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:path/path.dart' as path;
 
 class ProfilePage extends StatefulWidget {
-  final String userId;
+  final String? userId;
 
-  const ProfilePage({Key key, this.userId}) : super(key: key);
+  const ProfilePage({Key? key, this.userId}) : super(key: key);
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -43,9 +43,9 @@ class _ProfilePageState extends State<ProfilePage>
   TextEditingController _nameController = TextEditingController();
   TextEditingController _usernameController = TextEditingController();
 
-  User _user;
+  User? _user;
 
-  TabController _tabController;
+  TabController? _tabController;
   int _page = 0;
 
   List<Record> _records = [];
@@ -66,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   getRecords() async {
-    List<Record> records = await DatabaseService.getUserRecords(widget.userId);
+    List<Record> records = await DatabaseService.getUserRecords(widget.userId!);
     if (mounted) {
       setState(() {
         _records = records;
@@ -85,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   getUser() async {
-    User user = await DatabaseService.getUserWithId(widget.userId);
+    User user = await DatabaseService.getUserWithId(widget.userId!);
     setState(() {
       _user = user;
     });
@@ -93,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   configureTabs() {
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
-    _tabController.addListener(() {
+    _tabController!.addListener(() {
       setState(() {});
     });
 
@@ -129,10 +129,10 @@ class _ProfilePageState extends State<ProfilePage>
     ];
   }
 
-  LinkedScrollControllerGroup _controllers;
-  ScrollController _recordsScrollController;
-  ScrollController _favouritesScrollController;
-  ScrollController _mainScrollController;
+  LinkedScrollControllerGroup? _controllers;
+  ScrollController? _recordsScrollController;
+  ScrollController? _favouritesScrollController;
+  ScrollController? _mainScrollController;
 
   @override
   void initState() {
@@ -142,16 +142,16 @@ class _ProfilePageState extends State<ProfilePage>
     getRecords();
     getUser();
     _controllers = LinkedScrollControllerGroup();
-    _recordsScrollController = _controllers.addAndGet();
-    _favouritesScrollController = _controllers.addAndGet();
-    _mainScrollController = _controllers.addAndGet();
+    _recordsScrollController = _controllers!.addAndGet();
+    _favouritesScrollController = _controllers!.addAndGet();
+    _mainScrollController = _controllers!.addAndGet();
     super.initState();
   }
 
   @override
   void dispose() {
-    _recordsScrollController.dispose();
-    _mainScrollController.dispose();
+    _recordsScrollController!.dispose();
+    _mainScrollController!.dispose();
     super.dispose();
   }
 
@@ -275,10 +275,10 @@ class _ProfilePageState extends State<ProfilePage>
                                               itemCount: _slideImages.length,
                                               itemBuilder:
                                                   (BuildContext context,
-                                                          int index) =>
+                                                          int index, int useless) =>
                                                       CachedImage(
                                                 imageUrl:
-                                                    _slideImages[index]?.url,
+                                                    _slideImages[index].url!,
                                                 height: 200,
                                                 imageShape: BoxShape.rectangle,
                                                 width: MediaQuery.of(context)
@@ -414,13 +414,13 @@ class _ProfilePageState extends State<ProfilePage>
                                                       if (_editing) {
                                                         setState(() {
                                                           _nameController.text =
-                                                              _user.name;
+                                                              _user!.name!;
                                                           _usernameController
                                                                   .text =
-                                                              _user.username;
+                                                              _user!.username!;
                                                           _descriptionController
                                                                   .text =
-                                                              _user.description;
+                                                              _user!.description!;
                                                         });
                                                       } else {
                                                         _saveEdits();
@@ -679,7 +679,7 @@ class _ProfilePageState extends State<ProfilePage>
   void unfollowUser() async {
     AppUtil.showLoader(context);
 
-    await DatabaseService.unfollowUser(widget.userId);
+    await DatabaseService.unfollowUser(widget.userId!);
 
     await checkIfUserIsFollowed();
 
@@ -690,7 +690,7 @@ class _ProfilePageState extends State<ProfilePage>
   void followUser() async {
     AppUtil.showLoader(context);
 
-    await DatabaseService.followUser(widget.userId);
+    await DatabaseService.followUser(widget.userId!);
     await checkIfUserIsFollowed();
 
     Navigator.of(context).pop();
@@ -702,7 +702,7 @@ class _ProfilePageState extends State<ProfilePage>
       case 0:
         return StreamBuilder<QuerySnapshot>(
           stream:
-              recordsRef.where('singer_id', isEqualTo: _user?.id)?.snapshots(),
+              recordsRef.where('singer_id', isEqualTo: _user?.id).snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
@@ -787,14 +787,14 @@ class _ProfilePageState extends State<ProfilePage>
 
     if (taken) {
       // username exists
-      if (_usernameController.text != _user.username) {
+      if (_usernameController.text != _user!.username) {
         AppUtil.showToast(
             '${_usernameController.text} is already in use. Please choose a different username.');
       }
       isValidUsername = false;
     }
     if (validUsername != null) {
-      if (_usernameController.text != _user.username) {
+      if (_usernameController.text != _user!.username) {
         AppUtil.showToast(
             language(en: 'Invalid Username!', ar: 'اسم المستخدم غير مسموح'));
       }
@@ -805,13 +805,13 @@ class _ProfilePageState extends State<ProfilePage>
     search.addAll(searchList(_usernameController.text));
 
     await usersRef.doc(Constants.currentUserID).update({
-      'username': isValidUsername ? _usernameController.text : _user.username,
+      'username': isValidUsername ? _usernameController.text : _user!.username,
       'name': _nameController.text,
       'description': _descriptionController.text,
       'search': search
     });
 
-    User user = await DatabaseService.getUserWithId(Constants.currentUserID);
+    User user = await DatabaseService.getUserWithId(Constants.currentUserID!);
     setState(() {
       _user = user;
     });
@@ -822,7 +822,7 @@ class _ProfilePageState extends State<ProfilePage>
       imageShape: BoxShape.circle,
       height: 60,
       width: 60,
-      imageUrl: _user?.profileImageUrl,
+      imageUrl: _user!.profileImageUrl!,
       defaultAssetImage: Strings.default_profile_image,
     );
   }
@@ -853,7 +853,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   String validateUsername(String value) {
-    String errorMsgUsername;
+    String? errorMsgUsername = '';
     String pattern =
         r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
@@ -869,13 +869,13 @@ class _ProfilePageState extends State<ProfilePage>
       setState(() {
         errorMsgUsername = "Invalid Username";
       });
-      return errorMsgUsername;
+      return errorMsgUsername!;
     } else {
       setState(() {
         errorMsgUsername = null;
       });
     }
-    return errorMsgUsername;
+    return errorMsgUsername!;
   }
 
   Future<bool> isUsernameTaken(String username) async {
@@ -884,11 +884,13 @@ class _ProfilePageState extends State<ProfilePage>
     return result.docs.isNotEmpty;
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async{
     /// Navigate back to home page
     if (widget.userId == Constants.currentUserID)
       Navigator.of(context).pushReplacementNamed('/app-page');
     else
       Navigator.of(context).pop();
+
+    return true;
   }
 }

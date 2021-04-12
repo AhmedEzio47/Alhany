@@ -9,9 +9,9 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:flutter/material.dart';
 
 class SongsPage extends StatefulWidget {
-  final Singer singer;
+  final Singer? singer;
 
-  const SongsPage({Key key, this.singer}) : super(key: key);
+  const SongsPage({Key? key, this.singer}) : super(key: key);
   @override
   _SongsPageState createState() => _SongsPageState();
 }
@@ -24,7 +24,7 @@ class _SongsPageState extends State<SongsPage> {
 
   getSongs() async {
     List<Melody> songs =
-        await DatabaseService.getSongsBySingerName(widget.singer.name);
+        await DatabaseService.getSongsBySingerName(widget.singer!.name!);
     setState(() {
       _songs = songs;
     });
@@ -45,7 +45,7 @@ class _SongsPageState extends State<SongsPage> {
               child: Icon(Icons.add),
               onPressed: () {
                 Navigator.of(context).pushNamed('/upload-songs',
-                    arguments: {'singer': widget.singer.name});
+                    arguments: {'singer': widget.singer!.name});
               },
             )
           : null,
@@ -123,7 +123,7 @@ class _SongsPageState extends State<SongsPage> {
                 padding: const EdgeInsets.only(top: 40),
                 child: Align(
                   child: Text(
-                    widget.singer.name,
+                    widget.singer!.name!,
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

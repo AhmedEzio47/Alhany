@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class CustomModal extends ModalRoute<void> {
   //Test Commit
-  final Widget child;
-  final Function onWillPop;
+  final Widget? child;
+  final Function? onWillPop;
 
-  BuildContext _context;
+  BuildContext? _context;
   CustomModal({this.onWillPop, this.child});
   @override
   Color get barrierColor => Colors.black.withOpacity(0.5);
@@ -14,7 +14,7 @@ class CustomModal extends ModalRoute<void> {
   bool get barrierDismissible => false;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get maintainState => true;
@@ -46,12 +46,13 @@ class CustomModal extends ModalRoute<void> {
     );
   }
 
-  Future<bool> onBackPressed() {
+  Future<bool> onBackPressed() async{
     if (onWillPop != null) {
-      onWillPop();
+      onWillPop!();
     } else {
-      Navigator.of(_context).pop();
+      Navigator.of(_context!).pop();
     }
+    return true;
   }
 
   Widget _buildOverlayContent(BuildContext context) {

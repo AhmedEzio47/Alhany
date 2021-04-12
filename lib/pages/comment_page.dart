@@ -13,10 +13,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class CommentPage extends StatefulWidget {
-  final Record record;
-  final News news;
-  final Comment comment;
-  const CommentPage({Key key, this.record, this.news, this.comment})
+  final Record? record;
+  final News? news;
+  final Comment? comment;
+  const CommentPage({Key? key, this.record, this.news, this.comment})
       : super(key: key);
 
   @override
@@ -30,14 +30,14 @@ class _CommentPageState extends State<CommentPage> {
     AppUtil.showLoader(context);
 
     if (_replyController.text.isNotEmpty) {
-      DatabaseService.addReply(widget.comment.id, _replyController.text,
+      DatabaseService.addReply(widget.comment!.id!, _replyController.text,
           recordId: widget.record?.id, newsId: widget.news?.id);
 
       await NotificationHandler.sendNotification(
-          widget.record?.singerId ?? Constants.starUser.id,
-          Constants.currentUser.name + ' commented on your post',
+          (widget.record?.singerId ?? Constants.starUser!.id)!,
+          Constants.currentUser!.name! + ' commented on your post',
           _replyController.text,
-          widget.record?.id ?? widget.news?.id,
+          (widget.record?.id! ?? widget.news?.id!)!,
           widget.record != null ? 'record_comment' : 'news_comment');
 
       await AppUtil.checkIfContainsMention(
@@ -69,11 +69,11 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   List<Comment> _replies = [];
-  Timestamp lastVisiblePostSnapShot;
+  Timestamp? lastVisiblePostSnapShot;
 
   getReplies() async {
     List<Comment> replies = await DatabaseService.getCommentReplies(
-        widget.comment.id,
+        widget.comment!.id!,
         recordId: widget.record?.id,
         newsId: widget.news?.id);
 
@@ -85,7 +85,7 @@ class _CommentPageState extends State<CommentPage> {
 
   nextReplies() async {
     List<Comment> replies = await DatabaseService.getNextCommentReplies(
-        widget.comment.id, lastVisiblePostSnapShot,
+        widget.comment!.id!, lastVisiblePostSnapShot!,
         recordId: widget.record?.id, newsId: widget.news?.id);
     if (replies.length > 0) {
       setState(() {
@@ -155,7 +155,7 @@ class _CommentPageState extends State<CommentPage> {
               ),
               FutureBuilder(
                   future: DatabaseService.getUserWithId(
-                    widget.comment.commenterID,
+                    widget.comment!.commenterID!,
                   ),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (!snapshot.hasData) {
@@ -164,9 +164,9 @@ class _CommentPageState extends State<CommentPage> {
                     User commenter = snapshot.data;
                     //print('commenter: $commenter and comment: $comment');
                     return CommentItem2(
-                      record: widget.record,
-                      news: widget.news,
-                      comment: widget.comment,
+                      record: widget.record!,
+                      news: widget.news!,
+                      comment: widget.comment!,
                       commenter: commenter,
                       isReply: false,
                     );
@@ -213,7 +213,7 @@ class _CommentPageState extends State<CommentPage> {
                         Comment comment = _replies[index];
                         return FutureBuilder(
                             future: DatabaseService.getUserWithId(
-                              comment.commenterID,
+                              comment.commenterID!,
                             ),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
@@ -223,11 +223,11 @@ class _CommentPageState extends State<CommentPage> {
                               User commenter = snapshot.data;
                               //print('commenter: $commenter and comment: $comment');
                               return CommentItem2(
-                                record: widget.record,
-                                news: widget.news,
+                                record: widget.record!,
+                                news: widget.news!,
                                 comment: comment,
                                 commenter: commenter,
-                                parentComment: widget.comment,
+                                parentComment: widget.comment!,
                                 isReply: true,
                               );
                             });
@@ -241,8 +241,9 @@ class _CommentPageState extends State<CommentPage> {
     );
   }
 
-  Future<bool> _onBackPressed() {
+  Future<bool> _onBackPressed() async {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
+    return false;
   }
 }

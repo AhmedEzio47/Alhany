@@ -16,12 +16,12 @@ import 'custom_inkwell.dart';
 import 'custom_text.dart';
 
 class PostBottomSheet {
-  Widget postOptionIcon(BuildContext context, {Record record, News news}) {
+  Widget postOptionIcon(BuildContext context, {Record? record, News? news}) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, record: record, news: news);
+          _openBottomSheet(context, record: record!, news: news!);
         },
         child: Container(
           width: 25,
@@ -47,7 +47,7 @@ class PostBottomSheet {
   }
 
   void _openBottomSheet(BuildContext context,
-      {Record record, News news}) async {
+      {Record? record, News? news}) async {
     await showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -68,7 +68,7 @@ class PostBottomSheet {
     );
   }
 
-  Widget _commentOptions(BuildContext context, {Record record, News news}) {
+  Widget _commentOptions(BuildContext context, {Record? record, News? news}) {
     return Column(
       children: <Widget>[
         Container(
@@ -98,7 +98,7 @@ class PostBottomSheet {
                 firstFunc: () async {
                   AppUtil.showLoader(context);
                   await DatabaseService.deletePost(
-                      recordId: record?.id, newsId: news?.id);
+                      recordId: record!.id, newsId: news!.id);
                   Navigator.of(context).pushReplacementNamed('/');
                 },
                 secondBtnText: language(en: 'No', ar: 'لا '),
@@ -113,8 +113,8 @@ class PostBottomSheet {
   TextEditingController _commentController = TextEditingController();
 
   editComment(BuildContext context, Comment comment,
-      {Record record, News news}) async {
-    _commentController.text = comment.text;
+      {Record? record, News? news}) async {
+    _commentController.text = comment.text!;
 
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -145,8 +145,8 @@ class PostBottomSheet {
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
               await DatabaseService.editComment(
-                  comment.id, _commentController.text,
-                  recordId: record.id, newsId: news.id);
+                  comment.id!, _commentController.text,
+                  recordId: record!.id, newsId: news!.id);
               AppUtil.showToast(
                   language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/record-page',
@@ -164,8 +164,8 @@ class PostBottomSheet {
   }
 
   editReply(BuildContext context, Comment reply, Comment parentComment,
-      {Record record, News news}) async {
-    _commentController.text = reply.text;
+      {Record? record, News? news}) async {
+    _commentController.text = reply.text!;
 
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -196,8 +196,8 @@ class PostBottomSheet {
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
               await DatabaseService.editReply(
-                  parentComment.id, reply.id, _commentController.text,
-                  recordId: record.id, newsId: news.id);
+                  parentComment.id!, reply.id!, _commentController.text,
+                  recordId: record!.id, newsId: news!.id);
               AppUtil.showToast(
                   language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/comment-page',
@@ -241,9 +241,9 @@ class PostBottomSheet {
               onTap: () async {
                 AppUtil.showLoader(context);
 
-                await DatabaseService.unfollowUser(user.id);
+                await DatabaseService.unfollowUser(user.id!);
                 await NotificationHandler.removeNotification(
-                    user.id, Constants.currentUserID, 'follow');
+                    user.id!, Constants.currentUserID!, 'follow');
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -260,7 +260,7 @@ class PostBottomSheet {
   }
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,
-      {String text, Function onPressed, bool isEnable = false}) {
+      {String? text, Function? onPressed, bool isEnable = false}) {
     return Expanded(
       child: customInkWell(
         context: context,
@@ -280,7 +280,7 @@ class PostBottomSheet {
                 width: 15,
               ),
               customText(
-                text,
+                text!,
                 context: context,
                 style: TextStyle(
                   color: MyColors.textLightColor,
@@ -297,7 +297,7 @@ class PostBottomSheet {
 
   Future _deleteComment(
       BuildContext context, String commentId, String parentCommentId,
-      {String recordId, String newId}) async {
+      {String? recordId, String?newId}) async {
     await showDialog(
       context: context,
       builder: (context) => Padding(
@@ -320,13 +320,13 @@ class PostBottomSheet {
               onTap: () async {
                 if (parentCommentId == null)
                   await DatabaseService.deleteComment(commentId,
-                      recordId: recordId, newsId: newId);
+                      recordId: recordId!, newsId: newId!);
                 else
                   await DatabaseService.deleteReply(commentId, parentCommentId,
-                      recordId: recordId, newsId: newId);
+                      recordId: recordId!, newsId: newId!);
 
                 await NotificationHandler.removeNotification(
-                    (await DatabaseService.getRecordWithId(recordId)).singerId,
+                    (await DatabaseService.getRecordWithId(recordId)).singerId!,
                     recordId,
                     'comment');
 

@@ -21,20 +21,20 @@ class UploadMultiLevelMelody extends StatefulWidget {
 class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
   Map<String, File> melodies = {};
 
-  String _melodyName;
-  String _melodyUrl;
-  File _image;
+  String? _melodyName;
+  String? _melodyUrl;
+  File? _image;
 
   List<String> _singers = [];
-  String _singerName;
-  Singer _singer;
+  String? _singerName;
+  Singer? _singer;
 
   getSingers() async {
     _singers = [];
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singers.add(doc.data()['name']);
+        _singers.add(doc.data()!['name']);
       });
     }
   }
@@ -70,7 +70,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                             });
                           },
                           child: Image.asset(Strings.default_melody_image))
-                      : Image.file(_image)),
+                      : Image.file(_image!)),
               TextField(
                 onChanged: (text) {
                   setState(() {
@@ -79,7 +79,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                 },
                 decoration: InputDecoration(hintText: 'Melody name'),
               ),
-              DropdownButton(
+              DropdownButton<dynamic>(
                 hint: Text('Singer'),
                 value: _singerName,
                 onChanged: (text) async {
@@ -243,7 +243,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
   }
 
   uploadMelody() async {
-    if (_melodyName.trim().isEmpty) {
+    if (_melodyName!.trim().isEmpty) {
       AppUtil.showToast(language(
           en: 'Please choose a name for the melody',
           ar: 'قم باختيار اسم اللحن'));
@@ -258,26 +258,26 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     String id = randomAlphaNumeric(20);
 
     for (String key in melodies.keys) {
-      String ext = path.extension(melodies[key].path);
+      String ext = path.extension(melodies[key]!.path);
       String url = await AppUtil()
-          .uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
+          .uploadFile(melodies[key]!, context, '/melodies/$id\_$key$ext');
 
       final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
       MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(melodies[key].path);
+          await _flutterFFprobe.getMediaInformation(melodies[key]!.path);
       int duration =
-          double.parse(info.getMediaProperties()['duration'].toString())
+          double.parse(info.getMediaProperties()!['duration'].toString())
               .toInt();
 
       levelsUrls.putIfAbsent(key, () => url);
       levelsDurations.putIfAbsent(key, () => duration);
     }
 
-    String imageUrl;
+    String? imageUrl;
     if (_image != null) {
-      String ext = path.extension(_image.path);
+      String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image, context, '/melodies_images/$id$ext');
+          .uploadFile(_image!, context, '/melodies_images/$id$ext');
     }
 
     await melodiesRef.doc(id).set({
@@ -294,7 +294,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     });
 
     await singersRef
-        .doc(_singer.id)
+        .doc(_singer!.id)
         .update({'melodies': FieldValue.increment(1)});
 
     Navigator.of(context).pop();

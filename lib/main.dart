@@ -22,11 +22,11 @@ void main() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static void restartApp(BuildContext context) {
-    context.findAncestorStateOfType<_RestartWidgetState>().restartApp();
+    context.findAncestorStateOfType<_RestartWidgetState>()!.restartApp();
   }
 
   @override

@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 class CategoryPage extends StatefulWidget {
   final String category;
 
-  const CategoryPage({Key key, this.category}) : super(key: key);
+  const CategoryPage({Key? key, required this.category}) : super(key: key);
   @override
   _CategoryPageState createState() => _CategoryPageState();
 }
@@ -19,7 +19,7 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   List<Singer> _singers = [];
   ScrollController _songsScrollController = ScrollController();
-  String lastVisiblePostSnapShot;
+  late String lastVisiblePostSnapShot;
 
   bool _isPlaying = false;
 
@@ -28,7 +28,7 @@ class _CategoryPageState extends State<CategoryPage> {
     if (mounted) {
       setState(() {
         _singers = songs;
-        if (_singers.length > 0) this.lastVisiblePostSnapShot = _singers.last.name;
+        if (_singers.length > 0) this.lastVisiblePostSnapShot = _singers.last.name!;
       });
     }
   }
@@ -38,7 +38,7 @@ class _CategoryPageState extends State<CategoryPage> {
     if (singers.length > 0) {
       setState(() {
         singers.forEach((element) => _singers.add(element));
-        this.lastVisiblePostSnapShot = singers.last.name;
+        this.lastVisiblePostSnapShot = singers.last.name!;
       });
     }
   }

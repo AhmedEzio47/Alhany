@@ -17,7 +17,6 @@ import 'package:Alhany/widgets/image_overlay.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 //import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +24,7 @@ import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
-  final String otherUid;
+  final String? otherUid;
   final _ConversationState state = _ConversationState();
   Conversation({this.otherUid});
 
@@ -43,32 +42,31 @@ class _ConversationState extends State<Conversation>
   bool isMicrophoneGranted = false;
 
   User otherUser = User();
-  Timestamp firstVisibleGameSnapShot;
-  String messageText;
+  Timestamp? firstVisibleGameSnapShot;
+  String? messageText;
   bool _typing = false;
   FocusScopeNode _focusNode = FocusScopeNode();
-  AudioRecorder recorder;
+  AudioRecorder? recorder;
   var _url;
-  List<Message> _messages;
+  List<Message>? _messages;
 
   TextEditingController messageController = TextEditingController();
 
   var seen = false;
   final formatter = new NumberFormat("##");
 
-  StreamSubscription<QuerySnapshot> messagesSubscription;
+  StreamSubscription<QuerySnapshot>? messagesSubscription;
 
   ScrollController _scrollController = ScrollController();
 
-  String recordTime = 'recording...';
+  String? recordTime = 'recording...';
 
-  var _currentStatus;
+  bool? _isRecording;
 
   _ConversationState();
 
   initRecorder() async {
     recorder = AudioRecorder();
-    await recorder.init();
   }
 
   void loadUserData(String uid) async {
@@ -80,7 +78,7 @@ class _ConversationState extends State<Conversation>
   }
 
   void getMessages() async {
-    var messages = await DatabaseService.getMessages(widget.otherUid);
+    var messages = await DatabaseService.getMessages(widget.otherUid!);
     setState(() {
       this._messages = messages;
       this.firstVisibleGameSnapShot = messages.last.timestamp;
@@ -90,11 +88,11 @@ class _ConversationState extends State<Conversation>
   void getPrevMessages() async {
     var messages;
     messages = await DatabaseService.getPrevMessages(
-        firstVisibleGameSnapShot, widget.otherUid);
+        firstVisibleGameSnapShot!, widget.otherUid!);
 
     if (messages.length > 0) {
       setState(() {
-        messages.forEach((element) => this._messages.add(element));
+        messages.forEach((element) => this._messages!.add(element));
         this.firstVisibleGameSnapShot = messages.last.timestamp;
       });
     }
@@ -115,7 +113,7 @@ class _ConversationState extends State<Conversation>
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
-                _messages.insert(0, Message.fromDoc(change.doc));
+                _messages!.insert(0, Message.fromDoc(change.doc));
               });
             }
           }
@@ -140,7 +138,7 @@ class _ConversationState extends State<Conversation>
         if (change.doc.id == 'seen') {
           if (this.mounted) {
             setState(() {
-              seen = change.doc.data()['isSeen'];
+              seen = change.doc.data()!['isSeen'];
               print('seen');
             });
           }
@@ -247,10 +245,10 @@ class _ConversationState extends State<Conversation>
     updateOnlineUserState(state);
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-      messagesSubscription.resume();
+      messagesSubscription!.resume();
     } else if (state == AppLifecycleState.paused) {
       // app is inactive
-      messagesSubscription.pause();
+      messagesSubscription!.pause();
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
     }
@@ -260,12 +258,12 @@ class _ConversationState extends State<Conversation>
   void initState() {
     super.initState();
     //_loadAudioByteData();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     getMessages();
     listenToMessagesChanges();
     otherUserListener();
     listenIfMessagesSeen();
-    loadUserData(widget.otherUid);
+    loadUserData(widget.otherUid!);
     //initRecorder();
 
     _focusNode.addListener(_onFocusChange);
@@ -288,10 +286,10 @@ class _ConversationState extends State<Conversation>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    messagesSubscription.cancel();
+    WidgetsBinding.instance!.removeObserver(this);
+    messagesSubscription!.cancel();
     _scrollController.dispose();
-    recorder.dispose();
+    recorder!.dispose();
     super.dispose();
   }
 
@@ -326,7 +324,7 @@ class _ConversationState extends State<Conversation>
                   Padding(
                     padding: EdgeInsets.only(left: 0.0, right: 10.0),
                     child: CachedImage(
-                      imageUrl: otherUser.profileImageUrl,
+                      imageUrl: otherUser.profileImageUrl!,
                       imageShape: BoxShape.circle,
                       width: 50.0,
                       height: 50.0,
@@ -380,17 +378,17 @@ class _ConversationState extends State<Conversation>
                         child: ListView.builder(
                           controller: _scrollController,
                           padding: EdgeInsets.symmetric(horizontal: 10),
-                          itemCount: _messages.length,
+                          itemCount: _messages!.length,
                           reverse: true,
                           itemBuilder: (BuildContext context, int index) {
-                            Message msg = _messages[index];
+                            Message msg = _messages![index];
                             return ChatBubble(
-                              message: msg.message,
-                              username: otherUser.name,
+                              message: msg.message!,
+                              username: otherUser.name!,
                               time: msg.timestamp != null
                                   ? formatTimestamp(msg.timestamp)
                                   : 'now',
-                              type: msg.type,
+                              type: msg.type!,
                               replyText: null,
                               isMe: msg.sender == Constants.currentUserID,
                               isGroup: false,
@@ -418,7 +416,7 @@ class _ConversationState extends State<Conversation>
                       color: MyColors.primaryColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey[500],
+                          color: Colors.grey[500]!,
                           offset: Offset(0.0, 1.5),
                           blurRadius: 4.0,
                         ),
@@ -477,7 +475,7 @@ class _ConversationState extends State<Conversation>
                                                     messageController.clear();
                                                     await DatabaseService
                                                         .sendMessage(
-                                                            widget.otherUid,
+                                                            widget.otherUid!,
                                                             'image',
                                                             url);
                                                     makeMessagesUnseen();
@@ -491,7 +489,7 @@ class _ConversationState extends State<Conversation>
                               },
                             ),
                             contentPadding: EdgeInsets.all(0),
-                            title: _currentStatus != RecordingStatus.Recording
+                            title: _isRecording != true
                                 ? TextField(
                                     cursorColor: Colors.white,
                                     focusNode: _focusNode,
@@ -529,7 +527,7 @@ class _ConversationState extends State<Conversation>
                                     ),
                                     maxLines: null,
                                   )
-                                : Text(recordTime),
+                                : Text(recordTime!),
                             trailing: _typing
                                 ? IconButton(
                                     icon: Icon(
@@ -539,7 +537,7 @@ class _ConversationState extends State<Conversation>
                                     onPressed: () async {
                                       messageController.clear();
                                       await DatabaseService.sendMessage(
-                                          widget.otherUid, 'text', messageText);
+                                          widget.otherUid!, 'text', messageText!);
                                     },
                                   )
                                 : GestureDetector(
@@ -574,21 +572,21 @@ class _ConversationState extends State<Conversation>
 
                                       if (isMicrophoneGranted) {
                                         setState(() {
-                                          _currentStatus =
-                                              RecordingStatus.Recording;
+                                          _isRecording =
+                                              true;
                                         });
                                         await initRecorder();
-                                        await recorder.startRecording();
+                                        await recorder!.startRecording();
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
                                       if (isMicrophoneGranted) {
                                         setState(() {
-                                          _currentStatus =
-                                              RecordingStatus.Stopped;
+                                          _isRecording =
+                                          false;
                                         });
                                         String result =
-                                            await recorder.stopRecording();
+                                            await recorder!.stopRecording()?? '';
 
                                         //Storage path is voice_messages/sender_id/receiver_id/file
                                         _url = await AppUtil().uploadFile(
@@ -597,7 +595,7 @@ class _ConversationState extends State<Conversation>
                                             'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
 
                                         await DatabaseService.sendMessage(
-                                            widget.otherUid, 'audio', _url);
+                                            widget.otherUid!, 'audio', _url);
                                       }
                                     },
                                     child: IconButton(
@@ -631,7 +629,8 @@ class _ConversationState extends State<Conversation>
   }
 
   Future<bool> _onBackBtnPressed() async {
-    var message = await DatabaseService.getLastMessage(widget.otherUid);
+    var message = await DatabaseService.getLastMessage(widget.otherUid!);
     Navigator.of(context).pop(message);
+    return true;
   }
 }

@@ -158,9 +158,9 @@ class _EmailChangePageState extends State<EmailChangePage> {
             AppUtil.showToast(language(
                 en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
           } else {
-            final BaseAuth auth = AuthProvider.of(context).auth;
-            User firebaseUser = await auth.signInWithEmailAndPassword(
-                Constants.currentFirebaseUser.email, _password);
+            final BaseAuth auth = AuthProvider.of(context)!.auth!;
+            User firebaseUser = (await auth.signInWithEmailAndPassword(
+                Constants.currentFirebaseUser!.email!, _password))!;
             if (firebaseUser == null) {
               AppUtil.showToast(
                   language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));

@@ -17,8 +17,8 @@ class AddSingerPage extends StatefulWidget {
 }
 
 class _AddSingerPageState extends State<AddSingerPage> {
-  File _singerImage;
-  File _coverImage;
+  late File _singerImage;
+  late File _coverImage;
 
   TextEditingController _singerController = TextEditingController();
   List<String> _categories = [];
@@ -27,7 +27,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
     QuerySnapshot categoriesSnapshot = await categoriesRef.get();
     for (DocumentSnapshot doc in categoriesSnapshot.docs) {
       setState(() {
-        _categories.add(doc.data()['name']);
+        _categories.add(doc.data()!['name']);
       });
     }
   }
@@ -38,7 +38,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
     super.initState();
   }
 
-  String _category;
+  late String _category;
   TextEditingController _categoryController = TextEditingController();
 
   @override
@@ -138,7 +138,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                   ),
                   Expanded(
                     flex: 8,
-                    child: DropdownButton(
+                    child: DropdownButton<dynamic>(
                       hint: Text('Category'),
                       value: _category,
                       onChanged: (text) {
@@ -165,8 +165,8 @@ class _AddSingerPageState extends State<AddSingerPage> {
                         return;
                       }
                       Navigator.of(context).pop();
-                      String imageUrl;
-                      String coverUrl;
+                      late String imageUrl;
+                      late String coverUrl;
                       String id = randomAlphaNumeric(20);
 
                       if (_singerImage != null) {
@@ -238,7 +238,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
 
               await categoriesRef.add({
                 'name': _categoryController.text,
-                'order': order ?? 1,
+                'order': order,
                 'search': searchList(_categoryController.text),
               });
               //AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));

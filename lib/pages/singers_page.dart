@@ -14,9 +14,9 @@ class SingersPage extends StatefulWidget {
 class _SingersPageState extends State<SingersPage> {
   List<Singer> _singers = [];
 
-  String lastVisiblePostSnapShot;
+  String? lastVisiblePostSnapShot;
 
-  ScrollController _singersScrollController;
+  ScrollController? _singersScrollController;
 
   getSingers() async {
     List<Singer> singers = await DatabaseService.getSingers();
@@ -27,7 +27,7 @@ class _SingersPageState extends State<SingersPage> {
   }
 
   nextSingers() async {
-    List<Singer> singers = await DatabaseService.getNextSingers(lastVisiblePostSnapShot);
+    List<Singer> singers = await DatabaseService.getNextSingers(lastVisiblePostSnapShot!);
     if (singers.length > 0) {
       setState(() {
         singers.forEach((element) => _singers.add(element));
@@ -38,14 +38,14 @@ class _SingersPageState extends State<SingersPage> {
 
   @override
   void initState() {
-    _singersScrollController
+    _singersScrollController!
       ..addListener(() {
-        if (_singersScrollController.offset >= _singersScrollController.position.maxScrollExtent &&
-            !_singersScrollController.position.outOfRange) {
+        if (_singersScrollController!.offset >= _singersScrollController!.position.maxScrollExtent &&
+            !_singersScrollController!.position.outOfRange) {
           print('reached the bottom');
           nextSingers();
-        } else if (_singersScrollController.offset <= _singersScrollController.position.minScrollExtent &&
-            !_singersScrollController.position.outOfRange) {
+        } else if (_singersScrollController!.offset <= _singersScrollController!.position.minScrollExtent &&
+            !_singersScrollController!.position.outOfRange) {
           print("reached the top");
         } else {}
       });

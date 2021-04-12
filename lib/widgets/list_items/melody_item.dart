@@ -10,13 +10,13 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 
 class MelodyItem extends StatefulWidget {
-  final Melody melody;
-  final BuildContext context;
-  final bool isRounded;
-  final double imageSize;
-  final double padding;
+  final Melody? melody;
+  final BuildContext? context;
+  final bool? isRounded;
+  final double? imageSize;
+  final double? padding;
   MelodyItem(
-      {Key key,
+      {Key? key,
       this.melody,
       this.context,
       this.isRounded = true,
@@ -29,16 +29,16 @@ class MelodyItem extends StatefulWidget {
 }
 
 class _MelodyItemState extends State<MelodyItem> {
-  User _author;
+  User? _author;
   bool _isFavourite = false;
 
-  List<String> choices;
+  List<String>? choices;
 
   TextEditingController _nameController = TextEditingController();
 
   @override
   void initState() {
-    if (widget.melody.authorId != null) {
+    if (widget.melody!.authorId != null) {
       getAuthor();
     }
     super.initState();
@@ -52,7 +52,7 @@ class _MelodyItemState extends State<MelodyItem> {
   }
 
   getAuthor() async {
-    User author = await DatabaseService.getUserWithId(widget.melody.authorId);
+    User author = await DatabaseService.getUserWithId(widget.melody!.authorId!);
     setState(() {
       _author = author;
     });
@@ -62,7 +62,7 @@ class _MelodyItemState extends State<MelodyItem> {
     bool isFavourite = (await usersRef
             .doc(Constants.currentUserID)
             .collection('favourites')
-            .doc(widget.melody.id)
+            .doc(widget.melody!.id)
             .get())
         .exists;
 
@@ -74,25 +74,25 @@ class _MelodyItemState extends State<MelodyItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(widget.padding),
+      padding: EdgeInsets.all(widget.padding!),
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(.1),
-          borderRadius: widget.isRounded ? BorderRadius.circular(20.0) : null,
+          borderRadius: widget.isRounded! ? BorderRadius.circular(20.0) : null,
         ),
         child: ListTile(
           leading: CachedImage(
-            width: widget.imageSize,
-            height: widget.imageSize,
-            imageUrl: widget.melody.imageUrl,
+            width: widget.imageSize!,
+            height: widget.imageSize!,
+            imageUrl: widget.melody!.imageUrl!,
             imageShape: BoxShape.rectangle,
             defaultAssetImage: Strings.default_melody_image,
           ),
-          title: Text(widget.melody.name ?? '',
+          title: Text(widget.melody!.name ?? '',
               style: TextStyle(color: MyColors.textLightColor)),
           subtitle: Text(
-            _author?.name ?? widget.melody.singer ?? '',
+            _author?.name ?? widget.melody!.singer ?? '',
             style: TextStyle(color: MyColors.textLightColor),
           ),
           trailing: widget.melody?.isSong ?? false
@@ -101,9 +101,9 @@ class _MelodyItemState extends State<MelodyItem> {
                       AppUtil.executeFunctionIfLoggedIn(context, () async {
                     _isFavourite
                         ? await DatabaseService.deleteMelodyFromFavourites(
-                            widget.melody.id)
+                            widget.melody!.id!)
                         : await DatabaseService.addMelodyToFavourites(
-                            widget.melody.id);
+                            widget.melody!.id!);
 
                     await isFavourite();
                   }),

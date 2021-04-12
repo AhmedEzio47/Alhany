@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:stripe_payment/stripe_payment.dart';
 
 class StripeTransactionResponse {
-  String message;
-  bool success;
+  String? message;
+  bool? success;
   StripeTransactionResponse({this.message, this.success});
 }
 
@@ -23,14 +23,14 @@ class PaymentService {
 
   static Future<StripeTransactionResponse> payViaCreditCard(
       BuildContext context,
-      {String amount,
-      String currency}) async {
+      {String? amount,
+      String? currency}) async {
     try {
       PaymentMethod paymentMethod = await _paymentRequestWithCardForm();
       var paymentIntentMap = await _createPaymentIntent(
-          (double.parse(amount) * 100).toStringAsFixed(0), currency);
+          (double.parse(amount!) * 100).toStringAsFixed(0), currency!);
       PaymentIntent paymentIntent = PaymentIntent(
-          clientSecret: paymentIntentMap['client_secret'],
+          clientSecret: paymentIntentMap!['client_secret'],
           paymentMethodId: paymentMethod.id);
 
       PaymentIntentResult result = await _confirmPaymentIntent(paymentIntent);
@@ -70,7 +70,7 @@ class PaymentService {
     return token;
   }
 
-  static Future<Map<String, dynamic>> _createPaymentIntent(
+  static Future<Map<String, dynamic>?> _createPaymentIntent(
       String amount, String currency) async {
     try {
       Map<String, dynamic> body = {
@@ -79,7 +79,7 @@ class PaymentService {
         'payment_method_types[]': 'card'
       };
       var response =
-          await http.post(paymentApiUrl, body: body, headers: headers);
+          await http.post(Uri.parse(paymentApiUrl), body: body, headers: headers);
       return jsonDecode(response.body);
     } catch (error) {
       print(error.toString());

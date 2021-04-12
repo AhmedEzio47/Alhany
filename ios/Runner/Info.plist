@@ -58,6 +58,8 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+	    <key>NSAllowsLocalNetworking</key>
+        <true/>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSAllowsArbitraryLoadsForMedia</key>
