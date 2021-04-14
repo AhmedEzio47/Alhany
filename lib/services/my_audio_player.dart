@@ -1,42 +1,52 @@
+
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
-import 'package:Alhany/services/audio_recorder.dart';
-import 'package:audioplayers/audio_cache.dart';
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audio_cache.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+import 'package:just_audio/just_audio.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
-  AudioCache audioCache;
+  //AudioCache audioCache;
 
-  AudioPlayerState playerState = AudioPlayerState.STOPPED;
+  get isPlaying => advancedPlayer.playing;
 
   Duration duration;
   Duration position;
-
-  final String url;
   final List<String> urlList;
   final Function onComplete;
+  final Function onPlayingStarted;
   final bool isLocal;
 
   MyAudioPlayer(
-      {this.url, this.urlList, this.isLocal = false, this.onComplete}) {
+      {this.urlList,
+        this.isLocal = false,
+        this.onComplete,
+        this.onPlayingStarted}) {
     initAudioPlayer();
   }
 
   int index = 0;
 
-  initAudioPlayer() {
+  bool onPlayingStartedCalled = false;
+
+  initAudioPlayer() async {
     advancedPlayer = AudioPlayer();
-    audioCache = AudioCache(fixedPlayer: advancedPlayer);
+    //audioCache = AudioCache(fixedPlayer: advancedPlayer);
+    if (isLocal)
+      duration = await advancedPlayer.setFilePath(urlList[index]);
+    else
+      duration = await advancedPlayer.setUrl(urlList[index]);
 
-    advancedPlayer.durationHandler = (d) {
-      duration = d;
-      notifyListeners();
-      // print('my duration:$duration');
-    };
-
-    advancedPlayer.positionHandler = (p) {
+    advancedPlayer.positionStream.listen((p) {
+      if (onPlayingStarted != null) {
+        if (p > Duration(microseconds: 1) && !onPlayingStartedCalled) {
+          onPlayingStarted();
+          onPlayingStartedCalled = true;
+        }
+      }
       position = p;
       print('P:${p.inMilliseconds}');
       print('D:${duration.inMilliseconds}');
@@ -45,7 +55,7 @@ class MyAudioPlayer with ChangeNotifier {
       if (duration.inMilliseconds - p.inMilliseconds <
           Constants.endPositionOffsetInMilliSeconds) {
         stop();
-        if (urlList != null) {
+        if (urlList.length > 1) {
           if (this.index < urlList.length - 1)
             this.index++;
           else
@@ -56,7 +66,7 @@ class MyAudioPlayer with ChangeNotifier {
           stop();
         }
       } else if (duration.inMilliseconds - p.inMilliseconds == 0) {
-        if (urlList != null) {
+        if (urlList.length > 1) {
           if (this.index < urlList.length - 1)
             this.index++;
           else
@@ -67,24 +77,24 @@ class MyAudioPlayer with ChangeNotifier {
           stop();
         }
       }
-    };
+    });
   }
 
-  Future play({index}) async {
-    print('audio url: $url');
+  Future play({index = 0}) async {
     if (index == null) {
       index = this.index;
     }
-    await advancedPlayer.play(url ?? urlList[index], isLocal: isLocal);
-    playerState = AudioPlayerState.PLAYING;
+
+    await advancedPlayer.play();
+
     notifyListeners();
   }
 
   Future stop() async {
-    await advancedPlayer.stop();
-    playerState = AudioPlayerState.STOPPED;
-    position = null;
-    duration = null;
+    await advancedPlayer.pause();
+    await advancedPlayer.seek(Duration.zero);
+    // position = null;
+    // duration = null;
     notifyListeners();
     if (onComplete != null &&
         MelodyPage.recordingStatus == RecordingStatus.Recording) {
@@ -94,7 +104,6 @@ class MyAudioPlayer with ChangeNotifier {
 
   Future pause() async {
     await advancedPlayer.pause();
-    playerState = AudioPlayerState.PAUSED;
     notifyListeners();
   }
 

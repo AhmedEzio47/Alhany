@@ -11,7 +11,7 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +28,7 @@ enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
-  final String url;
+  //final String url;
   final List<Melody> melodyList;
   final Color backColor;
   final Function onComplete;
@@ -44,7 +44,7 @@ class MusicPlayer extends StatefulWidget {
 
   MusicPlayer(
       {Key key,
-      this.url,
+      //this.url,
       this.backColor,
       this.onComplete,
       this.isLocal = false,
@@ -67,8 +67,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   MyAudioPlayer myAudioPlayer;
 
-  get isPlaying => myAudioPlayer.playerState == AudioPlayerState.PLAYING;
-  get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
+  get isPlaying => myAudioPlayer.isPlaying;
+  //get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
   get durationText => myAudioPlayer.duration != null
       ? myAudioPlayer.duration.toString().split('.').first
@@ -141,7 +141,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       }
     }
     myAudioPlayer = MyAudioPlayer(
-        url: widget.url,
+        //url: widget.url,
         urlList: urlList,
         isLocal: widget.isLocal,
         onComplete: widget.onComplete);

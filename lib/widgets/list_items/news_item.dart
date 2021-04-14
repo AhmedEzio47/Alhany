@@ -413,7 +413,7 @@ class _NewsItemState extends State<NewsItem> {
         );
       case 'audio':
         return MusicPlayer(
-          url: widget.news.contentUrl,
+          urlList: [widget.news.contentUrl],
           backColor: Colors.transparent,
           btnSize: 26,
           initialDuration: widget.news.duration,
