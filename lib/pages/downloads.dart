@@ -8,9 +8,11 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+//import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/music_player.dart';
 
 class DownloadsPage extends StatefulWidget {
   @override
@@ -93,40 +95,55 @@ class _DownloadsPageState extends State<DownloadsPage> {
                           context,
                           height: 50,
                         ),
-                        _downloads.length > 0
-                            ? ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: _downloads.length,
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () async {
-                                      setState(() {
-                                        _isPlaying = true;
-                                      });
-
-                                      AppUtil.showLoader(context);
-                                      await playSong(index);
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: MelodyItem(
-                                      //Solves confusion between songs and melodies when adding to favourites
-                                      key: ValueKey('song_item'),
-                                      melody: _downloads[index],
-                                    ),
-                                  );
-                                })
-                            : Padding(
+                        authStatus == AuthStatus.NOT_LOGGED_IN
+                            ? Padding(
                                 padding: EdgeInsets.only(
                                     top:
                                         MediaQuery.of(context).size.height / 2 -
-                                            40),
+                                            50),
                                 child: Text(
-                                  'No downloads yet!',
-                                  style: TextStyle(
-                                      color: MyColors.textLightColor,
-                                      fontSize: 18),
+                                  language(
+                                      en: 'Please log in to see page content',
+                                      ar: 'من فضلك قم بتسجيل الدخول لترى محتوى الصفحة'),
+                                  style:
+                                      TextStyle(color: MyColors.textLightColor),
                                 ),
-                              ),
+                              )
+                            : _downloads.length > 0
+                                ? ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: _downloads.length,
+                                    itemBuilder: (context, index) {
+                                      return InkWell(
+                                        onTap: () async {
+                                          setState(() {
+                                            _isPlaying = true;
+                                          });
+
+                                          AppUtil.showLoader(context);
+                                          await playSong(index);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: MelodyItem(
+                                          //Solves confusion between songs and melodies when adding to favourites
+                                          key: ValueKey('song_item'),
+                                          melody: _downloads[index],
+                                        ),
+                                      );
+                                    })
+                                : Padding(
+                                    padding: EdgeInsets.only(
+                                        top:
+                                            MediaQuery.of(context).size.height /
+                                                    2 -
+                                                40),
+                                    child: Text(
+                                      'No downloads yet!',
+                                      style: TextStyle(
+                                          color: MyColors.textLightColor,
+                                          fontSize: 18),
+                                    ),
+                                  ),
                       ],
                     ),
                   ),

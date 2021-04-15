@@ -12,9 +12,12 @@ import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
+//import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:camera/camera.dart';
+//import 'package:easy_pip/easy_pip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -24,6 +27,7 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import 'package:path/path.dart' as path;
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
+//import 'package:pip_view/pip_view.dart';
 import 'package:random_string/random_string.dart';
 import 'package:screen/screen.dart';
 import 'package:video_player/video_player.dart' as video_player;
@@ -51,7 +55,7 @@ class _MelodyPageState extends State<MelodyPage> {
   bool isMicrophoneGranted = false;
 
   RecordingStatus recordingStatus = RecordingStatus.Unset;
-  MusicPlayer melodyPlayer;
+  Widget melodyPlayer;
   AudioRecorder recorder;
 
   String recordingFilePath;
@@ -86,7 +90,7 @@ class _MelodyPageState extends State<MelodyPage> {
     const oneSec = const Duration(seconds: 1);
     Timer.periodic(
       oneSec,
-      (Timer timer) {
+          (Timer timer) {
         if (_countDownStart == 0) {
           setState(() {
             _countDownText = 'GO';
@@ -146,7 +150,7 @@ class _MelodyPageState extends State<MelodyPage> {
       melodyPath = filePath;
       if (_type == Types.AUDIO) {
         mergedFilePath +=
-            '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+        '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
       } else {
         mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new.mp4';
       }
@@ -337,7 +341,7 @@ class _MelodyPageState extends State<MelodyPage> {
       print('started video recording');
       try {
         await _initializeControllerFuture;
-        await cameraController.startVideoRecording(recordingFilePath);
+        await cameraController.startVideoRecording();
       } catch (ex) {
         AppUtil.showToast(language(
             en: 'Unexpected error, please try again',
@@ -421,8 +425,14 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future saveRecord() async {
+//    Constants.ongoingEncoding = true;
+    // Singer singer =
+    //     await DatabaseService.getSingerWithName(widget.melody.singer);
+    //PIPView.of(_context).presentBelow(MyApp());
+
     setState(() {
       recordingStatus = RecordingStatus.Stopped;
+      //_isFloating = true;
     });
     MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
@@ -434,9 +444,10 @@ class _MelodyPageState extends State<MelodyPage> {
         recordingFilePath = result;
         // String url = await AppUtil().uploadFile(File(recordingFilePath),
         //     context, 'tests/test${path.extension(recordingFilePath)}');
-        // print('test url:' + url);
+        print('recorded path:' + result);
       } else {
-        await cameraController.stopVideoRecording();
+        XFile result = await cameraController.stopVideoRecording();
+        recordingFilePath = result.path;
       }
     } catch (ex) {
       AppUtil.showToast(language(
@@ -479,10 +490,10 @@ class _MelodyPageState extends State<MelodyPage> {
       //     ? 'Added 1 s silence Failure!'
       //     : 'Added 1 s silence Success!');
 
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation('$recordingFilePath');
-      _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
-      _recordingDuration = double.parse(info.getMediaProperties()['duration']);
+      // MediaInformation info =
+      //     await _flutterFFprobe.getMediaInformation('$recordingFilePath');
+      // _flutterFFmpegConfig.enableStatisticsCallback(this.statisticsCallback);
+      // _recordingDuration = double.parse(info.getMediaProperties()['duration']);
 
       if (mounted) {
         setState(() {
@@ -535,13 +546,13 @@ class _MelodyPageState extends State<MelodyPage> {
       // }
       // MERGE VIDEO WITH FINAL AUDIO
       success = await flutterFFmpeg.execute(
-          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v copy -c:a libmp3lame -shortest ${appTempDirectoryPath}final_video.mp4');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -ac 2 -map 1:v -map [out] -c:v libx264 -preset veryfast -c:a libmp3lame -shortest $mergedFilePath');
       print(success == 1 ? 'FINAL Failure!' : 'FINAL Success!');
 
       //Scale video
-      success = await flutterFFmpeg.execute(
-          "-i ${appTempDirectoryPath}final_video.mp4 -map 0 -af \"equalizer=f=440:width_type=o:width=2:g=2\" -vf \"scale=720:trunc(ow/a/2)*2\" $mergedFilePath");
-      print(success == 1 ? 'SCALE Failure!' : 'SCALE Success!');
+      // success = await flutterFFmpeg.execute(
+      //     "-i ${appTempDirectoryPath}final_video.mp4 -map 0 -af \"equalizer=f=440:width_type=o:width=2:g=2\" -vf \"scale=720:trunc(ow/a/2)*2\" $mergedFilePath");
+      // print(success == 1 ? 'SCALE Failure!' : 'SCALE Success!');
 
       success = await flutterFFmpeg.execute(
           "-y -i $mergedFilePath -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");
@@ -554,7 +565,7 @@ class _MelodyPageState extends State<MelodyPage> {
     int duration;
     try {
       MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(mergedFilePath);
+      await _flutterFFprobe.getMediaInformation(mergedFilePath);
       duration = double.parse(info.getMediaProperties()['duration'].toString())
           .toInt();
     } catch (error) {
@@ -562,16 +573,16 @@ class _MelodyPageState extends State<MelodyPage> {
     }
 
     if (_type == Types.AUDIO) {
-      Melody melody = Melody(
-          id: '',
-          isSong: false,
-          duration: duration,
-          name: 'preview',
-          singer: 'Me',
-          audioUrl: mergedFilePath);
       melodyPlayer = MusicPlayer(
         key: ValueKey('preview'),
-        melodyList: [melody],
+        melodyList: [
+          Melody(
+              audioUrl: mergedFilePath,
+              name: 'Preview',
+              singer: 'Preview',
+              imageUrl: Strings.default_melody_image,
+              duration: duration)
+        ],
         isLocal: true,
         backColor: MyColors.primaryColor,
         initialDuration: duration,
@@ -607,34 +618,34 @@ class _MelodyPageState extends State<MelodyPage> {
   Widget playPauseBtn() {
     return !_isVideoPlaying
         ? InkWell(
-            onTap: () => _videoController.value.isPlaying
-                ? null
-                : setState(() {
-                    _isVideoPlaying = true;
-                    _videoController.play();
-                  }),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.play_arrow,
-                size: 35,
-                color: MyColors.primaryColor,
-              ),
+      onTap: () => _videoController.value.isPlaying
+          ? null
+          : setState(() {
+        _isVideoPlaying = true;
+        _videoController.play();
+      }),
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey.shade300,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black54,
+              spreadRadius: 2,
+              blurRadius: 4,
+              offset: Offset(0, 2), // changes position of shadow
             ),
-          )
+          ],
+        ),
+        child: Icon(
+          Icons.play_arrow,
+          size: 35,
+          color: MyColors.primaryColor,
+        ),
+      ),
+    )
         : Container();
   }
 
@@ -704,8 +715,16 @@ class _MelodyPageState extends State<MelodyPage> {
 
   double _progress = 0;
   submitRecord() async {
-    AppUtil.showLoader(context,
-        message: language(en: 'Uploading video', ar: 'جاري الآن رفع الفيديو'));
+    //PIPView.of(_context).presentBelow(MyApp());
+
+    // AppUtil.showLoader(context,
+    //     message: language(en: 'Uploading video', ar: 'جاري الآن رفع الفيديو'));
+    AppUtil.showFixedSnackBar(
+        context,
+        _scaffoldKey,
+        language(
+            en: 'Please hold on, uploading video',
+            ar: 'برجاء الإنتظار جاري رفع الفيديو'));
     setState(() {
       _progressVisible = true;
     });
@@ -746,7 +765,7 @@ class _MelodyPageState extends State<MelodyPage> {
     MediaInformation info = await _flutterFFprobe.getMediaInformation(
         _type == Types.VIDEO ? mergedFilePath : imageVideoPath);
     int duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+    double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
     await DatabaseService.submitRecord(
         widget.melody.id, recordId, url, thumbnailUrl, duration);
@@ -845,7 +864,6 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       melodyPlayer = new MusicPlayer(
         key: ValueKey('main'),
-        //url: url,
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
         initialDuration: widget.melody.duration,
@@ -860,65 +878,69 @@ class _MelodyPageState extends State<MelodyPage> {
       onWillPop: _onBackPressed,
       child: SafeArea(
         child: Scaffold(
+          //resizeToAvoidBottomInset: !isFloating,
           key: _scaffoldKey,
           backgroundColor: Colors.black,
           body: choosingImage
               ? choosingImagePage(context)
               : _progressVisible
-                  ? progressPage()
-                  : recordingStatus == RecordingStatus.Recording &&
-                          _type == Types.VIDEO
-                      ? videoRecordingPage()
-                      : mainPage(),
+              ? progressPage()
+              : recordingStatus == RecordingStatus.Recording &&
+              _type == Types.VIDEO
+              ? videoRecordingPage()
+              : mainPage(),
           floatingActionButton: !_progressVisible && !choosingImage
               ? FloatingActionButton(
-                  onPressed: () async {
-                    if (recordingStatus == RecordingStatus.Recording) {
-                      await saveRecord();
-                    } else {
-                      if ((await PermissionsService().hasStoragePermission()) &&
-                          (await PermissionsService()
-                              .hasMicrophonePermission())) {
-                        await createAppFolder();
-                        //await AppUtil.createAppDirectory();
-                        recordingFilePath = appTempDirectoryPath;
-                        melodyPath = appTempDirectoryPath;
-                        mergedFilePath = appTempDirectoryPath;
-                        await _downloadMelody();
+            onPressed: () async {
+              if (AudioService.running) AudioService.pause();
+              if (recordingStatus == RecordingStatus.Recording) {
+                await saveRecord();
+              } else {
+                if ((await PermissionsService().hasStoragePermission()) &&
+                    (await PermissionsService()
+                        .hasMicrophonePermission())) {
+                  await createAppFolder();
+                  //await AppUtil.createAppDirectory();
+                  recordingFilePath = appTempDirectoryPath;
+                  melodyPath = appTempDirectoryPath;
+                  mergedFilePath = appTempDirectoryPath;
+                  await _downloadMelody();
 
-                        Navigator.of(context).push(CustomModal(
-                          child: _headphonesDialog(),
-                        ));
-                      }
-                      if (!await PermissionsService().hasStoragePermission()) {
-                        await PermissionsService().requestStoragePermission(
-                          context,
-                        );
-                      }
-                      if (!await PermissionsService()
-                          .hasMicrophonePermission()) {
-                        await PermissionsService().requestMicrophonePermission(
-                          context,
-                        );
-                      }
-                    }
-                  },
-                  child: Icon(
-                    recordingStatus == RecordingStatus.Recording
-                        ? Icons.stop
-                        : _type == Types.VIDEO
-                            ? Icons.videocam
-                            : Icons.mic,
-                    color: MyColors.primaryColor,
-                    size: 30,
-                  ),
-                )
+                  Navigator.of(context).push(CustomModal(
+                    child: _headphonesDialog(),
+                  ));
+                }
+                if (!await PermissionsService().hasStoragePermission()) {
+                  await PermissionsService().requestStoragePermission(
+                    context,
+                  );
+                }
+                if (!await PermissionsService()
+                    .hasMicrophonePermission()) {
+                  await PermissionsService().requestMicrophonePermission(
+                    context,
+                  );
+                }
+              }
+            },
+            child: Icon(
+              recordingStatus == RecordingStatus.Recording
+                  ? Icons.stop
+                  : _type == Types.VIDEO
+                  ? Icons.videocam
+                  : Icons.mic,
+              color: MyColors.primaryColor,
+              size: 30,
+            ),
+          )
               : null,
         ),
       ),
     );
   }
 
+  BuildContext _context;
+  // bool _canFloat = false;
   bool _isPreviewVideoPlaying = false;
   choosingImagePage(BuildContext context) {
     return Container(
@@ -935,89 +957,150 @@ class _MelodyPageState extends State<MelodyPage> {
         child: Container(
           child: _type == Types.AUDIO
               ? SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      melodyPlayer ?? Container(),
-                      SizedBox(
-                        height: 10,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                melodyPlayer ?? Container(),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    RaisedButton(
+                      onPressed: imageVideoPath == null
+                          ? () async {
+                        //Constants.ongoingEncoding = false;
+
+                        _image = await AppUtil
+                            .pickCompressedImageFromGallery();
+                        //PIPView.of(_context).presentBelow(MyApp());
+                        // setState(() {
+                        //   _isFloating = true;
+                        // });
+
+                        // FileStat s = await pickedImage.stat();
+                        //
+                        // print('Non-Compressed file: ${s.size}');
+                        //
+                        // _image = await FlutterImageCompress
+                        //     .compressAndGetFile(
+                        //   pickedImage.absolute.path,
+                        //   '$appTempDirectoryPath/${path.basename(pickedImage.absolute.path)}',
+                        //   quality: 50,
+                        // );
+                        //
+                        // s = await _image.stat();
+                        // print('Compressed file size: ${s.size}');
+
+                        setState(() {
+                          imageVideoPath =
+                          '${path.withoutExtension(mergedFilePath)}.mp4';
+                        });
+                        setState(() {
+                          _progressVisible = true;
+                          choosingImage = false;
+                        });
+                        _flutterFFmpegConfig
+                            .enableStatisticsCallback(
+                            this.statisticsCallback);
+                        print(
+                            'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
+                        int success = await flutterFFmpeg.execute(
+                            '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=480:trunc(ow/a/2)*2\" -c:v libx264 -preset veryfast -c:a copy -shortest $imageVideoPath');
+                        print('conversion success:$success');
+                        if (success != 0) {
+                          AppUtil.showToast(language(
+                              en: 'Unexpected error, please try another image',
+                              ar: 'حدث خطأ، من فضلك قم بتجربة صورة أخرى'));
+                          Navigator.of(context).pop();
+                          return;
+                        }
+
+                        if (_image == null) {
+                          AppUtil.showToast(language(
+                              en: 'Please choose an image',
+                              ar: 'من فضلك اختر صورة'));
+                          return;
+                        }
+                        setState(() {
+                          choosingImage = false;
+                          _progressVisible = true;
+                        });
+                        await submitRecord();
+                        setState(() {
+                          _progressVisible = false;
+                        });
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, "/", (r) => false);
+                        // setState(() {
+                        //   _progressVisible = false;
+                        //   choosingImage = true;
+                        // });
+                      }
+                          : null,
+                      color: MyColors.accentColor,
+                      child: Text(
+                        imageVideoPath == null
+                            ? language(
+                            en: 'Choose Image & Submit',
+                            ar: 'اختيار صورة')
+                            : language(en: 'Done', ar: 'تم'),
+                        style: TextStyle(color: MyColors.textDarkColor),
                       ),
-                      Row(
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    RaisedButton(
+                      onPressed: () async {
+                        //Constants.ongoingEncoding = false;
+                        await AppUtil.deleteFiles();
+                        Navigator.of(context).pop();
+                      },
+                      color: MyColors.accentColor,
+                      child: Text(
+                        language(en: 'Cancel', ar: 'إلغاء'),
+                        style: TextStyle(color: MyColors.textDarkColor),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          )
+              : Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: _videoController.value.aspectRatio,
+                child: video_player.VideoPlayer(_videoController),
+              ),
+              Positioned.fill(
+                  child: Align(
+                    child: playPauseBtn(),
+                    alignment: Alignment.center,
+                  )),
+              Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           RaisedButton(
-                            onPressed: imageVideoPath == null
-                                ? () async {
-                                    _image = await AppUtil
-                                        .pickCompressedImageFromGallery();
-                                    // FileStat s = await pickedImage.stat();
-                                    //
-                                    // print('Non-Compressed file: ${s.size}');
-                                    //
-                                    // _image = await FlutterImageCompress
-                                    //     .compressAndGetFile(
-                                    //   pickedImage.absolute.path,
-                                    //   '$appTempDirectoryPath/${path.basename(pickedImage.absolute.path)}',
-                                    //   quality: 50,
-                                    // );
-                                    //
-                                    // s = await _image.stat();
-                                    // print('Compressed file size: ${s.size}');
+                            onPressed: () async {
+                              //Constants.ongoingEncoding = false;
 
-                                    setState(() {
-                                      imageVideoPath =
-                                          '${path.withoutExtension(mergedFilePath)}.mp4';
-                                    });
-                                    setState(() {
-                                      _progressVisible = true;
-                                      choosingImage = false;
-                                    });
-                                    _flutterFFmpegConfig
-                                        .enableStatisticsCallback(
-                                            this.statisticsCallback);
-                                    print(
-                                        'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
-                                    int success = await flutterFFmpeg.execute(
-                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:trunc(ow/a/2)*2,format=yuv420p\" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath');
-                                    print('conversion success:$success');
-                                    if (success != 0) {
-                                      AppUtil.showToast(language(
-                                          en: 'Unexpected error, please try another image',
-                                          ar: 'حدث خطأ، من فضلك قم بتجربة صورة أخرى'));
-                                      Navigator.of(context).pop();
-                                      return;
-                                    }
-
-                                    if (_image == null) {
-                                      AppUtil.showToast(language(
-                                          en: 'Please choose an image',
-                                          ar: 'من فضلك اختر صورة'));
-                                      return;
-                                    }
-                                    setState(() {
-                                      choosingImage = false;
-                                      _progressVisible = true;
-                                    });
-                                    await submitRecord();
-                                    setState(() {
-                                      _progressVisible = false;
-                                    });
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context, "/", (r) => false);
-                                    // setState(() {
-                                    //   _progressVisible = false;
-                                    //   choosingImage = true;
-                                    // });
-                                  }
-                                : null,
+                              //Navigator.of(context).pop(false);
+                              await submitRecord();
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, "/", (r) => false);
+                            },
                             color: MyColors.accentColor,
                             child: Text(
-                              imageVideoPath == null
-                                  ? language(
-                                      en: 'Choose Image & Submit',
-                                      ar: 'اختيار صورة')
-                                  : language(en: 'Done', ar: 'تم'),
+                              language(en: 'Submit', ar: 'رفع'),
                               style: TextStyle(color: MyColors.textDarkColor),
                             ),
                           ),
@@ -1026,6 +1109,9 @@ class _MelodyPageState extends State<MelodyPage> {
                           ),
                           RaisedButton(
                             onPressed: () async {
+                              //Constants.ongoingEncoding = false;
+
+                              await _videoController.pause();
                               await AppUtil.deleteFiles();
                               Navigator.of(context).pop();
                             },
@@ -1036,64 +1122,12 @@ class _MelodyPageState extends State<MelodyPage> {
                             ),
                           ),
                         ],
-                      )
-                    ],
-                  ),
-                )
-              : Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: _videoController.value.aspectRatio,
-                      child: video_player.VideoPlayer(_videoController),
-                    ),
-                    Positioned.fill(
-                        child: Align(
-                      child: playPauseBtn(),
-                      alignment: Alignment.center,
-                    )),
-                    Positioned.fill(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Align(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            RaisedButton(
-                              onPressed: () async {
-                                //Navigator.of(context).pop(false);
-                                await submitRecord();
-                                Navigator.pushNamedAndRemoveUntil(
-                                    context, "/", (r) => false);
-                              },
-                              color: MyColors.accentColor,
-                              child: Text(
-                                language(en: 'Submit', ar: 'رفع'),
-                                style: TextStyle(color: MyColors.textDarkColor),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            RaisedButton(
-                              onPressed: () async {
-                                await _videoController.pause();
-                                await AppUtil.deleteFiles();
-                                Navigator.of(context).pop();
-                              },
-                              color: MyColors.accentColor,
-                              child: Text(
-                                language(en: 'Cancel', ar: 'إلغاء'),
-                                style: TextStyle(color: MyColors.textDarkColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.bottomCenter,
                       ),
-                    )),
-                  ],
-                ),
+                      alignment: Alignment.bottomCenter,
+                    ),
+                  )),
+            ],
+          ),
         ),
       ),
     );
@@ -1109,7 +1143,8 @@ class _MelodyPageState extends State<MelodyPage> {
               // If the Future is complete, display the preview.
               return Center(
                 child: AspectRatio(
-                    aspectRatio: cameraController?.value?.aspectRatio ?? 16 / 9,
+                    aspectRatio:
+                    1 / cameraController?.value?.aspectRatio ?? 16 / 9,
                     child: CameraPreview(cameraController)),
               );
             } else {
@@ -1129,7 +1164,7 @@ class _MelodyPageState extends State<MelodyPage> {
                   child: HtmlWidget(
                     widget.melody.lyrics ?? '',
                     textStyle:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     customStylesBuilder: (e) {
                       return {'text-align': 'center', 'line-height': '85%'};
                     },
@@ -1193,30 +1228,30 @@ class _MelodyPageState extends State<MelodyPage> {
                   ),
                   widget.melody.levelUrls != null
                       ? DropdownButton(
-                          dropdownColor: MyColors.lightPrimaryColor,
-                          iconEnabledColor: MyColors.iconLightColor,
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 16),
-                          value: Constants.currentMelodyLevel ?? _dropdownValue,
-                          onChanged: (choice) async {
-                            Constants.currentMelodyLevel = choice;
-                            Navigator.of(context).pushReplacementNamed(
-                                '/melody-page',
-                                arguments: {
-                                  'melody': widget.melody,
-                                });
-                          },
-                          items: (widget.melody.levelUrls.keys.toList())
-                              .map<DropdownMenuItem<dynamic>>((dynamic value) {
-                            return DropdownMenuItem<dynamic>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        )
+                    dropdownColor: MyColors.lightPrimaryColor,
+                    iconEnabledColor: MyColors.iconLightColor,
+                    style: TextStyle(
+                        color: MyColors.textLightColor, fontSize: 16),
+                    value: Constants.currentMelodyLevel ?? _dropdownValue,
+                    onChanged: (choice) async {
+                      Constants.currentMelodyLevel = choice;
+                      Navigator.of(context).pushReplacementNamed(
+                          '/melody-page',
+                          arguments: {
+                            'melody': widget.melody,
+                          });
+                    },
+                    items: (widget.melody.levelUrls.keys.toList())
+                        .map<DropdownMenuItem<dynamic>>((dynamic value) {
+                      return DropdownMenuItem<dynamic>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  )
                       : SizedBox(
-                          width: 50,
-                        )
+                    width: 50,
+                  )
                 ],
               ),
               SizedBox(
@@ -1259,69 +1294,69 @@ class _MelodyPageState extends State<MelodyPage> {
           ),
           _countDownVisible
               ? Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.black45,
-                    alignment: Alignment.center,
-                    child: Container(
-                      color: MyColors.accentColor,
-                      height: 200,
-                      width: MediaQuery.of(context).size.width - 50,
-                      child: Center(
-                        child: Text(
-                          _countDownText,
-                          style: TextStyle(fontSize: 34),
-                        ),
-                      ),
-                    ),
+            alignment: Alignment.center,
+            child: Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.black45,
+              alignment: Alignment.center,
+              child: Container(
+                color: MyColors.accentColor,
+                height: 200,
+                width: MediaQuery.of(context).size.width - 50,
+                child: Center(
+                  child: Text(
+                    _countDownText,
+                    style: TextStyle(fontSize: 34),
                   ),
-                )
+                ),
+              ),
+            ),
+          )
               : Container(),
           Positioned.fill(
               child: Padding(
-            padding: const EdgeInsets.only(top: 80, left: 15),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                '${language(en: 'Views', ar: 'مشاهدات')}: ${widget.melody.views ?? 0}',
-                style: TextStyle(color: MyColors.textLightColor),
-              ),
-            ),
-          )),
+                padding: const EdgeInsets.only(top: 80, left: 15),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    '${language(en: 'Views', ar: 'مشاهدات')}: ${widget.melody.views ?? 0}',
+                    style: TextStyle(color: MyColors.textLightColor),
+                  ),
+                ),
+              )),
           Positioned.fill(
               child: Padding(
-            padding: const EdgeInsets.only(top: 70, right: 10),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: DropdownButton(
-                dropdownColor: MyColors.lightPrimaryColor,
-                iconEnabledColor: MyColors.iconLightColor,
-                style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
-                value: _type,
-                items: [
-                  DropdownMenuItem(
-                    child: Text(language(en: 'Audio', ar: 'صوت')),
-                    value: Types.AUDIO,
+                padding: const EdgeInsets.only(top: 70, right: 10),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: DropdownButton(
+                    dropdownColor: MyColors.lightPrimaryColor,
+                    iconEnabledColor: MyColors.iconLightColor,
+                    style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
+                    value: _type,
+                    items: [
+                      DropdownMenuItem(
+                        child: Text(language(en: 'Audio', ar: 'صوت')),
+                        value: Types.AUDIO,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(language(en: 'Video', ar: 'فيديو')),
+                        value: Types.VIDEO,
+                      ),
+                    ],
+                    onChanged: (type) async {
+                      setState(() {
+                        _type = type;
+                      });
+                      print('Type: $_type');
+                      if (_type == Types.VIDEO) {
+                        await _initCamera();
+                      }
+                    },
                   ),
-                  DropdownMenuItem(
-                    child: Text(language(en: 'Video', ar: 'فيديو')),
-                    value: Types.VIDEO,
-                  ),
-                ],
-                onChanged: (type) async {
-                  setState(() {
-                    _type = type;
-                  });
-                  print('Type: $_type');
-                  if (_type == Types.VIDEO) {
-                    await _initCamera();
-                  }
-                },
-              ),
-            ),
-          )),
+                ),
+              )),
         ],
       ),
     );
@@ -1376,7 +1411,9 @@ class _MelodyPageState extends State<MelodyPage> {
     num counter = 0;
     Timer.periodic(
       oneSec,
-      (timer) {
+          (timer) {
+        if (counter > (_recordingDuration ?? 0).toDouble())
+          _recordingDuration = counter.toDouble();
         //TODO trial
         // if (recordingStatus == RecordingStatus.Stopped) {
         //   timer.cancel();
@@ -1398,7 +1435,7 @@ class _MelodyPageState extends State<MelodyPage> {
           try {
             setState(() {
               _recordingText =
-                  '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
+              '${(counter ~/ 60).toInt()} : ${counter % 60} / ${_duration ~/ 60} : ${_duration % 60}';
             });
           } catch (ex) {
             timer.cancel();
@@ -1482,6 +1519,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController = CameraController(cameras[1], ResolutionPreset.medium,
           enableAudio: true);
       print('Camera: $cameraController');
+      //cameraController.buildPreview();
       _initializeControllerFuture = cameraController.initialize();
 
       // Prevent screen from going into sleep mode:
@@ -1490,31 +1528,32 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future<bool> _onBackPressed() async {
-    List executions = await flutterFFmpeg.listExecutions();
-    print('executions length:${executions.length}');
-
-    if (recordingStatus != RecordingStatus.Recording) {
-      if (executions.isNotEmpty) {
-        AppUtil.showAlertDialog(
-            context: context,
-            message: language(
-                en: 'Ongoing video encoding, sure to quit?',
-                ar: 'جاري معالجة الفيديو، هل ترغب ف الإلغاء والخروح؟'),
-            firstBtnText: language(en: 'Yes', ar: 'نعم'),
-            firstFunc: () {
-              flutterFFmpeg.cancel();
-              Screen.keepOn(false);
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            secondBtnText: language(en: 'No', ar: 'لا'),
-            secondFunc: () {
-              Navigator.of(context).pop();
-            });
-      } else {
-        Screen.keepOn(false);
-        Navigator.of(context).pop();
-      }
-    }
+    Navigator.of(context).pop();
+    // List executions = await flutterFFmpeg.listExecutions();
+    // print('executions length:${executions.length}');
+    //
+    // if (recordingStatus != RecordingStatus.Recording) {
+    //   if (executions.isNotEmpty) {
+    //     AppUtil.showAlertDialog(
+    //         context: context,
+    //         message: language(
+    //             en: 'Ongoing video encoding, sure to quit?',
+    //             ar: 'جاري معالجة الفيديو، هل ترغب ف الإلغاء والخروح؟'),
+    //         firstBtnText: language(en: 'Yes', ar: 'نعم'),
+    //         firstFunc: () {
+    //           flutterFFmpeg.cancel();
+    //           Screen.keepOn(false);
+    //           Navigator.of(context).pop();
+    //           Navigator.of(context).pop();
+    //         },
+    //         secondBtnText: language(en: 'No', ar: 'لا'),
+    //         secondFunc: () {
+    //           Navigator.of(context).pop();
+    //         });
+    //   } else {
+    //     Screen.keepOn(false);
+    //     Navigator.of(context).pop();
+    //   }
+    // }
   }
 }

@@ -95,8 +95,9 @@ class _SongsPageState extends State<SongsPage> {
 
                               setState(() {
                                 musicPlayer = MusicPlayer(
-                                  melodyList: [_songs[index]],
-                                  //url: _songs[index].audioUrl,
+                                  melodyList: [
+                                    Melody(audioUrl: _songs[index].audioUrl)
+                                  ],
                                   backColor: MyColors.lightPrimaryColor,
                                   title: _songs[index].name,
                                   initialDuration: _songs[index].duration,

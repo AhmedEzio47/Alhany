@@ -16,6 +16,7 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../app_util.dart';
@@ -243,13 +244,13 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: Sizes.singer_box + 70,
+                  height: Sizes.singer_box + 90,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Constants.isAdmin
+                      Constants.isAdmin ?? false
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -317,11 +318,15 @@ class _HomePageState extends State<HomePage>
                                                     });
                                               },
                                               child: Container(
+                                                key: ValueKey(_categorySingers[
+                                                            _categories[index]]
+                                                        [index2]
+                                                    .id),
                                                 height: Sizes.singer_box,
                                                 width: Sizes.singer_box,
                                                 child: Column(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                      MainAxisAlignment.start,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
@@ -340,15 +345,20 @@ class _HomePageState extends State<HomePage>
                                                       defaultAssetImage: Strings
                                                           .default_profile_image,
                                                     ),
-                                                    Text(
-                                                      _categorySingers[
-                                                                  _categories[
-                                                                      index]]
-                                                              [index2]
-                                                          ?.name,
-                                                      style: TextStyle(
-                                                        color: Colors
-                                                            .grey.shade300,
+                                                    Container(
+                                                      width: 100,
+                                                      child: Text(
+                                                        _categorySingers[
+                                                                    _categories[
+                                                                        index]]
+                                                                [index2]
+                                                            ?.name,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                          color: Colors
+                                                              .grey.shade300,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -450,18 +460,18 @@ class _HomePageState extends State<HomePage>
         itemCount: _records.length,
         itemBuilder: (context, index) {
           return InkWell(
-            // onTap: () {
-            //   setState(() {
-            //     musicPlayer = MusicPlayer(
-            //       melodyList: [_records[index]],
-            //       backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-            //       btnSize: 35,
-            //       initialDuration: _records[index].duration,
-            //       playBtnPosition: PlayBtnPosition.left,
-            //     );
-            //     _isPlaying = true;
-            //   });
-            // },
+            onTap: () {
+              // setState(() {
+              //   musicPlayer = MusicPlayer(
+              //     url: _records[index].url,
+              //     backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+              //     btnSize: 35,
+              //     initialDuration: _records[index].duration,
+              //     playBtnPosition: PlayBtnPosition.left,
+              //   );
+              //   _isPlaying = true;
+              // });
+            },
             child: RecordItem(
               key: ValueKey(_records[index].id),
               record: _records[index],
@@ -479,7 +489,7 @@ class _HomePageState extends State<HomePage>
           SliverList(
             delegate: SliverChildListDelegate([
               Container(
-                height: 140,
+                height: 164,
                 child: Row(
                   children: [
                     Flexible(
@@ -503,6 +513,7 @@ class _HomePageState extends State<HomePage>
                                             });
                                       },
                                       child: Container(
+                                        key: ValueKey(_singers[index].id),
                                         height: 120,
                                         width: 120,
                                         child: Column(
@@ -516,13 +527,17 @@ class _HomePageState extends State<HomePage>
                                               defaultAssetImage:
                                                   Strings.default_profile_image,
                                             ),
-                                            Text(
-                                              _singers[index].name,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.visible,
-                                              style: TextStyle(
-                                                  color:
-                                                      MyColors.textLightColor),
+                                            Container(
+                                              width: 100,
+                                              child: Text(
+                                                _singers[index].name,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.visible,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: MyColors
+                                                        .textLightColor),
+                                              ),
                                             )
                                           ],
                                         ),
@@ -597,7 +612,6 @@ class _HomePageState extends State<HomePage>
                   musicPlayer = MusicPlayer(
                     melodyList: [_favourites[index]],
                     key: ValueKey(_favourites[index].id),
-                    //url: _favourites[index].audioUrl,
                     backColor: Colors.white.withOpacity(.4),
                     initialDuration: _favourites[index].duration,
                     title: _favourites[index].name,

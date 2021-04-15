@@ -129,8 +129,9 @@ class _NewsItemState extends State<NewsItem> {
       padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).pushNamed('/news-page',
-              arguments: {'news': widget.news, 'is_video_visible': true});
+          if (Constants.currentRoute != '/news-page')
+            Navigator.of(context).pushNamed('/news-page',
+                arguments: {'news': widget.news, 'is_video_visible': true});
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -138,7 +139,7 @@ class _NewsItemState extends State<NewsItem> {
               ? 320
               : 305,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.4),
+            color: Colors.white.withOpacity(.1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +186,7 @@ class _NewsItemState extends State<NewsItem> {
                         ),
                       ],
                     ),
-                    Constants.currentUserID == Strings.starId
+                    Constants.isAdmin
                         ? ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {

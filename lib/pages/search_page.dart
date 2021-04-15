@@ -4,6 +4,7 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/singer_item.dart';
@@ -97,10 +98,10 @@ class _SearchPageState extends State<SearchPage> {
                         return _results[index] is Melody
                             ? InkWell(
                                 onTap: () {
+                                  print('are we here?!');
                                   setState(() {
                                     musicPlayer = MusicPlayer(
                                       key: ValueKey(_results[index].id),
-                                      //url: _results[index].url,
                                       backColor: MyColors.lightPrimaryColor
                                           .withOpacity(.8),
                                       title: _results[index].name,
@@ -118,12 +119,16 @@ class _SearchPageState extends State<SearchPage> {
                                 ),
                               )
                             : InkWell(
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(
-                                      '/singer-page',
-                                      arguments: {'singer': _results[index]});
+                                onTap: () async {
+                                  print('are we even here?!');
+                                  Navigator.of(context)
+                                      .pushNamed('/singer-page', arguments: {
+                                    'singer': _results[index],
+                                    'data_type': DataTypes.SONGS
+                                  });
                                 },
                                 child: SingerItem(
+                                  key: ValueKey('song_item'),
                                   singer: _results[index],
                                 ),
                               );
@@ -157,6 +162,7 @@ class _SearchPageState extends State<SearchPage> {
     if (melodies.length == 0) {
       List<Melody> songs = await searchSongs(text.toLowerCase());
       if (songs.length == 0) {
+        print('Searching for singers');
         List<Singer> singers = await searchSingers(text.toLowerCase());
         if (singers.length == 0) {
           setState(() {

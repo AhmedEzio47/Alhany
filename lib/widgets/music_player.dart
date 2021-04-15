@@ -11,7 +11,6 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/sqlite_service.dart';
-//import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +27,6 @@ enum PlayerState { stopped, playing, paused }
 enum PlayBtnPosition { bottom, left }
 
 class MusicPlayer extends StatefulWidget {
-  //final String url;
   final List<Melody> melodyList;
   final Color backColor;
   final Function onComplete;
@@ -40,18 +38,14 @@ class MusicPlayer extends StatefulWidget {
   final bool isCompact;
   final bool isRecordBtnVisible;
 
-  final Melody melody;
-
   MusicPlayer(
       {Key key,
-      //this.url,
       this.backColor,
       this.onComplete,
       this.isLocal = false,
       this.title,
       this.btnSize = 40.0,
       this.initialDuration,
-      this.melody,
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
       this.melodyList,
@@ -68,7 +62,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
   MyAudioPlayer myAudioPlayer;
 
   get isPlaying => myAudioPlayer.isPlaying;
-  //get isPaused => myAudioPlayer.playerState == AudioPlayerState.PAUSED;
 
   get durationText => myAudioPlayer.duration != null
       ? myAudioPlayer.duration.toString().split('.').first
@@ -87,7 +80,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     bool isFavourite = (await usersRef
             .doc(Constants.currentUserID)
             .collection('favourites')
-            .doc(widget.melody?.id)
+            .doc(widget.melodyList[index]?.id)
             .get())
         .exists;
 
@@ -104,9 +97,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
     await isFavourite();
   }
 
+  int index = 0;
+
   @override
   void initState() {
-    if (widget.melody?.isSong ?? true) {
+    if (widget.melodyList[index]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
@@ -134,14 +129,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   void initAudioPlayer() async {
     List<String> urlList;
-    if (widget.melodyList.length > 1) {
-      urlList = [];
-      for (Melody melody in widget.melodyList) {
-        urlList.add(melody.audioUrl);
-      }
+
+    urlList = [];
+    for (Melody melody in widget.melodyList) {
+      urlList.add(melody.audioUrl);
     }
+
     myAudioPlayer = MyAudioPlayer(
-        //url: widget.url,
         urlList: urlList,
         isLocal: widget.isLocal,
         onComplete: widget.onComplete);
@@ -149,6 +143,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       if (mounted) {
         setState(() {
           _duration = myAudioPlayer.duration;
+          index = myAudioPlayer.index;
         });
       }
     });
@@ -191,7 +186,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold),
                     )
-                  : widget.melodyList.length > 1
+                  : widget.title != null
                       ? Text(
                           widget.title,
                           style: TextStyle(
@@ -280,7 +275,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        (widget.melody?.isSong ?? false)
+                        (widget.melodyList[index]?.isSong ?? false)
                             ? favouriteBtn()
                             : Container(),
                         widget.melodyList.length > 1
@@ -288,18 +283,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             : Container(),
                         playPauseBtn(),
                         widget.melodyList.length > 1 ? nextBtn() : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => Navigator.of(context)
                                     .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melody,
+                                  'melody': widget.melodyList[index],
                                   'type': Types.AUDIO
                                 }),
                                 child: Container(
@@ -325,22 +320,20 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melody?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                  '/melody-page',
-                                  arguments: {
-                                    'melody': widget.melody,
-                                    'type': Types.VIDEO
-                                  },
-                                ),
+                                onTap: () => Navigator.of(context)
+                                    .pushNamed('/melody-page', arguments: {
+                                  'melody': widget.melodyList[index],
+                                  'type': Types.VIDEO
+                                }),
                                 child: Container(
                                   height: widget.btnSize,
                                   width: widget.btnSize,
@@ -442,8 +435,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
         onTap: () async {
           _isFavourite
               ? await DatabaseService.deleteMelodyFromFavourites(
-                  widget.melody.id)
-              : await DatabaseService.addMelodyToFavourites(widget.melody.id);
+                  widget.melodyList[index].id)
+              : await DatabaseService.addMelodyToFavourites(
+                  widget.melodyList[index].id);
 
           await isFavourite();
         },
@@ -472,7 +466,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Widget downloadOrOptions() {
-    return Constants.isAdmin
+    return Constants.isAdmin ?? false
         ? Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Container(
@@ -516,7 +510,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           )
-        : widget.melody?.authorId != null ?? false
+        : widget.melodyList[index]?.authorId != null ?? false
             ? Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: InkWell(
@@ -573,12 +567,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
         break;
 
       case Strings.ar_edit_lyrics:
-        Navigator.of(context)
-            .pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
         break;
       case Strings.ar_edit_lyrics:
-        Navigator.of(context)
-            .pushNamed('/lyrics-editor', arguments: {'melody': widget.melody});
+        Navigator.of(context).pushNamed('/lyrics-editor',
+            arguments: {'melody': widget.melodyList[index]});
         break;
     }
   }
@@ -587,22 +581,24 @@ class _MusicPlayerState extends State<MusicPlayer> {
     File image = await AppUtil.pickImageFromGallery();
     String ext = path.extension(image.path);
 
-    if (widget.melody.imageUrl != null) {
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(widget.melody.imageUrl);
+    if (widget.melodyList[index].imageUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(
+          widget.melodyList[index].imageUrl);
       await storageRef.child('/melodies_images/$fileName').delete();
     }
 
-    String url = await AppUtil()
-        .uploadFile(image, context, '/melodies_images/${widget.melody.id}$ext');
-    await melodiesRef.doc(widget.melody.id).update({'image_url': url});
+    String url = await AppUtil().uploadFile(
+        image, context, '/melodies_images/${widget.melodyList[index].id}$ext');
+    await melodiesRef
+        .doc(widget.melodyList[index].id)
+        .update({'image_url': url});
     AppUtil.showToast(language(en: Strings.en_updated, ar: Strings.ar_updated));
   }
 
   TextEditingController _nameController = TextEditingController();
   editName() async {
     setState(() {
-      _nameController.text = widget.melody.name;
+      _nameController.text = widget.melodyList[index].name;
     });
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -631,7 +627,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await melodiesRef.doc(widget.melody.id).update({
+              await melodiesRef.doc(widget.melodyList[index].id).update({
                 'name': _nameController.text,
                 'search': searchList(_nameController.text),
               });
@@ -658,10 +654,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
         firstFunc: () async {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
-          await DatabaseService.deleteMelody(widget.melody);
-          Singer singer =
-              await DatabaseService.getSingerWithName(widget.melody.singer);
-          if (widget.melody.isSong) {
+          await DatabaseService.deleteMelody(widget.melodyList[index]);
+          Singer singer = await DatabaseService.getSingerWithName(
+              widget.melodyList[index].singer);
+          if (widget.melodyList[index].isSong) {
             await singersRef
                 .doc(singer.id)
                 .update({'songs': FieldValue.increment(-1)});
@@ -682,25 +678,26 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   void _downloadMelody() async {
     Token token = Token();
-    if (widget.melody.price == null || widget.melody.price == '0') {
+    if (widget.melodyList[index].price == null ||
+        widget.melodyList[index].price == '0') {
       token.tokenId = 'free';
     } else {
       DocumentSnapshot doc = await usersRef
           .doc(Constants.currentUserID)
           .collection('downloads')
-          .doc(widget.melody.id)
+          .doc(widget.melodyList[index].id)
           .get();
       bool alreadyDownloaded = doc.exists;
       print('alreadyDownloaded: $alreadyDownloaded');
 
       if (!alreadyDownloaded) {
         final success = await Navigator.of(context).pushNamed('/payment-home',
-            arguments: {'amount': widget.melody.price});
+            arguments: {'amount': widget.melodyList[index].price});
         if (success) {
           usersRef
               .doc(Constants.currentUserID)
               .collection('downloads')
-              .doc(widget.melody.id)
+              .doc(widget.melodyList[index].id)
               .set({'timestamp': FieldValue.serverTimestamp()});
         }
         token.tokenId = 'purchased';
@@ -715,30 +712,30 @@ class _MusicPlayerState extends State<MusicPlayer> {
       AppUtil.showLoader(context);
       await AppUtil.createAppDirectory();
       String path;
-      if (widget.melody.audioUrl != null) {
-        path =
-            await AppUtil.downloadFile(widget.melody.audioUrl, encrypt: true);
+      if (widget.melodyList[index].audioUrl != null) {
+        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
+            encrypt: true);
       } else {
         path = await AppUtil.downloadFile(
-            widget.melody.levelUrls.values.elementAt(0),
+            widget.melodyList[index].levelUrls.values.elementAt(0),
             encrypt: true);
       }
 
       Melody melody = Melody(
-          id: widget.melody.id,
-          authorId: widget.melody.authorId,
-          duration: widget.melody.duration,
-          imageUrl: widget.melody.imageUrl,
-          name: widget.melody.name,
+          id: widget.melodyList[index].id,
+          authorId: widget.melodyList[index].authorId,
+          duration: widget.melodyList[index].duration,
+          imageUrl: widget.melodyList[index].imageUrl,
+          name: widget.melodyList[index].name,
           audioUrl: path);
       Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(widget.melody.id);
+          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
       if (storedMelody == null) {
         await MelodySqlite.insert(melody);
         await usersRef
             .doc(Constants.currentUserID)
             .collection('downloads')
-            .doc(widget.melody.id)
+            .doc(widget.melodyList[index].id)
             .set({'timestamp': FieldValue.serverTimestamp()});
         Navigator.of(context).pop();
         AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));

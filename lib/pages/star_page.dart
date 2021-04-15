@@ -198,7 +198,7 @@ class _StarPageState extends State<StarPage>
                               SizedBox(
                                 height: 10,
                               ),
-                              Constants.isAdmin
+                              Constants.isAdmin ?? false
                                   ? Center(
                                       child: InkWell(
                                           onTap: () => Navigator.of(context)
@@ -231,7 +231,7 @@ class _StarPageState extends State<StarPage>
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
-                                      Constants.startUser?.name,
+                                      Constants.startUser?.name ?? '',
                                       style: TextStyle(
                                           color: MyColors.textLightColor,
                                           fontSize: 16),
@@ -289,7 +289,7 @@ class _StarPageState extends State<StarPage>
             ],
           ),
         ),
-        floatingActionButton: Constants.isAdmin
+        floatingActionButton: Constants.isAdmin ?? false
             ? FloatingActionButton(
                 backgroundColor: Colors.white,
                 child: Icon(
@@ -375,7 +375,6 @@ class _StarPageState extends State<StarPage>
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_filteredMelodies[index].id),
-                          //url: _filteredMelodies[index].audioUrl,
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredMelodies[index].name,
                           btnSize: 30,
@@ -403,12 +402,12 @@ class _StarPageState extends State<StarPage>
                     onTap: () async {
                       setState(() {
                         musicPlayer = MusicPlayer(
-                          key: ValueKey(_filteredMelodies[index].id),
+                          key: ValueKey(_melodies[index].id),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _filteredMelodies[index].name,
+                          title: _melodies[index].name,
                           btnSize: 30,
-                          initialDuration: _filteredMelodies[index].duration,
-                          melodyList: [_filteredMelodies[index]],
+                          initialDuration: _melodies[index].duration,
+                          melodyList: [_melodies[index]],
                           isRecordBtnVisible: true,
                         );
                         _isPlaying = true;
