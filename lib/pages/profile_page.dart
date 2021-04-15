@@ -662,18 +662,18 @@ class _ProfilePageState extends State<ProfilePage>
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       return InkWell(
-                        onTap: () async {
-                          // if (musicPlayer != null) {
-                          //   musicPlayer.stop();
-                          // }
-                          musicPlayer = MusicPlayer(
-                            url: _records[index].url,
-                            backColor: Colors.white.withOpacity(.4),
-                          );
-                          setState(() {
-                            _isPlaying = true;
-                          });
-                        },
+                        // onTap: () async {
+                        //   // if (musicPlayer != null) {
+                        //   //   musicPlayer.stop();
+                        //   // }
+                        //   musicPlayer = MusicPlayer(melodyList: [_records[index]],
+                        //     url: _records[index].url,
+                        //     backColor: Colors.white.withOpacity(.4),
+                        //   );
+                        //   setState(() {
+                        //     _isPlaying = true;
+                        //   });
+                        // },
                         child: RecordItem(
                           record: _records[index],
                           key: UniqueKey(),
@@ -698,10 +698,10 @@ class _ProfilePageState extends State<ProfilePage>
                       // }
                       musicPlayer = MusicPlayer(
                         key: ValueKey(_favourites[index].id),
-                        melody: _favourites[index],
+                        melodyList: [_favourites[index]],
                         title: _favourites[index].name,
                         initialDuration: _favourites[index].duration,
-                        url: _favourites[index].audioUrl,
+                        //url: _favourites[index].audioUrl,
                         backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                       );
                       setState(() {

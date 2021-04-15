@@ -375,12 +375,12 @@ class _StarPageState extends State<StarPage>
                       setState(() {
                         musicPlayer = MusicPlayer(
                           key: ValueKey(_filteredMelodies[index].id),
-                          url: _filteredMelodies[index].audioUrl,
+                          //url: _filteredMelodies[index].audioUrl,
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           title: _filteredMelodies[index].name,
                           btnSize: 30,
                           initialDuration: _filteredMelodies[index].duration,
-                          melody: _filteredMelodies[index],
+                          melodyList: [_filteredMelodies[index]],
                           isRecordBtnVisible: true,
                         );
                         _isPlaying = true;
@@ -403,14 +403,12 @@ class _StarPageState extends State<StarPage>
                     onTap: () async {
                       setState(() {
                         musicPlayer = MusicPlayer(
-                          key: ValueKey(_melodies[index].id),
-                          url: _melodies[index].audioUrl ??
-                              _melodies[index].levelUrls.values.elementAt(0),
+                          key: ValueKey(_filteredMelodies[index].id),
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _melodies[index].name,
+                          title: _filteredMelodies[index].name,
                           btnSize: 30,
-                          initialDuration: _melodies[index].duration,
-                          melody: _melodies[index],
+                          initialDuration: _filteredMelodies[index].duration,
+                          melodyList: [_filteredMelodies[index]],
                           isRecordBtnVisible: true,
                         );
                         _isPlaying = true;

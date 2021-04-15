@@ -134,7 +134,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   void initAudioPlayer() async {
     List<String> urlList;
-    if (widget.melodyList != null) {
+    if (widget.melodyList.length > 1) {
       urlList = [];
       for (Melody melody in widget.melodyList) {
         urlList.add(melody.audioUrl);
@@ -183,7 +183,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   : SizedBox(
                       height: 5,
                     ),
-              widget.melodyList != null
+              widget.melodyList.length > 1
                   ? Text(
                       widget.melodyList[myAudioPlayer.index].name,
                       style: TextStyle(
@@ -191,7 +191,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold),
                     )
-                  : widget.title != null
+                  : widget.melodyList.length > 1
                       ? Text(
                           widget.title,
                           style: TextStyle(
@@ -283,9 +283,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (widget.melody?.isSong ?? false)
                             ? favouriteBtn()
                             : Container(),
-                        widget.melodyList != null ? previousBtn() : Container(),
+                        widget.melodyList.length > 1
+                            ? previousBtn()
+                            : Container(),
                         playPauseBtn(),
-                        widget.melodyList != null ? nextBtn() : Container(),
+                        widget.melodyList.length > 1 ? nextBtn() : Container(),
                         (!(widget.melody?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(

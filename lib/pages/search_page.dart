@@ -43,7 +43,9 @@ class _SearchPageState extends State<SearchPage> {
                   fillColor: _searchColor,
                   focusColor: _searchColor,
                   hoverColor: _searchColor,
-                  hintText: language(en: 'Search melodies, songs or singers', ar: 'ابحث عن ألحان، أغاني أو مطربين'),
+                  hintText: language(
+                      en: 'Search melodies, songs or singers',
+                      ar: 'ابحث عن ألحان، أغاني أو مطربين'),
                   disabledBorder: new UnderlineInputBorder(
                       borderSide: new BorderSide(
                     color: _searchColor,
@@ -82,7 +84,8 @@ class _SearchPageState extends State<SearchPage> {
               decoration: BoxDecoration(
                 color: MyColors.primaryColor,
                 image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  colorFilter: new ColorFilter.mode(
+                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
                   image: AssetImage(Strings.default_bg),
                   fit: BoxFit.cover,
                 ),
@@ -97,12 +100,13 @@ class _SearchPageState extends State<SearchPage> {
                                   setState(() {
                                     musicPlayer = MusicPlayer(
                                       key: ValueKey(_results[index].id),
-                                      url: _results[index].url,
-                                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                                      //url: _results[index].url,
+                                      backColor: MyColors.lightPrimaryColor
+                                          .withOpacity(.8),
                                       title: _results[index].name,
                                       btnSize: 30,
                                       initialDuration: _results[index].duration,
-                                      melody: _results[index],
+                                      melodyList: [_results[index]],
                                     );
                                     _isPlaying = true;
                                   });
@@ -115,8 +119,9 @@ class _SearchPageState extends State<SearchPage> {
                               )
                             : InkWell(
                                 onTap: () {
-                                  Navigator.of(context)
-                                      .pushNamed('/singer-page', arguments: {'singer': _results[index]});
+                                  Navigator.of(context).pushNamed(
+                                      '/singer-page',
+                                      arguments: {'singer': _results[index]});
                                 },
                                 child: SingerItem(
                                   singer: _results[index],
@@ -125,7 +130,8 @@ class _SearchPageState extends State<SearchPage> {
                       })
                   : Center(
                       child: Text(
-                        language(en: 'Nothing found', ar: 'لم يتم العثور على شئ'),
+                        language(
+                            en: 'Nothing found', ar: 'لم يتم العثور على شئ'),
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),

@@ -23,7 +23,8 @@ class _SongsPageState extends State<SongsPage> {
   bool _isPlaying = false;
 
   getSongs() async {
-    List<Melody> songs = await DatabaseService.getSongsBySingerName(widget.singer.name);
+    List<Melody> songs =
+        await DatabaseService.getSongsBySingerName(widget.singer.name);
     setState(() {
       _songs = songs;
     });
@@ -43,7 +44,8 @@ class _SongsPageState extends State<SongsPage> {
               backgroundColor: MyColors.accentColor,
               child: Icon(Icons.add),
               onPressed: () {
-                Navigator.of(context).pushNamed('/upload-songs', arguments: {'singer': widget.singer.name});
+                Navigator.of(context).pushNamed('/upload-songs',
+                    arguments: {'singer': widget.singer.name});
               },
             )
           : null,
@@ -69,7 +71,8 @@ class _SongsPageState extends State<SongsPage> {
                   ),
                   color: MyColors.primaryColor,
                   image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                    colorFilter: new ColorFilter.mode(
+                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
                     image: AssetImage(Strings.default_bg),
                     fit: BoxFit.cover,
                   ),
@@ -92,7 +95,8 @@ class _SongsPageState extends State<SongsPage> {
 
                               setState(() {
                                 musicPlayer = MusicPlayer(
-                                  url: _songs[index].audioUrl,
+                                  melodyList: [_songs[index]],
+                                  //url: _songs[index].audioUrl,
                                   backColor: MyColors.lightPrimaryColor,
                                   title: _songs[index].name,
                                   initialDuration: _songs[index].duration,
@@ -119,7 +123,10 @@ class _SongsPageState extends State<SongsPage> {
                 child: Align(
                   child: Text(
                     widget.singer.name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MyColors.textLightColor),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: MyColors.textLightColor),
                   ),
                   alignment: Alignment.topCenter,
                 ),

@@ -167,11 +167,18 @@ class _DownloadsPageState extends State<DownloadsPage> {
     if (!_decryptedPaths.contains(path)) {
       _decryptedPaths.add(path);
     }
+    _downloads[index] = Melody(
+        id: _downloads[index].id,
+        isSong: _downloads[index].isSong,
+        duration: _downloads[index].duration,
+        name: _downloads[index].name,
+        singer: _downloads[index].singer,
+        audioUrl: path);
+
     musicPlayer = MusicPlayer(
-      melody: _downloads[index],
+      melodyList: [_downloads[index]],
       initialDuration: _downloads[index].duration,
       title: _downloads[index].name,
-      url: path,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );
