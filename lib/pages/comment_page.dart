@@ -34,7 +34,7 @@ class _CommentPageState extends State<CommentPage> {
           recordId: widget.record?.id, newsId: widget.news?.id);
 
       await NotificationHandler.sendNotification(
-          widget.record?.singerId ?? Constants.startUser.id,
+          widget.record?.singerId ?? Constants.starUser.id,
           Constants.currentUser.name + ' commented on your post',
           _replyController.text,
           widget.record?.id ?? widget.news?.id,

@@ -223,7 +223,7 @@ class _StarPageState extends State<StarPage>
                                       height: 60,
                                       imageShape: BoxShape.circle,
                                       imageUrl:
-                                          Constants.startUser?.profileImageUrl,
+                                          Constants.starUser?.profileImageUrl,
                                       defaultAssetImage:
                                           Strings.default_profile_image,
                                     ),
@@ -231,7 +231,7 @@ class _StarPageState extends State<StarPage>
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
-                                      Constants.startUser?.name ?? '',
+                                      Constants.starUser?.name ?? '',
                                       style: TextStyle(
                                           color: MyColors.textLightColor,
                                           fontSize: 16),

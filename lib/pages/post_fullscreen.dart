@@ -108,7 +108,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
           .update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           record?.id ?? news?.id,
           'like');
       setState(() {
@@ -131,7 +131,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
       });
 
       await NotificationHandler.sendNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           'New Post Like',
           Constants.currentUser.name + ' likes your post',
           record?.id ?? news?.id,
@@ -148,7 +148,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   void _goToProfilePage() {
     Navigator.of(context).pushNamed('/profile-page', arguments: {
-      'user_id': widget.record?.singerId ?? Constants.startUser.id
+      'user_id': widget.record?.singerId ?? Constants.starUser.id
     });
   }
 
@@ -445,7 +445,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                           imageShape: BoxShape.circle,
                           defaultAssetImage: Strings.default_profile_image,
                           imageUrl: widget.singer?.profileImageUrl ??
-                              Constants.startUser.profileImageUrl,
+                              Constants.starUser.profileImageUrl,
                         ),
                       ),
                     ),
@@ -556,7 +556,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                               newsId: widget.news?.id);
                         } else {
                           AppUtil.sharePost(
-                              '${Constants.startUser.name} post some news', '',
+                              '${Constants.starUser.name} post some news', '',
                               recordId: _record?.id, newsId: widget.news?.id);
                         }
                       },
@@ -628,7 +628,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                 await DatabaseService.addComment(_commentController.text,
                     recordId: widget.news.id);
                 NotificationHandler.sendNotification(
-                    Constants.startUser.id,
+                    Constants.starUser.id,
                     '${Constants.currentUser.name} commented on your news',
                     _commentController.text,
                     widget.news.id,

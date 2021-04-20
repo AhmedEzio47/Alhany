@@ -113,8 +113,8 @@ class _CommentItem2State extends State<CommentItem2> {
                                         fontSize: 16)),
                                 TextSpan(
                                     text: ' @${widget.commenter.username}',
-                                    style: TextStyle(
-                                        color: MyColors.primaryColor)),
+                                    style:
+                                        TextStyle(color: Colors.grey.shade400)),
                               ],
                             ),
                           ),
@@ -171,8 +171,8 @@ class _CommentItem2State extends State<CommentItem2> {
                 children: [
                   Text(
                       '${AppUtil.formatCommentsTimestamp(widget.comment.timestamp)}',
-                      style: TextStyle(
-                          color: MyColors.primaryColor, fontSize: 12)),
+                      style:
+                          TextStyle(color: Colors.grey.shade400, fontSize: 12)),
                   Row(
                     children: [
                       InkWell(
@@ -324,7 +324,7 @@ class _CommentItem2State extends State<CommentItem2> {
       });
 
       await NotificationHandler.sendNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           'New Comment Like',
           Constants.currentUser.name + ' likes your comment',
           record?.id ?? news?.id,
@@ -418,7 +418,7 @@ class _CommentItem2State extends State<CommentItem2> {
       });
 
       await NotificationHandler.sendNotification(
-          record?.singerId ?? Constants.startUser.id,
+          record?.singerId ?? Constants.starUser.id,
           'New Comment Like',
           Constants.currentUser.name + ' likes your comment',
           record?.id ?? news?.id,

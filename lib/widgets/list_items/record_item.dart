@@ -72,8 +72,17 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   void _goToMelodyPage() {
-    Navigator.of(context).pushNamed('/melody-page',
-        arguments: {'melody': _melody, 'type': Types.AUDIO});
+    AppUtil.executeFunctionIfLoggedIn(context, () {
+      if (!Constants.ongoingEncoding) {
+        Navigator.of(context).pushNamed('/melody-page',
+            arguments: {'melody': _melody, 'type': Types.AUDIO});
+      } else {
+        AppUtil.showToast(language(
+            ar: 'من فضلك قم برفع الفيديو السابق أولا',
+            en: 'Please upload the previous video first'));
+      }
+      ;
+    });
   }
 
   Future<void> likeBtnHandler(Record record) async {
@@ -147,12 +156,14 @@ class _RecordItemState extends State<RecordItem> {
       padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
-          if (Constants.currentRoute != '/record-page')
-            Navigator.of(context).pushNamed('/record-page', arguments: {
-              'record': widget.record,
-              'singer': _singer,
-              'is_video_visible': true
-            });
+          AppUtil.executeFunctionIfLoggedIn(context, () {
+            if (Constants.currentRoute != '/record-page')
+              Navigator.of(context).pushNamed('/record-page', arguments: {
+                'record': widget.record,
+                'singer': _singer,
+                'is_video_visible': true
+              });
+          });
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -334,9 +345,12 @@ class _RecordItemState extends State<RecordItem> {
                       children: [
                         InkWell(
                           onTap: () async {
-                            if (isLikeEnabled) {
-                              await likeBtnHandler(widget.record);
-                            }
+                            AppUtil.executeFunctionIfLoggedIn(context,
+                                () async {
+                              if (isLikeEnabled) {
+                                await likeBtnHandler(widget.record);
+                              }
+                            });
                           },
                           child: SizedBox(
                             child: isLiked
@@ -366,9 +380,12 @@ class _RecordItemState extends State<RecordItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () => AppUtil.sharePost(
-                              ' ${_singer.name} singed ${_melody.name} ', '',
-                              recordId: widget.record.id),
+                          onTap: () =>
+                              AppUtil.executeFunctionIfLoggedIn(context, () {
+                            AppUtil.sharePost(
+                                ' ${_singer.name} singed ${_melody.name} ', '',
+                                recordId: widget.record.id);
+                          }),
                           child: SizedBox(
                             child: Icon(
                               Icons.share,
@@ -392,7 +409,8 @@ class _RecordItemState extends State<RecordItem> {
   Widget playPauseBtn() {
     return InkWell(
       onTap: () {
-        if (Constants.currentRoute == '/record-page') {
+        if (Constants.currentRoute == '/record-page' ||
+            Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
             'record': widget.record,
             'singer': _singer,
@@ -429,7 +447,8 @@ class _RecordItemState extends State<RecordItem> {
   playBtn() {
     return InkWell(
       onTap: () {
-        if (Constants.currentRoute == '/record-page') {
+        if (Constants.currentRoute == '/record-page' ||
+            Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
             'record': widget.record,
             'singer': _singer,

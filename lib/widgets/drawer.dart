@@ -31,17 +31,21 @@ class _BuildDrawerState extends State<BuildDrawer> {
               children: <Widget>[
                 InkWell(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()));
+                    AppUtil.executeFunctionIfLoggedIn(context, () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProfilePage()));
+                    });
                   },
                   child: CircleAvatar(
                     radius: 50.0,
                     backgroundColor: Theme.of(context).primaryColor,
                     backgroundImage:
-                        Constants.currentUser?.profileImageUrl != null
-                            ? CachedNetworkImageProvider(
-                                Constants.currentUser.profileImageUrl)
-                            : AssetImage(Strings.default_profile_image),
+                    Constants.currentUser?.profileImageUrl != null
+                        ? CachedNetworkImageProvider(
+                        Constants.currentUser.profileImageUrl)
+                        : AssetImage(Strings.default_profile_image),
                   ),
                 ),
                 Row(
@@ -80,28 +84,32 @@ class _BuildDrawerState extends State<BuildDrawer> {
               color: MyColors.primaryColor,
             ),
           ),
-          (!Constants.isFacebookOrGoogleUser) ?? false
+          authStatus == AuthStatus.LOGGED_IN
+              ? (!Constants.isFacebookOrGoogleUser) ?? false
               ? ListTile(
-                  onTap: () async {
-                    try {
-                      Navigator.of(context).pushNamed('/change-email');
-                    } catch (e) {
-                      print('Sign out: $e');
-                    }
-                  },
-                  title: Text(
-                    language(en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
-                    style: TextStyle(
-                      color: MyColors.primaryColor,
-                    ),
-                  ),
-                  leading: Icon(
-                    Icons.alternate_email,
-                    color: MyColors.primaryColor,
-                  ),
-                )
+            onTap: () async {
+              try {
+                Navigator.of(context).pushNamed('/change-email');
+              } catch (e) {
+                print('Sign out: $e');
+              }
+            },
+            title: Text(
+              language(
+                  en: 'Change Email', ar: 'تغيير البريد الإلكتروني'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.alternate_email,
+              color: MyColors.primaryColor,
+            ),
+          )
+              : Container()
               : Container(),
-          ListTile(
+          authStatus == AuthStatus.LOGGED_IN
+              ? ListTile(
             onTap: () async {
               try {
                 Navigator.of(context).pushNamed('/password-change');
@@ -119,7 +127,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
               Icons.lock,
               color: MyColors.primaryColor,
             ),
-          ),
+          )
+              : Container(),
           ListTile(
             onTap: () async {
               await AppUtil.switchLanguage();
@@ -168,7 +177,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
               color: MyColors.primaryColor,
             ),
           ),
-          ListTile(
+          authStatus == AuthStatus.LOGGED_IN
+              ? ListTile(
             onTap: () async {
               try {
                 // String token = await FirebaseMessaging().getToken();
@@ -199,6 +209,26 @@ class _BuildDrawerState extends State<BuildDrawer> {
             },
             title: Text(
               language(ar: 'تسجيل الخروج', en: 'Sign Out'),
+              style: TextStyle(
+                color: MyColors.primaryColor,
+              ),
+            ),
+            leading: Icon(
+              Icons.power_settings_new,
+              color: MyColors.primaryColor,
+            ),
+          )
+              : ListTile(
+            onTap: () async {
+              try {
+                Navigator.of(context)
+                    .pushReplacementNamed('/welcome-page');
+              } catch (e) {
+                print('Log In: $e');
+              }
+            },
+            title: Text(
+              language(ar: 'تسجيل الدخول', en: 'Log In'),
               style: TextStyle(
                 color: MyColors.primaryColor,
               ),

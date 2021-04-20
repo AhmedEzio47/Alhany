@@ -14,11 +14,11 @@ class RegularAppbar extends StatelessWidget {
 
   RegularAppbar(BuildContext context,
       {this.color = Colors.white,
-      this.height = Sizes.appbar_height,
-      this.margin = 5.0,
-      this.onBackPressed,
-      this.leading,
-      this.trailing}) {
+        this.height = Sizes.appbar_height,
+        this.margin = 5.0,
+        this.onBackPressed,
+        this.leading,
+        this.trailing}) {
     const double padding = 16;
     this.context = context;
     if (onBackPressed == null) {

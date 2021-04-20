@@ -58,6 +58,24 @@ class AppUtil with ChangeNotifier {
   static user_model.User fullscreenSinger;
   static Melody fullscreenMelody;
 
+  static executeFunctionIfLoggedIn(BuildContext context, Function function) {
+    if (authStatus == AuthStatus.LOGGED_IN) {
+      function();
+    } else {
+      showAlertDialog(
+          context: context,
+          message: language(
+              en: 'You need to log in to be able to do this',
+              ar: 'يجب أن تقوم بتسجيل الدخول للقيام بذلك'),
+          firstBtnText: language(en: 'Login In', ar: 'تسجيل الدخول'),
+          firstFunc: () {
+            Navigator.of(context).pushReplacementNamed('/welcome-page');
+          },
+          secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
+          secondFunc: () => Navigator.of(context).pop());
+    }
+  }
+
   goToFullscreen(Record record, user_model.User user, Melody melody) {
     fullscreenRecord = record;
     fullscreenSinger = user;
@@ -119,21 +137,21 @@ class AppUtil with ChangeNotifier {
               ),
               secondBtnText != null
                   ? MaterialButton(
-                      onPressed: secondFunc,
-                      child: Text(
-                        secondBtnText,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
+                onPressed: secondFunc,
+                child: Text(
+                  secondBtnText,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
                   : Container(),
               thirdBtnText != null
                   ? MaterialButton(
-                      onPressed: thirdFunc,
-                      child: Text(
-                        thirdBtnText,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
+                onPressed: thirdFunc,
+                child: Text(
+                  thirdBtnText,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
                   : Container(),
             ],
           );
@@ -267,7 +285,7 @@ class AppUtil with ChangeNotifier {
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
     String fileName =
-        await getStorageFileNameFromContentDisposition(contentDisposition);
+    await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
@@ -313,7 +331,7 @@ class AppUtil with ChangeNotifier {
     } else {
       //if folder not exists create folder and then return its path
       final Directory _appDocDirNewFolder =
-          await _appDocDirFolder.create(recursive: true);
+      await _appDocDirFolder.create(recursive: true);
       return _appDocDirNewFolder.path;
     }
   }
@@ -322,7 +340,7 @@ class AppUtil with ChangeNotifier {
     String initialPath = '${(await getApplicationDocumentsDirectory()).path}/';
     if (!(await Directory('$initialPath' + 'temp').exists())) {
       final dir =
-          await Directory('$initialPath' + 'temp').create(recursive: true);
+      await Directory('$initialPath' + 'temp').create(recursive: true);
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
@@ -340,12 +358,12 @@ class AppUtil with ChangeNotifier {
   static showLoader(BuildContext context, {String message}) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
-      loaderBackground: MyColors.accentColor,
-      iconColor: MyColors.primaryColor,
-      icon: Icons.music_note,
-      animationType: "full_flip",
-      message: message,
-    )));
+          loaderBackground: MyColors.accentColor,
+          iconColor: MyColors.primaryColor,
+          icon: Icons.music_note,
+          animationType: "full_flip",
+          message: message,
+        )));
   }
 
   static String formatTimestamp(Timestamp timestamp) {
@@ -425,6 +443,7 @@ class AppUtil with ChangeNotifier {
 
   /// Format Time For Comments
   static String formatCommentsTimestamp(Timestamp timestamp) {
+    if (timestamp == null) return '';
     var now = Timestamp.now().toDate();
     var date = new DateTime.fromMillisecondsSinceEpoch(
         timestamp.millisecondsSinceEpoch);
@@ -460,7 +479,7 @@ class AppUtil with ChangeNotifier {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         user_model.User user =
-            await DatabaseService.getUserWithUsername(word.substring(1));
+        await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
             user.id,
@@ -494,15 +513,13 @@ class AppUtil with ChangeNotifier {
 
   static setUserVariablesByFirebaseUser(User user) async {
     user_model.User loggedInUser =
-        await DatabaseService.getUserWithId(user?.uid);
-
-    user_model.User star = await DatabaseService.getUserWithId(Strings.starId);
+    await DatabaseService.getUserWithId(user?.uid);
 
     Constants.currentUser = loggedInUser;
     Constants.currentFirebaseUser = user;
     Constants.currentUserID = user?.uid;
     authStatus = AuthStatus.LOGGED_IN;
-    Constants.startUser = star;
+    print('star id:${Strings.starId}');
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
         Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
     Constants.isFacebookOrGoogleUser = false;

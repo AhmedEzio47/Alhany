@@ -13,12 +13,12 @@ class FlipLoader extends StatefulWidget {
   final String message;
   FlipLoader(
       {this.loaderBackground = Colors.redAccent,
-      this.iconColor = Colors.white,
-      this.icon = Icons.sync,
-      this.animationType = "full_flip",
-      this.shape = "square",
-      this.rotateIcon = true,
-      this.message = ''});
+        this.iconColor = Colors.white,
+        this.icon = Icons.sync,
+        this.animationType = "full_flip",
+        this.shape = "square",
+        this.rotateIcon = true,
+        this.message = ''});
 
   @override
   _FlipLoaderState createState() => _FlipLoaderState(
@@ -166,24 +166,24 @@ class _FlipLoaderState extends State<FlipLoader>
                     height: 40.0,
                     child: rotateIcon == true
                         ? new RotationTransition(
-                            turns: rotationHorizontal.value == 1.0
-                                ? rotationVertical
-                                : rotationHorizontal,
-                            child: new Center(
-                              child: Icon(
-                                icon,
-                                color: iconColor,
-                                size: 20.0,
-                              ),
-                            ),
-                          )
+                      turns: rotationHorizontal.value == 1.0
+                          ? rotationVertical
+                          : rotationHorizontal,
+                      child: new Center(
+                        child: Icon(
+                          icon,
+                          color: iconColor,
+                          size: 20.0,
+                        ),
+                      ),
+                    )
                         : Center(
-                            child: Icon(
-                              icon,
-                              color: iconColor,
-                              size: 20.0,
-                            ),
-                          )),
+                      child: Icon(
+                        icon,
+                        color: iconColor,
+                        size: 20.0,
+                      ),
+                    )),
               ),
             ),
             Padding(

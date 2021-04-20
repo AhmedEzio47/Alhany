@@ -49,7 +49,7 @@ class _NewsItemState extends State<NewsItem> {
 
   void _goToProfilePage() {
     Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': Constants.startUser.id});
+        arguments: {'user_id': Constants.starUser.id});
   }
 
   Future<void> likeBtnHandler(News news) async {
@@ -66,7 +66,7 @@ class _NewsItemState extends State<NewsItem> {
       await newsRef.doc(news.id).update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
-          Constants.startUser.id, news.id, 'like');
+          Constants.starUser.id, news.id, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -85,7 +85,7 @@ class _NewsItemState extends State<NewsItem> {
       });
 
       await NotificationHandler.sendNotification(
-          Constants.startUser.id,
+          Constants.starUser.id,
           'New News Like',
           Constants.currentUser.name + ' likes your post',
           news.id,
@@ -129,9 +129,11 @@ class _NewsItemState extends State<NewsItem> {
       padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
-          if (Constants.currentRoute != '/news-page')
-            Navigator.of(context).pushNamed('/news-page',
-                arguments: {'news': widget.news, 'is_video_visible': true});
+          AppUtil.executeFunctionIfLoggedIn(context, () {
+            if (Constants.currentRoute != '/news-page')
+              Navigator.of(context).pushNamed('/news-page',
+                  arguments: {'news': widget.news, 'is_video_visible': true});
+          });
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -156,7 +158,7 @@ class _NewsItemState extends State<NewsItem> {
                             height: 25,
                             width: 25,
                             imageShape: BoxShape.circle,
-                            imageUrl: Constants.startUser?.profileImageUrl,
+                            imageUrl: Constants.starUser?.profileImageUrl,
                             defaultAssetImage: Strings.default_profile_image,
                           ),
                           onTap: () => _goToProfilePage(),
@@ -169,7 +171,7 @@ class _NewsItemState extends State<NewsItem> {
                           children: [
                             InkWell(
                               child: Text(
-                                '${Constants.startUser?.name}' ?? '',
+                                '${Constants.starUser?.name}' ?? '',
                                 style: TextStyle(
                                     color: MyColors.darkPrimaryColor,
                                     fontWeight: FontWeight.bold),
@@ -300,9 +302,12 @@ class _NewsItemState extends State<NewsItem> {
                       children: [
                         InkWell(
                           onTap: () async {
-                            if (isLikeEnabled) {
-                              await likeBtnHandler(widget.news);
-                            }
+                            AppUtil.executeFunctionIfLoggedIn(context,
+                                () async {
+                              if (isLikeEnabled) {
+                                await likeBtnHandler(widget.news);
+                              }
+                            });
                           },
                           child: SizedBox(
                             child: isLiked
@@ -332,9 +337,12 @@ class _NewsItemState extends State<NewsItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () => AppUtil.sharePost(
-                              '${Constants.startUser.name} post some news', '',
-                              newsId: widget.news.id),
+                          onTap: () =>
+                              AppUtil.executeFunctionIfLoggedIn(context, () {
+                            AppUtil.sharePost(
+                                '${Constants.starUser.name} post some news', '',
+                                newsId: widget.news.id);
+                          }),
                           child: SizedBox(
                             child: Icon(
                               Icons.share,
@@ -418,8 +426,8 @@ class _NewsItemState extends State<NewsItem> {
           melodyList: [
             Melody(
               audioUrl: widget.news.contentUrl,
-              singer: Constants.startUser.name,
-              imageUrl: Constants.startUser.profileImageUrl,
+              singer: Constants.starUser.name,
+              imageUrl: Constants.starUser.profileImageUrl,
             ),
           ],
           backColor: Colors.transparent,

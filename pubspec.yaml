@@ -63,6 +63,7 @@ dependencies:
   #flutter_imagepress: ^0.7.0
   flutter_webview_plugin:
   screen: ^0.0.5
+  pip_view: ^0.9.5
 
 dev_dependencies:
   flutter_test:

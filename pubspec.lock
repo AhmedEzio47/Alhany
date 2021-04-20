@@ -660,6 +660,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.2"
+  pip_view:
+    dependency: "direct main"
+    description:
+      name: pip_view
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.5"
   platform:
     dependency: transitive
     description:
