@@ -3,20 +3,16 @@ import 'dart:math' as math;
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
-import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/models/user_model.dart';
-import 'package:Alhany/pages/melody_page.dart';
-import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
-import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -156,10 +152,16 @@ class _PostFullscreenState extends State<PostFullscreen> {
     });
   }
 
-  void _goToMelodyPage() {
-    Navigator.of(context)
-        .pushNamed('/melody-page', arguments: {'melody': widget.melody});
-  }
+  // void _goToMelodyPage() {
+  //   if (!Constants.ongoingEncoding) {
+  //     Navigator.of(context).pushNamed('/melody-page',
+  //         arguments: {'melody': widget.melody, 'type': Types.AUDIO});
+  //   } else {
+  //     AppUtil.showToast(language(
+  //         ar: 'من فضلك قم برفع الفيديو السابق أولا',
+  //         en: 'Please upload the previous video first'));
+  //   }
+  // }
 
   Record _record;
   ScrollDirection _scrollDirection = ScrollDirection.reverse;
@@ -219,7 +221,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
       ..initialize().then((value) {
         _controller.play();
         _controller.setLooping(false);
-        print('aspect ration: ${_controller.value.aspectRatio}');
+        print('aspect ratio: ${_controller.value.aspectRatio}');
       });
   }
 
@@ -250,10 +252,13 @@ class _PostFullscreenState extends State<PostFullscreen> {
       Constants.currentRoute = '/';
       appPageUtil.goToHome();
     } else if (Constants.routeStack[Constants.routeStack.length - 2] ==
-        '/record-page') {
+            '/record-page' ||
+        Constants.routeStack[Constants.routeStack.length - 2] ==
+            '/profile-page') {
+      Constants.currentRoute =
+          Constants.routeStack[Constants.routeStack.length - 2];
       Constants.routeStack.removeLast();
 
-      Constants.currentRoute = '/record-page';
       Navigator.of(context).pop();
     } else {
       //Constants.routeStack.removeLast();
@@ -267,7 +272,26 @@ class _PostFullscreenState extends State<PostFullscreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        backgroundColor: MyColors.primaryColor,
+        appBar: AppBar(
+          leading: Builder(
+              builder: (context) => InkWell(
+                  onTap: _onBackPressed,
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: MyColors.accentColor,
+                  ))),
+          title: Padding(
+            padding: const EdgeInsets.only(right: 75),
+            child: Center(
+              child: Container(
+                width: 120,
+                child: Image.asset(
+                  Strings.app_bar,
+                ),
+              ),
+            ),
+          ),
+        ),
         body: Stack(
           children: <Widget>[
             widget.record != null
@@ -342,30 +366,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         }),
                   )
                 : fullscreen(),
-            Positioned.fill(
-                child: Align(
-              child: RegularAppbar(
-                context,
-                color: Colors.black,
-                height: Sizes.appbar_height,
-                margin: 25,
-                leading: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 15.0,
-                  ),
-                  child: Builder(
-                    builder: (context) => InkWell(
-                      onTap: _onBackPressed,
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: MyColors.accentColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              alignment: Alignment.topCenter,
-            )),
           ],
         ),
       ),
@@ -387,63 +387,108 @@ class _PostFullscreenState extends State<PostFullscreen> {
   fullscreen() {
     return Stack(
       children: <Widget>[
-        Center(
-          child: FlatButton(
-              padding: EdgeInsets.all(0),
-              onPressed: () {
-                setState(() {
-                  if (play) {
-                    _controller?.pause();
-                    play = !play;
-                  } else {
-                    _controller?.play();
-                    play = !play;
-                  }
-                });
-              },
+        FlatButton(
+            padding: EdgeInsets.all(0),
+            onPressed: () {
+              setState(() {
+                if (play) {
+                  _controller?.pause();
+                  play = !play;
+                } else {
+                  _controller?.play();
+                  play = !play;
+                }
+              });
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               child: _controller != null
-                  ? Container(
-                      height: MediaQuery.of(context).size.height * .45,
-                      width: _controller.value.aspectRatio > .65
-                          ? _controller.value.aspectRatio *
-                              .55 *
-                              MediaQuery.of(context).size.height
-                          : MediaQuery.of(context).size.width,
-                      child: VideoPlayer(_controller))
-                  : Container()),
+                  ? AspectRatio(
+                      aspectRatio: 9 / 16, child: VideoPlayer(_controller))
+                  : Container(),
+            )),
+        Padding(
+          padding: EdgeInsets.only(top: 90, left: 10),
+          child: Column(
+            children: [
+              Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: Icon(Icons.remove_red_eye,
+                      size: 35, color: Colors.white)),
+              Text('${_record?.views ?? widget.news?.views ?? 0}',
+                  style: TextStyle(color: Colors.white))
+            ],
+          ),
         ),
         Padding(
-            padding: EdgeInsets.only(bottom: 65, right: 10),
+          padding: EdgeInsets.only(bottom: 10),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              width: MediaQuery.of(context).size.width - 100,
+              height: 150,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  ListTile(
+                    leading: InkWell(
+                      onTap: () => _goToProfilePage(),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                        child: CachedImage(
+                          key: ValueKey('profile'),
+                          height: 38,
+                          width: 38,
+                          imageShape: BoxShape.circle,
+                          defaultAssetImage: Strings.default_profile_image,
+                          imageUrl: widget.singer?.profileImageUrl ??
+                              Constants.startUser.profileImageUrl,
+                        ),
+                      ),
+                    ),
+                    title: _record != null
+                        ? Text(
+                            '${widget.singer?.name}',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        : Container(),
+                    subtitle: _record != null
+                        ? Text(
+                            '@${widget.singer?.username}',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        : Container(),
+                  ),
+                  _record != null
+                      ? Padding(
+                          padding: EdgeInsets.only(left: 20, bottom: 10),
+                          child: Text.rich(
+                            TextSpan(children: <TextSpan>[
+                              TextSpan(
+                                  text: widget.melody?.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold))
+                            ]),
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ))
+                      : Container(),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+            padding: EdgeInsets.only(bottom: 10, right: 10),
             child: Align(
-              alignment: Alignment.bottomLeft,
+              alignment: Alignment.bottomRight,
               child: Container(
                 width: 70,
                 height: 400,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 23),
-                      width: 40,
-                      height: 50,
-                      child: Stack(
-                        children: <Widget>[
-                          _isFollowing
-                              ? Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: CircleAvatar(
-                                    radius: 10,
-                                    backgroundColor:
-                                        MyColors.primaryColor.withOpacity(1),
-                                    child: Center(
-                                        child: Icon(Icons.add,
-                                            size: 15, color: Colors.white)),
-                                  ),
-                                )
-                              : Container()
-                        ],
-                      ),
-                    ),
                     Container(
                       padding: EdgeInsets.only(bottom: 25),
                       child: Column(
@@ -535,198 +580,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                   ],
                 ),
               ),
-            )),
-        Padding(
-          padding:
-              EdgeInsets.only(top: Sizes.fullHeight(context) * .13, right: 16),
-          child: Align(
-            alignment: Alignment.topRight,
-            child: Container(
-              padding: EdgeInsets.only(bottom: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.rotationY(math.pi),
-                      child: Icon(Icons.remove_red_eye,
-                          size: 30, color: Colors.white)),
-                  Text('${_record?.views ?? widget.news?.views ?? 0}',
-                      style: TextStyle(color: Colors.white))
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding:
-              EdgeInsets.only(top: Sizes.fullHeight(context) * .13, left: 16),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pushNamed('/melody-page',
-                  arguments: {'melody': widget.melody, 'type': Types.AUDIO}),
-              child: Container(
-                padding: EdgeInsets.only(bottom: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(
-                          color: MyColors.accentColor, shape: BoxShape.circle),
-                      child: Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.rotationY(math.pi),
-                          child:
-                              Icon(Icons.mic, size: 30, color: Colors.black)),
-                    ),
-                    Text(language(en: 'Sing', ar: 'غــني'),
-                        style: TextStyle(color: Colors.white))
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-              right: 20.0, bottom: MediaQuery.of(context).size.height * .11),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              height: 75,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  InkWell(
-                    onTap: () => _goToProfilePage(),
-                    child: Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            height: 35,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  _singer.name,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: MyColors.textLightColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '${AppUtil.formatTimestamp(widget.record.timestamp)}' ??
-                                          '',
-                                      style: TextStyle(
-                                          color: Colors.grey.shade300,
-                                          fontSize: 12),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Icon(
-                                      Icons.watch_later_outlined,
-                                      color: MyColors.iconLightColor,
-                                      size: 15,
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.white,
-                            child: CachedImage(
-                              key: ValueKey('profile'),
-                              height: 38,
-                              width: 38,
-                              imageShape: BoxShape.circle,
-                              defaultAssetImage: Strings.default_profile_image,
-                              imageUrl: widget.singer?.profileImageUrl ??
-                                  Constants.startUser.profileImageUrl,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 50.0, top: 8),
-                    child: Text(
-                      'أنا أغني مع ${widget.melody.singer}',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: MyColors.textLightColor,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).size.height * .05, right: 15),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  widget.melody.name,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: MyColors.textLightColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(
-                  Icons.music_note,
-                  color: Colors.white,
-                  size: 22,
-                )
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).size.height * .05, left: 15),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pushNamed('/singer-page',
-                  arguments: {
-                    'singer': _melodySinger,
-                    'data_type': DataTypes.MELODIES
-                  }),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.white,
-                child: CachedImage(
-                  key: ValueKey('singer'),
-                  height: 38,
-                  width: 38,
-                  imageShape: BoxShape.circle,
-                  defaultAssetImage: Strings.default_profile_image,
-                  imageUrl: _melodySinger?.imageUrl,
-                ),
-              ),
-            ),
-          ),
-        )
+            ))
       ],
     );
   }
