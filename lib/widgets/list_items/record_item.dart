@@ -152,6 +152,8 @@ class _RecordItemState extends State<RecordItem> {
 
   @override
   Widget build(BuildContext context) {
+    double videoHeight = MediaQuery.of(context).size.width;
+
     return Padding(
       padding: const EdgeInsets.only(top: 1),
       child: InkWell(
@@ -167,7 +169,7 @@ class _RecordItemState extends State<RecordItem> {
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 290,
+          height: videoHeight + 84,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(.1),
           ),
@@ -178,70 +180,64 @@ class _RecordItemState extends State<RecordItem> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Container(
+                      height: 38,
+                      width: 38,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              style: BorderStyle.solid,
+                              color: MyColors.accentColor)),
+                      child: InkWell(
+                        onTap: _goToMelodyPage,
+                        child: Icon(
+                          Icons.mic,
+                          size: 32,
+                          color: MyColors.accentColor,
+                        ),
+                      ),
+                    ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        InkWell(
-                          child: CachedImage(
-                            height: 25,
-                            width: 25,
-                            imageShape: BoxShape.circle,
-                            imageUrl: _singer?.profileImageUrl,
-                            defaultAssetImage: Strings.default_profile_image,
-                          ),
-                          onTap: () => _goToProfilePage(),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  child: Text(' ${_singer?.name ?? ' '} - ',
-                                      style: TextStyle(
-                                          color: MyColors.iconLightColor,
-                                          fontWeight: FontWeight.bold)),
-                                  onTap: () => _goToProfilePage(),
-                                ),
-                                Text(
-                                  ' singed ',
+                            InkWell(
+                              child: Text(' ${_singer?.name ?? ' '}',
                                   style: TextStyle(
-                                    color: MyColors.textLightColor,
-                                  ),
-                                ),
-                                InkWell(
-                                  child: Text(_melody?.name ?? '',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      )),
-                                  onTap: () => _goToMelodyPage(),
-                                ),
-                              ],
+                                      color: MyColors.iconLightColor,
+                                      fontWeight: FontWeight.bold)),
+                              onTap: () => _goToProfilePage(),
                             ),
-                            Text(
-                              '${AppUtil.formatTimestamp(widget.record.timestamp)}' ??
-                                  '',
-                              style: TextStyle(
-                                  color: Colors.grey.shade300, fontSize: 12),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            InkWell(
+                              child: CachedImage(
+                                height: 25,
+                                width: 25,
+                                imageShape: BoxShape.circle,
+                                imageUrl: _singer?.profileImageUrl,
+                                defaultAssetImage:
+                                    Strings.default_profile_image,
+                              ),
+                              onTap: () => _goToProfilePage(),
                             ),
                           ],
                         ),
+                        widget.record.singerId == Constants.currentUserID
+                            ? ValueListenableBuilder<int>(
+                                valueListenable: number,
+                                builder: (context, value, child) {
+                                  return PostBottomSheet().postOptionIcon(
+                                    context,
+                                    record: widget.record,
+                                  );
+                                },
+                              )
+                            : Container()
                       ],
                     ),
-                    widget.record.singerId == Constants.currentUserID
-                        ? ValueListenableBuilder<int>(
-                            valueListenable: number,
-                            builder: (context, value, child) {
-                              return PostBottomSheet().postOptionIcon(
-                                context,
-                                record: widget.record,
-                              );
-                            },
-                          )
-                        : Container()
                   ],
                 ),
               ),
@@ -257,13 +253,13 @@ class _RecordItemState extends State<RecordItem> {
               Stack(
                 children: [
                   Container(
-                      height: 200,
+                      height: videoHeight,
                       child: widget.record.thumbnailUrl != null
                           ? Stack(
                               children: [
                                 CachedImage(
-                                  height: 200,
-                                  width: MediaQuery.of(context).size.width,
+                                  height: MediaQuery.of(context).size.width,
+                                  width: videoHeight,
                                   imageShape: BoxShape.rectangle,
                                   imageUrl: widget.record.thumbnailUrl,
                                   defaultAssetImage:
@@ -280,7 +276,7 @@ class _RecordItemState extends State<RecordItem> {
                               children: [
                                 Image.asset(
                                   Strings.default_cover_image,
-                                  height: 200,
+                                  height: videoHeight,
                                 ),
                                 Positioned.fill(
                                     child: Align(
@@ -420,26 +416,10 @@ class _RecordItemState extends State<RecordItem> {
           appPageUtil.goToFullscreen(widget.record, _singer, _melody);
         }
       },
-      child: Container(
-        height: 40,
-        width: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.grey.shade300,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black54,
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.play_arrow,
-          size: 35,
-          color: MyColors.primaryColor,
-        ),
+      child: Icon(
+        Icons.play_arrow,
+        size: 50,
+        color: MyColors.iconLightColor,
       ),
     );
   }
@@ -458,26 +438,10 @@ class _RecordItemState extends State<RecordItem> {
           appPageUtil.goToFullscreen(widget.record, _singer, _melody);
         }
       },
-      child: Container(
-        height: 35,
-        width: 35,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.grey.shade300,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black54,
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.play_arrow,
-          size: 30,
-          color: MyColors.primaryColor,
-        ),
+      child: Icon(
+        Icons.play_arrow,
+        size: 40,
+        color: MyColors.primaryColor,
       ),
     );
   }
