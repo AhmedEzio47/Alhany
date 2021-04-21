@@ -4,7 +4,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class DynamicLinks {
-  static String _urlPrefix = 'https://alhany.page.link/';
+  static String _urlPrefix = 'https://m.alhaniiraq.com';
 
   static Future<Uri> createPostDynamicLink(Map<String, String> args) async {
     var uri;
@@ -32,9 +32,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }
@@ -57,9 +59,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }
@@ -82,9 +86,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }

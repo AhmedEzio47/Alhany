@@ -14,6 +14,7 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 
 class RecordItem extends StatefulWidget {
   final Record record;
@@ -153,7 +154,7 @@ class _RecordItemState extends State<RecordItem> {
   @override
   Widget build(BuildContext context) {
     double videoHeight = MediaQuery.of(context).size.width;
-
+    bool isTitleExpanded = false;
     return Padding(
       padding: const EdgeInsets.only(
         top: 1,
@@ -171,14 +172,17 @@ class _RecordItemState extends State<RecordItem> {
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: videoHeight + 115,
+          padding: const EdgeInsets.only(bottom: 8.0),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(.1),
           ),
-          child: Column(
-            crossAxisAlignment: Constants.language == 'ar'
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
+          child: Wrap(
+            // crossAxisAlignment: Constants.language == 'ar'
+            //     ? CrossAxisAlignment.end
+            //     : CrossAxisAlignment.start,
+            alignment: Constants.language == 'ar'
+                ? WrapAlignment.end
+                : WrapAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -257,9 +261,26 @@ class _RecordItemState extends State<RecordItem> {
               // ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
+                child: ReadMoreText(
                   widget.record.title ?? '',
+                  callback: (isMore) {
+                    setState(() {
+                      isTitleExpanded = !isMore;
+                    });
+                    print(isTitleExpanded ? 'Expanded' : 'Collapsed');
+                  },
+                  trimExpandedText: language(ar: 'عرض القليل', en: 'show less'),
+                  trimCollapsedText:
+                      language(ar: 'عرض المزيد', en: 'show more'),
                   style: TextStyle(color: Colors.white, fontSize: 16),
+                  // moreStyle:
+                  //     TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  // lessStyle:
+                  // TextStyle(fontSize: 14, fontWeight: FontWeight.bold,),
+                  colorClickableText: MyColors.accentColor,
+
+                  trimLines: 1, textAlign: TextAlign.right,
+                  trimMode: TrimMode.Line,
                 ),
               ),
               SizedBox(
@@ -273,8 +294,8 @@ class _RecordItemState extends State<RecordItem> {
                           ? Stack(
                               children: [
                                 CachedImage(
-                                  height: MediaQuery.of(context).size.width,
-                                  width: videoHeight,
+                                  height: videoHeight + 50,
+                                  width: MediaQuery.of(context).size.width,
                                   imageShape: BoxShape.rectangle,
                                   imageUrl: widget.record.thumbnailUrl,
                                   defaultAssetImage:
@@ -311,150 +332,152 @@ class _RecordItemState extends State<RecordItem> {
                   ))
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Padding(
-                  //   padding: const EdgeInsets.only(left: 10.0),
-                  //   child: Row(
-                  //     children: [
-                  //       Text(
-                  //         '${widget.record.likes ?? 0}',
-                  //         style: TextStyle(color: Colors.white, fontSize: 12),
-                  //       ),
-                  //       Text(
-                  //         ' Likes, ',
-                  //         style: TextStyle(
-                  //             color: MyColors.textLightColor, fontSize: 12),
-                  //       ),
-                  //       Text(
-                  //         '${widget.record.comments ?? 0}',
-                  //         style: TextStyle(color: Colors.white, fontSize: 12),
-                  //       ),
-                  //       Text(
-                  //         '  Comments, ',
-                  //         style: TextStyle(
-                  //             color: MyColors.textLightColor, fontSize: 12),
-                  //       ),
-                  //       Text(
-                  //         '${widget.record.shares ?? 0}',
-                  //         style: TextStyle(color: Colors.white, fontSize: 12),
-                  //       ),
-                  //       Text(
-                  //         ' Shares',
-                  //         style: TextStyle(
-                  //             color: MyColors.textLightColor, fontSize: 12),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Directionality(
-                      textDirection: Constants.language == 'ar'
-                          ? TextDirection.rtl
-                          : TextDirection.ltr,
-                      child: Text(
-                        '${widget.record.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 10.0),
+                    //   child: Row(
+                    //     children: [
+                    //       Text(
+                    //         '${widget.record.likes ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         ' Likes, ',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '${widget.record.comments ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '  Comments, ',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '${widget.record.shares ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         ' Shares',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Directionality(
+                        textDirection: Constants.language == 'ar'
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                        child: Text(
+                          '${widget.record.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: () =>
-                              AppUtil.executeFunctionIfLoggedIn(context, () {
-                            AppUtil.sharePost(
-                                ' ${_singer.name} singed ${_melody.name} ', '',
-                                recordId: widget.record.id);
-                          }),
-                          child: SizedBox(
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () =>
+                                AppUtil.executeFunctionIfLoggedIn(context, () {
+                              AppUtil.sharePost(
+                                  ' ${_singer.name} singed ${_melody.name} ',
+                                  '',
+                                  recordId: widget.record.id);
+                            }),
+                            child: SizedBox(
+                              child: Icon(
+                                Icons.reply,
+                                size: Sizes.card_btn_size,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            '${widget.record.comments ?? 0}',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
                             child: Icon(
-                              Icons.reply,
+                              Icons.comment,
                               size: Sizes.card_btn_size,
                               color: Colors.white,
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          '${widget.record.comments ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        SizedBox(
-                          child: Icon(
-                            Icons.comment,
-                            size: Sizes.card_btn_size,
-                            color: Colors.white,
+                          SizedBox(
+                            width: 10,
                           ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          '${widget.record.likes ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            AppUtil.executeFunctionIfLoggedIn(context,
-                                () async {
-                              if (isLikeEnabled) {
-                                await likeBtnHandler(widget.record);
-                              }
-                            });
-                          },
-                          child: SizedBox(
-                            child: isLiked
-                                ? Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: MyColors.primaryColor,
-                                  )
-                                : Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: Colors.white,
-                                  ),
+                          Text(
+                            '${widget.record.likes ?? 0}',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
-                        ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              AppUtil.executeFunctionIfLoggedIn(context,
+                                  () async {
+                                if (isLikeEnabled) {
+                                  await likeBtnHandler(widget.record);
+                                }
+                              });
+                            },
+                            child: SizedBox(
+                              child: isLiked
+                                  ? Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: MyColors.primaryColor,
+                                    )
+                                  : Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          ),
 
-                        // SizedBox(
-                        //   width: 10,
-                        // ),
-                        // InkWell(
-                        //   onTap: () =>
-                        //       AppUtil.executeFunctionIfLoggedIn(context, () {
-                        //     AppUtil.sharePost(
-                        //         ' ${_singer.name} singed ${_melody.name} ', '',
-                        //         recordId: widget.record.id);
-                        //   }),
-                        //   child: SizedBox(
-                        //     child: Icon(
-                        //       Icons.share,
-                        //       size: Sizes.card_btn_size,
-                        //       color: Colors.white,
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  )
-                ],
+                          // SizedBox(
+                          //   width: 10,
+                          // ),
+                          // InkWell(
+                          //   onTap: () =>
+                          //       AppUtil.executeFunctionIfLoggedIn(context, () {
+                          //     AppUtil.sharePost(
+                          //         ' ${_singer.name} singed ${_melody.name} ', '',
+                          //         recordId: widget.record.id);
+                          //   }),
+                          //   child: SizedBox(
+                          //     child: Icon(
+                          //       Icons.share,
+                          //       size: Sizes.card_btn_size,
+                          //       color: Colors.white,
+                          //     ),
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               )
             ],
           ),

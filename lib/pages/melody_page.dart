@@ -1109,10 +1109,9 @@ class _MelodyPageState extends State<MelodyPage> {
               : Column(
                   children: [
                     Expanded(
-                      flex: 3,
+                      flex: 4,
                       child: Container(
                         margin: const EdgeInsets.all(8.0),
-                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                             color: MyColors.primaryColor,
                             border: Border.all(
@@ -1136,15 +1135,26 @@ class _MelodyPageState extends State<MelodyPage> {
                     ),
                     Expanded(
                       flex: 15,
-                      child: Stack(
-                        children: [
-                          video_player.VideoPlayer(_videoController),
-                          Positioned.fill(
-                              child: Align(
-                            child: playPauseBtn(),
-                            alignment: Alignment.center,
-                          )),
-                        ],
+                      child: InkWell(
+                        onTap: _videoController.value.isPlaying
+                            ? () {
+                                _videoController.pause();
+                                setState(() {
+                                  _isVideoPlaying = false;
+                                });
+                                print('pausing');
+                              }
+                            : null,
+                        child: Stack(
+                          children: [
+                            video_player.VideoPlayer(_videoController),
+                            Positioned.fill(
+                                child: Align(
+                              child: playPauseBtn(),
+                              alignment: Alignment.center,
+                            )),
+                          ],
+                        ),
                       ),
                     ),
                     Padding(
@@ -1157,7 +1167,11 @@ class _MelodyPageState extends State<MelodyPage> {
                             RaisedButton(
                               onPressed: () async {
                                 Constants.ongoingEncoding = false;
-
+                                _videoController.pause();
+                                setState(() {
+                                  _isVideoPlaying = false;
+                                });
+                                //_videoController.dispose();
                                 //Navigator.of(context).pop(false);
                                 await submitRecord();
                                 Navigator.pushNamedAndRemoveUntil(
@@ -1176,7 +1190,11 @@ class _MelodyPageState extends State<MelodyPage> {
                               onPressed: () async {
                                 Constants.ongoingEncoding = false;
 
-                                await _videoController.pause();
+                                _videoController.pause();
+                                setState(() {
+                                  _isVideoPlaying = false;
+                                });
+                                //_videoController.dispose();
                                 await AppUtil.deleteFiles();
                                 Navigator.of(context).pop();
                               },

@@ -273,25 +273,27 @@ class _NewsItemState extends State<NewsItem> {
                         Text(
                           ' Likes, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.news.comments ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          style: TextStyle(
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '  Comments, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '${widget.news.shares ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          style: TextStyle(
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           ' Shares',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                       ],
                     ),

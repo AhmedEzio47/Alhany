@@ -64,6 +64,7 @@ dependencies:
   flutter_webview_plugin:
   screen: ^0.0.5
   pip_view: ^0.9.5
+  readmore: ^2.0.0
 
 dev_dependencies:
   flutter_test:
