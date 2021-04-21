@@ -14,6 +14,7 @@ import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
@@ -408,81 +409,86 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       aspectRatio: 9 / 16, child: VideoPlayer(_controller))
                   : Container(),
             )),
-        Padding(
-          padding: EdgeInsets.only(top: 90, left: 10),
-          child: Column(
-            children: [
-              Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationY(math.pi),
-                  child: Icon(Icons.remove_red_eye,
-                      size: 35, color: Colors.white)),
-              Text('${_record?.views ?? widget.news?.views ?? 0}',
-                  style: TextStyle(color: Colors.white))
-            ],
+        Positioned.fill(
+          child: Align(
+            alignment: Constants.language == 'ar'
+                ? Alignment.topRight
+                : Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.only(top: 20, left: 10, right: 10),
+              child: Column(
+                children: [
+                  Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationY(math.pi),
+                      child: Icon(Icons.remove_red_eye,
+                          size: 35, color: Colors.white)),
+                  Text('${_record?.views ?? widget.news?.views ?? 0}',
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            ),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(bottom: 10),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              width: MediaQuery.of(context).size.width - 100,
-              height: 150,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        Positioned.fill(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16, bottom: 16),
+            child: Align(
+              alignment: Constants.language == 'ar'
+                  ? Alignment.bottomRight
+                  : Alignment.bottomLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  ListTile(
-                    leading: InkWell(
-                      onTap: () => _goToProfilePage(),
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.white,
-                        child: CachedImage(
-                          key: ValueKey('profile'),
-                          height: 38,
-                          width: 38,
-                          imageShape: BoxShape.circle,
-                          defaultAssetImage: Strings.default_profile_image,
-                          imageUrl: widget.singer?.profileImageUrl ??
-                              Constants.starUser.profileImageUrl,
-                        ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _record != null
+                          ? Text(
+                              '${widget.singer?.name}',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : Container(),
+                      _record != null
+                          ? Text(
+                              '@${widget.singer?.username}',
+                              style: TextStyle(color: Colors.white),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                  InkWell(
+                    onTap: () => _goToProfilePage(),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.white,
+                      child: CachedImage(
+                        key: ValueKey('profile'),
+                        height: 38,
+                        width: 38,
+                        imageShape: BoxShape.circle,
+                        defaultAssetImage: Strings.default_profile_image,
+                        imageUrl: widget.singer?.profileImageUrl ??
+                            Constants.starUser.profileImageUrl,
                       ),
                     ),
-                    title: _record != null
-                        ? Text(
-                            '${widget.singer?.name}',
-                            style: TextStyle(color: Colors.white),
-                          )
-                        : Container(),
-                    subtitle: _record != null
-                        ? Text(
-                            '@${widget.singer?.username}',
-                            style: TextStyle(color: Colors.white),
-                          )
-                        : Container(),
                   ),
-                  _record != null
-                      ? Padding(
-                          padding: EdgeInsets.only(left: 20, bottom: 10),
-                          child: Text.rich(
-                            TextSpan(children: <TextSpan>[
-                              TextSpan(
-                                  text: widget.melody?.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold))
-                            ]),
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ))
-                      : Container(),
                 ],
               ),
             ),
           ),
         ),
         Padding(
-            padding: EdgeInsets.only(bottom: 10, right: 10),
+            padding: EdgeInsets.only(
+              bottom: 70,
+              right: 10,
+            ),
             child: Align(
-              alignment: Alignment.bottomRight,
+              alignment: Constants.language == 'ar'
+                  ? Alignment.bottomLeft
+                  : Alignment.bottomRight,
               child: Container(
                 width: 70,
                 height: 400,
@@ -502,9 +508,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
                               }
                             },
                             child: isLiked
-                                ? Icon(Icons.thumb_up,
+                                ? Icon(Icons.favorite,
                                     size: 35, color: MyColors.primaryColor)
-                                : Icon(Icons.thumb_up,
+                                : Icon(Icons.favorite,
                                     size: 35, color: Colors.white),
                           ),
                           Text('${_record?.likes ?? widget.news?.likes ?? 0}',
@@ -568,7 +574,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                             Transform(
                                 alignment: Alignment.center,
                                 transform: Matrix4.rotationY(math.pi),
-                                child: Icon(Icons.share,
+                                child: Icon(Icons.reply,
                                     size: 35, color: Colors.white)),
                             Text(
                                 '${_record?.shares ?? widget.news?.shares ?? 0}',
