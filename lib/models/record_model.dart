@@ -7,6 +7,7 @@ class Record {
   final String singerId;
   final String melodyId;
   final int duration;
+  final String title;
   int likes;
   int comments;
   int shares;
@@ -24,6 +25,7 @@ class Record {
       this.comments,
       this.shares,
       this.views,
+      this.title,
       this.timestamp});
 
   factory Record.fromDoc(DocumentSnapshot doc) {
@@ -38,6 +40,7 @@ class Record {
         comments: doc.data()['comments'],
         shares: doc.data()['shares'],
         views: doc.data()['views'],
+        title: doc.data()['title'],
         timestamp: doc.data()['timestamp']);
   }
 }

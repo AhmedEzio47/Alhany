@@ -292,10 +292,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melodyList[index],
-                                  'type': Types.AUDIO
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  if (!Constants.ongoingEncoding) {
+                                    Navigator.of(context)
+                                        .pushNamed('/melody-page', arguments: {
+                                      'melody': widget.melodyList[index],
+                                      'type': Types.AUDIO
+                                    });
+                                  } else {
+                                    AppUtil.showToast(language(
+                                        ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                        en: 'Please upload the previous video first'));
+                                  }
                                 }),
                                 child: Container(
                                   height: widget.btnSize,
@@ -329,10 +338,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         (!(widget.melodyList[index]?.isSong ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
-                                onTap: () => Navigator.of(context)
-                                    .pushNamed('/melody-page', arguments: {
-                                  'melody': widget.melodyList[index],
-                                  'type': Types.VIDEO
+                                onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                                    context, () {
+                                  if (!Constants.ongoingEncoding) {
+                                    Navigator.of(context)
+                                        .pushNamed('/melody-page', arguments: {
+                                      'melody': widget.melodyList[index],
+                                      'type': Types.VIDEO
+                                    });
+                                  } else {
+                                    AppUtil.showToast(language(
+                                        ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                        en: 'Please upload the previous video first'));
+                                  }
                                 }),
                                 child: Container(
                                   height: widget.btnSize,

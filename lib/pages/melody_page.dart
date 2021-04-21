@@ -426,7 +426,7 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future saveRecord() async {
-//    Constants.ongoingEncoding = true;
+    Constants.ongoingEncoding = true;
     // Singer singer =
     //     await DatabaseService.getSingerWithName(widget.melody.singer);
     PIPView.of(_context).presentBelow(MyApp());
@@ -772,8 +772,8 @@ class _MelodyPageState extends State<MelodyPage> {
     int duration =
         double.parse(info.getMediaProperties()['duration'].toString()).toInt();
 
-    await DatabaseService.submitRecord(
-        widget.melody.id, recordId, url, thumbnailUrl, duration);
+    await DatabaseService.submitRecord(widget.melody.id, recordId, url,
+        thumbnailUrl, duration, _titleController.text);
     await AppUtil.deleteFiles();
     Navigator.of(context).pop();
 
@@ -953,6 +953,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   BuildContext _context;
   // bool _canFloat = false;
+  TextEditingController _titleController = TextEditingController();
   bool _isPreviewVideoPlaying = false;
   choosingImagePage(BuildContext context) {
     return Container(
@@ -973,6 +974,29 @@ class _MelodyPageState extends State<MelodyPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Container(
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                            color: MyColors.primaryColor,
+                            border: Border.all(
+                                color: MyColors.textLightColor, width: 1)),
+                        child: Directionality(
+                          textDirection: Constants.language == 'ar'
+                              ? TextDirection.rtl
+                              : TextDirection.ltr,
+                          child: TextField(
+                            controller: _titleController,
+                            maxLength: 150,
+                            decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                    color: MyColors.textInactiveColor),
+                                hintText: language(
+                                    ar: 'أضف عنوانا', en: 'Add title')),
+                            style: TextStyle(color: MyColors.textLightColor),
+                          ),
+                        ),
+                      ),
                       melodyPlayer ?? Container(),
                       SizedBox(
                         height: 10,
@@ -983,7 +1007,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           RaisedButton(
                             onPressed: imageVideoPath == null
                                 ? () async {
-                                    //Constants.ongoingEncoding = false;
+                                    Constants.ongoingEncoding = false;
 
                                     _image = await AppUtil
                                         .pickCompressedImageFromGallery();
@@ -1067,7 +1091,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           ),
                           RaisedButton(
                             onPressed: () async {
-                              //Constants.ongoingEncoding = false;
+                              Constants.ongoingEncoding = false;
                               await AppUtil.deleteFiles();
                               Navigator.of(context).pop();
                             },
@@ -1082,19 +1106,48 @@ class _MelodyPageState extends State<MelodyPage> {
                     ],
                   ),
                 )
-              : Stack(
+              : Column(
                   children: [
-                    AspectRatio(
-                      aspectRatio: _videoController.value.aspectRatio,
-                      child: video_player.VideoPlayer(_videoController),
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                            color: MyColors.primaryColor,
+                            border: Border.all(
+                                color: MyColors.textLightColor, width: 1)),
+                        child: Directionality(
+                          textDirection: Constants.language == 'ar'
+                              ? TextDirection.rtl
+                              : TextDirection.ltr,
+                          child: TextField(
+                            controller: _titleController,
+                            maxLength: 150,
+                            decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                    color: MyColors.textInactiveColor),
+                                hintText: language(
+                                    ar: 'أضف عنوانا', en: 'Add title')),
+                            style: TextStyle(color: MyColors.textLightColor),
+                          ),
+                        ),
+                      ),
                     ),
-                    Positioned.fill(
-                        child: Align(
-                      child: playPauseBtn(),
-                      alignment: Alignment.center,
-                    )),
-                    Positioned.fill(
-                        child: Padding(
+                    Expanded(
+                      flex: 15,
+                      child: Stack(
+                        children: [
+                          video_player.VideoPlayer(_videoController),
+                          Positioned.fill(
+                              child: Align(
+                            child: playPauseBtn(),
+                            alignment: Alignment.center,
+                          )),
+                        ],
+                      ),
+                    ),
+                    Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Align(
                         child: Row(
@@ -1103,7 +1156,7 @@ class _MelodyPageState extends State<MelodyPage> {
                           children: [
                             RaisedButton(
                               onPressed: () async {
-                                //Constants.ongoingEncoding = false;
+                                Constants.ongoingEncoding = false;
 
                                 //Navigator.of(context).pop(false);
                                 await submitRecord();
@@ -1121,7 +1174,7 @@ class _MelodyPageState extends State<MelodyPage> {
                             ),
                             RaisedButton(
                               onPressed: () async {
-                                //Constants.ongoingEncoding = false;
+                                Constants.ongoingEncoding = false;
 
                                 await _videoController.pause();
                                 await AppUtil.deleteFiles();
@@ -1137,7 +1190,7 @@ class _MelodyPageState extends State<MelodyPage> {
                         ),
                         alignment: Alignment.bottomCenter,
                       ),
-                    )),
+                    )
                   ],
                 ),
         ),
@@ -1540,32 +1593,10 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future<bool> _onBackPressed() async {
-    Navigator.of(context).pop();
-    // List executions = await flutterFFmpeg.listExecutions();
-    // print('executions length:${executions.length}');
-    //
-    // if (recordingStatus != RecordingStatus.Recording) {
-    //   if (executions.isNotEmpty) {
-    //     AppUtil.showAlertDialog(
-    //         context: context,
-    //         message: language(
-    //             en: 'Ongoing video encoding, sure to quit?',
-    //             ar: 'جاري معالجة الفيديو، هل ترغب ف الإلغاء والخروح؟'),
-    //         firstBtnText: language(en: 'Yes', ar: 'نعم'),
-    //         firstFunc: () {
-    //           flutterFFmpeg.cancel();
-    //           Screen.keepOn(false);
-    //           Navigator.of(context).pop();
-    //           Navigator.of(context).pop();
-    //         },
-    //         secondBtnText: language(en: 'No', ar: 'لا'),
-    //         secondFunc: () {
-    //           Navigator.of(context).pop();
-    //         });
-    //   } else {
-    //     Screen.keepOn(false);
-    //     Navigator.of(context).pop();
-    //   }
-    // }
+    if (Constants.ongoingEncoding) {
+      PIPView.of(_context).presentBelow(MyApp());
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 }

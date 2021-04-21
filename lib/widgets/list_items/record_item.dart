@@ -155,7 +155,9 @@ class _RecordItemState extends State<RecordItem> {
     double videoHeight = MediaQuery.of(context).size.width;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 1),
+      padding: const EdgeInsets.only(
+        top: 1,
+      ),
       child: InkWell(
         onTap: () {
           AppUtil.executeFunctionIfLoggedIn(context, () {
@@ -169,11 +171,14 @@ class _RecordItemState extends State<RecordItem> {
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: videoHeight + 84,
+          height: videoHeight + 115,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(.1),
           ),
           child: Column(
+            crossAxisAlignment: Constants.language == 'ar'
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -250,6 +255,16 @@ class _RecordItemState extends State<RecordItem> {
               //   playBtnPosition: PlayBtnPosition.left,
               //   isCompact: true,
               // ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  widget.record.title ?? '',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+              SizedBox(
+                width: 5,
+              ),
               Stack(
                 children: [
                   Container(
@@ -277,6 +292,7 @@ class _RecordItemState extends State<RecordItem> {
                                 Image.asset(
                                   Strings.default_cover_image,
                                   height: videoHeight,
+                                  fit: BoxFit.fitHeight,
                                 ),
                                 Positioned.fill(
                                     child: Align(
@@ -301,44 +317,98 @@ class _RecordItemState extends State<RecordItem> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10.0),
+                  //   child: Row(
+                  //     children: [
+                  //       Text(
+                  //         '${widget.record.likes ?? 0}',
+                  //         style: TextStyle(color: Colors.white, fontSize: 12),
+                  //       ),
+                  //       Text(
+                  //         ' Likes, ',
+                  //         style: TextStyle(
+                  //             color: MyColors.textLightColor, fontSize: 12),
+                  //       ),
+                  //       Text(
+                  //         '${widget.record.comments ?? 0}',
+                  //         style: TextStyle(color: Colors.white, fontSize: 12),
+                  //       ),
+                  //       Text(
+                  //         '  Comments, ',
+                  //         style: TextStyle(
+                  //             color: MyColors.textLightColor, fontSize: 12),
+                  //       ),
+                  //       Text(
+                  //         '${widget.record.shares ?? 0}',
+                  //         style: TextStyle(color: Colors.white, fontSize: 12),
+                  //       ),
+                  //       Text(
+                  //         ' Shares',
+                  //         style: TextStyle(
+                  //             color: MyColors.textLightColor, fontSize: 12),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${widget.record.likes ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          ' Likes, ',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                        Text(
-                          '${widget.record.comments ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          '  Comments, ',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                        Text(
-                          '${widget.record.shares ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          ' Shares',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                      ],
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Directionality(
+                      textDirection: Constants.language == 'ar'
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                      child: Text(
+                        '${widget.record.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Row(
                       children: [
+                        InkWell(
+                          onTap: () =>
+                              AppUtil.executeFunctionIfLoggedIn(context, () {
+                            AppUtil.sharePost(
+                                ' ${_singer.name} singed ${_melody.name} ', '',
+                                recordId: widget.record.id);
+                          }),
+                          child: SizedBox(
+                            child: Icon(
+                              Icons.reply,
+                              size: Sizes.card_btn_size,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          '${widget.record.comments ?? 0}',
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        SizedBox(
+                          child: Icon(
+                            Icons.comment,
+                            size: Sizes.card_btn_size,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          '${widget.record.likes ?? 0}',
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
                         InkWell(
                           onTap: () async {
                             AppUtil.executeFunctionIfLoggedIn(context,
@@ -362,34 +432,25 @@ class _RecordItemState extends State<RecordItem> {
                                   ),
                           ),
                         ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        SizedBox(
-                          child: Icon(
-                            Icons.comment,
-                            size: Sizes.card_btn_size,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        InkWell(
-                          onTap: () =>
-                              AppUtil.executeFunctionIfLoggedIn(context, () {
-                            AppUtil.sharePost(
-                                ' ${_singer.name} singed ${_melody.name} ', '',
-                                recordId: widget.record.id);
-                          }),
-                          child: SizedBox(
-                            child: Icon(
-                              Icons.share,
-                              size: Sizes.card_btn_size,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+
+                        // SizedBox(
+                        //   width: 10,
+                        // ),
+                        // InkWell(
+                        //   onTap: () =>
+                        //       AppUtil.executeFunctionIfLoggedIn(context, () {
+                        //     AppUtil.sharePost(
+                        //         ' ${_singer.name} singed ${_melody.name} ', '',
+                        //         recordId: widget.record.id);
+                        //   }),
+                        //   child: SizedBox(
+                        //     child: Icon(
+                        //       Icons.share,
+                        //       size: Sizes.card_btn_size,
+                        //       color: Colors.white,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   )
@@ -418,7 +479,7 @@ class _RecordItemState extends State<RecordItem> {
       },
       child: Icon(
         Icons.play_arrow,
-        size: 50,
+        size: 60,
         color: MyColors.iconLightColor,
       ),
     );
