@@ -17,6 +17,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:readmore/readmore.dart';
 import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:video_player/video_player.dart';
 
@@ -386,6 +387,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
   }
 
   fullscreen() {
+    bool isTitleExpanded = false;
+
     return Stack(
       children: <Widget>[
         FlatButton(
@@ -432,48 +435,84 @@ class _PostFullscreenState extends State<PostFullscreen> {
         ),
         Positioned.fill(
           child: Padding(
-            padding: const EdgeInsets.only(right: 16, bottom: 16),
+            padding: const EdgeInsets.only(right: 16, bottom: 32),
             child: Align(
               alignment: Constants.language == 'ar'
                   ? Alignment.bottomRight
                   : Alignment.bottomLeft,
-              child: Row(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _record != null
-                          ? Text(
-                              '${widget.singer?.name}',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : Container(),
-                      _record != null
-                          ? Text(
-                              '@${widget.singer?.username}',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : Container(),
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _record != null
+                              ? Text(
+                                  '${widget.singer?.name}',
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : Container(),
+                          _record != null
+                              ? Directionality(
+                                  textDirection: Constants.language == 'ar'
+                                      ? TextDirection.rtl
+                                      : TextDirection.ltr,
+                                  child: Text(
+                                    '${AppUtil.formatCommentsTimestamp(widget.record.timestamp)}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                              : Container(),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      InkWell(
+                        onTap: () => _goToProfilePage(),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.white,
+                          child: CachedImage(
+                            key: ValueKey('profile'),
+                            height: 38,
+                            width: 38,
+                            imageShape: BoxShape.circle,
+                            defaultAssetImage: Strings.default_profile_image,
+                            imageUrl: widget.singer?.profileImageUrl ??
+                                Constants.starUser.profileImageUrl,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  InkWell(
-                    onTap: () => _goToProfilePage(),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.white,
-                      child: CachedImage(
-                        key: ValueKey('profile'),
-                        height: 38,
-                        width: 38,
-                        imageShape: BoxShape.circle,
-                        defaultAssetImage: Strings.default_profile_image,
-                        imageUrl: widget.singer?.profileImageUrl ??
-                            Constants.starUser.profileImageUrl,
-                      ),
-                    ),
+                  ReadMoreText(
+                    widget.record.title ?? '',
+                    callback: (isMore) {
+                      setState(() {
+                        isTitleExpanded = !isMore;
+                      });
+                      print(isTitleExpanded ? 'Expanded' : 'Collapsed');
+                    },
+                    trimExpandedText:
+                        language(ar: 'عرض القليل', en: 'show less'),
+                    trimCollapsedText:
+                        language(ar: 'عرض المزيد', en: 'show more'),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    // moreStyle:
+                    //     TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    // lessStyle:
+                    // TextStyle(fontSize: 14, fontWeight: FontWeight.bold,),
+                    colorClickableText: MyColors.accentColor,
+
+                    trimLines: 1, textAlign: TextAlign.right,
+                    trimMode: TrimMode.Line,
                   ),
                 ],
               ),

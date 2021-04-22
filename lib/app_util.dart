@@ -137,21 +137,21 @@ class AppUtil with ChangeNotifier {
               ),
               secondBtnText != null
                   ? MaterialButton(
-                onPressed: secondFunc,
-                child: Text(
-                  secondBtnText,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              )
+                      onPressed: secondFunc,
+                      child: Text(
+                        secondBtnText,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    )
                   : Container(),
               thirdBtnText != null
                   ? MaterialButton(
-                onPressed: thirdFunc,
-                child: Text(
-                  thirdBtnText,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              )
+                      onPressed: thirdFunc,
+                      child: Text(
+                        thirdBtnText,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    )
                   : Container(),
             ],
           );
@@ -285,7 +285,7 @@ class AppUtil with ChangeNotifier {
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];
     String fileName =
-    await getStorageFileNameFromContentDisposition(contentDisposition);
+        await getStorageFileNameFromContentDisposition(contentDisposition);
     String filePathAndName = firstPath + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
@@ -331,7 +331,7 @@ class AppUtil with ChangeNotifier {
     } else {
       //if folder not exists create folder and then return its path
       final Directory _appDocDirNewFolder =
-      await _appDocDirFolder.create(recursive: true);
+          await _appDocDirFolder.create(recursive: true);
       return _appDocDirNewFolder.path;
     }
   }
@@ -340,7 +340,7 @@ class AppUtil with ChangeNotifier {
     String initialPath = '${(await getApplicationDocumentsDirectory()).path}/';
     if (!(await Directory('$initialPath' + 'temp').exists())) {
       final dir =
-      await Directory('$initialPath' + 'temp').create(recursive: true);
+          await Directory('$initialPath' + 'temp').create(recursive: true);
       appTempDirectoryPath = dir.path + '/';
       print('appTempDirectoryPath: $appTempDirectoryPath');
     } else {
@@ -358,12 +358,12 @@ class AppUtil with ChangeNotifier {
   static showLoader(BuildContext context, {String message}) {
     Navigator.of(context).push(CustomModal(
         child: FlipLoader(
-          loaderBackground: MyColors.accentColor,
-          iconColor: MyColors.primaryColor,
-          icon: Icons.music_note,
-          animationType: "full_flip",
-          message: message,
-        )));
+      loaderBackground: MyColors.accentColor,
+      iconColor: MyColors.primaryColor,
+      icon: Icons.music_note,
+      animationType: "full_flip",
+      message: message,
+    )));
   }
 
   static String formatTimestamp(Timestamp timestamp) {
@@ -451,24 +451,24 @@ class AppUtil with ChangeNotifier {
     var time = '';
 
     if (diff.inSeconds <= 60) {
-      time = 'now';
+      time = language(ar: 'الآن', en: 'now');
     } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
       if (diff.inMinutes == 1) {
-        time = '1m';
+        time = language(en: '1m', ar: '1د');
       } else {
-        time = diff.inMinutes.toString() + 'm';
+        time = diff.inMinutes.toString() + language(en: 'm', ar: 'د');
       }
     } else if (diff.inHours > 0 && diff.inHours < 24) {
       if (diff.inHours == 1) {
-        time = '1h';
+        time = language(en: '1h', ar: '1س');
       } else {
-        time = diff.inHours.toString() + 'h';
+        time = diff.inHours.toString() + language(en: 'h', ar: 'س');
       }
     } else if (diff.inDays > 0) {
       if (diff.inDays == 1) {
-        time = '1d';
+        time = language(en: '1d', ar: '1يوم');
       } else {
-        time = diff.inDays.toString() + 'd';
+        time = diff.inDays.toString() + language(en: 'd', ar: 'يوم');
       }
     }
 
@@ -479,7 +479,7 @@ class AppUtil with ChangeNotifier {
     text.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         user_model.User user =
-        await DatabaseService.getUserWithUsername(word.substring(1));
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
             user.id,
@@ -513,7 +513,7 @@ class AppUtil with ChangeNotifier {
 
   static setUserVariablesByFirebaseUser(User user) async {
     user_model.User loggedInUser =
-    await DatabaseService.getUserWithId(user?.uid);
+        await DatabaseService.getUserWithId(user?.uid);
 
     Constants.currentUser = loggedInUser;
     Constants.currentFirebaseUser = user;
