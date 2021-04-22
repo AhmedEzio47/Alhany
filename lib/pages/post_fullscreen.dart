@@ -459,14 +459,26 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                 )
                               : Container(),
                           _record != null
-                              ? Directionality(
-                                  textDirection: Constants.language == 'ar'
-                                      ? TextDirection.rtl
-                                      : TextDirection.ltr,
-                                  child: Text(
-                                    '${AppUtil.formatCommentsTimestamp(widget.record.timestamp)}',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                              ? Row(
+                                  children: [
+                                    Directionality(
+                                      textDirection: Constants.language == 'ar'
+                                          ? TextDirection.rtl
+                                          : TextDirection.ltr,
+                                      child: Text(
+                                        '${AppUtil.formatCommentsTimestamp(widget.record.timestamp)}',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 15,
+                                      color: MyColors.iconLightColor,
+                                    )
+                                  ],
                                 )
                               : Container(),
                         ],

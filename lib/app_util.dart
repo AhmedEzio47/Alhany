@@ -454,19 +454,19 @@ class AppUtil with ChangeNotifier {
       time = language(ar: 'الآن', en: 'now');
     } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
       if (diff.inMinutes == 1) {
-        time = language(en: '1m', ar: '1د');
+        time = language(en: '1m', ar: '1 د');
       } else {
-        time = diff.inMinutes.toString() + language(en: 'm', ar: 'د');
+        time = diff.inMinutes.toString() + language(en: 'm', ar: ' د');
       }
     } else if (diff.inHours > 0 && diff.inHours < 24) {
       if (diff.inHours == 1) {
-        time = language(en: '1h', ar: '1س');
+        time = language(en: '1h', ar: '1 س');
       } else {
-        time = diff.inHours.toString() + language(en: 'h', ar: 'س');
+        time = diff.inHours.toString() + language(en: 'h', ar: ' س');
       }
     } else if (diff.inDays > 0) {
       if (diff.inDays == 1) {
-        time = language(en: '1d', ar: '1يوم');
+        time = language(en: '1d', ar: '1 يوم');
       } else {
         time = diff.inDays.toString() + language(en: 'd', ar: 'يوم');
       }
