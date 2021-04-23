@@ -746,19 +746,19 @@ class _MelodyPageState extends State<MelodyPage> {
     });
     if (_type == Types.VIDEO) {
       url = await appUtil.uploadFile(File(mergedFilePath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(mergedFilePath)}');
+          'records/${Constants.currentUserID}/$recordId${path.extension(mergedFilePath)}');
     } else {
       url = await appUtil.uploadFile(File(imageVideoPath), context,
-          'records/${widget.melody.id}/$recordId${path.extension(imageVideoPath)}');
+          'records/${Constants.currentUserID}/$recordId${path.extension(imageVideoPath)}');
     }
     if (_type == Types.VIDEO) {
       thumbnailUrl = await appUtil.uploadFile(
           File('${appTempDirectoryPath}thumbnail.png'),
           context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
+          'records_thumbnails/${Constants.currentUserID}/$recordId${path.extension('${appTempDirectoryPath}thumbnail.png')}');
     } else {
       thumbnailUrl = await appUtil.uploadFile(File(_image.path), context,
-          'records_thumbnails/${widget.melody.id}/$recordId${path.extension(_image.path)}');
+          'records_thumbnails/${Constants.currentUserID}/$recordId${path.extension(_image.path)}');
     }
 
     if (mounted) {

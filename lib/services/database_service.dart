@@ -210,6 +210,17 @@ class DatabaseService {
     return records.length > 0 ? records[0] : null;
   }
 
+  static Future<News> getNextNews(Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot newsSnapshot = await newsRef
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(1)
+        .get();
+    List<News> news =
+        newsSnapshot.docs.map((doc) => News.fromDoc(doc)).toList();
+    return news.length > 0 ? news[0] : null;
+  }
+
   static Future<Record> getPrevRecord(Timestamp lastVisiblePostSnapShot) async {
     QuerySnapshot recordsSnapshot = await recordsRef
         .orderBy('timestamp', descending: false)
@@ -219,6 +230,17 @@ class DatabaseService {
     List<Record> records =
         recordsSnapshot.docs.map((doc) => Record.fromDoc(doc)).toList();
     return records.length > 0 ? records[0] : null;
+  }
+
+  static Future<News> getPrevNews(Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot newsSnapshot = await newsRef
+        .orderBy('timestamp', descending: false)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(1)
+        .get();
+    List<News> news =
+        newsSnapshot.docs.map((doc) => News.fromDoc(doc)).toList();
+    return news.length > 0 ? news[0] : null;
   }
 
   static getUserRecords(String userId) async {
