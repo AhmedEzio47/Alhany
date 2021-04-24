@@ -184,70 +184,73 @@ class _RecordItemState extends State<RecordItem> {
                 ? WrapAlignment.end
                 : WrapAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      height: 38,
-                      width: 38,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              style: BorderStyle.solid,
-                              color: MyColors.accentColor)),
-                      child: InkWell(
-                        onTap: _goToMelodyPage,
-                        child: Icon(
-                          Icons.mic,
-                          size: 32,
-                          color: MyColors.accentColor,
+              Container(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        height: 38,
+                        width: 38,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                style: BorderStyle.solid,
+                                color: MyColors.accentColor)),
+                        child: InkWell(
+                          onTap: _goToMelodyPage,
+                          child: Icon(
+                            Icons.mic,
+                            size: 32,
+                            color: MyColors.accentColor,
+                          ),
                         ),
                       ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            InkWell(
-                              child: Text(' ${_singer?.name ?? ' '}',
-                                  style: TextStyle(
-                                      color: MyColors.iconLightColor,
-                                      fontWeight: FontWeight.bold)),
-                              onTap: () => _goToProfilePage(),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            InkWell(
-                              child: CachedImage(
-                                height: 25,
-                                width: 25,
-                                imageShape: BoxShape.circle,
-                                imageUrl: _singer?.profileImageUrl,
-                                defaultAssetImage:
-                                    Strings.default_profile_image,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              InkWell(
+                                child: Text(' ${_singer?.name ?? ' '}',
+                                    style: TextStyle(
+                                        color: MyColors.textDarkColor,
+                                        fontWeight: FontWeight.bold)),
+                                onTap: () => _goToProfilePage(),
                               ),
-                              onTap: () => _goToProfilePage(),
-                            ),
-                          ],
-                        ),
-                        widget.record.singerId == Constants.currentUserID
-                            ? ValueListenableBuilder<int>(
-                                valueListenable: number,
-                                builder: (context, value, child) {
-                                  return PostBottomSheet().postOptionIcon(
-                                    context,
-                                    record: widget.record,
-                                  );
-                                },
-                              )
-                            : Container()
-                      ],
-                    ),
-                  ],
+                              SizedBox(
+                                width: 10,
+                              ),
+                              InkWell(
+                                child: CachedImage(
+                                  height: 25,
+                                  width: 25,
+                                  imageShape: BoxShape.circle,
+                                  imageUrl: _singer?.profileImageUrl,
+                                  defaultAssetImage:
+                                      Strings.default_profile_image,
+                                ),
+                                onTap: () => _goToProfilePage(),
+                              ),
+                            ],
+                          ),
+                          widget.record.singerId == Constants.currentUserID
+                              ? ValueListenableBuilder<int>(
+                                  valueListenable: number,
+                                  builder: (context, value, child) {
+                                    return PostBottomSheet().postOptionIcon(
+                                      context,
+                                      record: widget.record,
+                                    );
+                                  },
+                                )
+                              : Container()
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // MusicPlayer(
@@ -259,32 +262,36 @@ class _RecordItemState extends State<RecordItem> {
               //   playBtnPosition: PlayBtnPosition.left,
               //   isCompact: true,
               // ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ReadMoreText(
-                  widget.record.title ?? '',
-                  callback: (isMore) {
-                    setState(() {
-                      isTitleExpanded = !isMore;
-                    });
-                    print(isTitleExpanded ? 'Expanded' : 'Collapsed');
-                  },
-                  trimExpandedText: language(ar: 'عرض القليل', en: 'show less'),
-                  trimCollapsedText:
-                      language(ar: 'عرض المزيد', en: 'show more'),
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                  // moreStyle:
-                  //     TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  // lessStyle:
-                  // TextStyle(fontSize: 14, fontWeight: FontWeight.bold,),
-                  colorClickableText: MyColors.accentColor,
+              widget.record.title != null
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ReadMoreText(
+                        widget.record.title ?? '',
+                        callback: (isMore) {
+                          setState(() {
+                            isTitleExpanded = !isMore;
+                          });
+                          print(isTitleExpanded ? 'Expanded' : 'Collapsed');
+                        },
+                        trimExpandedText:
+                            language(ar: 'عرض القليل', en: 'show less'),
+                        trimCollapsedText:
+                            language(ar: 'عرض المزيد', en: 'show more'),
+                        style: TextStyle(
+                            color: MyColors.textLightColor, fontSize: 16),
+                        // moreStyle:
+                        //     TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                        // lessStyle:
+                        // TextStyle(fontSize: 14, fontWeight: FontWeight.bold,),
+                        colorClickableText: MyColors.accentColor,
 
-                  trimLines: 1, textAlign: TextAlign.right,
-                  trimMode: TrimMode.Line,
-                ),
-              ),
+                        trimLines: 2, textAlign: TextAlign.right,
+                        trimMode: TrimMode.Line,
+                      ),
+                    )
+                  : Container(),
               SizedBox(
-                width: 5,
+                width: widget.record.title != null ? 5 : 0,
               ),
               Stack(
                 children: [
