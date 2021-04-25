@@ -73,6 +73,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
     setState(() {
       _melody = melody;
     });
+
+    Singer singer = await DatabaseService.getSingerWithName(_melody.singer);
+    setState(() {
+      _melodySinger = singer;
+    });
   }
 
   void initLikes({Record record, News news}) async {
@@ -178,7 +183,11 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.record != null) getMelodySinger();
+    setState(() {
+      _record = widget.record;
+      _news = widget.news;
+    });
+    if (widget.record != null) getMelody();
     _pageController.addListener(() {
       print(_pageController.position.userScrollDirection.toString());
       if (_pageController.position.userScrollDirection != _scrollDirection) {
@@ -397,7 +406,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
     initVideoPlayer(_record.url);
     getMelody();
     getSinger();
-    getMelodySinger();
     isFollowing();
     initLikes(record: _record, news: _news);
     setState(() {
@@ -440,12 +448,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
   int _page = 0;
   Singer _melodySinger;
   Melody _melody;
-  getMelodySinger() async {
-    Singer singer = await DatabaseService.getSingerWithName(_melody.singer);
-    setState(() {
-      _melodySinger = singer;
-    });
-  }
 
   fullscreen() {
     bool isTitleExpanded = false;
