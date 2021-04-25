@@ -244,7 +244,7 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: Sizes.singer_box + 90,
+                  height: Sizes.singer_box + 100,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
