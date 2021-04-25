@@ -503,7 +503,7 @@ class _MelodyPageState extends State<MelodyPage> {
       }
       //MERGE 2 sounds
       success = await flutterFFmpeg.execute(
-          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -map [out] -ac 2 -c:a libmp3lame -b:a 192k -shortest $mergedFilePath');
+          '-i $melodyPath -i $recordingFilePath -filter_complex "[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.musicVolume}[a1]; [1:a]loudnorm,aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,volume=${Constants.voiceVolume}[a2]; [a1][a2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[out]" -async 1 -map [out] -ac 2 -c:a libmp3lame -b:a 192k -shortest $mergedFilePath');
       print(success == 1 ? 'Failure!' : 'Success!');
       setState(() {
         _progressVisible = false;
@@ -1044,7 +1044,7 @@ class _MelodyPageState extends State<MelodyPage> {
                                     print(
                                         'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
                                     int success = await flutterFFmpeg.execute(
-                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=480:trunc(ow/a/2)*2\" -c:v libx264 -preset veryfast -c:a copy -shortest $imageVideoPath');
+                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:trunc(ow/a/2)*2,format=yuv420p\" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath');
                                     print('conversion success:$success');
                                     if (success != 0) {
                                       AppUtil.showToast(language(
