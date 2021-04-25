@@ -999,28 +999,35 @@ class DatabaseService {
   }
 
   static deletePost({String recordId, String newsId}) async {
-    if (newsId != null) {
-      News news = await getNewsWithId(newsId);
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(news.contentUrl);
-      await storageRef.child('/news/$fileName').delete();
-    }
-    if (recordId != null) {
-      Record record = await getRecordWithId(recordId);
-      if (record.url != null) {
-        String fileName = await AppUtil.getStorageFileNameFromUrl(record.url);
-        await storageRef
-            .child('/records/${record.melodyId}/$fileName')
-            .delete();
-      }
+    try {
+      if (newsId != null) {
+        News news = await getNewsWithId(newsId);
 
-      if (record.thumbnailUrl != null) {
-        String thumbnail =
-            await AppUtil.getStorageFileNameFromUrl(record.thumbnailUrl);
-        await storageRef
-            .child('/records_thumbnails/${record.melodyId}/$thumbnail')
-            .delete();
+        String fileName =
+            await AppUtil.getStorageFileNameFromUrl(news.contentUrl);
+
+        await storageRef.child('/news/$fileName').delete();
       }
+      if (recordId != null) {
+        Record record = await getRecordWithId(recordId);
+        if (record.url != null) {
+          String fileName = await AppUtil.getStorageFileNameFromUrl(record.url);
+          await storageRef
+              .child('/records/${Constants.currentUserID}/$fileName')
+              .delete();
+        }
+
+        if (record.thumbnailUrl != null) {
+          String thumbnail =
+              await AppUtil.getStorageFileNameFromUrl(record.thumbnailUrl);
+          await storageRef
+              .child(
+                  '/records_thumbnails/${Constants.currentUserID}/$thumbnail')
+              .delete();
+        }
+      }
+    } catch (ex) {
+      print(ex);
     }
     CollectionReference collectionReference;
     if (recordId != null) {

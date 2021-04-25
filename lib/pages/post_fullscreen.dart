@@ -61,7 +61,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   User _singer;
   getSinger() async {
-    User singer = await DatabaseService.getUserWithId(_record.singerId);
+    User singer = await DatabaseService.getUserWithId(
+        _record?.singerId ?? Constants.starUser.id);
     setState(() {
       _singer = singer;
     });
@@ -177,7 +178,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   void initState() {
     super.initState();
-    getMelodySinger();
+    if (widget.record != null) getMelodySinger();
     _pageController.addListener(() {
       print(_pageController.position.userScrollDirection.toString());
       if (_pageController.position.userScrollDirection != _scrollDirection) {
@@ -240,8 +241,9 @@ class _PostFullscreenState extends State<PostFullscreen> {
   }
 
   @override
-  void dispose() {
-    disposePlayer();
+  void dispose() async {
+    print('disposing');
+    await disposePlayer();
     super.dispose();
   }
 
@@ -262,7 +264,10 @@ class _PostFullscreenState extends State<PostFullscreen> {
   DragUpdateDetails updateVerticalDragDetails;
 
   Future<bool> _onBackPressed() {
-    if (Constants.routeStack.length < 2) {
+    if (widget.news != null) {
+      Constants.currentRoute = '/';
+      Navigator.of(context).pop();
+    } else if (Constants.routeStack.length < 2) {
       //Constants.routeStack.removeLast();
       Constants.currentRoute = '/';
       appPageUtil.goToHome();
@@ -280,6 +285,20 @@ class _PostFullscreenState extends State<PostFullscreen> {
       Constants.currentRoute = '/';
       appPageUtil.goToHome();
     }
+  }
+
+  getRecord() async {
+    Record record = await DatabaseService.getRecordWithId(widget.record.id);
+    setState(() {
+      _record = record;
+    });
+  }
+
+  getNews() async {
+    News news = await DatabaseService.getNewsWithId(widget.news.id);
+    setState(() {
+      _news = news;
+    });
   }
 
   @override
@@ -408,6 +427,8 @@ class _PostFullscreenState extends State<PostFullscreen> {
     });
     DatabaseService.incrementNewsViews(_news.id);
     initVideoPlayer(_news.contentUrl);
+    getSinger();
+
     initLikes(record: _record, news: _news);
     setState(() {
       _page = index;
@@ -492,35 +513,31 @@ class _PostFullscreenState extends State<PostFullscreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _record != null
-                              ? Text(
-                                  '${_singer?.name}',
+                          Text(
+                            '${_singer?.name}',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Row(
+                            children: [
+                              Directionality(
+                                textDirection: Constants.language == 'ar'
+                                    ? TextDirection.rtl
+                                    : TextDirection.ltr,
+                                child: Text(
+                                  '${AppUtil.formatCommentsTimestamp(_record?.timestamp ?? _news.timestamp)}',
                                   style: TextStyle(color: Colors.white),
-                                )
-                              : Container(),
-                          _record != null
-                              ? Row(
-                                  children: [
-                                    Directionality(
-                                      textDirection: Constants.language == 'ar'
-                                          ? TextDirection.rtl
-                                          : TextDirection.ltr,
-                                      child: Text(
-                                        '${AppUtil.formatCommentsTimestamp(_record.timestamp)}',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Icon(
-                                      Icons.access_time,
-                                      size: 15,
-                                      color: MyColors.iconLightColor,
-                                    )
-                                  ],
-                                )
-                              : Container(),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Icon(
+                                Icons.access_time,
+                                size: 15,
+                                color: MyColors.iconLightColor,
+                              )
+                            ],
+                          ),
                         ],
                       ),
                       SizedBox(
@@ -545,7 +562,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                     ],
                   ),
                   ReadMoreText(
-                    _record.title ?? '',
+                    _record?.title ?? _news?.text ?? '',
                     callback: (isMore) {
                       setState(() {
                         isTitleExpanded = !isMore;
@@ -610,20 +627,25 @@ class _PostFullscreenState extends State<PostFullscreen> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {
+                      onTap: () async {
                         //addComment();
                         if (_record != null) {
-                          Navigator.of(context).pushNamed('/record-page',
+                          _controller.pause();
+
+                          await Navigator.of(context).pushNamed('/record-page',
                               arguments: {
                                 'record': _record,
                                 'is_video_visible': false
                               });
+                          await getRecord();
                         } else {
-                          Navigator.of(context).pushNamed('/news-page',
+                          _controller.pause();
+                          await Navigator.of(context).pushNamed('/news-page',
                               arguments: {
                                 'news': _news,
                                 'is_video_visible': false
                               });
+                          await getNews();
                         }
                       },
                       child: Container(
@@ -664,7 +686,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
                                 transform: Matrix4.rotationY(math.pi),
                                 child: Icon(Icons.reply,
                                     size: 35, color: Colors.white)),
-                            Text('${_record?.shares ?? _news?.shares ?? 0}',
+                            Text('${language(ar: 'شارك', en: 'Share')}',
                                 style: TextStyle(color: Colors.white))
                           ],
                         ),

@@ -297,7 +297,9 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {
-    var response = await get(url);
+    var response = await get(
+      url,
+    );
     var contentDisposition = response.headers['content-disposition'];
     String fileName = contentDisposition
         .split('filename*=utf-8')

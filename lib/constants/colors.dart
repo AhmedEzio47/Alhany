@@ -7,6 +7,7 @@ class MyColors {
   static Color accentColor = Color(0xffe5ca01);
   static Color textLightColor = Colors.white;
   static Color iconLightColor = Colors.white;
+  static Color iconDarkColor = Colors.black;
   static Color iconInactiveColor = Colors.grey;
   static Color textInactiveColor = Colors.grey;
   static Color textDarkColor = Colors.black;

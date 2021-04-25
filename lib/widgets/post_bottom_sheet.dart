@@ -31,7 +31,7 @@ class PostBottomSheet {
           ),
           child: Icon(
             Icons.arrow_drop_down,
-            color: MyColors.textLightColor,
+            color: MyColors.iconDarkColor,
           ),
         ));
   }
@@ -118,49 +118,49 @@ class PostBottomSheet {
 
     Navigator.of(context).push(CustomModal(
         child: Container(
-          height: 200,
-          color: Colors.white,
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: _commentController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(hintText: 'New comment'),
-                ),
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              RaisedButton(
-                onPressed: () async {
-                  if (_commentController.text.trim().isEmpty) {
-                    AppUtil.showToast(language(
-                        en: 'Please enter some text',
-                        ar: 'من فضلك لا تترك الخانة فارغة'));
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                  AppUtil.showLoader(context);
-                  await DatabaseService.editComment(
-                      comment.id, _commentController.text,
-                      recordId: record.id, newsId: news.id);
-                  AppUtil.showToast(
-                      language(en: Strings.en_updated, ar: Strings.ar_updated));
-                  Navigator.of(context).pushReplacementNamed('/record-page',
-                      arguments: {'record': record, 'is_video_visible': true});
-                },
-                color: MyColors.primaryColor,
-                child: Text(
-                  language(en: Strings.en_update, ar: Strings.ar_update),
-                  style: TextStyle(color: MyColors.primaryColor),
-                ),
-              )
-            ],
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _commentController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(hintText: 'New comment'),
+            ),
           ),
-        )));
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_commentController.text.trim().isEmpty) {
+                AppUtil.showToast(language(
+                    en: 'Please enter some text',
+                    ar: 'من فضلك لا تترك الخانة فارغة'));
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              await DatabaseService.editComment(
+                  comment.id, _commentController.text,
+                  recordId: record.id, newsId: news.id);
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pushReplacementNamed('/record-page',
+                  arguments: {'record': record, 'is_video_visible': true});
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              language(en: Strings.en_update, ar: Strings.ar_update),
+              style: TextStyle(color: MyColors.primaryColor),
+            ),
+          )
+        ],
+      ),
+    )));
   }
 
   editReply(BuildContext context, Comment reply, Comment parentComment,
@@ -169,53 +169,53 @@ class PostBottomSheet {
 
     Navigator.of(context).push(CustomModal(
         child: Container(
-          height: 200,
-          color: Colors.white,
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: _commentController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(hintText: 'New reply'),
-                ),
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              RaisedButton(
-                onPressed: () async {
-                  if (_commentController.text.trim().isEmpty) {
-                    AppUtil.showToast(language(
-                        en: 'Please enter some text',
-                        ar: 'من فضلك لا تترك الخانة فارغة'));
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                  AppUtil.showLoader(context);
-                  await DatabaseService.editReply(
-                      parentComment.id, reply.id, _commentController.text,
-                      recordId: record.id, newsId: news.id);
-                  AppUtil.showToast(
-                      language(en: Strings.en_updated, ar: Strings.ar_updated));
-                  Navigator.of(context).pushReplacementNamed('/comment-page',
-                      arguments: {
-                        'record': record,
-                        'news': news,
-                        'comment': parentComment
-                      });
-                },
-                color: MyColors.primaryColor,
-                child: Text(
-                  language(en: Strings.en_update, ar: Strings.ar_update),
-                  style: TextStyle(color: MyColors.primaryColor),
-                ),
-              )
-            ],
+      height: 200,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _commentController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(hintText: 'New reply'),
+            ),
           ),
-        )));
+          SizedBox(
+            height: 40,
+          ),
+          RaisedButton(
+            onPressed: () async {
+              if (_commentController.text.trim().isEmpty) {
+                AppUtil.showToast(language(
+                    en: 'Please enter some text',
+                    ar: 'من فضلك لا تترك الخانة فارغة'));
+                return;
+              }
+              Navigator.of(context).pop();
+              AppUtil.showLoader(context);
+              await DatabaseService.editReply(
+                  parentComment.id, reply.id, _commentController.text,
+                  recordId: record.id, newsId: news.id);
+              AppUtil.showToast(
+                  language(en: Strings.en_updated, ar: Strings.ar_updated));
+              Navigator.of(context).pushReplacementNamed('/comment-page',
+                  arguments: {
+                    'record': record,
+                    'news': news,
+                    'comment': parentComment
+                  });
+            },
+            color: MyColors.primaryColor,
+            child: Text(
+              language(en: Strings.en_update, ar: Strings.ar_update),
+              style: TextStyle(color: MyColors.primaryColor),
+            ),
+          )
+        ],
+      ),
+    )));
   }
 
   void unfollowUser(BuildContext context, User user) async {
@@ -229,8 +229,8 @@ class PostBottomSheet {
           actions: <Widget>[
             new GestureDetector(
               onTap: () =>
-              // CLose bottom sheet
-              Navigator.of(context).pop(),
+                  // CLose bottom sheet
+                  Navigator.of(context).pop(),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text("NO"),
@@ -308,8 +308,8 @@ class PostBottomSheet {
           actions: <Widget>[
             new GestureDetector(
               onTap: () =>
-              // CLose bottom sheet
-              Navigator.of(context).pop(),
+                  // CLose bottom sheet
+                  Navigator.of(context).pop(),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text("NO"),

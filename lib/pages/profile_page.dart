@@ -208,7 +208,7 @@ class _ProfilePageState extends State<ProfilePage>
                               padding: const EdgeInsets.only(
                                 left: 15.0,
                               ),
-                              child: _user?.id != Constants.currentUserID
+                              child: Constants.currentRoute == '/profile-page'
                                   ? Builder(
                                       builder: (context) => InkWell(
                                         onTap: () {

@@ -11,10 +11,11 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
-import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
+
+import '../post_bottom_sheet.dart';
 
 class RecordItem extends StatefulWidget {
   final Record record;
@@ -37,6 +38,9 @@ class _RecordItemState extends State<RecordItem> {
 
   @override
   void initState() {
+    setState(() {
+      _record = widget.record;
+    });
     getAuthor();
     getMelody();
     initLikes(widget.record);
@@ -151,6 +155,15 @@ class _RecordItemState extends State<RecordItem> {
     }
   }
 
+  Record _record;
+
+  getRecord() async {
+    Record record = await DatabaseService.getRecordWithId(widget.record.id);
+    setState(() {
+      _record = record;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double videoHeight = MediaQuery.of(context).size.width;
@@ -161,13 +174,14 @@ class _RecordItemState extends State<RecordItem> {
       ),
       child: InkWell(
         onTap: () {
-          AppUtil.executeFunctionIfLoggedIn(context, () {
+          AppUtil.executeFunctionIfLoggedIn(context, () async {
             if (Constants.currentRoute != '/record-page')
-              Navigator.of(context).pushNamed('/record-page', arguments: {
-                'record': widget.record,
+              await Navigator.of(context).pushNamed('/record-page', arguments: {
+                'record': _record,
                 'singer': _singer,
                 'is_video_visible': true
               });
+            await getRecord();
           });
         },
         child: Container(
@@ -191,22 +205,38 @@ class _RecordItemState extends State<RecordItem> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        height: 38,
-                        width: 38,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                style: BorderStyle.solid,
-                                color: MyColors.accentColor)),
-                        child: InkWell(
-                          onTap: _goToMelodyPage,
-                          child: Icon(
-                            Icons.mic,
-                            size: 32,
-                            color: MyColors.accentColor,
+                      Row(
+                        children: [
+                          _record.singerId == Constants.currentUserID ||
+                                  Constants.isAdmin
+                              ? ValueListenableBuilder<int>(
+                                  valueListenable: number,
+                                  builder: (context, value, child) {
+                                    return PostBottomSheet().postOptionIcon(
+                                      context,
+                                      record: _record,
+                                    );
+                                  },
+                                )
+                              : Container(),
+                          Container(
+                            height: 38,
+                            width: 38,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    style: BorderStyle.solid,
+                                    color: MyColors.accentColor)),
+                            child: InkWell(
+                              onTap: _goToMelodyPage,
+                              child: Icon(
+                                Icons.mic,
+                                size: 32,
+                                color: MyColors.accentColor,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -236,17 +266,6 @@ class _RecordItemState extends State<RecordItem> {
                               ),
                             ],
                           ),
-                          widget.record.singerId == Constants.currentUserID
-                              ? ValueListenableBuilder<int>(
-                                  valueListenable: number,
-                                  builder: (context, value, child) {
-                                    return PostBottomSheet().postOptionIcon(
-                                      context,
-                                      record: widget.record,
-                                    );
-                                  },
-                                )
-                              : Container()
                         ],
                       ),
                     ],
@@ -262,11 +281,11 @@ class _RecordItemState extends State<RecordItem> {
               //   playBtnPosition: PlayBtnPosition.left,
               //   isCompact: true,
               // ),
-              widget.record.title != null
+              _record.title != null
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: ReadMoreText(
-                        widget.record.title ?? '',
+                        _record.title ?? '',
                         callback: (isMore) {
                           setState(() {
                             isTitleExpanded = !isMore;
@@ -291,22 +310,23 @@ class _RecordItemState extends State<RecordItem> {
                     )
                   : Container(),
               SizedBox(
-                width: widget.record.title != null ? 5 : 0,
+                width: _record.title != null ? 5 : 0,
               ),
               Stack(
                 children: [
                   Container(
                       height: videoHeight,
-                      child: widget.record.thumbnailUrl != null
+                      child: _record.thumbnailUrl != null
                           ? Stack(
                               children: [
                                 CachedImage(
                                   height: videoHeight + 50,
                                   width: MediaQuery.of(context).size.width,
                                   imageShape: BoxShape.rectangle,
-                                  imageUrl: widget.record.thumbnailUrl,
+                                  imageUrl: _record.thumbnailUrl,
                                   defaultAssetImage:
                                       Strings.default_cover_image,
+                                  assetFit: BoxFit.fill,
                                 ),
                                 Positioned.fill(
                                     child: Align(
@@ -386,7 +406,7 @@ class _RecordItemState extends State<RecordItem> {
                             ? TextDirection.rtl
                             : TextDirection.ltr,
                         child: Text(
-                          '${widget.record.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
+                          '${_record.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
@@ -401,7 +421,7 @@ class _RecordItemState extends State<RecordItem> {
                               AppUtil.sharePost(
                                   ' ${_singer.name} singed ${_melody.name} ',
                                   '',
-                                  recordId: widget.record.id);
+                                  recordId: _record.id);
                             }),
                             child: SizedBox(
                               child: Icon(
@@ -415,7 +435,7 @@ class _RecordItemState extends State<RecordItem> {
                             width: 10,
                           ),
                           Text(
-                            '${widget.record.comments ?? 0}',
+                            '${_record.comments ?? 0}',
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                           SizedBox(
@@ -432,7 +452,7 @@ class _RecordItemState extends State<RecordItem> {
                             width: 10,
                           ),
                           Text(
-                            '${widget.record.likes ?? 0}',
+                            '${_record.likes ?? 0}',
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                           SizedBox(
@@ -443,7 +463,7 @@ class _RecordItemState extends State<RecordItem> {
                               AppUtil.executeFunctionIfLoggedIn(context,
                                   () async {
                                 if (isLikeEnabled) {
-                                  await likeBtnHandler(widget.record);
+                                  await likeBtnHandler(_record);
                                 }
                               });
                             },
@@ -499,12 +519,12 @@ class _RecordItemState extends State<RecordItem> {
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
-            'record': widget.record,
+            'record': _record,
             'singer': _singer,
             'melody': _melody
           });
         } else {
-          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+          appPageUtil.goToFullscreen(_record, _singer, _melody);
         }
       },
       child: Icon(
@@ -521,12 +541,12 @@ class _RecordItemState extends State<RecordItem> {
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
-            'record': widget.record,
+            'record': _record,
             'singer': _singer,
             'melody': _melody
           });
         } else {
-          appPageUtil.goToFullscreen(widget.record, _singer, _melody);
+          appPageUtil.goToFullscreen(_record, _singer, _melody);
         }
       },
       child: Icon(

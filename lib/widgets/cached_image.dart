@@ -8,6 +8,7 @@ class CachedImage extends StatefulWidget {
   final double width;
   final double height;
   final String defaultAssetImage;
+  final BoxFit assetFit;
 
   const CachedImage({
     Key key,
@@ -15,7 +16,7 @@ class CachedImage extends StatefulWidget {
     this.imageShape,
     this.width,
     this.height,
-    this.defaultAssetImage,
+    this.defaultAssetImage, this.assetFit,
   }) : super(key: key);
 
   @override
@@ -26,10 +27,10 @@ class _CachedImageState extends State<CachedImage> {
   @override
   Widget build(BuildContext context) {
     return _cacheRoundedImage(
-        widget.imageUrl, widget.imageShape, widget.width, widget.height, widget.defaultAssetImage);
+        widget.imageUrl, widget.imageShape, widget.width, widget.height, widget.defaultAssetImage, widget.assetFit);
   }
 
-  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width, double height, String defaultAssetImage) {
+  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width, double height, String defaultAssetImage, BoxFit fit) {
     return Container(
       width: width,
       height: height,
@@ -50,6 +51,7 @@ class _CachedImageState extends State<CachedImage> {
               placeholder: (context, loggedInProfileImageURL) => Center(
                   child: Image.asset(
                 defaultAssetImage,
+                fit: fit,
                 height: height,
                 width: width,
               )),
