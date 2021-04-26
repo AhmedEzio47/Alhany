@@ -54,7 +54,7 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
           );
         });
       }
-      print(AppUtil.fullScreenPage);
+      print('is postfullscreen:' + AppUtil.fullScreenPage.toString());
     });
   }
 

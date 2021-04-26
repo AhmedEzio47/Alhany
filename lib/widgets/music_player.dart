@@ -254,7 +254,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ),
                   myAudioPlayer.duration != null
                       ? Text(
-                          '${_numberFormatter.format(_duration.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
+                          '${_numberFormatter.format(_duration?.inMinutes)}:${_numberFormatter.format(_duration.inSeconds % 60)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(

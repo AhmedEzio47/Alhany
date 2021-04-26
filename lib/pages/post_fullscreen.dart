@@ -252,7 +252,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
   @override
   void dispose() async {
     print('disposing');
-    await disposePlayer();
+    disposePlayer();
     super.dispose();
   }
 
@@ -261,9 +261,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
     _controller.removeListener(() {});
     await _controller.dispose();
     if (mounted) {
-      setState(() {
-        _controller = null;
-      });
+      _controller = null;
     }
   }
 
