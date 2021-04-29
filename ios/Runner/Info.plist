@@ -66,13 +66,13 @@
 		<true/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>App need permission to access music library</string>
+	<string>Alhani need permission to access music library to be able to save music and singing records</string>
 	<key>NSCameraUsageDescription</key>
-	<string>App need permission to access camera.</string>
+	<string>Alhani need permission to access camera to capture you while singing and share it for other users</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>App need permission to access microphone</string>
+	<string>Alhani need permission to access microphone to record your voice while singing over music</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>App need permission to access photo library.</string>
+	<string>Alhani need permission to access photo library to be able to select your profile picture.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
