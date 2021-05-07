@@ -4,7 +4,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class DynamicLinks {
-  static String _urlPrefix = 'https://alhany.page.link/';
+  static String _urlPrefix = 'https://m.alhaniiraq.com';
 
   static Future<Uri> createPostDynamicLink(Map<String, String> args) async {
     var uri;
@@ -22,7 +22,7 @@ class DynamicLinks {
       link: uri,
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]?.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
@@ -32,9 +32,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }
@@ -47,7 +49,7 @@ class DynamicLinks {
       link: Uri.parse('$_urlPrefix/users/${args["userId"]}'),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]?.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
@@ -57,9 +59,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }
@@ -72,7 +76,7 @@ class DynamicLinks {
       link: Uri.parse('$_urlPrefix/games/${args["gameId"]}'),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: '${args["text"]}'.length > 25
-            ? '${args["text"]}'.replaceRange(25, args["text"]!.length, '...')
+            ? '${args["text"]}'.replaceRange(25, args["text"]?.length, '...')
             : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
@@ -82,9 +86,11 @@ class DynamicLinks {
       ),
     );
     final link = await parameters.buildUrl();
-    final ShortDynamicLink shortenedLink = await DynamicLinkParameters.shortenUrl(
+    final ShortDynamicLink shortenedLink =
+        await DynamicLinkParameters.shortenUrl(
       link,
-      DynamicLinkParametersOptions(shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
+      DynamicLinkParametersOptions(
+          shortDynamicLinkPathLength: ShortDynamicLinkPathLength.unguessable),
     );
     return shortenedLink.shortUrl;
   }

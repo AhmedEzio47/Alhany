@@ -27,28 +27,35 @@ class _SingersPageState extends State<SingersPage> {
   }
 
   nextSingers() async {
-    List<Singer> singers = await DatabaseService.getNextSingers(lastVisiblePostSnapShot!);
-    if (singers.length > 0) {
-      setState(() {
-        singers.forEach((element) => _singers.add(element));
-        this.lastVisiblePostSnapShot = singers.last.name;
-      });
+    if (lastVisiblePostSnapShot != null) {
+      List<Singer> singers =
+          await DatabaseService.getNextSingers(lastVisiblePostSnapShot!);
+      if (singers.length > 0) {
+        setState(() {
+          singers.forEach((element) => _singers.add(element));
+          this.lastVisiblePostSnapShot = singers.last.name;
+        });
+      }
     }
   }
 
   @override
   void initState() {
-    _singersScrollController!
-      ..addListener(() {
-        if (_singersScrollController!.offset >= _singersScrollController!.position.maxScrollExtent &&
-            !_singersScrollController!.position.outOfRange) {
-          print('reached the bottom');
-          nextSingers();
-        } else if (_singersScrollController!.offset <= _singersScrollController!.position.minScrollExtent &&
-            !_singersScrollController!.position.outOfRange) {
-          print("reached the top");
-        } else {}
-      });
+    if (_singersScrollController != null) {
+      _singersScrollController
+        ?..addListener(() {
+          if (_singersScrollController!.offset >=
+                  _singersScrollController!.position.maxScrollExtent &&
+              !_singersScrollController!.position.outOfRange) {
+            print('reached the bottom');
+            nextSingers();
+          } else if (_singersScrollController!.offset <=
+                  _singersScrollController!.position.minScrollExtent &&
+              !_singersScrollController!.position.outOfRange) {
+            print("reached the top");
+          } else {}
+        });
+    }
     getSingers();
     super.initState();
   }
@@ -61,7 +68,8 @@ class _SingersPageState extends State<SingersPage> {
         decoration: BoxDecoration(
           color: MyColors.primaryColor,
           image: DecorationImage(
-            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+            colorFilter: new ColorFilter.mode(
+                Colors.black.withOpacity(0.1), BlendMode.dstATop),
             image: AssetImage(Strings.default_bg),
             fit: BoxFit.cover,
           ),
@@ -92,7 +100,10 @@ class _SingersPageState extends State<SingersPage> {
                 child: Align(
                   child: Text(
                     language(en: 'Singers', ar: 'المطربون'),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MyColors.textLightColor),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: MyColors.textLightColor),
                   ),
                   alignment: Alignment.topCenter,
                 ),

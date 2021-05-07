@@ -12,6 +12,7 @@ class CategoryPage extends StatefulWidget {
   final String category;
 
   const CategoryPage({Key? key, required this.category}) : super(key: key);
+
   @override
   _CategoryPageState createState() => _CategoryPageState();
 }
@@ -19,27 +20,32 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   List<Singer> _singers = [];
   ScrollController _songsScrollController = ScrollController();
-  late String lastVisiblePostSnapShot;
+  String? lastVisiblePostSnapShot;
 
   bool _isPlaying = false;
 
   getSingers() async {
-    List<Singer> songs = await DatabaseService.getSingersByCategory(widget.category);
+    List<Singer> songs =
+        await DatabaseService.getSingersByCategory(widget.category);
     if (mounted) {
       setState(() {
         _singers = songs;
-        if (_singers.length > 0) this.lastVisiblePostSnapShot = _singers.last.name!;
+        if (_singers.length > 0)
+          this.lastVisiblePostSnapShot = _singers.last.name;
       });
     }
   }
 
   nextSingers() async {
-    List<Singer> singers = await DatabaseService.getNextSingersByCategory(widget.category, lastVisiblePostSnapShot);
-    if (singers.length > 0) {
-      setState(() {
-        singers.forEach((element) => _singers.add(element));
-        this.lastVisiblePostSnapShot = singers.last.name!;
-      });
+    if (lastVisiblePostSnapShot != null) {
+      List<Singer> singers = await DatabaseService.getNextSingersByCategory(
+          widget.category, lastVisiblePostSnapShot!);
+      if (singers.length > 0) {
+        setState(() {
+          singers.forEach((element) => _singers.add(element));
+          this.lastVisiblePostSnapShot = singers.last.name;
+        });
+      }
     }
   }
 
@@ -54,8 +60,10 @@ class _CategoryPageState extends State<CategoryPage> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () async {
-                    Navigator.of(context).pushNamed('/singer-page',
-                        arguments: {'singer': _singers[index], 'data_type': DataTypes.SONGS});
+                    Navigator.of(context).pushNamed('/singer-page', arguments: {
+                      'singer': _singers[index],
+                      'data_type': DataTypes.SONGS
+                    });
                   },
                   child: SingerItem(
                     key: ValueKey('song_item'),
@@ -83,11 +91,13 @@ class _CategoryPageState extends State<CategoryPage> {
     getSingers();
     _songsScrollController
       ..addListener(() {
-        if (_songsScrollController.offset >= _songsScrollController.position.maxScrollExtent &&
+        if (_songsScrollController.offset >=
+                _songsScrollController.position.maxScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print('reached the bottom');
           nextSingers();
-        } else if (_songsScrollController.offset <= _songsScrollController.position.minScrollExtent &&
+        } else if (_songsScrollController.offset <=
+                _songsScrollController.position.minScrollExtent &&
             !_songsScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -112,7 +122,8 @@ class _CategoryPageState extends State<CategoryPage> {
               decoration: BoxDecoration(
                 color: MyColors.primaryColor,
                 image: DecorationImage(
-                  colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                  colorFilter: new ColorFilter.mode(
+                      Colors.black.withOpacity(0.1), BlendMode.dstATop),
                   image: AssetImage(Strings.default_bg),
                   fit: BoxFit.cover,
                 ),

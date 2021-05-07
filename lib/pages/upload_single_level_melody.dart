@@ -35,7 +35,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data()!['name']);
+        _singersNames.add(doc.data()?['name']);
       });
     }
   }
@@ -65,7 +65,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                   child: _image == null
                       ? InkWell(
                           onTap: () async {
-                            File image = await AppUtil.pickImageFromGallery();
+                            File? image = await AppUtil.pickImageFromGallery();
                             setState(() {
                               _image = image;
                             });
@@ -202,7 +202,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     MediaInformation info =
         await _flutterFFprobe.getMediaInformation(melodyFile.path);
     int duration =
-        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()?['duration'].toString() ?? "0")
+            .toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
@@ -212,7 +213,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
     if (_image != null) {
       String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image!, context, '/melodies_images/$id$ext');
+          .uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (melodyUrl == '') {
@@ -221,21 +222,21 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       Navigator.of(context).pop();
       return;
     }
-
-    await melodiesRef.doc(id).set({
-      'name': _melodyName ?? fileNameWithoutExtension,
-      'audio_url': melodyUrl,
-      'image_url': imageUrl,
-      'author_id': _singerName == null ? Constants.currentUserID : null,
-      'singer': _singerName,
-      'is_song': false,
-      'price': _price,
-      'search': _melodyName != null
-          ? searchList(_melodyName)
-          : searchList(fileNameWithoutExtension),
-      'duration': duration,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+    if (imageUrl != null)
+      await melodiesRef.doc(id).set({
+        'name': _melodyName ?? fileNameWithoutExtension,
+        'audio_url': melodyUrl,
+        'image_url': imageUrl,
+        'author_id': _singerName == null ? Constants.currentUserID : null,
+        'singer': _singerName,
+        'is_song': false,
+        'price': _price,
+        'search': _melodyName != null
+            ? searchList(_melodyName)
+            : searchList(fileNameWithoutExtension),
+        'duration': duration,
+        'timestamp': FieldValue.serverTimestamp()
+      });
     if (_singer != null) {
       await singersRef
           .doc(_singer!.id)
@@ -266,7 +267,7 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(melodyFile.path);
       int duration =
-          double.parse(info.getMediaProperties()!['duration'].toString())
+          double.parse(info.getMediaProperties()?['duration'].toString() ?? "0")
               .toInt();
 
       await melodiesRef.doc(id).set({
@@ -280,9 +281,10 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
         'duration': duration,
         'timestamp': FieldValue.serverTimestamp()
       });
-      await singersRef
-          .doc(_singer!.id)
-          .update({'melodies': FieldValue.increment(melodiesFiles.length)});
+      if (_singer != null && _singer!.id != null)
+        await singersRef
+            .doc(_singer!.id)
+            .update({'melodies': FieldValue.increment(melodiesFiles.length)});
     }
     AppUtil.showToast(language(en: 'Melodies uploaded!', ar: 'تم رفع الألحان'));
     Navigator.of(context).pop();

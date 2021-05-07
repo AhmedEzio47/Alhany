@@ -11,9 +11,11 @@ import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
-import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
+
+import '../post_bottom_sheet.dart';
 
 class RecordItem extends StatefulWidget {
   final Record? record;
@@ -36,9 +38,13 @@ class _RecordItemState extends State<RecordItem> {
 
   @override
   void initState() {
+    if (widget.record != null)
+      setState(() {
+        _record = widget.record!;
+      });
     getAuthor();
     getMelody();
-    initLikes(widget.record!);
+    if (widget.record != null) initLikes(widget.record!);
     super.initState();
   }
 
@@ -48,27 +54,33 @@ class _RecordItemState extends State<RecordItem> {
   }
 
   getAuthor() async {
-    User author = await DatabaseService.getUserWithId(widget.record!.singerId!);
-    if (mounted) {
-      setState(() {
-        _singer = author;
-      });
+    if (widget.record != null && widget.record!.singerId != null) {
+      User author =
+          await DatabaseService.getUserWithId(widget.record!.singerId!);
+      if (mounted) {
+        setState(() {
+          _singer = author;
+        });
+      }
     }
   }
 
   getMelody() async {
-    Melody melody =
-        await DatabaseService.getMelodyWithId(widget.record!.melodyId!);
-    if (mounted) {
-      setState(() {
-        _melody = melody;
-      });
+    if (widget.record != null && widget.record!.melodyId != null) {
+      Melody melody =
+          await DatabaseService.getMelodyWithId(widget.record!.melodyId!);
+      if (mounted) {
+        setState(() {
+          _melody = melody;
+        });
+      }
     }
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': widget.record!.singerId});
+    if (widget.record != null && widget.record!.singerId != null)
+      Navigator.of(context).pushNamed('/profile-page',
+          arguments: {'user_id': widget.record!.singerId!});
   }
 
   void _goToMelodyPage() {
@@ -99,9 +111,9 @@ class _RecordItemState extends State<RecordItem> {
       await recordsRef
           .doc(record.id)
           .update({'likes': FieldValue.increment(-1)});
-
-      await NotificationHandler.removeNotification(
-          record.singerId!, record.id!, 'record_like');
+      if (record.singerId != null && record.id != null)
+        await NotificationHandler.removeNotification(
+            record.singerId!, record.id!, 'record_like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -121,12 +133,16 @@ class _RecordItemState extends State<RecordItem> {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          record.singerId!,
-          'New Record Like',
-          Constants.currentUser!.name! + ' likes your post',
-          record.id!,
-          'record_like');
+      if (record.singerId != null &&
+          record.id != null &&
+          Constants.currentUser != null &&
+          Constants.currentUser!.name != null)
+        await NotificationHandler.sendNotification(
+            record.singerId!,
+            'New Record Like',
+            Constants.currentUser!.name! + ' likes your post',
+            record.id!,
+            'record_like');
     }
     var recordMeta = await DatabaseService.getPostMeta(recordId: record.id);
     setState(() {
@@ -143,105 +159,131 @@ class _RecordItemState extends State<RecordItem> {
         .get();
 
     //Solves the problem setState() called after dispose()
-    if (mounted) {
+    if (mounted && likedSnapshot != null) {
       setState(() {
         isLiked = likedSnapshot.exists;
       });
     }
   }
 
+  Record? _record;
+
+  getRecord() async {
+    if (widget.record != null && widget.record!.id != null) {
+      Record record = await DatabaseService.getRecordWithId(widget.record!.id!);
+      if(mounted)
+      setState(() {
+        _record = record;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double videoHeight = MediaQuery.of(context).size.width;
+    bool isTitleExpanded = false;
     return Padding(
-      padding: const EdgeInsets.only(top: 1),
+      padding: const EdgeInsets.only(
+        top: 1,
+      ),
       child: InkWell(
         onTap: () {
-          AppUtil.executeFunctionIfLoggedIn(context, () {
+          AppUtil.executeFunctionIfLoggedIn(context, () async {
             if (Constants.currentRoute != '/record-page')
-              Navigator.of(context).pushNamed('/record-page', arguments: {
-                'record': widget.record,
+              await Navigator.of(context).pushNamed('/record-page', arguments: {
+                'record': _record,
                 'singer': _singer,
                 'is_video_visible': true
               });
+            await getRecord();
           });
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 290,
+          padding: const EdgeInsets.only(bottom: 8.0),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(.1),
           ),
-          child: Column(
+          child: Wrap(
+            // crossAxisAlignment: Constants.language == 'ar'
+            //     ? CrossAxisAlignment.end
+            //     : CrossAxisAlignment.start,
+            alignment: Constants.language == 'ar'
+                ? WrapAlignment.end
+                : WrapAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          child: CachedImage(
-                            height: 25,
-                            width: 25,
-                            imageShape: BoxShape.circle,
-                            imageUrl: _singer!.profileImageUrl!,
-                            defaultAssetImage: Strings.default_profile_image,
+              Container(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          _record?.singerId == Constants.currentUserID ||
+                                  Constants.isAdmin
+                              ? ValueListenableBuilder<int>(
+                                  valueListenable: number,
+                                  builder: (context, value, child) {
+                                    return PostBottomSheet().postOptionIcon(
+                                      context,
+                                      record: _record,
+                                    );
+                                  },
+                                )
+                              : Container(),
+                          Container(
+                            height: 38,
+                            width: 38,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    style: BorderStyle.solid,
+                                    color: MyColors.accentColor)),
+                            child: InkWell(
+                              onTap: _goToMelodyPage,
+                              child: Icon(
+                                Icons.mic,
+                                size: 32,
+                                color: MyColors.accentColor,
+                              ),
+                            ),
                           ),
-                          onTap: () => _goToProfilePage(),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  child: Text(' ${_singer?.name ?? ' '} - ',
-                                      style: TextStyle(
-                                          color: MyColors.iconLightColor,
-                                          fontWeight: FontWeight.bold)),
-                                  onTap: () => _goToProfilePage(),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              InkWell(
+                                child: Text(' ${_singer?.name ?? ' '}',
+                                    style: TextStyle(
+                                        color: MyColors.textDarkColor,
+                                        fontWeight: FontWeight.bold)),
+                                onTap: () => _goToProfilePage(),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              InkWell(
+                                child: CachedImage(
+                                  height: 25,
+                                  width: 25,
+                                  imageShape: BoxShape.circle,
+                                  imageUrl: _singer?.profileImageUrl,
+                                  defaultAssetImage:
+                                      Strings.default_profile_image,
                                 ),
-                                Text(
-                                  ' singed ',
-                                  style: TextStyle(
-                                    color: MyColors.textLightColor,
-                                  ),
-                                ),
-                                InkWell(
-                                  child: Text(_melody?.name ?? '',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      )),
-                                  onTap: () => _goToMelodyPage(),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              '${AppUtil.formatTimestamp(widget.record!.timestamp!)}',
-                              style: TextStyle(
-                                  color: Colors.grey.shade300, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    widget.record!.singerId == Constants.currentUserID
-                        ? ValueListenableBuilder<int>(
-                            valueListenable: number,
-                            builder: (context, value, child) {
-                              return PostBottomSheet().postOptionIcon(
-                                context,
-                                record: widget.record,
-                              );
-                            },
-                          )
-                        : Container()
-                  ],
+                                onTap: () => _goToProfilePage(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // MusicPlayer(
@@ -253,20 +295,53 @@ class _RecordItemState extends State<RecordItem> {
               //   playBtnPosition: PlayBtnPosition.left,
               //   isCompact: true,
               // ),
+              _record?.title != null
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ReadMoreText(
+                        _record?.title ?? '',
+                        callback: (isMore) {
+                          setState(() {
+                            isTitleExpanded = !isMore;
+                          });
+                          print(isTitleExpanded ? 'Expanded' : 'Collapsed');
+                        },
+                        trimExpandedText:
+                            language(ar: 'عرض القليل', en: 'show less'),
+                        trimCollapsedText:
+                            language(ar: 'عرض المزيد', en: 'show more'),
+                        style: TextStyle(
+                            color: MyColors.textLightColor, fontSize: 16),
+                        // moreStyle:
+                        //     TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                        // lessStyle:
+                        // TextStyle(fontSize: 14, fontWeight: FontWeight.bold,),
+                        colorClickableText: MyColors.accentColor,
+
+                        trimLines: 2,
+                        textAlign: TextAlign.right,
+                        trimMode: TrimMode.Line,
+                      ),
+                    )
+                  : Container(),
+              SizedBox(
+                width: _record?.title != null ? 5 : 0,
+              ),
               Stack(
                 children: [
                   Container(
-                      height: 200,
-                      child: widget.record!.thumbnailUrl != null
+                      height: videoHeight,
+                      child: _record?.thumbnailUrl != null
                           ? Stack(
                               children: [
                                 CachedImage(
-                                  height: 200,
+                                  height: videoHeight + 50,
                                   width: MediaQuery.of(context).size.width,
                                   imageShape: BoxShape.rectangle,
-                                  imageUrl: widget.record!.thumbnailUrl!,
+                                  imageUrl: _record?.thumbnailUrl,
                                   defaultAssetImage:
                                       Strings.default_cover_image,
+                                  assetFit: BoxFit.fill,
                                 ),
                                 Positioned.fill(
                                     child: Align(
@@ -279,7 +354,8 @@ class _RecordItemState extends State<RecordItem> {
                               children: [
                                 Image.asset(
                                   Strings.default_cover_image,
-                                  height: 200,
+                                  height: videoHeight,
+                                  fit: BoxFit.fitHeight,
                                 ),
                                 Positioned.fill(
                                     child: Align(
@@ -298,105 +374,152 @@ class _RecordItemState extends State<RecordItem> {
                   ))
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${widget.record!.likes ?? 0}',
+
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 10.0),
+                    //   child: Row(
+                    //     children: [
+                    //       Text(
+                    //         '${widget.record.likes ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         ' Likes, ',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '${widget.record.comments ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '  Comments, ',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         '${widget.record.shares ?? 0}',
+                    //         style: TextStyle(color: Colors.white, fontSize: 12),
+                    //       ),
+                    //       Text(
+                    //         ' Shares',
+                    //         style: TextStyle(
+                    //             color: MyColors.textLightColor, fontSize: 12),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Directionality(
+                        textDirection: Constants.language == 'ar'
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                        child: Text(
+                          '${_record?.views ?? 0} ${language(en: 'views', ar: 'مشاهدة')}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
-                        Text(
-                          ' Likes, ',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                        Text(
-                          '${widget.record!.comments ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          '  Comments, ',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                        Text(
-                          '${widget.record!.shares ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          ' Shares',
-                          style: TextStyle(
-                              color: MyColors.textLightColor, fontSize: 12),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: () async {
-                            AppUtil.executeFunctionIfLoggedIn(context,
-                                () async {
-                              if (isLikeEnabled) {
-                                await likeBtnHandler(widget.record!);
-                              }
-                            });
-                          },
-                          child: SizedBox(
-                            child: isLiked
-                                ? Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: MyColors.primaryColor,
-                                  )
-                                : Icon(
-                                    Icons.thumb_up,
-                                    size: Sizes.card_btn_size,
-                                    color: Colors.white,
-                                  ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () =>
+                                AppUtil.executeFunctionIfLoggedIn(context, () {
+                              AppUtil.sharePost(
+                                  ' ${_singer?.name} singed ${_melody?.name} ',
+                                  '',
+                                  recordId: _record?.id);
+                            }),
+                            child: SizedBox(
+                              child: Icon(
+                                Icons.reply,
+                                size: Sizes.card_btn_size,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        SizedBox(
-                          child: Icon(
-                            Icons.comment,
-                            size: Sizes.card_btn_size,
-                            color: Colors.white,
+                          SizedBox(
+                            width: 10,
                           ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        InkWell(
-                          onTap: () =>
-                              AppUtil.executeFunctionIfLoggedIn(context, () {
-                            AppUtil.sharePost(
-                                ' ${_singer!.name} singed ${_melody!.name} ', '',
-                                recordId: widget.record!.id);
-                          }),
-                          child: SizedBox(
+                          Text(
+                            '${_record?.comments ?? 0}',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
                             child: Icon(
-                              Icons.share,
+                              Icons.comment,
                               size: Sizes.card_btn_size,
                               color: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            '${_record?.likes ?? 0}',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              AppUtil.executeFunctionIfLoggedIn(context,
+                                  () async {
+                                if (isLikeEnabled && _record != null) {
+                                  await likeBtnHandler(_record!);
+                                }
+                              });
+                            },
+                            child: SizedBox(
+                              child: isLiked
+                                  ? Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: MyColors.primaryColor,
+                                    )
+                                  : Icon(
+                                      Icons.thumb_up,
+                                      size: Sizes.card_btn_size,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          ),
+
+                          // SizedBox(
+                          //   width: 10,
+                          // ),
+                          // InkWell(
+                          //   onTap: () =>
+                          //       AppUtil.executeFunctionIfLoggedIn(context, () {
+                          //     AppUtil.sharePost(
+                          //         ' ${_singer.name} singed ${_melody.name} ', '',
+                          //         recordId: widget.record.id);
+                          //   }),
+                          //   child: SizedBox(
+                          //     child: Icon(
+                          //       Icons.share,
+                          //       size: Sizes.card_btn_size,
+                          //       color: Colors.white,
+                          //     ),
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               )
             ],
           ),
@@ -411,34 +534,18 @@ class _RecordItemState extends State<RecordItem> {
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
-            'record': widget.record,
+            'record': _record,
             'singer': _singer,
             'melody': _melody
           });
         } else {
-          appPageUtil!.goToFullscreen(widget.record!, _singer!, _melody!);
+          appPageUtil.goToFullscreen(_record, _singer, _melody);
         }
       },
-      child: Container(
-        height: 40,
-        width: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.grey.shade300,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black54,
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.play_arrow,
-          size: 35,
-          color: MyColors.primaryColor,
-        ),
+      child: Icon(
+        Icons.play_arrow,
+        size: 60,
+        color: MyColors.iconLightColor,
       ),
     );
   }
@@ -449,34 +556,18 @@ class _RecordItemState extends State<RecordItem> {
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
-            'record': widget.record,
+            'record': _record,
             'singer': _singer,
             'melody': _melody
           });
         } else {
-          appPageUtil!.goToFullscreen(widget.record!, _singer!, _melody!);
+          appPageUtil.goToFullscreen(_record, _singer, _melody);
         }
       },
-      child: Container(
-        height: 35,
-        width: 35,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.grey.shade300,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black54,
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: Offset(0, 2), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.play_arrow,
-          size: 30,
-          color: MyColors.primaryColor,
-        ),
+      child: Icon(
+        Icons.play_arrow,
+        size: 40,
+        color: MyColors.primaryColor,
       ),
     );
   }

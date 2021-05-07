@@ -29,11 +29,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
   int _page = 0;
   bool _isPlaying = false;
 
-  late PageController _pageController;
+  PageController? _pageController;
 
   TextEditingController _categoryController = TextEditingController();
 
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage>
                               //_isPlaying = false;
                               _page = index;
                             });
-                            _pageController.animateToPage(
+                            _pageController?.animateToPage(
                               index,
                               duration: Duration(milliseconds: 800),
                               curve: Curves.easeOut,
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage>
                             controller: _pageController,
                             onPageChanged: (index) {
                               setState(() {
-                                _tabController.index = index;
+                                _tabController?.index = index;
                                 _page = index;
                               });
                               _currentPage();
@@ -218,6 +218,7 @@ class _HomePageState extends State<HomePage>
 
   List<Category> _categories = [];
   Map<Category, List<Singer>> _categorySingers = {};
+
   getCategories() async {
     List<Category> categories = await DatabaseService.getCategories();
     if (mounted) {
@@ -226,12 +227,14 @@ class _HomePageState extends State<HomePage>
       });
     }
     for (Category category in categories) {
-      List<Singer> singers =
-          await DatabaseService.getSingersByCategory(category.name!);
-      if (mounted) {
-        setState(() {
-          _categorySingers.putIfAbsent(category, () => singers);
-        });
+      if (category.name != null) {
+        List<Singer> singers =
+            await DatabaseService.getSingersByCategory(category.name!);
+        if (mounted) {
+          setState(() {
+            _categorySingers.putIfAbsent(category, () => singers);
+          });
+        }
       }
     }
   }
@@ -244,7 +247,7 @@ class _HomePageState extends State<HomePage>
         itemBuilder: (context, index) {
           return (_categorySingers[_categories[index]]?.length ?? 0) > 0
               ? Container(
-                  height: Sizes.singer_box + 90,
+                  height: Sizes.singer_box + 100,
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +258,7 @@ class _HomePageState extends State<HomePage>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  _categories[index].name!,
+                                  _categories[index].name ?? "",
                                   style: TextStyle(
                                       color: MyColors.textLightColor,
                                       fontSize: 22,
@@ -276,7 +279,7 @@ class _HomePageState extends State<HomePage>
                             )
                           : Center(
                               child: Text(
-                                _categories[index].name!,
+                                _categories[index].name ?? "",
                                 style: TextStyle(
                                     color: MyColors.textLightColor,
                                     fontSize: 22,
@@ -300,27 +303,31 @@ class _HomePageState extends State<HomePage>
                                     scrollDirection: Axis.horizontal,
                                     itemBuilder: (context, index2) {
                                       return index2 <
-                                              _categorySingers[
-                                                      _categories[index]]!
-                                                  .length
+                                              (_categorySingers[
+                                                          _categories[index]]
+                                                      ?.length ??
+                                                  0)
                                           ? InkWell(
                                               onTap: () {
-                                                Navigator.of(context).pushNamed(
-                                                    '/singer-page',
-                                                    arguments: {
-                                                      'singer':
-                                                          _categorySingers[
-                                                                  _categories[
-                                                                      index]]!
-                                                              [index2],
-                                                      'data_type':
-                                                          DataTypes.SONGS
-                                                    });
+                                                if (_categorySingers[
+                                                        _categories[index]] !=
+                                                    null)
+                                                  Navigator.of(context)
+                                                      .pushNamed('/singer-page',
+                                                          arguments: {
+                                                        'singer':
+                                                            _categorySingers[
+                                                                    _categories[
+                                                                        index]]![
+                                                                index2],
+                                                        'data_type':
+                                                            DataTypes.SONGS
+                                                      });
                                               },
                                               child: Container(
                                                 key: ValueKey(_categorySingers[
-                                                            _categories[index]]!
-                                                        [index2]
+                                                        _categories[
+                                                            index]]![index2]
                                                     .id),
                                                 height: Sizes.singer_box,
                                                 width: Sizes.singer_box,
@@ -339,28 +346,37 @@ class _HomePageState extends State<HomePage>
                                                           BoxShape.rectangle,
                                                       imageUrl: _categorySingers[
                                                                   _categories[
-                                                                      index]]!
-                                                              [index2]
-                                                          .imageUrl!,
+                                                                      index]]
+                                                              ?[index2]
+                                                          .imageUrl,
                                                       defaultAssetImage: Strings
                                                           .default_profile_image,
                                                     ),
-                                                    Container(
-                                                      width: 100,
-                                                      child: Text(
-                                                        _categorySingers[
-                                                                    _categories[
-                                                                        index]]!
-                                                                [index2]
-                                                            .name!,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: TextStyle(
-                                                          color: Colors
-                                                              .grey.shade300,
+                                                    if (_categorySingers[
+                                                                _categories[
+                                                                    index]] !=
+                                                            null &&
+                                                        _categorySingers[_categories[
+                                                                        index]]![
+                                                                    index2]
+                                                                .name !=
+                                                            null)
+                                                      Container(
+                                                        width: 100,
+                                                        child: Text(
+                                                          _categorySingers[
+                                                                      _categories[
+                                                                          index]]![
+                                                                  index2]
+                                                              .name!,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                            color: Colors
+                                                                .grey.shade300,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
                                                   ],
                                                 ),
                                               ),
@@ -417,6 +433,7 @@ class _HomePageState extends State<HomePage>
   }
 
   List<Singer> _singers = [];
+
   getSingers() async {
     List<Singer> singers = await DatabaseService.getSingersHaveMelodies();
     if (mounted) {
@@ -426,33 +443,37 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  late Timestamp lastVisiblePostSnapShot;
+  Timestamp? lastVisiblePostSnapShot;
   List<Record> _records = [];
+
   getRecords() async {
     List<Record> records = await DatabaseService.getRecords();
     if (mounted) {
       setState(() {
         _records = records;
         if (_records.length > 0)
-          this.lastVisiblePostSnapShot = records.last.timestamp!;
+          this.lastVisiblePostSnapShot = records.last.timestamp;
       });
     }
   }
 
   nextRecords() async {
-    List<Record> records =
-        await DatabaseService.getNextRecords(lastVisiblePostSnapShot);
-    if (records.length > 0) {
-      setState(() {
-        records.forEach((element) => _records.add(element));
-        this.lastVisiblePostSnapShot = records.last.timestamp!;
-      });
+    if (lastVisiblePostSnapShot != null) {
+      List<Record> records =
+          await DatabaseService.getNextRecords(lastVisiblePostSnapShot!);
+      if (records.length > 0) {
+        setState(() {
+          records.forEach((element) => _records.add(element));
+          this.lastVisiblePostSnapShot = records.last.timestamp;
+        });
+      }
     }
   }
 
-  late LinkedScrollControllerGroup _controllers;
+  LinkedScrollControllerGroup? _controllers;
   ScrollController _recordsScrollController = ScrollController();
   ScrollController _melodiesPageScrollController = ScrollController();
+
   recordListView() {
     return ListView.builder(
         shrinkWrap: true,
@@ -523,22 +544,24 @@ class _HomePageState extends State<HomePage>
                                               height: 100,
                                               imageShape: BoxShape.circle,
                                               imageUrl:
-                                                  _singers[index].imageUrl!,
+                                                  _singers[index].imageUrl,
                                               defaultAssetImage:
                                                   Strings.default_profile_image,
                                             ),
-                                            Container(
-                                              width: 100,
-                                              child: Text(
-                                                _singers[index].name!,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.visible,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: MyColors
-                                                        .textLightColor),
-                                              ),
-                                            )
+                                            if (_singers[index].name != null)
+                                              Container(
+                                                width: 100,
+                                                child: Text(
+                                                  _singers[index].name!,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.visible,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      color: MyColors
+                                                          .textLightColor),
+                                                ),
+                                              )
                                           ],
                                         ),
                                       ),
@@ -590,6 +613,7 @@ class _HomePageState extends State<HomePage>
   }
 
   List<Melody> _favourites = [];
+
   getFavourites() async {
     List<Melody> favourites = await DatabaseService.getFavourites();
     if (mounted) {
@@ -609,16 +633,19 @@ class _HomePageState extends State<HomePage>
                   // if (musicPlayer != null) {
                   //   musicPlayer.stop();
                   // }
-                  musicPlayer = MusicPlayer(
-                    melodyList: [_favourites[index]],
-                    key: ValueKey(_favourites[index].id),
-                    backColor: Colors.white.withOpacity(.4),
-                    initialDuration: _favourites[index].duration,
-                    title: _favourites[index].name,
-                  );
-                  setState(() {
-                    _isPlaying = true;
-                  });
+                  if (_favourites[index].duration != null &&
+                      _favourites[index].name != null) {
+                    musicPlayer = MusicPlayer(
+                      melodyList: [_favourites[index]],
+                      key: ValueKey(_favourites[index].id),
+                      backColor: Colors.white.withOpacity(.4),
+                      initialDuration: _favourites[index].duration!,
+                      title: _favourites[index].name!,
+                    );
+                    setState(() {
+                      _isPlaying = true;
+                    });
+                  }
                 },
                 child: MelodyItem(
                   padding: 4,
@@ -640,22 +667,23 @@ class _HomePageState extends State<HomePage>
     );
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
-    _recordsScrollController = _controllers.addAndGet();
-
-    _recordsScrollController
-      ..addListener(() {
-        if (_recordsScrollController.offset >=
-                _recordsScrollController.position.maxScrollExtent &&
-            !_recordsScrollController.position.outOfRange) {
-          print('reached the bottom');
-          nextRecords();
-        } else if (_recordsScrollController.offset <=
-                _recordsScrollController.position.minScrollExtent &&
-            !_recordsScrollController.position.outOfRange) {
-          print("reached the top");
-        } else {}
-      });
-    _melodiesPageScrollController = _controllers.addAndGet();
+    if (_controllers != null) {
+      _recordsScrollController = _controllers!.addAndGet()!;
+      _recordsScrollController
+        ..addListener(() {
+          if (_recordsScrollController.offset >=
+                  _recordsScrollController.position.maxScrollExtent &&
+              !_recordsScrollController.position.outOfRange) {
+            print('reached the bottom');
+            nextRecords();
+          } else if (_recordsScrollController.offset <=
+                  _recordsScrollController.position.minScrollExtent &&
+              !_recordsScrollController.position.outOfRange) {
+            print("reached the top");
+          } else {}
+        });
+      _melodiesPageScrollController = _controllers!.addAndGet();
+    }
     getCategories();
     super.initState();
   }
@@ -668,6 +696,7 @@ class _HomePageState extends State<HomePage>
   }
 
   var currentBackPressTime;
+
   Future<bool> _onBackPressed() {
     DateTime now = DateTime.now();
     if (currentBackPressTime == null ||
@@ -682,59 +711,60 @@ class _HomePageState extends State<HomePage>
 
   editCategory(Category category) async {
     setState(() {
-      _categoryController.text = category.name!;
+      if (category.name != null) _categoryController.text = category.name!;
     });
-    Navigator.of(context).push(CustomModal(
-        child: Container(
-      height: 200,
-      color: Colors.white,
-      alignment: Alignment.center,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _categoryController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(hintText: 'New name'),
+    if (category.name != null)
+      Navigator.of(context).push(CustomModal(
+          child: Container(
+        height: 200,
+        color: Colors.white,
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _categoryController,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(hintText: 'New name'),
+              ),
             ),
-          ),
-          SizedBox(
-            height: 40,
-          ),
-          RaisedButton(
-            onPressed: () async {
-              if (_categoryController.text.trim().isEmpty) {
-                AppUtil.showToast(language(
-                    en: 'Please enter a name', ar: 'من فضلك ادخل اسم'));
-                return;
-              }
-              Navigator.of(context).pop();
-              AppUtil.showLoader(context);
-              List<Singer> singers =
-                  await DatabaseService.getSingersByCategory(category.name!);
-              for (Singer singer in singers) {
-                await singersRef
-                    .doc(singer.id)
-                    .update({'category': _categoryController.text});
-              }
-              await categoriesRef.doc(category.id).update({
-                'name': _categoryController.text,
-                'search': searchList(_categoryController.text),
-              });
-              AppUtil.showToast(
-                  language(en: 'Name Updated', ar: 'تم تحديث الإسم'));
-              Navigator.of(context).pop();
-              Navigator.of(context).pushReplacementNamed('/');
-            },
-            color: MyColors.primaryColor,
-            child: Text(
-              'Update',
-              style: TextStyle(color: Colors.white),
+            SizedBox(
+              height: 40,
             ),
-          )
-        ],
-      ),
-    )));
+            RaisedButton(
+              onPressed: () async {
+                if (_categoryController.text.trim().isEmpty) {
+                  AppUtil.showToast(language(
+                      en: 'Please enter a name', ar: 'من فضلك ادخل اسم'));
+                  return;
+                }
+                Navigator.of(context).pop();
+                AppUtil.showLoader(context);
+                List<Singer> singers =
+                    await DatabaseService.getSingersByCategory(category.name!);
+                for (Singer singer in singers) {
+                  await singersRef
+                      .doc(singer.id)
+                      .update({'category': _categoryController.text});
+                }
+                await categoriesRef.doc(category.id).update({
+                  'name': _categoryController.text,
+                  'search': searchList(_categoryController.text),
+                });
+                AppUtil.showToast(
+                    language(en: 'Name Updated', ar: 'تم تحديث الإسم'));
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+              color: MyColors.primaryColor,
+              child: Text(
+                'Update',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ],
+        ),
+      )));
   }
 }

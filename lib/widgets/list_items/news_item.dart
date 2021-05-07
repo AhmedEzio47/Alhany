@@ -19,6 +19,7 @@ class NewsItem extends StatefulWidget {
   final News? news;
 
   const NewsItem({Key? key, this.news}) : super(key: key);
+
   @override
   _NewsItemState createState() => _NewsItemState();
 }
@@ -32,24 +33,35 @@ class _NewsItemState extends State<NewsItem> {
 
   @override
   void initState() {
-    if (widget.news!.text!.length > Sizes.postExcerpt) {
+    if (widget.news != null)
+      setState(() {
+        _news = widget.news!;
+      });
+    if (widget.news != null &&
+        widget.news!.text != null &&
+        widget.news!.text!.length > Sizes.postExcerpt) {
       firstHalf = widget.news!.text!.substring(0, Sizes.postExcerpt);
       secondHalf = widget.news!.text!
           .substring(Sizes.postExcerpt, widget.news!.text!.length);
     } else {
-      firstHalf = widget.news!.text!;
-      secondHalf = "";
+      if (widget.news != null && widget.news!.text != null) {
+        firstHalf = widget.news!.text!;
+        secondHalf = "";
+      }
     }
-    if (widget.news!.type == 'video') {
+    if (widget.news != null &&
+        widget.news!.type != null &&
+        widget.news!.type! == 'video') {
       initVideoPlayer();
     }
-    initLikes(widget.news!);
+    if (widget.news != null) initLikes(widget.news!);
     super.initState();
   }
 
   void _goToProfilePage() {
-    Navigator.of(context).pushNamed('/profile-page',
-        arguments: {'user_id': Constants.starUser!.id});
+    if (Constants.starUser != null)
+      Navigator.of(context).pushNamed('/profile-page',
+          arguments: {'user_id': Constants.starUser!.id});
   }
 
   Future<void> likeBtnHandler(News news) async {
@@ -64,9 +76,11 @@ class _NewsItemState extends State<NewsItem> {
           .delete();
 
       await newsRef.doc(news.id).update({'likes': FieldValue.increment(-1)});
-
-      await NotificationHandler.removeNotification(
-          Constants.starUser!.id!, news.id!, 'like');
+      if (Constants.starUser != null &&
+          Constants.starUser!.id != null &&
+          news.id != null)
+        await NotificationHandler.removeNotification(
+            Constants.starUser!.id!, news.id!, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
@@ -84,12 +98,17 @@ class _NewsItemState extends State<NewsItem> {
         isLiked = true;
       });
 
-      await NotificationHandler.sendNotification(
-          Constants.starUser!.id!,
-          'New News Like',
-          Constants.currentUser!.name! + ' likes your post',
-          news.id!,
-          'news_like');
+      if (Constants.starUser != null &&
+          Constants.starUser!.id != null &&
+          Constants.currentUser != null &&
+          Constants.currentUser!.name != null &&
+          news.id != null)
+        await NotificationHandler.sendNotification(
+            Constants.starUser!.id!,
+            'New News Like',
+            Constants.currentUser!.name! + ' likes your post',
+            news.id!,
+            'news_like');
     }
     var newsMeta = await DatabaseService.getPostMeta(newsId: news.id);
     setState(() {
@@ -99,7 +118,7 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   void initLikes(News news) async {
-    DocumentSnapshot? likedSnapshot = await newsRef
+    DocumentSnapshot likedSnapshot = await newsRef
         .doc(news.id)
         .collection('likes')
         .doc(Constants.currentUserID)
@@ -114,14 +133,30 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   VideoPlayerController? _videoController;
+
   initVideoPlayer() async {
-    _videoController = VideoPlayerController.network(widget.news!.contentUrl!);
-    await _videoController!.initialize();
+    if (widget.news != null && widget.news!.contentUrl != null) {
+      _videoController =
+          VideoPlayerController.network(widget.news!.contentUrl!);
+      await _videoController?.initialize();
+    }
   }
 
   String? firstHalf;
   String? secondHalf;
   bool flag = true;
+
+  News? _news;
+
+  getNews() async {
+    if (widget.news != null && widget.news!.id != null) {
+      News news = await DatabaseService.getNewsWithId(widget.news!.id!);
+      if (mounted)
+        setState(() {
+          _news = news;
+        });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,15 +164,17 @@ class _NewsItemState extends State<NewsItem> {
       padding: const EdgeInsets.only(top: 1),
       child: InkWell(
         onTap: () {
-          AppUtil.executeFunctionIfLoggedIn(context, () {
+          AppUtil.executeFunctionIfLoggedIn(context, () async {
             if (Constants.currentRoute != '/news-page')
-              Navigator.of(context).pushNamed('/news-page',
-                  arguments: {'news': widget.news, 'is_video_visible': true});
+              await Navigator.of(context).pushNamed('/news-page',
+                  arguments: {'news': _news, 'is_video_visible': true});
+            await getNews();
           });
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: widget.news!.text != null && widget.news!.text!.isNotEmpty
+          height: _news?.text != null &&
+                  (_news != null && _news!.text?.isNotEmpty == true)
               ? 320
               : 305,
           decoration: BoxDecoration(
@@ -158,7 +195,7 @@ class _NewsItemState extends State<NewsItem> {
                             height: 25,
                             width: 25,
                             imageShape: BoxShape.circle,
-                            imageUrl: Constants.starUser!.profileImageUrl!,
+                            imageUrl: Constants.starUser?.profileImageUrl,
                             defaultAssetImage: Strings.default_profile_image,
                           ),
                           onTap: () => _goToProfilePage(),
@@ -171,7 +208,7 @@ class _NewsItemState extends State<NewsItem> {
                           children: [
                             InkWell(
                               child: Text(
-                                '${Constants.starUser?.name}' ,
+                                '${Constants.starUser?.name}',
                                 style: TextStyle(
                                     color: MyColors.darkPrimaryColor,
                                     fontWeight: FontWeight.bold),
@@ -179,7 +216,7 @@ class _NewsItemState extends State<NewsItem> {
                               onTap: () => _goToProfilePage(),
                             ),
                             Text(
-                              '${AppUtil.formatTimestamp(widget.news!.timestamp!)}',
+                              '${AppUtil.formatTimestamp(_news?.timestamp)}',
                               style: TextStyle(
                                   color: Colors.grey.shade400, fontSize: 12),
                             ),
@@ -191,23 +228,26 @@ class _NewsItemState extends State<NewsItem> {
                         ? ValueListenableBuilder<int>(
                             valueListenable: number,
                             builder: (context, value, child) {
-                              return PostBottomSheet().postOptionIcon(
-                                context,
-                                news: widget.news,
-                              );
+                              if (_news != null)
+                                return PostBottomSheet().postOptionIcon(
+                                  context,
+                                  news: _news!,
+                                );
+                              return SizedBox.shrink();
                             },
                           )
                         : Container()
                   ],
                 ),
               ),
-              widget.news!.text != null && widget.news!.text!.isNotEmpty
-                  ? secondHalf!.isEmpty
+              _news?.text != null &&
+                      (_news != null && _news!.text?.isNotEmpty == true)
+                  ? secondHalf?.isEmpty == true
                       ? Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: UrlText(
                             context: context,
-                            text: widget.news!.text!,
+                            text: _news!.text!,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -218,29 +258,31 @@ class _NewsItemState extends State<NewsItem> {
                                 fontWeight: FontWeight.w400),
                           ),
                         )
-                      : Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: UrlText(
-                            context: context,
-                            text: flag
-                                ? (firstHalf! + '...')
-                                : (firstHalf! + secondHalf!),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            urlStyle: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        )
+                      : firstHalf != null && secondHalf != null
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: UrlText(
+                                context: context,
+                                text: flag
+                                    ? (firstHalf! + '...')
+                                    : (firstHalf! + secondHalf!),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                urlStyle: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            )
+                          : SizedBox.shrink()
                   : Container(),
               InkWell(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    secondHalf!.isEmpty
+                    secondHalf?.isEmpty == true
                         ? Text('')
                         : Text(
                             flag ? 'Show more' : 'Show less',
@@ -266,31 +308,33 @@ class _NewsItemState extends State<NewsItem> {
                     child: Row(
                       children: [
                         Text(
-                          '${widget.news!.likes ?? 0}',
+                          '${_news?.likes ?? 0}',
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         Text(
                           ' Likes, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.news!.comments ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          '${_news?.comments ?? 0}',
+                          style: TextStyle(
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           '  Comments, ',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
-                          '${widget.news!.shares ?? 0}',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          '${_news?.shares ?? 0}',
+                          style: TextStyle(
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                         Text(
                           ' Shares',
                           style: TextStyle(
-                              color: MyColors.primaryColor, fontSize: 12),
+                              color: MyColors.textLightColor, fontSize: 12),
                         ),
                       ],
                     ),
@@ -303,8 +347,8 @@ class _NewsItemState extends State<NewsItem> {
                           onTap: () async {
                             AppUtil.executeFunctionIfLoggedIn(context,
                                 () async {
-                              if (isLikeEnabled) {
-                                await likeBtnHandler(widget.news!);
+                              if (isLikeEnabled && _news != null) {
+                                await likeBtnHandler(_news!);
                               }
                             });
                           },
@@ -336,11 +380,13 @@ class _NewsItemState extends State<NewsItem> {
                           width: 10,
                         ),
                         InkWell(
-                          onTap: () =>
-                              AppUtil.executeFunctionIfLoggedIn(context, () {
-                            AppUtil.sharePost(
-                                '${Constants.starUser!.name} post some news', '',
-                                newsId: widget.news!.id);
+                          onTap: () => AppUtil.executeFunctionIfLoggedIn(
+                              context, () async {
+                            await AppUtil.sharePost(
+                                '${Constants.starUser?.name} post some news',
+                                '',
+                                newsId: _news?.id);
+                            await getNews();
                           }),
                           child: SizedBox(
                             child: Icon(
@@ -365,17 +411,15 @@ class _NewsItemState extends State<NewsItem> {
   @override
   dispose() {
     if (_videoController != null) {
-      _videoController!.dispose();
+      _videoController?.dispose();
     }
     super.dispose();
   }
 
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () =>
-          Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
-        'news': widget.news,
-      }),
+      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen',
+          arguments: {'news': _news, 'singer': Constants.starUser}),
       child: Container(
         height: 40,
         width: 40,
@@ -401,7 +445,7 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   _content() {
-    switch (widget.news!.type) {
+    switch (_news?.type) {
       case 'video':
         return Stack(
           children: [
@@ -421,26 +465,30 @@ class _NewsItemState extends State<NewsItem> {
           ],
         );
       case 'audio':
-        return MusicPlayer(
-          melodyList: [
-            Melody(
-              audioUrl: widget.news!.contentUrl,
-              singer: Constants.starUser!.name,
-              imageUrl: Constants.starUser!.profileImageUrl,
-            ),
-          ],
-          backColor: Colors.transparent,
-          btnSize: 26,
-          initialDuration: widget.news!.duration,
-          playBtnPosition: PlayBtnPosition.left,
-          isCompact: true,
-        );
+        if (_news != null && _news!.duration != null)
+          return MusicPlayer(
+            melodyList: [
+              Melody(
+                audioUrl: _news?.contentUrl,
+                singer: Constants.starUser?.name,
+                imageUrl: Constants.starUser?.profileImageUrl,
+              ),
+            ],
+            backColor: Colors.transparent,
+            btnSize: 26,
+            initialDuration: _news!.duration!,
+            playBtnPosition: PlayBtnPosition.left,
+            isCompact: true,
+          );
+        return null;
       case 'image':
         return CachedImage(
           height: 200,
           imageShape: BoxShape.rectangle,
-          imageUrl: widget.news!.contentUrl!,
+          imageUrl: _news?.contentUrl,
+          assetFit: BoxFit.fill,
           defaultAssetImage: Strings.default_cover_image,
+          width: 200,
         );
       default:
         return Container();

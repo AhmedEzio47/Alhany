@@ -41,7 +41,7 @@ class _SlideImagesState extends State<SlideImages> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: DropdownButton<dynamic>(
+            child: DropdownButton<dynamic?>(
               hint: Text('Singer'),
               value: _chosenPage,
               onChanged: (text) async {
@@ -66,13 +66,13 @@ class _SlideImagesState extends State<SlideImages> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Stack(
                       children: [
-                        CachedImage(
-                          imageUrl: _slideImages[index].url!,
-                          height: 200,
-                          imageShape: BoxShape.rectangle,
-                          width: MediaQuery.of(context).size.width,
-                          defaultAssetImage: Strings.default_cover_image,
-                        ),
+                          CachedImage(
+                            imageUrl: _slideImages[index].url,
+                            height: 200,
+                            imageShape: BoxShape.rectangle,
+                            width: MediaQuery.of(context).size.width,
+                            defaultAssetImage: Strings.default_cover_image,
+                          ),
                         Positioned.fill(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -129,26 +129,31 @@ class _SlideImagesState extends State<SlideImages> {
 
   addImage() async {
     String id = randomAlphaNumeric(20);
-    File image = await AppUtil.pickImageFromGallery();
-    String ext = path.extension(image.path);
+    File? image = await AppUtil.pickImageFromGallery();
     AppUtil.showLoader(context);
-    String url =
-        await AppUtil().uploadFile(image, context, '/slide_images/$id$ext');
-    slideImagesRef.doc(id).set({
-      'url': url,
-      'page': _chosenPage,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+    if (image != null) {
+      String ext = path.extension(image.path);
+      String url =
+          await AppUtil().uploadFile(image, context, '/slide_images/$id$ext');
+
+      slideImagesRef.doc(id).set({
+        'url': url,
+        'page': _chosenPage,
+        'timestamp': FieldValue.serverTimestamp()
+      });
+    }
     AppUtil.showToast('Uploaded');
     Navigator.of(context).pop();
     Navigator.of(context).pushReplacementNamed('/slide-images');
   }
 
   getSlideImages() async {
-    List<SlideImage> slideImages =
-        await DatabaseService.getSlideImages(_chosenPage!);
-    setState(() {
-      _slideImages = slideImages;
-    });
+    if (_chosenPage != null) {
+      List<SlideImage> slideImages =
+          await DatabaseService.getSlideImages(_chosenPage!);
+      setState(() {
+        _slideImages = slideImages;
+      });
+    }
   }
 }

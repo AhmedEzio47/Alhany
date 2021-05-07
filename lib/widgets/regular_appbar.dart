@@ -3,9 +3,8 @@ import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
 class RegularAppbar extends StatelessWidget {
-  BuildContext? context;
+  BuildContext context;
   Color color;
   double height;
   double margin;
@@ -13,13 +12,13 @@ class RegularAppbar extends StatelessWidget {
   Widget? trailing;
   Future<bool> Function()? onBackPressed;
 
-  RegularAppbar(BuildContext context,
+  RegularAppbar(this.context,
       {this.color = Colors.white,
       this.height = Sizes.appbar_height,
       this.margin = 5.0,
-       this.onBackPressed,
-       this.leading,
-       this.trailing}) {
+      this.onBackPressed,
+      this.leading,
+      this.trailing}) {
     const double padding = 16;
     this.context = context;
     if (onBackPressed == null) {
@@ -48,9 +47,10 @@ class RegularAppbar extends StatelessWidget {
           ));
     }
   }
+
   Future<bool> _onBackPressed() async {
     Constants.currentRoute = '';
-    Navigator.of(context!).pop();
+    Navigator.of(context).pop();
     return true;
   }
 
@@ -63,7 +63,7 @@ class RegularAppbar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            leading!,
+            if (leading != null) leading!,
             Container(
               height: height,
               width: 150,
@@ -71,7 +71,7 @@ class RegularAppbar extends StatelessWidget {
                 Strings.app_bar,
               ),
             ),
-            trailing!
+            if (trailing != null) trailing!
           ],
         ));
   }

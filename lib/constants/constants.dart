@@ -45,8 +45,8 @@ class Constants {
 
   static bool? isFacebookOrGoogleUser;
 
-  static double musicVolume = 0.9;
-  static double voiceVolume = 7;
+  static double musicVolume = 0.4;
+  static double voiceVolume = 1.5;
 
   static int endPositionOffsetInMilliSeconds = 600;
 

@@ -9,7 +9,6 @@ import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/chat_bubble.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
@@ -17,6 +16,8 @@ import 'package:Alhany/widgets/image_overlay.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+
 //import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,7 @@ import 'package:random_string/random_string.dart';
 class Conversation extends StatefulWidget {
   final String? otherUid;
   final _ConversationState state = _ConversationState();
+
   Conversation({this.otherUid});
 
   updateRecordTime(String recordTime) {
@@ -59,14 +61,15 @@ class _ConversationState extends State<Conversation>
 
   ScrollController _scrollController = ScrollController();
 
-  String? recordTime = 'recording...';
+  String recordTime = 'recording...';
 
-  bool? _isRecording;
+  var _currentStatus;
 
   _ConversationState();
 
   initRecorder() async {
     recorder = AudioRecorder();
+    await recorder?.init();
   }
 
   void loadUserData(String uid) async {
@@ -78,23 +81,26 @@ class _ConversationState extends State<Conversation>
   }
 
   void getMessages() async {
-    var messages = await DatabaseService.getMessages(widget.otherUid!);
-    setState(() {
-      this._messages = messages;
-      this.firstVisibleGameSnapShot = messages.last.timestamp;
-    });
+    if (widget.otherUid != null) {
+      var messages = await DatabaseService.getMessages(widget.otherUid!);
+      setState(() {
+        this._messages = messages;
+        this.firstVisibleGameSnapShot = messages.last.timestamp;
+      });
+    }
   }
 
   void getPrevMessages() async {
-    var messages;
-    messages = await DatabaseService.getPrevMessages(
-        firstVisibleGameSnapShot!, widget.otherUid!);
+    if (widget.otherUid != null && firstVisibleGameSnapShot != null) {
+      var messages = await DatabaseService.getPrevMessages(
+          firstVisibleGameSnapShot!, widget.otherUid!);
 
-    if (messages.length > 0) {
-      setState(() {
-        messages.forEach((element) => this._messages!.add(element));
-        this.firstVisibleGameSnapShot = messages.last.timestamp;
-      });
+      if (messages.length > 0) {
+        setState(() {
+          messages.forEach((element) => this._messages?.add(element));
+          this.firstVisibleGameSnapShot = messages.last.timestamp;
+        });
+      }
     }
   }
 
@@ -113,7 +119,7 @@ class _ConversationState extends State<Conversation>
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
-                _messages!.insert(0, Message.fromDoc(change.doc));
+                _messages?.insert(0, Message.fromDoc(change.doc));
               });
             }
           }
@@ -138,7 +144,7 @@ class _ConversationState extends State<Conversation>
         if (change.doc.id == 'seen') {
           if (this.mounted) {
             setState(() {
-              seen = change.doc.data()!['isSeen'];
+              seen = change.doc.data()?['isSeen'];
               print('seen');
             });
           }
@@ -245,10 +251,10 @@ class _ConversationState extends State<Conversation>
     updateOnlineUserState(state);
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-      messagesSubscription!.resume();
+      messagesSubscription?.resume();
     } else if (state == AppLifecycleState.paused) {
       // app is inactive
-      messagesSubscription!.pause();
+      messagesSubscription?.pause();
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
     }
@@ -258,12 +264,12 @@ class _ConversationState extends State<Conversation>
   void initState() {
     super.initState();
     //_loadAudioByteData();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     getMessages();
     listenToMessagesChanges();
     otherUserListener();
     listenIfMessagesSeen();
-    loadUserData(widget.otherUid!);
+    if (widget.otherUid != null) loadUserData(widget.otherUid!);
     //initRecorder();
 
     _focusNode.addListener(_onFocusChange);
@@ -286,10 +292,10 @@ class _ConversationState extends State<Conversation>
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
-    messagesSubscription!.cancel();
+    WidgetsBinding.instance?.removeObserver(this);
+    messagesSubscription?.cancel();
     _scrollController.dispose();
-    recorder!.dispose();
+    recorder?.dispose();
     super.dispose();
   }
 
@@ -324,7 +330,7 @@ class _ConversationState extends State<Conversation>
                   Padding(
                     padding: EdgeInsets.only(left: 0.0, right: 10.0),
                     child: CachedImage(
-                      imageUrl: otherUser.profileImageUrl!,
+                      imageUrl: otherUser.profileImageUrl,
                       imageShape: BoxShape.circle,
                       width: 50.0,
                       height: 50.0,
@@ -382,19 +388,23 @@ class _ConversationState extends State<Conversation>
                           reverse: true,
                           itemBuilder: (BuildContext context, int index) {
                             Message msg = _messages![index];
-                            return ChatBubble(
-                              message: msg.message!,
-                              username: otherUser.name!,
-                              time: msg.timestamp != null
-                                  ? formatTimestamp(msg.timestamp)
-                                  : 'now',
-                              type: msg.type!,
-                              replyText: null,
-                              isMe: msg.sender == Constants.currentUserID,
-                              isGroup: false,
-                              isReply: false,
-                              replyName: null,
-                            );
+                            if (msg.message != null &&
+                                otherUser.name != null &&
+                                msg.type != null)
+                              return ChatBubble(
+                                message: msg.message!,
+                                username: otherUser.name!,
+                                time: msg.timestamp != null
+                                    ? formatTimestamp(msg.timestamp)
+                                    : 'now',
+                                type: msg.type!,
+                                replyText: "",
+                                isMe: msg.sender == Constants.currentUserID,
+                                isGroup: false,
+                                isReply: false,
+                                replyName: "",
+                              );
+                            return SizedBox.shrink();
                           },
                         ),
                       )
@@ -440,7 +450,7 @@ class _ConversationState extends State<Conversation>
                                     ImageEditBottomSheet();
                                 await bottomSheet.openBottomSheet(context);
 
-                                File image;
+                                File? image;
                                 if (bottomSheet.source == ImageSource.gallery) {
                                   image = await AppUtil.pickImageFromGallery();
                                 } else if (bottomSheet.source ==
@@ -460,7 +470,7 @@ class _ConversationState extends State<Conversation>
                                             width: 300,
                                             height: 300,
                                             child: ImageOverlay(
-                                                imageFile: image,
+                                                imageFile: image!,
                                                 btnIcons: [
                                                   Icons.send
                                                 ],
@@ -470,14 +480,15 @@ class _ConversationState extends State<Conversation>
                                                         .uploadFile(
                                                             image,
                                                             context,
-                                                            'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image.path)}');
+                                                            'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image!.path)}');
 
                                                     messageController.clear();
-                                                    await DatabaseService
-                                                        .sendMessage(
-                                                            widget.otherUid!,
-                                                            'image',
-                                                            url);
+                                                    if (widget.otherUid != null)
+                                                      await DatabaseService
+                                                          .sendMessage(
+                                                              widget.otherUid!,
+                                                              'image',
+                                                              url);
                                                     makeMessagesUnseen();
 
                                                     Navigator.of(context).pop();
@@ -489,7 +500,7 @@ class _ConversationState extends State<Conversation>
                               },
                             ),
                             contentPadding: EdgeInsets.all(0),
-                            title: _isRecording != true
+                            title: _currentStatus != RecordingStatus.Recording
                                 ? TextField(
                                     cursorColor: Colors.white,
                                     focusNode: _focusNode,
@@ -527,85 +538,98 @@ class _ConversationState extends State<Conversation>
                                     ),
                                     maxLines: null,
                                   )
-                                : Text(recordTime!),
-                            trailing: _typing
-                                ? IconButton(
-                                    icon: Icon(
-                                      Icons.send,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () async {
-                                      messageController.clear();
-                                      await DatabaseService.sendMessage(
-                                          widget.otherUid!, 'text', messageText!);
-                                    },
-                                  )
-                                : GestureDetector(
-                                    onLongPress: () async {
-                                      if (await PermissionsService()
-                                          .hasMicrophonePermission()) {
-                                        setState(() {
-                                          isMicrophoneGranted = true;
-                                        });
-                                      } else {
-                                        bool isGranted =
-                                            await PermissionsService()
-                                                .requestMicrophonePermission(
-                                                    context,
-                                                    onPermissionDenied: () {
-                                          AppUtil.showAlertDialog(
-                                              context: context,
-                                              heading: 'info',
-                                              message:
-                                                  'You must grant this microphone access to be able to use this feature.',
-                                              firstBtnText: 'OK',
-                                              firstFunc: () {
-                                                Navigator.of(context).pop();
-                                              });
-                                          print('Permission has been denied');
-                                        });
-                                        setState(() {
-                                          isMicrophoneGranted = isGranted;
-                                        });
-                                        return;
-                                      }
-
-                                      if (isMicrophoneGranted) {
-                                        setState(() {
-                                          _isRecording =
-                                              true;
-                                        });
-                                        await initRecorder();
-                                        await recorder!.startRecording();
-                                      } else {}
-                                    },
-                                    onLongPressEnd: (longPressDetails) async {
-                                      if (isMicrophoneGranted) {
-                                        setState(() {
-                                          _isRecording =
-                                          false;
-                                        });
-                                        String result =
-                                            await recorder!.stopRecording()?? '';
-
-                                        //Storage path is voice_messages/sender_id/receiver_id/file
-                                        _url = await AppUtil().uploadFile(
-                                            File(result),
-                                            context,
-                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
-
-                                        await DatabaseService.sendMessage(
-                                            widget.otherUid!, 'audio', _url);
-                                      }
-                                    },
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.mic,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: null,
-                                    ),
-                                  ),
+                                : Text(recordTime),
+                            trailing: IconButton(
+                              icon: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                messageController.clear();
+                                if (widget.otherUid != null &&
+                                    messageText != null)
+                                  await DatabaseService.sendMessage(
+                                      widget.otherUid!, 'text', messageText!);
+                              },
+                            ),
+                            // trailing: _typing
+                            //     ? IconButton(
+                            //         icon: Icon(
+                            //           Icons.send,
+                            //           color: Colors.white,
+                            //         ),
+                            //         onPressed: () async {
+                            //           messageController.clear();
+                            //           await DatabaseService.sendMessage(
+                            //               widget.otherUid, 'text', messageText);
+                            //         },
+                            //       )
+                            //     : GestureDetector(
+                            //         onLongPress: () async {
+                            //           if (await PermissionsService()
+                            //               .hasMicrophonePermission()) {
+                            //             setState(() {
+                            //               isMicrophoneGranted = true;
+                            //             });
+                            //           } else {
+                            //             bool isGranted =
+                            //                 await PermissionsService()
+                            //                     .requestMicrophonePermission(
+                            //                         context,
+                            //                         onPermissionDenied: () {
+                            //               AppUtil.showAlertDialog(
+                            //                   context: context,
+                            //                   heading: 'info',
+                            //                   message:
+                            //                       'You must grant this microphone access to be able to use this feature.',
+                            //                   firstBtnText: 'OK',
+                            //                   firstFunc: () {
+                            //                     Navigator.of(context).pop();
+                            //                   });
+                            //               print('Permission has been denied');
+                            //             });
+                            //             setState(() {
+                            //               isMicrophoneGranted = isGranted;
+                            //             });
+                            //             return;
+                            //           }
+                            //
+                            //           if (isMicrophoneGranted) {
+                            //             setState(() {
+                            //               _currentStatus =
+                            //                   RecordingStatus.Recording;
+                            //             });
+                            //             await initRecorder();
+                            //             await recorder.startRecording();
+                            //           } else {}
+                            //         },
+                            //         onLongPressEnd: (longPressDetails) async {
+                            //           if (isMicrophoneGranted) {
+                            //             setState(() {
+                            //               _currentStatus =
+                            //                   RecordingStatus.Stopped;
+                            //             });
+                            //             String result =
+                            //                 await recorder.stopRecording();
+                            //
+                            //             //Storage path is voice_messages/sender_id/receiver_id/file
+                            //             _url = await AppUtil().uploadFile(
+                            //                 File(result),
+                            //                 context,
+                            //                 'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result)}');
+                            //
+                            //             await DatabaseService.sendMessage(
+                            //                 widget.otherUid, 'audio', _url);
+                            //           }
+                            //         },
+                            //         child: IconButton(
+                            //           icon: Icon(
+                            //             Icons.mic,
+                            //             color: Colors.white,
+                            //           ),
+                            //           onPressed: null,
+                            //         ),
+                            //       ),
                           ),
                         ),
                       ],
@@ -629,8 +653,11 @@ class _ConversationState extends State<Conversation>
   }
 
   Future<bool> _onBackBtnPressed() async {
-    var message = await DatabaseService.getLastMessage(widget.otherUid!);
-    Navigator.of(context).pop(message);
-    return true;
+    if (widget.otherUid != null) {
+      var message = await DatabaseService.getLastMessage(widget.otherUid!);
+      Navigator.of(context).pop(message);
+      return true;
+    }
+    return false;
   }
 }

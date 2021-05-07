@@ -17,6 +17,7 @@ class UploadSongs extends StatefulWidget {
   final String? singer;
 
   const UploadSongs({Key? key, this.singer}) : super(key: key);
+
   @override
   _UploadSongsState createState() => _UploadSongsState();
 }
@@ -26,10 +27,12 @@ class _UploadSongsState extends State<UploadSongs> {
   File? _image;
 
   List<String> _singersNames = [];
+
   //List<String> _categories = [];
 
   String? _singerName;
   Singer? _singer;
+
   //String _category;
 
   TextEditingController _categoryController = TextEditingController();
@@ -39,7 +42,7 @@ class _UploadSongsState extends State<UploadSongs> {
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singersNames.add(doc.data()!['name']);
+        _singersNames.add(doc.data()?['name']);
       });
     }
   }
@@ -102,7 +105,7 @@ class _UploadSongsState extends State<UploadSongs> {
                   child: _image == null
                       ? InkWell(
                           onTap: () async {
-                            File image = await AppUtil.pickImageFromGallery();
+                            File? image = await AppUtil.pickImageFromGallery();
                             setState(() {
                               _image = image;
                             });
@@ -303,7 +306,8 @@ class _UploadSongsState extends State<UploadSongs> {
     MediaInformation info =
         await _flutterFFprobe.getMediaInformation(songFile.path);
     int duration =
-        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()?['duration'].toString() ?? "0")
+            .toInt();
 
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
@@ -313,7 +317,7 @@ class _UploadSongsState extends State<UploadSongs> {
     if (_image != null) {
       String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image!, context, '/melodies_images/$id$ext');
+          .uploadFile(_image, context, '/melodies_images/$id$ext');
     }
 
     if (songUrl == '') {
@@ -322,21 +326,24 @@ class _UploadSongsState extends State<UploadSongs> {
       Navigator.of(context).pop();
       return;
     }
-
-    await melodiesRef.doc(id).set({
-      'name': _songName ?? fileNameWithoutExtension,
-      'audio_url': songUrl,
-      'image_url': imageUrl,
-      'is_song': true,
-      'singer': _singerName,
+    if (imageUrl != null)
+      await melodiesRef.doc(id).set({
+        'name': _songName ?? fileNameWithoutExtension,
+        'audio_url': songUrl,
+        'image_url': imageUrl,
+        'is_song': true,
+        'singer': _singerName,
 //      'category': _category,
-      'search': _songName != null
-          ? searchList(_songName)
-          : searchList(fileNameWithoutExtension),
-      'duration': duration,
-      'timestamp': FieldValue.serverTimestamp()
-    });
-    await singersRef.doc(_singer!.id).update({'songs': FieldValue.increment(1)});
+        'search': _songName != null
+            ? searchList(_songName)
+            : searchList(fileNameWithoutExtension),
+        'duration': duration,
+        'timestamp': FieldValue.serverTimestamp()
+      });
+    if (_singer != null && _singer!.id != null)
+      await singersRef
+          .doc(_singer!.id!)
+          .update({'songs': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -367,7 +374,7 @@ class _UploadSongsState extends State<UploadSongs> {
       MediaInformation info =
           await _flutterFFprobe.getMediaInformation(songFile.path);
       int duration =
-          double.parse(info.getMediaProperties()!['duration'].toString())
+          double.parse(info.getMediaProperties()?['duration'].toString() ?? "0")
               .toInt();
 
       await melodiesRef.doc(id).set({
@@ -380,9 +387,10 @@ class _UploadSongsState extends State<UploadSongs> {
         'timestamp': FieldValue.serverTimestamp()
       });
     }
-    await singersRef
-        .doc(_singer!.id)
-        .update({'songs': FieldValue.increment(songFiles.length)});
+    if (_singer != null && _singer!.id != null)
+      await singersRef
+          .doc(_singer!.id!)
+          .update({'songs': FieldValue.increment(songFiles.length)});
     AppUtil.showToast('Songs uploaded!');
     Navigator.of(context).pop();
     Navigator.of(context).pop();

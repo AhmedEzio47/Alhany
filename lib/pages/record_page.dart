@@ -17,8 +17,10 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 class RecordPage extends StatefulWidget {
   final Record? record;
   final bool isVideoVisible;
+
   const RecordPage({Key? key, this.record, this.isVideoVisible = true})
       : super(key: key);
+
   @override
   _RecordPageState createState() => _RecordPageState();
 }
@@ -28,10 +30,13 @@ class _RecordPageState extends State<RecordPage> {
   User? _singer;
 
   getSinger() async {
-    User singer = await DatabaseService.getUserWithId(widget.record!.singerId!);
-    setState(() {
-      _singer = singer;
-    });
+    if (widget.record != null && widget.record!.singerId != null) {
+      User singer =
+          await DatabaseService.getUserWithId(widget.record!.singerId!);
+      setState(() {
+        _singer = singer;
+      });
+    }
   }
 
   /// Submit Comment to save in firebase database
@@ -41,25 +46,27 @@ class _RecordPageState extends State<RecordPage> {
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(
         _commentController.text,
-        recordId: widget.record!.id,
+        recordId: widget.record?.id,
       );
-
-      await NotificationHandler.sendNotification(
-          widget.record!.singerId!,
-          Constants.currentUser!.name! + ' commented on your post',
-          _commentController.text,
-          widget.record!.id!,
-          'record_comment');
-
-      await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.record!.id);
-      Constants.currentRoute = '';
+      if (widget.record?.id != null &&
+          widget.record?.singerId != null &&
+          Constants.currentUser?.name != null)
+        await NotificationHandler.sendNotification(
+            widget.record!.singerId!,
+            Constants.currentUser!.name! + ' commented on your post',
+            _commentController.text,
+            widget.record!.id!,
+            'record_comment');
+      if (widget.record?.id != null)
+        await AppUtil.checkIfContainsMention(
+            _commentController.text, widget.record!.id!);
+      Constants.currentRoute = '/';
       Navigator.pop(context);
     } else {
-      showDialog(
+      await showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (BuildContext context) {
+        builder: (context) {
           // return object of type Dialog
           return AlertDialog(
             content: new Text(language(
@@ -68,7 +75,7 @@ class _RecordPageState extends State<RecordPage> {
               new FlatButton(
                 child: new Text(language(en: "Ok", ar: 'موافق')),
                 onPressed: () {
-                  Constants.currentRoute = '';
+                  Constants.currentRoute = '/';
                   Navigator.of(context).pop();
                 },
               ),
@@ -77,36 +84,41 @@ class _RecordPageState extends State<RecordPage> {
         },
       );
     }
-    Constants.currentRoute = '';
-    Navigator.of(context).pop();
+    // Constants.currentRoute = '';
+    // Navigator.of(context).pop();
   }
 
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments =
-        await DatabaseService.getComments(recordId: widget.record!.id);
-    setState(() {
-      _comments = comments;
-    });
+    if (widget.record != null && widget.record!.id != null) {
+      List<Comment>? comments =
+          await DatabaseService.getComments(recordId: widget.record!.id);
+      setState(() {
+        if (comments != null) _comments = comments;
+      });
+    }
   }
 
   getAllComments() async {
-    List<Comment> comments =
-        await DatabaseService.getAllComments(recordId: widget.record!.id);
-    setState(() {
-      _comments = comments;
-    });
+    if (widget.record != null && widget.record!.id != null) {
+      List<Comment>? comments =
+          await DatabaseService.getAllComments(recordId: widget.record!.id);
+      setState(() {
+        if (comments != null) _comments = comments;
+      });
+    }
   }
 
-  LinkedScrollControllerGroup? _controllers;
+  late LinkedScrollControllerGroup _controllers;
   ScrollController _commentsScrollController = ScrollController();
   ScrollController _pageScrollController = ScrollController();
+
   @override
   void initState() {
     _controllers = LinkedScrollControllerGroup();
-    _commentsScrollController = _controllers!.addAndGet();
-    _pageScrollController = _controllers!.addAndGet();
+    _commentsScrollController = _controllers.addAndGet();
+    _pageScrollController = _controllers.addAndGet();
     getComments();
     getSinger();
     super.initState();
@@ -131,159 +143,155 @@ class _RecordPageState extends State<RecordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: SafeArea(
-        child: Scaffold(
-          body: Container(
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: new LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black,
-                  MyColors.primaryColor,
-                ],
-              ),
-              color: MyColors.primaryColor,
-              image: DecorationImage(
-                colorFilter: new ColorFilter.mode(
-                    Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                image: AssetImage(Strings.default_bg),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  controller: _pageScrollController,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                      children: [
-                        RegularAppbar(context),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Expanded(
-                          child: CustomScrollView(
-                            slivers: [
-                              SliverList(
-                                delegate: SliverChildListDelegate([
-                                  widget.isVideoVisible
-                                      ? RecordItem(
-                                          record: widget.record!,
-                                        )
-                                      : Container(),
-                                  ListView.separated(
-                                      controller: _commentsScrollController,
-                                      separatorBuilder: (context, index) {
-                                        return Divider(
-                                          height: 2,
-                                          thickness: 2,
-                                          color: Colors.transparent,
-                                        );
-                                      },
-                                      shrinkWrap: true,
-                                      itemCount: _comments.length + 1,
-                                      itemBuilder: (context, index) {
-                                        Comment comment = Comment();
-                                        if (index < _comments.length) {
-                                          comment = _comments[index];
-                                        }
-                                        return index < _comments.length
-                                            ? FutureBuilder(
-                                                future: DatabaseService
-                                                    .getUserWithId(
-                                                  comment.commenterID!,
-                                                ),
-                                                builder: (BuildContext context,
-                                                    AsyncSnapshot snapshot) {
-                                                  if (!snapshot.hasData) {
-                                                    return SizedBox.shrink();
-                                                  }
-                                                  User commenter =
-                                                      snapshot.data;
-                                                  //print('commenter: $commenter and comment: $comment');
-
-                                                  return CommentItem2(
-                                                    record: widget.record!,
-                                                    comment: comment,
-                                                    commenter: commenter,
-                                                    isReply: false,
-                                                  );
-                                                })
-                                            : _comments.length > 20
-                                                ? InkWell(
-                                                    onTap: () async {
-                                                      AppUtil.showLoader(
-                                                          context);
-                                                      await getAllComments();
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Center(
-                                                          child: Text(
-                                                        'show all',
-                                                        style: TextStyle(
-                                                            color: MyColors
-                                                                .accentColor,
-                                                            decoration:
-                                                                TextDecoration
-                                                                    .underline),
-                                                      )),
-                                                    ),
-                                                  )
-                                                : Container();
-                                      }),
-                                ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            margin: EdgeInsets.only(
-                                left: 8, right: 8, top: 8, bottom: 8),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30.0),
-                                color: MyColors.lightPrimaryColor),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: TextField(
-                                  style: TextStyle(color: Colors.white),
-                                  textAlign: Constants.language == 'ar'
-                                      ? TextAlign.right
-                                      : TextAlign.left,
-                                  controller: _commentController,
-                                  decoration: InputDecoration(
-                                    hintStyle: TextStyle(color: Colors.white),
-                                    hintText: language(
-                                        en: Strings.en_leave_comment,
-                                        ar: Strings.ar_leave_comment),
-                                    suffix: Constants.language == 'en'
-                                        ? sendBtn()
-                                        : null,
-                                    prefix: Constants.language == 'ar'
-                                        ? sendBtn()
-                                        : null,
-                                  )),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            gradient: new LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black,
+                MyColors.primaryColor,
               ],
             ),
+            color: MyColors.primaryColor,
+            image: DecorationImage(
+              colorFilter: new ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), BlendMode.dstATop),
+              image: AssetImage(Strings.default_bg),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                controller: _pageScrollController,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(
+                    children: [
+                      RegularAppbar(context),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                widget.isVideoVisible
+                                    ? widget.record != null
+                                        ? RecordItem(
+                                            record: widget.record!,
+                                          )
+                                        : SizedBox.shrink()
+                                    : Container(),
+                                ListView.separated(
+                                    controller: _commentsScrollController,
+                                    separatorBuilder: (context, index) {
+                                      return Divider(
+                                        height: 2,
+                                        thickness: 2,
+                                        color: Colors.transparent,
+                                      );
+                                    },
+                                    shrinkWrap: true,
+                                    itemCount: _comments.length + 1,
+                                    itemBuilder: (context, index) {
+                                      Comment comment = Comment();
+                                      if (index < _comments.length) {
+                                        comment = _comments[index];
+                                      }
+                                      return index < _comments.length
+                                          ? FutureBuilder(
+                                              future:
+                                                  DatabaseService.getUserWithId(
+                                                comment.commenterID!,
+                                              ),
+                                              builder: (BuildContext context,
+                                                  AsyncSnapshot snapshot) {
+                                                if (!snapshot.hasData) {
+                                                  return SizedBox.shrink();
+                                                }
+                                                User commenter = snapshot.data;
+                                                //print('commenter: $commenter and comment: $comment');
+                                                return widget.record != null
+                                                    ? CommentItem2(
+                                                        record: widget.record!,
+                                                        comment: comment,
+                                                        commenter: commenter,
+                                                        isReply: false,
+                                                      )
+                                                    : SizedBox.shrink();
+                                              })
+                                          : _comments.length > 20
+                                              ? InkWell(
+                                                  onTap: () async {
+                                                    AppUtil.showLoader(context);
+                                                    await getAllComments();
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Center(
+                                                        child: Text(
+                                                      'show all',
+                                                      style: TextStyle(
+                                                          color: MyColors
+                                                              .accentColor,
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline),
+                                                    )),
+                                                  ),
+                                                )
+                                              : Container();
+                                    }),
+                              ]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          margin: EdgeInsets.only(
+                              left: 8, right: 8, top: 8, bottom: 35),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30.0),
+                              color: MyColors.lightPrimaryColor),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: TextField(
+                                style: TextStyle(color: Colors.white),
+                                textAlign: Constants.language == 'ar'
+                                    ? TextAlign.right
+                                    : TextAlign.left,
+                                controller: _commentController,
+                                decoration: InputDecoration(
+                                  hintStyle: TextStyle(color: Colors.white),
+                                  hintText: language(
+                                      en: Strings.en_leave_comment,
+                                      ar: Strings.ar_leave_comment),
+                                  suffix: Constants.language == 'en'
+                                      ? sendBtn()
+                                      : null,
+                                  prefix: Constants.language == 'ar'
+                                      ? sendBtn()
+                                      : null,
+                                )),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -297,8 +305,8 @@ class _RecordPageState extends State<RecordPage> {
     super.dispose();
   }
 
-  Future<bool> _onBackPressed() async{
-    Constants.currentRoute = '';
+  Future<bool> _onBackPressed() async {
+    Constants.currentRoute = '/';
     Constants.routeStack.removeLast();
     Navigator.of(context).pop();
     return true;

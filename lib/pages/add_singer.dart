@@ -17,17 +17,18 @@ class AddSingerPage extends StatefulWidget {
 }
 
 class _AddSingerPageState extends State<AddSingerPage> {
-  late File _singerImage;
-  late File _coverImage;
+  File? _singerImage;
+  File? _coverImage;
 
   TextEditingController _singerController = TextEditingController();
   List<String> _categories = [];
+
   getCategories() async {
     _categories = [];
     QuerySnapshot categoriesSnapshot = await categoriesRef.get();
     for (DocumentSnapshot doc in categoriesSnapshot.docs) {
       setState(() {
-        _categories.add(doc.data()!['name']);
+        _categories.add(doc.data()?['name']);
       });
     }
   }
@@ -38,7 +39,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
     super.initState();
   }
 
-  late String _category;
+  String? _category;
   TextEditingController _categoryController = TextEditingController();
 
   @override
@@ -79,7 +80,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                           child: _coverImage == null
                               ? InkWell(
                                   onTap: () async {
-                                    File image =
+                                    File? image =
                                         await AppUtil.pickImageFromGallery();
                                     setState(() {
                                       _coverImage = image;
@@ -89,7 +90,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                                     Strings.default_cover_image,
                                     fit: BoxFit.cover,
                                   ))
-                              : Image.file(_coverImage)),
+                              : Image.file(_coverImage!)),
                       Positioned.fill(
                           child: Align(
                         alignment: Alignment.centerLeft,
@@ -105,7 +106,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                               child: _singerImage == null
                                   ? InkWell(
                                       onTap: () async {
-                                        File image = await AppUtil
+                                        File? image = await AppUtil
                                             .pickImageFromGallery();
                                         setState(() {
                                           _singerImage = image;
@@ -115,7 +116,7 @@ class _AddSingerPageState extends State<AddSingerPage> {
                                           backgroundImage: AssetImage(
                                               Strings.default_profile_image)))
                                   : CircleAvatar(
-                                      backgroundImage: FileImage(_singerImage),
+                                      backgroundImage: FileImage(_singerImage!),
                                     )),
                         ),
                       ))
@@ -165,30 +166,30 @@ class _AddSingerPageState extends State<AddSingerPage> {
                         return;
                       }
                       Navigator.of(context).pop();
-                      late String imageUrl;
-                      late String coverUrl;
+                      String? imageUrl;
+                      String? coverUrl;
                       String id = randomAlphaNumeric(20);
 
                       if (_singerImage != null) {
-                        String ext = path.extension(_singerImage.path);
+                        String ext = path.extension(_singerImage!.path);
                         imageUrl = await AppUtil().uploadFile(
                             _singerImage, context, '/singers_images/$id$ext');
                       }
                       if (_coverImage != null) {
-                        String ext = path.extension(_coverImage.path);
+                        String ext = path.extension(_coverImage!.path);
                         coverUrl = await AppUtil().uploadFile(
                             _coverImage, context, '/singers_covers/$id$ext');
                       }
-
-                      await singersRef.doc(id).set({
-                        'name': _singerController.text,
-                        'category': _category,
-                        'image_url': imageUrl,
-                        'cover_url': coverUrl,
-                        'songs': 0,
-                        'melodies': 0,
-                        'search': searchList(_singerController.text),
-                      });
+                      if (imageUrl != null && _coverImage != null)
+                        await singersRef.doc(id).set({
+                          'name': _singerController.text,
+                          'category': _category,
+                          'image_url': imageUrl,
+                          'cover_url': coverUrl,
+                          'songs': 0,
+                          'melodies': 0,
+                          'search': searchList(_singerController.text),
+                        });
                       AppUtil.showToast('Singer added');
                       Navigator.of(context).pop();
                     },

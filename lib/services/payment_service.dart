@@ -8,9 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:stripe_payment/stripe_payment.dart';
 
 class StripeTransactionResponse {
-  String? message;
-  bool? success;
-  StripeTransactionResponse({this.message, this.success});
+  String message;
+  bool success;
+  StripeTransactionResponse({required this.message, required this.success});
 }
 
 class PaymentService {
@@ -23,14 +23,14 @@ class PaymentService {
 
   static Future<StripeTransactionResponse> payViaCreditCard(
       BuildContext context,
-      {String? amount,
-      String? currency}) async {
+      {required String amount,
+      required String currency}) async {
     try {
       PaymentMethod paymentMethod = await _paymentRequestWithCardForm();
       var paymentIntentMap = await _createPaymentIntent(
-          (double.parse(amount!) * 100).toStringAsFixed(0), currency!);
+          (double.parse(amount) * 100).toStringAsFixed(0), currency);
       PaymentIntent paymentIntent = PaymentIntent(
-          clientSecret: paymentIntentMap!['client_secret'],
+          clientSecret: paymentIntentMap?['client_secret'],
           paymentMethodId: paymentMethod.id);
 
       PaymentIntentResult result = await _confirmPaymentIntent(paymentIntent);

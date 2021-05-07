@@ -22,7 +22,7 @@ class EncryptionService {
   //   encryptedFile.writeAsStringSync(decrypted);
   // }
 
-  static String encryptFile(String path) {
+  static String? encryptFile(String path) {
     AesCrypt crypt = AesCrypt();
     crypt.setOverwriteMode(AesCryptOwMode.on);
     crypt.setPassword('my cool password');
@@ -39,7 +39,7 @@ class EncryptionService {
         return 'ERROR';
       }
     }
-    return encFilepath!;
+    return encFilepath;
   }
 
   static String decryptFile(String path) {

@@ -164,8 +164,8 @@ class NotificationHandler {
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('ic_launcher');
     var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(android:
-    initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    var initializationSettings = new InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -182,7 +182,8 @@ class NotificationHandler {
         autoCancel: true);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
-        android:androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
         0,
         message['notification']['title'].toString(),
@@ -192,8 +193,9 @@ class NotificationHandler {
   }
 
   clearNotificationsNumber() async {
-    await usersRef
-        .doc(Constants.currentUserID)
-        .update({'notificationsNumber': 0});
+    if (Constants.currentUserID != null)
+      await usersRef
+          .doc(Constants.currentUserID)
+          .update({'notificationsNumber': 0});
   }
 }

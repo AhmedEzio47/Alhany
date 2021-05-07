@@ -9,20 +9,20 @@ import 'audio_message_player.dart';
 import 'image_overlay.dart';
 
 class ChatBubble extends StatefulWidget {
-  final String? message, time, username, type, replyText, replyName;
-  final bool? isMe, isGroup, isReply;
+  final String message, time, username, type, replyText, replyName;
+  final bool isMe, isGroup, isReply;
 
   ChatBubble(
       {Key? key,
-      @required this.message,
-      @required this.time,
-      @required this.isMe,
-      @required this.isGroup,
-      @required this.username,
-      @required this.type,
-      @required this.replyText,
-      @required this.isReply,
-      @required this.replyName})
+      required this.message,
+      required this.time,
+      required this.isMe,
+      required this.isGroup,
+      required this.username,
+      required this.type,
+      required this.replyText,
+      required this.isReply,
+      required this.replyName})
       : super(key: key);
 
   @override
@@ -52,10 +52,10 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.isMe! ? MyColors.primaryColor : Colors.grey[200];
+    final bg = widget.isMe ? MyColors.primaryColor : Colors.grey[200];
     final align =
-        widget.isMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final radius = widget.isMe!
+        widget.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final radius = widget.isMe
         ? BorderRadius.only(
             topLeft: Radius.circular(5.0),
             bottomLeft: Radius.circular(5.0),
@@ -85,13 +85,13 @@ class _ChatBubbleState extends State<ChatBubble> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              widget.isMe!
+              widget.isMe
                   ? SizedBox()
-                  : widget.isGroup!
+                  : widget.isGroup
                       ? Padding(
                           padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
                           child: Text(
-                            widget.username!,
+                            widget.username,
                             style: TextStyle(
                               fontSize: 13,
                               color: colors[rNum],
@@ -101,15 +101,15 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ),
                         )
                       : SizedBox(),
-              widget.isGroup!
-                  ? widget.isMe!
+              widget.isGroup
+                  ? widget.isMe
                       ? SizedBox()
                       : SizedBox(height: 5)
                   : SizedBox(),
-              widget.isReply!
+              widget.isReply
                   ? Container(
                       decoration: BoxDecoration(
-                        color: !widget.isMe!
+                        color: !widget.isMe
                             ? MyColors.accentColor
                             : MyColors.primaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -126,7 +126,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           children: <Widget>[
                             Container(
                               child: Text(
-                                widget.isMe! ? "You" : widget.replyName!,
+                                widget.isMe ? "You" : widget.replyName,
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                   fontWeight: FontWeight.bold,
@@ -140,7 +140,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             SizedBox(height: 2),
                             Container(
                               child: Text(
-                                widget.replyText!,
+                                widget.replyText,
                                 style: TextStyle(
                                   color: MyColors.textDarkColor,
                                   fontSize: 10,
@@ -154,15 +154,15 @@ class _ChatBubbleState extends State<ChatBubble> {
                       ),
                     )
                   : SizedBox(width: 2),
-              widget.isReply! ? SizedBox(height: 5) : SizedBox(),
+              widget.isReply ? SizedBox(height: 5) : SizedBox(),
               Padding(
                 padding: EdgeInsets.all(widget.type == "text" ? 5 : 0),
                 child: widget.type == "text"
-                    ? !widget.isReply!
+                    ? !widget.isReply
                         ? Text(
-                            widget.message!,
+                            widget.message,
                             style: TextStyle(
-                              color: widget.isMe!
+                              color: widget.isMe
                                   ? MyColors.textLightColor
                                   : MyColors.textDarkColor,
                             ),
@@ -170,9 +170,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                         : Container(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              widget.message!,
+                              widget.message,
                               style: TextStyle(
-                                color: widget.isMe!
+                                color: widget.isMe
                                     ? MyColors.textLightColor
                                     : MyColors.textDarkColor,
                               ),
@@ -187,14 +187,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                                         width: 200,
                                         height: 200,
                                         child: ImageOverlay(
-                                            imageUrl: widget.message!,
+                                            imageUrl: widget.message,
                                             btnIcons: [
                                               Icons.file_download
                                             ],
                                             btnFunctions: [
                                               () {
                                                 AppUtil.downloadFile(
-                                                    widget.message!);
+                                                    widget.message);
                                               },
                                             ]),
                                       ),
@@ -215,7 +215,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           ),
         ),
         Padding(
-          padding: widget.isMe!
+          padding: widget.isMe
               ? EdgeInsets.only(
                   right: 10,
                   bottom: 10.0,
@@ -225,7 +225,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                   bottom: 10.0,
                 ),
           child: Text(
-            widget.time!,
+            widget.time,
             style: TextStyle(
               color: MyColors.textLightColor,
               fontSize: 10.0,

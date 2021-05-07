@@ -50,6 +50,7 @@ class _StarPageState extends State<StarPage>
   }
 
   List<SlideImage> _slideImages = [];
+
   getSlideImages() async {
     List<SlideImage> slideImages =
         await DatabaseService.getSlideImages('صفحة الفنان');
@@ -59,13 +60,15 @@ class _StarPageState extends State<StarPage>
   }
 
   nextMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot!);
-    if (melodies.length > 0) {
-      setState(() {
-        melodies.forEach((element) => _melodies.add(element));
-        this.lastVisiblePostSnapShot = melodies.last.timestamp;
-      });
+    if (lastVisiblePostSnapShot != null) {
+      List<Melody> melodies =
+          await DatabaseService.getNextMelodies(lastVisiblePostSnapShot!);
+      if (melodies.length > 0) {
+        setState(() {
+          melodies.forEach((element) => _melodies.add(element));
+          this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        });
+      }
     }
   }
 
@@ -182,18 +185,17 @@ class _StarPageState extends State<StarPage>
                                         enlargeCenterPage: true,
                                       ),
                                       itemCount: _slideImages.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index, int useless) =>
-                                              CachedImage(
-                                        imageUrl: _slideImages[index].url!,
-                                        height: 200,
-                                        imageShape: BoxShape.rectangle,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        defaultAssetImage:
-                                            Strings.default_cover_image,
-                                      ),
-                                    )
+                                      itemBuilder: (context, index, realIndex) {
+                                        return CachedImage(
+                                          imageUrl: _slideImages[index].url,
+                                          height: 200,
+                                          imageShape: BoxShape.rectangle,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          defaultAssetImage:
+                                              Strings.default_cover_image,
+                                        );
+                                      })
                                   : Container(),
                               SizedBox(
                                 height: 10,
@@ -223,7 +225,7 @@ class _StarPageState extends State<StarPage>
                                       height: 60,
                                       imageShape: BoxShape.circle,
                                       imageUrl:
-                                          Constants.starUser!.profileImageUrl!,
+                                          Constants.starUser?.profileImageUrl,
                                       defaultAssetImage:
                                           Strings.default_profile_image,
                                     ),
@@ -263,10 +265,11 @@ class _StarPageState extends State<StarPage>
                                           en: 'News', ar: 'آخر الأخبار'),
                                     ),
                                   ]),
-                              MediaQuery.removePadding(
-                                  context: context,
-                                  removeTop: true,
-                                  child: _currentPage()?? Container())
+                              if (_currentPage() != null)
+                                MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: _currentPage()!)
                             ]),
                           ),
                         ],
@@ -340,6 +343,7 @@ class _StarPageState extends State<StarPage>
   }
 
   List<News> _news = [];
+
   getNews() async {
     List<News> news = await DatabaseService.getNews();
     if (mounted) {
@@ -372,18 +376,21 @@ class _StarPageState extends State<StarPage>
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      setState(() {
-                        musicPlayer = MusicPlayer(
-                          key: ValueKey(_filteredMelodies[index].id),
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _filteredMelodies[index].name,
-                          btnSize: 30,
-                          initialDuration: _filteredMelodies[index].duration,
-                          melodyList: [_filteredMelodies[index]],
-                          isRecordBtnVisible: true,
-                        );
-                        _isPlaying = true;
-                      });
+                      if (_filteredMelodies[index].name != null &&
+                          _filteredMelodies[index].duration != null)
+                        setState(() {
+                          musicPlayer = MusicPlayer(
+                            key: ValueKey(_filteredMelodies[index].id),
+                            backColor:
+                                MyColors.lightPrimaryColor.withOpacity(.8),
+                            title: _filteredMelodies[index].name!,
+                            btnSize: 30,
+                            initialDuration: _filteredMelodies[index].duration!,
+                            melodyList: [_filteredMelodies[index]],
+                            isRecordBtnVisible: true,
+                          );
+                          _isPlaying = true;
+                        });
                     },
                     child: MelodyItem(
                       context: context,
@@ -400,18 +407,21 @@ class _StarPageState extends State<StarPage>
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () async {
-                      setState(() {
-                        musicPlayer = MusicPlayer(
-                          key: ValueKey(_melodies[index].id),
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _melodies[index].name,
-                          btnSize: 30,
-                          initialDuration: _melodies[index].duration,
-                          melodyList: [_melodies[index]],
-                          isRecordBtnVisible: true,
-                        );
-                        _isPlaying = true;
-                      });
+                      if (_melodies[index].name != null &&
+                          _melodies[index].duration != null)
+                        setState(() {
+                          musicPlayer = MusicPlayer(
+                            key: ValueKey(_melodies[index].id),
+                            backColor:
+                                MyColors.lightPrimaryColor.withOpacity(.8),
+                            title: _melodies[index].name!,
+                            btnSize: 30,
+                            initialDuration: _melodies[index].duration!,
+                            melodyList: [_melodies[index]],
+                            isRecordBtnVisible: true,
+                          );
+                          _isPlaying = true;
+                        });
                     },
                     child: MelodyItem(
                       context: context,
@@ -490,7 +500,7 @@ class _StarPageState extends State<StarPage>
     ));
   }
 
-  Future<bool> _onBackPressed() async{
+  Future<bool> _onBackPressed() async {
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/app-page');
     return true;

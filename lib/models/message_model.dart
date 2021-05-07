@@ -7,15 +7,15 @@ class Message {
   final dynamic timestamp;
   final String? type;
 
-  Message({ this.id,  this.sender,  this.message,  this.timestamp,  this.type});
+  Message({this.id, this.sender, this.message, this.timestamp, this.type});
 
   factory Message.fromDoc(DocumentSnapshot doc) {
     return Message(
       id: doc.id,
-      sender: doc.data()!['sender'],
-      message: doc.data()!['message'],
-      timestamp: doc.data()!['timestamp'],
-      type: doc.data()!['type'],
+      sender: doc.data()?['sender'],
+      message: doc.data()?['message'],
+      timestamp: doc.data()?['timestamp'],
+      type: doc.data()?['type'],
     );
   }
 }

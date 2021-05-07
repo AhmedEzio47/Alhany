@@ -17,14 +17,14 @@ import 'custom_text.dart';
 
 class CommentBottomSheet {
   Widget commentOptionIcon(
-      BuildContext? context, Comment? comment, Comment? parentComment,
-      {Record? record, News? news}) {
+      BuildContext context, Comment comment, Comment parentComment,
+      {required Record record, required News news}) {
     return customInkWell(
         radius: BorderRadius.circular(20),
-        context: context!,
+        context: context,
         onPressed: () {
-          _openBottomSheet(context, comment!, parentComment!,
-              record: record!, news: news!);
+          _openBottomSheet(context, comment, parentComment,
+              record: record, news: news);
         },
         child: Container(
           width: 25,
@@ -51,37 +51,39 @@ class CommentBottomSheet {
 
   void _openBottomSheet(
       BuildContext context, Comment comment, Comment parentComment,
-      {Record? record, News? news}) async {
-    User user = await DatabaseService.getUserWithId(
-      comment.commenterID!,
-    );
-    bool isMyComment = Constants.currentUserID == comment.commenterID;
-    await showModalBottomSheet(
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (context) {
-        return Container(
-            padding: EdgeInsets.only(top: 5, bottom: 0),
-            height:
-                Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
-            width: Sizes.fullWidth(context),
-            decoration: BoxDecoration(
-              color: MyColors.lightPrimaryColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+      {required Record record, required News news}) async {
+    if (comment.commenterID != null) {
+      User user = await DatabaseService.getUserWithId(
+        comment.commenterID!,
+      );
+      bool isMyComment = Constants.currentUserID == comment.commenterID;
+      await showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        context: context,
+        builder: (context) {
+          return Container(
+              padding: EdgeInsets.only(top: 5, bottom: 0),
+              height:
+                  Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
+              width: Sizes.fullWidth(context),
+              decoration: BoxDecoration(
+                color: MyColors.lightPrimaryColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-            ),
-            child: _commentOptions(
-                context, isMyComment, comment, parentComment, user,
-                record: record!, news: news!));
-      },
-    );
+              child: _commentOptions(
+                  context, isMyComment, comment, parentComment, user,
+                  record: record, news: news));
+        },
+      );
+    }
   }
 
   Widget _commentOptions(BuildContext context, bool isMyComment,
-      Comment comment, Comment parentComment, User user,
-      {Record? record, News? news}) {
+      Comment comment, Comment? parentComment, User user,
+      {required Record record, required News news}) {
     return Column(
       children: <Widget>[
         Container(
@@ -106,12 +108,12 @@ class CommentBottomSheet {
                   if (parentComment == null) {
 //                    Navigator.of(context)
 //                        .pushNamed('/edit-comment', arguments: {'record': record, 'user': user, 'comment': comment});
-                    editComment(context, comment, record: record!, news: news!);
+                    editComment(context, comment, record: record, news: news);
                   } else {
 //                    Navigator.of(context).pushNamed('/edit-comment',
 //                        arguments: {'record': record, 'comment': parentComment, 'reply': comment, 'user': user});
                     editReply(context, comment, parentComment,
-                        record: record!, news: news!);
+                        record: record, news: news);
                   }
                 },
                 isEnable: false,
@@ -126,9 +128,13 @@ class CommentBottomSheet {
                 ),
                 text: language(en: 'Delete Comment', ar: 'حذف'),
                 onPressed: () async {
-                  await _deleteComment(context, comment.id!,
-                      parentComment == null ? null : parentComment.id!,
-                      recordId: record!.id, newId: news!.id);
+                  if (comment.id != null &&
+                      parentComment?.id != null &&
+                      record.id != null &&
+                      news.id != null)
+                    await _deleteComment(context, comment.id!,
+                        parentComment == null ? null : parentComment.id!,
+                        recordId: record.id!, newId: news.id!);
                   if (parentComment == null) {
                     Navigator.of(context).pushReplacementNamed('/record-page',
                         arguments: {
@@ -185,8 +191,8 @@ class CommentBottomSheet {
   TextEditingController _commentController = TextEditingController();
 
   editComment(BuildContext context, Comment comment,
-      {Record? record, News? news}) async {
-    _commentController.text = comment.text!;
+      {required Record record, required News news}) async {
+    if (comment.text != null) _commentController.text = comment.text!;
 
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -216,9 +222,10 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editComment(
-                  comment.id!, _commentController.text,
-                  recordId: record!.id, newsId: news!.id);
+              if (comment.id != null)
+                await DatabaseService.editComment(
+                    comment.id!, _commentController.text,
+                    recordId: record.id, newsId: news.id);
               AppUtil.showToast(
                   language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/record-page',
@@ -236,8 +243,8 @@ class CommentBottomSheet {
   }
 
   editReply(BuildContext context, Comment reply, Comment parentComment,
-      {Record? record, News? news}) async {
-    _commentController.text = reply.text!;
+      {required Record record, required News news}) async {
+    if (reply.text != null) _commentController.text = reply.text!;
 
     Navigator.of(context).push(CustomModal(
         child: Container(
@@ -267,9 +274,10 @@ class CommentBottomSheet {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await DatabaseService.editReply(
-                  parentComment.id!, reply.id!, _commentController.text,
-                  recordId: record!.id, newsId: news!.id);
+              if (parentComment.id != null && reply.id != null)
+                await DatabaseService.editReply(
+                    parentComment.id!, reply.id!, _commentController.text,
+                    recordId: record.id, newsId: news.id);
               AppUtil.showToast(
                   language(en: Strings.en_updated, ar: Strings.ar_updated));
               Navigator.of(context).pushReplacementNamed('/comment-page',
@@ -315,9 +323,12 @@ class CommentBottomSheet {
               onTap: () async {
                 AppUtil.showLoader(context);
 
-                await DatabaseService.unfollowUser(user.id!);
-                await NotificationHandler.removeNotification(
-                    user.id!, Constants.currentUserID!, 'follow');
+                if (user.id != null) {
+                  await DatabaseService.unfollowUser(user.id!);
+                  if (Constants.currentUserID != null)
+                    await NotificationHandler.removeNotification(
+                        user.id!, Constants.currentUserID!, 'follow');
+                }
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -334,7 +345,7 @@ class CommentBottomSheet {
   }
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,
-      {String? text, Function? onPressed, bool isEnable = false}) {
+      {required String text, Function? onPressed, bool isEnable = false}) {
     return Expanded(
       child: customInkWell(
         context: context,
@@ -354,7 +365,7 @@ class CommentBottomSheet {
                 width: 15,
               ),
               customText(
-                text!,
+                text,
                 context: context,
                 style: TextStyle(
                   color: MyColors.textLightColor,
@@ -370,10 +381,10 @@ class CommentBottomSheet {
   }
 
   Future _deleteComment(
-      BuildContext? context, String? commentId, String? parentCommentId,
-      {String? recordId, String? newId}) async {
+      BuildContext context, String commentId, String? parentCommentId,
+      {required String recordId, required String newId}) async {
     await showDialog(
-      context: context!,
+      context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: new AlertDialog(
@@ -395,16 +406,17 @@ class CommentBottomSheet {
             new GestureDetector(
               onTap: () async {
                 if (parentCommentId == null)
-                  await DatabaseService.deleteComment(commentId!,
+                  await DatabaseService.deleteComment(commentId,
                       recordId: recordId, newsId: newId);
                 else
-                  await DatabaseService.deleteReply(commentId!, parentCommentId,
+                  await DatabaseService.deleteReply(commentId, parentCommentId,
                       recordId: recordId, newsId: newId);
 
-                await NotificationHandler.removeNotification(
-                    (await DatabaseService.getRecordWithId(recordId!)).singerId!,
-                    recordId,
-                    'comment');
+                var t =
+                    (await DatabaseService.getRecordWithId(recordId)).singerId;
+                if (t != null)
+                  await NotificationHandler.removeNotification(
+                      t, recordId, 'comment');
 
                 Navigator.of(context).pop();
               },

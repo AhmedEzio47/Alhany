@@ -1,13 +1,15 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
+
 //import 'package:audioplayers/audio_cache.dart';
 //import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 
 class MyAudioPlayer with ChangeNotifier {
   AudioPlayer advancedPlayer = AudioPlayer();
+
   //AudioCache audioCache;
 
   get isPlaying => advancedPlayer.playing;
@@ -21,9 +23,9 @@ class MyAudioPlayer with ChangeNotifier {
 
   MyAudioPlayer(
       {this.urlList,
-        this.isLocal = false,
-        this.onComplete,
-        this.onPlayingStarted}) {
+      this.isLocal = false,
+      this.onComplete,
+      this.onPlayingStarted}) {
     initAudioPlayer();
   }
 
@@ -34,10 +36,12 @@ class MyAudioPlayer with ChangeNotifier {
   initAudioPlayer() async {
     advancedPlayer = AudioPlayer();
     //audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    if (isLocal)
-      duration = await advancedPlayer.setFilePath(urlList![index]);
-    else
-      duration = await advancedPlayer.setUrl(urlList![index]);
+    if (urlList != null && urlList!.isNotEmpty) {
+      if (isLocal)
+        duration = await advancedPlayer.setFilePath(urlList![index]);
+      else
+        duration = await advancedPlayer.setUrl(urlList![index]);
+    }
 
     advancedPlayer.positionStream.listen((p) {
       if (onPlayingStarted != null) {
@@ -48,13 +52,13 @@ class MyAudioPlayer with ChangeNotifier {
       }
       position = p;
       print('P:${p.inMilliseconds}');
-      print('D:${duration!.inMilliseconds}');
+      print('D:${duration?.inMilliseconds}');
       notifyListeners();
 
-      if (duration!.inMilliseconds - p.inMilliseconds <
+      if ((duration?.inMilliseconds ?? 0) - p.inMilliseconds <
           Constants.endPositionOffsetInMilliSeconds) {
         stop();
-        if (urlList!.length > 1) {
+        if (urlList != null && urlList!.length > 1) {
           if (this.index < urlList!.length - 1)
             this.index++;
           else
@@ -64,8 +68,8 @@ class MyAudioPlayer with ChangeNotifier {
         } else {
           stop();
         }
-      } else if (duration!.inMilliseconds - p.inMilliseconds == 0) {
-        if (urlList!.length > 1) {
+      } else if ((duration?.inMilliseconds ?? 0) - p.inMilliseconds == 0) {
+        if (urlList != null && urlList!.length > 1) {
           if (this.index < urlList!.length - 1)
             this.index++;
           else
@@ -96,7 +100,7 @@ class MyAudioPlayer with ChangeNotifier {
     // duration = null;
     notifyListeners();
     if (onComplete != null &&
-        MelodyPage.isRecording == true) {
+        MelodyPage.recordingStatus == RecordingStatus.Recording) {
       onComplete!();
     }
   }
@@ -111,23 +115,37 @@ class MyAudioPlayer with ChangeNotifier {
     notifyListeners();
   }
 
-  next() {
-    advancedPlayer.stop();
-    if (this.index < urlList!.length - 1)
+  next() async {
+    await advancedPlayer.stop();
+    if (urlList != null &&
+        urlList!.isNotEmpty &&
+        this.index < urlList!.length - 1)
       this.index++;
     else
       this.index = 0;
     notifyListeners();
-    play(index: this.index);
+    if (urlList != null && urlList!.isNotEmpty) {
+      if (isLocal)
+        duration = await advancedPlayer.setFilePath(urlList![index]);
+      else
+        duration = await advancedPlayer.setUrl(urlList![index]);
+    }
+    await play();
   }
 
-  prev() {
-    advancedPlayer.stop();
+  prev() async {
+    await advancedPlayer.stop();
     if (this.index > 0)
       this.index--;
     else
-      this.index = urlList!.length - 1;
+      this.index = (urlList?.length ?? 0) - 1;
     notifyListeners();
-    play(index: this.index);
+    if (urlList != null && urlList!.isNotEmpty) {
+      if (isLocal)
+        duration = await advancedPlayer.setFilePath(urlList![index]);
+      else
+        duration = await advancedPlayer.setUrl(urlList![index]);
+    }
+    await play(index: this.index);
   }
 }

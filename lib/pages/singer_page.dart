@@ -42,45 +42,57 @@ class _SingerPageState extends State<SingerPage>
   Timestamp? lastVisiblePostSnapShot;
 
   getSongs() async {
-    List<Melody> songs =
-        await DatabaseService.getSongsBySingerName(widget.singer!.name!);
-    if (mounted) {
-      setState(() {
-        _songs = songs;
-        lastVisiblePostSnapShot = songs.last.timestamp;
-      });
+    if (widget.singer != null && widget.singer!.name != null) {
+      List<Melody> songs =
+          await DatabaseService.getSongsBySingerName(widget.singer!.name!);
+      if (mounted) {
+        setState(() {
+          _songs = songs;
+          lastVisiblePostSnapShot = songs.last.timestamp;
+        });
+      }
     }
   }
 
   nextSongs() async {
-    List<Melody> songs = await DatabaseService.getNextSongsBySingerName(
-        widget.singer!.name!, lastVisiblePostSnapShot!);
-    if (songs.length > 0) {
-      setState(() {
-        songs.forEach((element) => _songs.add(element));
-        this.lastVisiblePostSnapShot = songs.last.timestamp;
-      });
+    if (widget.singer != null &&
+        widget.singer!.name != null &&
+        lastVisiblePostSnapShot != null) {
+      List<Melody> songs = await DatabaseService.getNextSongsBySingerName(
+          widget.singer!.name!, lastVisiblePostSnapShot!);
+      if (songs.length > 0) {
+        setState(() {
+          songs.forEach((element) => _songs.add(element));
+          this.lastVisiblePostSnapShot = songs.last.timestamp;
+        });
+      }
     }
   }
 
   getMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getMelodiesBySingerName(widget.singer!.name!);
-    if (mounted) {
-      setState(() {
-        _melodies = melodies;
-      });
+    if (widget.singer != null && widget.singer!.name != null) {
+      List<Melody> melodies =
+          await DatabaseService.getMelodiesBySingerName(widget.singer!.name!);
+      if (mounted) {
+        setState(() {
+          _melodies = melodies;
+        });
+      }
     }
   }
 
   nextMelodies() async {
-    List<Melody> melodies = await DatabaseService.getNextMelodiesBySingerName(
-        widget.singer!.name!, lastVisiblePostSnapShot!);
-    if (melodies.length > 0) {
-      setState(() {
-        melodies.forEach((element) => _melodies.add(element));
-        this.lastVisiblePostSnapShot = melodies.last.timestamp;
-      });
+    if (widget.singer != null &&
+        widget.singer!.name != null &&
+        lastVisiblePostSnapShot != null) {
+      List<Melody> melodies = await DatabaseService.getNextMelodiesBySingerName(
+          widget.singer!.name!, lastVisiblePostSnapShot!);
+      if (melodies.length > 0) {
+        setState(() {
+          melodies.forEach((element) => _melodies.add(element));
+          this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        });
+      }
     }
   }
 
@@ -140,16 +152,18 @@ class _SingerPageState extends State<SingerPage>
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () async {
-                setState(() {
-                  musicPlayer = MusicPlayer(
-                    key: ValueKey(_songs[index].id),
-                    melodyList: [_songs[index]],
-                    backColor: MyColors.lightPrimaryColor,
-                    title: _songs[index].name,
-                    initialDuration: _songs[index].duration,
-                  );
-                  _isPlaying = true;
-                });
+                if (_songs[index].name != null &&
+                    _songs[index].duration != null)
+                  setState(() {
+                    musicPlayer = MusicPlayer(
+                      key: ValueKey(_songs[index].id),
+                      melodyList: [_songs[index]],
+                      backColor: MyColors.lightPrimaryColor,
+                      title: _songs[index].name!,
+                      initialDuration: _songs[index].duration!,
+                    );
+                    _isPlaying = true;
+                  });
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
@@ -177,17 +191,19 @@ class _SingerPageState extends State<SingerPage>
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () async {
-                setState(() {
-                  musicPlayer = MusicPlayer(
-                    key: ValueKey(_melodies[index].id),
-                    melodyList: [_melodies[index]],
-                    backColor: MyColors.lightPrimaryColor,
-                    title: _melodies[index].name,
-                    initialDuration: _melodies[index].duration,
-                    isRecordBtnVisible: true,
-                  );
-                  _isPlaying = true;
-                });
+                if (_melodies[index].name != null &&
+                    _melodies[index].duration != null)
+                  setState(() {
+                    musicPlayer = MusicPlayer(
+                      key: ValueKey(_melodies[index].id),
+                      melodyList: [_melodies[index]],
+                      backColor: MyColors.lightPrimaryColor,
+                      title: _melodies[index].name!,
+                      initialDuration: _melodies[index].duration!,
+                      isRecordBtnVisible: true,
+                    );
+                    _isPlaying = true;
+                  });
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
@@ -250,25 +266,27 @@ class _SingerPageState extends State<SingerPage>
                                   width: MediaQuery.of(context).size.width,
                                   defaultAssetImage:
                                       Strings.default_cover_image,
-                                  imageUrl: widget.singer!.coverUrl!,
+                                  imageUrl: widget.singer?.coverUrl,
                                   imageShape: BoxShape.rectangle,
                                 ),
-                                Positioned.fill(
-                                    child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16.0, bottom: 16),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: CachedImage(
-                                      height: 100,
-                                      width: 100,
-                                      defaultAssetImage:
-                                          Strings.default_profile_image,
-                                      imageUrl: widget.singer!.imageUrl!,
-                                      imageShape: BoxShape.circle,
+                                if (widget.singer != null &&
+                                    widget.singer!.imageUrl != null)
+                                  Positioned.fill(
+                                      child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 16.0, bottom: 16),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: CachedImage(
+                                        height: 100,
+                                        width: 100,
+                                        defaultAssetImage:
+                                            Strings.default_profile_image,
+                                        imageUrl: widget.singer?.imageUrl,
+                                        imageShape: BoxShape.circle,
+                                      ),
                                     ),
-                                  ),
-                                )),
+                                  )),
                                 Positioned.fill(
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -279,7 +297,7 @@ class _SingerPageState extends State<SingerPage>
                                             vertical: 4, horizontal: 16),
                                         color: Colors.black.withOpacity(.6),
                                         child: Text(
-                                          widget.singer!.name!,
+                                          widget.singer?.name ?? "",
                                           style: TextStyle(
                                               fontSize: 22,
                                               color: Colors.white,
@@ -374,7 +392,7 @@ class _SingerPageState extends State<SingerPage>
     );
   }
 
-  Future<bool> _onBackPressed() async{
+  Future<bool> _onBackPressed() async {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
     return true;
@@ -383,6 +401,7 @@ class _SingerPageState extends State<SingerPage>
   var choices = ['Edit Image', 'Edit Name', 'Delete'];
 
   TextEditingController _nameController = TextEditingController();
+
   void _select(String value) async {
     switch (value) {
       case 'Edit Image':
@@ -400,25 +419,28 @@ class _SingerPageState extends State<SingerPage>
   }
 
   editImage() async {
-    File image = await AppUtil.pickImageFromGallery();
-    String ext = path.extension(image.path);
+    File? image = await AppUtil.pickImageFromGallery();
 
-    if (widget.singer!.imageUrl != null) {
-      String fileName =
+    if (widget.singer != null && widget.singer!.imageUrl != null) {
+      String? fileName =
           await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
-      await storageRef.child('/singers_images/$fileName').delete();
+      if (fileName != null)
+        await storageRef.child('/singers_images/$fileName').delete();
     }
-
-    String url = await AppUtil()
-        .uploadFile(image, context, '/singers_images/${widget.singer!.id}$ext');
-    await singersRef.doc(widget.singer!.id).update({'image_url': url});
-    AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
+    if (image != null && widget.singer != null && widget.singer!.id != null) {
+      String ext = path.extension(image.path);
+      String url = await AppUtil().uploadFile(
+          image, context, '/singers_images/${widget.singer!.id}$ext');
+      await singersRef.doc(widget.singer!.id!).update({'image_url': url});
+      AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
+    }
   }
 
   editName() async {
-    setState(() {
-      _nameController.text = widget.singer!.name!;
-    });
+    if (widget.singer != null && widget.singer!.name != null)
+      setState(() {
+        _nameController.text = widget.singer!.name!;
+      });
     Navigator.of(context).push(CustomModal(
         child: Container(
       height: 200,
@@ -446,10 +468,11 @@ class _SingerPageState extends State<SingerPage>
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await singersRef.doc(widget.singer!.id).update({
-                'name': _nameController.text,
-                'search': searchList(_nameController.text),
-              });
+              if (widget.singer != null && widget.singer!.id != null)
+                await singersRef.doc(widget.singer!.id).update({
+                  'name': _nameController.text,
+                  'search': searchList(_nameController.text),
+                });
               AppUtil.showToast(
                   language(en: 'Name Updated', ar: 'تم تغيير الاسم'));
               Navigator.of(context).pop();
@@ -473,33 +496,40 @@ class _SingerPageState extends State<SingerPage>
         firstFunc: () async {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
-          if (widget.singer!.imageUrl != null) {
-            String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
-            await storageRef.child('/singers_images/$fileName').delete();
+          if (widget.singer != null && widget.singer!.imageUrl != null) {
+            String? fileName = await AppUtil.getStorageFileNameFromUrl(
+                widget.singer!.imageUrl!);
+            if (fileName != null)
+              await storageRef.child('/singers_images/$fileName').delete();
           }
-          if (widget.singer!.coverUrl != null) {
-            String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.singer!.coverUrl!);
-            await storageRef.child('/singers_covers/$fileName').delete();
+          if (widget.singer != null && widget.singer!.coverUrl != null) {
+            String? fileName = await AppUtil.getStorageFileNameFromUrl(
+                widget.singer!.coverUrl!);
+            if (fileName != null)
+              await storageRef.child('/singers_covers/$fileName').delete();
           }
-          List<Melody> songs =
-              await DatabaseService.getSongsBySingerName(widget.singer!.name!);
-          if (songs != null) {
-            for (Melody song in songs) {
-              await DatabaseService.deleteMelody(song);
+          if (widget.singer != null && widget.singer!.name != null) {
+            List<Melody> songs = await DatabaseService.getSongsBySingerName(
+                widget.singer!.name!);
+            if (songs != null || songs.isNotEmpty) {
+              for (Melody song in songs) {
+                await DatabaseService.deleteMelody(song);
+              }
             }
           }
 
-          List<Melody> melodies =
-              await DatabaseService.getMelodiesBySingerName(widget.singer!.name!);
-          if (melodies != null) {
-            for (Melody melody in melodies) {
-              await DatabaseService.deleteMelody(melody);
+          if (widget.singer != null && widget.singer!.name != null) {
+            List<Melody> melodies =
+                await DatabaseService.getMelodiesBySingerName(
+                    widget.singer!.name!);
+            if (melodies != null || melodies.isNotEmpty) {
+              for (Melody melody in melodies) {
+                await DatabaseService.deleteMelody(melody);
+              }
             }
           }
-
-          await singersRef.doc(widget.singer!.id).delete();
+          if (widget.singer != null && widget.singer!.id != null)
+            await singersRef.doc(widget.singer!.id).delete();
           AppUtil.showToast('Deleted!');
           Navigator.of(context).pop();
         },

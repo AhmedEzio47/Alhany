@@ -9,22 +9,22 @@ class Comment {
   final Timestamp? timestamp;
 
   Comment({
-     this.id,
-     this.commenterID,
-     this.text,
-     this.likes,
-     this.replies,
-     this.timestamp,
+    this.id,
+    this.commenterID,
+    this.text,
+    this.likes,
+    this.replies,
+    this.timestamp,
   });
 
   factory Comment.fromDoc(DocumentSnapshot doc) {
     return Comment(
       id: doc.id,
-      commenterID: doc.data()!['commenter'],
-      text: doc.data()!['text'],
-      likes: doc.data()!['likes'],
-      replies: doc.data()!['replies'],
-      timestamp: doc.data()!['timestamp'],
+      commenterID: doc.data()?['commenter'],
+      text: doc.data()?['text'],
+      likes: doc.data()?['likes'],
+      replies: doc.data()?['replies'],
+      timestamp: doc.data()?['timestamp'],
     );
   }
 }

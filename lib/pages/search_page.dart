@@ -121,8 +121,11 @@ class _SearchPageState extends State<SearchPage> {
                             : InkWell(
                                 onTap: () async {
                                   print('are we even here?!');
-                                  Navigator.of(context).pushNamed('/singer-page',
-                                      arguments: {'singer': _results[index], 'data_type': DataTypes.SONGS});
+                                  Navigator.of(context)
+                                      .pushNamed('/singer-page', arguments: {
+                                    'singer': _results[index],
+                                    'data_type': DataTypes.SONGS
+                                  });
                                 },
                                 child: SingerItem(
                                   key: ValueKey('song_item'),

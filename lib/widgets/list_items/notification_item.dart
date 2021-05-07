@@ -1,10 +1,10 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/notification_model.dart' as notification_model;
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
-import 'package:Alhany/models/notification_model.dart' as notification_model;
 
 class NotificationItem extends StatefulWidget {
   final notification_model.Notification? notification;
@@ -12,7 +12,13 @@ class NotificationItem extends StatefulWidget {
   final String? senderName;
   final int? counter;
 
-  NotificationItem({Key? key, @required this.notification, this.image, this.senderName, this.counter}) : super(key: key);
+  NotificationItem(
+      {Key? key,
+      required this.notification,
+      this.image,
+      this.senderName,
+      this.counter})
+      : super(key: key);
 
   @override
   _NotificationItemState createState() => _NotificationItemState();
@@ -23,25 +29,29 @@ class _NotificationItemState extends State<NotificationItem> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildItem(widget.notification!);
+    print(widget.notification);
+    if (widget.notification != null) return _buildItem(widget.notification!);
+    return SizedBox.shrink();
   }
 
   _buildItem(notification_model.Notification notification) {
     return Container(
-      color: notification.seen! ? MyColors.lightPrimaryColor.withOpacity(.5) : Colors.transparent,
+      color: notification.seen == true
+          ? MyColors.lightPrimaryColor.withOpacity(.5)
+          : Colors.transparent,
       child: Container(
         padding: EdgeInsets.all(7),
         child: ListTile(
           contentPadding: EdgeInsets.all(0),
           leading: CachedImage(
-            imageUrl: widget.image!,
+            imageUrl: widget.image,
             imageShape: BoxShape.circle,
             width: 50.0,
             height: 50.0,
             defaultAssetImage: Strings.default_profile_image,
           ),
           title: Text(
-            "${widget.notification!.title}",
+            "${widget.notification?.title}",
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -49,7 +59,7 @@ class _NotificationItemState extends State<NotificationItem> {
             ),
           ),
           subtitle: Text(
-            "${widget.notification!.body}",
+            "${widget.notification?.body}",
             style: TextStyle(
               color: Colors.grey.shade300,
             ),
@@ -59,7 +69,7 @@ class _NotificationItemState extends State<NotificationItem> {
             children: <Widget>[
               SizedBox(height: 10),
               Text(
-                "${AppUtil.formatTimestamp(widget.notification!.timestamp!)}",
+                "${AppUtil.formatTimestamp(widget.notification?.timestamp)}",
                 style: TextStyle(
                   color: Colors.grey.shade300,
                   fontWeight: FontWeight.w300,
@@ -94,8 +104,14 @@ class _NotificationItemState extends State<NotificationItem> {
             ],
           ),
           onTap: () {
-            NotificationHandler.makeNotificationSeen(widget.notification!.id!);
-            NotificationHandler.navigateToScreen(context, widget.notification!.type!, widget.notification!.objectId!);
+            if (widget.notification != null && widget.notification!.id != null)
+              NotificationHandler.makeNotificationSeen(
+                  widget.notification!.id!);
+            if (widget.notification != null &&
+                widget.notification!.type != null &&
+                widget.notification!.objectId != null)
+              NotificationHandler.navigateToScreen(context,
+                  widget.notification!.type!, widget.notification!.objectId!);
           },
         ),
       ),

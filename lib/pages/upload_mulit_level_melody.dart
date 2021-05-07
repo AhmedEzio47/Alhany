@@ -34,7 +34,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     QuerySnapshot singersSnapshot = await singersRef.get();
     for (DocumentSnapshot doc in singersSnapshot.docs) {
       setState(() {
-        _singers.add(doc.data()!['name']);
+        _singers.add(doc.data()?['name']);
       });
     }
   }
@@ -64,7 +64,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                   child: _image == null
                       ? InkWell(
                           onTap: () async {
-                            File image = await AppUtil.pickImageFromGallery();
+                            File? image = await AppUtil.pickImageFromGallery();
                             setState(() {
                               _image = image;
                             });
@@ -79,7 +79,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                 },
                 decoration: InputDecoration(hintText: 'Melody name'),
               ),
-              DropdownButton<dynamic>(
+              DropdownButton<dynamic?>(
                 hint: Text('Singer'),
                 value: _singerName,
                 onChanged: (text) async {
@@ -243,7 +243,7 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
   }
 
   uploadMelody() async {
-    if (_melodyName!.trim().isEmpty) {
+    if (_melodyName != null && _melodyName!.trim().isEmpty) {
       AppUtil.showToast(language(
           en: 'Please choose a name for the melody',
           ar: 'قم باختيار اسم اللحن'));
@@ -258,44 +258,46 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
     String id = randomAlphaNumeric(20);
 
     for (String key in melodies.keys) {
-      String ext = path.extension(melodies[key]!.path);
-      String url = await AppUtil()
-          .uploadFile(melodies[key]!, context, '/melodies/$id\_$key$ext');
+      if (melodies[key] != null) {
+        String ext = path.extension(melodies[key]!.path);
+        String url = await AppUtil()
+            .uploadFile(melodies[key], context, '/melodies/$id\_$key$ext');
 
-      final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(melodies[key]!.path);
-      int duration =
-          double.parse(info.getMediaProperties()!['duration'].toString())
-              .toInt();
+        final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
+        MediaInformation info =
+            await _flutterFFprobe.getMediaInformation(melodies[key]!.path);
+        int duration = double.parse(
+                info.getMediaProperties()?['duration'].toString() ?? "0")
+            .toInt();
 
-      levelsUrls.putIfAbsent(key, () => url);
-      levelsDurations.putIfAbsent(key, () => duration);
+        levelsUrls.putIfAbsent(key, () => url);
+        levelsDurations.putIfAbsent(key, () => duration);
+      }
     }
 
-    String? imageUrl;
+    String imageUrl;
     if (_image != null) {
       String ext = path.extension(_image!.path);
       imageUrl = await AppUtil()
-          .uploadFile(_image!, context, '/melodies_images/$id$ext');
+          .uploadFile(_image, context, '/melodies_images/$id$ext');
+
+      await melodiesRef.doc(id).set({
+        'name': _melodyName,
+        'audio_url': _melodyUrl,
+        'image_url': imageUrl,
+        'level_urls': levelsUrls,
+        'level_durations': levelsDurations,
+        'author_id': _singerName == null ? Constants.currentUserID : null,
+        'singer': _singerName,
+        'is_song': false,
+        'search': searchList(_melodyName),
+        'timestamp': FieldValue.serverTimestamp()
+      });
     }
-
-    await melodiesRef.doc(id).set({
-      'name': _melodyName,
-      'audio_url': _melodyUrl,
-      'image_url': imageUrl,
-      'level_urls': levelsUrls,
-      'level_durations': levelsDurations,
-      'author_id': _singerName == null ? Constants.currentUserID : null,
-      'singer': _singerName,
-      'is_song': false,
-      'search': searchList(_melodyName),
-      'timestamp': FieldValue.serverTimestamp()
-    });
-
-    await singersRef
-        .doc(_singer!.id)
-        .update({'melodies': FieldValue.increment(1)});
+    if (_singer != null && _singer!.id != null)
+      await singersRef
+          .doc(_singer!.id!)
+          .update({'melodies': FieldValue.increment(1)});
 
     Navigator.of(context).pop();
     AppUtil.showToast(language(en: 'Melody uploaded!', ar: 'تم رقع اللحن'));

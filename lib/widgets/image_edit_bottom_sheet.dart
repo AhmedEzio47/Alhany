@@ -87,7 +87,7 @@ class ImageEditBottomSheet {
   }
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,
-      {String? text, Function? onPressed}) {
+      {required String text, Function? onPressed}) {
     return Expanded(
       child: customInkWell(
         context: context,
@@ -107,7 +107,7 @@ class ImageEditBottomSheet {
                 width: 15,
               ),
               Text(
-                text!,
+                text,
                 style: TextStyle(
                   color: MyColors.primaryColor,
                   fontSize: 18,

@@ -12,6 +12,7 @@ class SongsPage extends StatefulWidget {
   final Singer? singer;
 
   const SongsPage({Key? key, this.singer}) : super(key: key);
+
   @override
   _SongsPageState createState() => _SongsPageState();
 }
@@ -23,11 +24,13 @@ class _SongsPageState extends State<SongsPage> {
   bool _isPlaying = false;
 
   getSongs() async {
-    List<Melody> songs =
-        await DatabaseService.getSongsBySingerName(widget.singer!.name!);
-    setState(() {
-      _songs = songs;
-    });
+    if (widget.singer != null && widget.singer!.name != null) {
+      List<Melody> songs =
+          await DatabaseService.getSongsBySingerName(widget.singer!.name!);
+      setState(() {
+        _songs = songs;
+      });
+    }
   }
 
   @override
@@ -44,8 +47,9 @@ class _SongsPageState extends State<SongsPage> {
               backgroundColor: MyColors.accentColor,
               child: Icon(Icons.add),
               onPressed: () {
-                Navigator.of(context).pushNamed('/upload-songs',
-                    arguments: {'singer': widget.singer!.name});
+                if (widget.singer != null && widget.singer!.name != null)
+                  Navigator.of(context).pushNamed('/upload-songs',
+                      arguments: {'singer': widget.singer!.name!});
               },
             )
           : null,
@@ -92,18 +96,19 @@ class _SongsPageState extends State<SongsPage> {
                               // if (musicPlayer != null) {
                               //   musicPlayer.stop();
                               // }
-
-                              setState(() {
-                                musicPlayer = MusicPlayer(
-                                  melodyList: [
-                                    Melody(audioUrl: _songs[index].audioUrl)
-                                  ],
-                                  backColor: MyColors.lightPrimaryColor,
-                                  title: _songs[index].name,
-                                  initialDuration: _songs[index].duration,
-                                );
-                                _isPlaying = true;
-                              });
+                              if (_songs[index].name != null &&
+                                  _songs[index].duration != null)
+                                setState(() {
+                                  musicPlayer = MusicPlayer(
+                                    melodyList: [
+                                      Melody(audioUrl: _songs[index].audioUrl)
+                                    ],
+                                    backColor: MyColors.lightPrimaryColor,
+                                    title: _songs[index].name!,
+                                    initialDuration: _songs[index].duration!,
+                                  );
+                                  _isPlaying = true;
+                                });
                             },
                             child: MelodyItem(
                               padding: 0,
@@ -123,7 +128,7 @@ class _SongsPageState extends State<SongsPage> {
                 padding: const EdgeInsets.only(top: 40),
                 child: Align(
                   child: Text(
-                    widget.singer!.name!,
+                    widget.singer?.name ?? "",
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

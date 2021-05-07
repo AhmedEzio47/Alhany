@@ -8,20 +8,21 @@ import '../../app_util.dart';
 
 class ChatItem extends StatefulWidget {
   final String? dp;
-  final String? name;
+  final String name;
+
   //final String time;
-  Message? msg;
-  final bool? isOnline;
-  final int? counter;
+  Message msg;
+  final bool isOnline;
+  final int counter;
 
   ChatItem({
     Key? key,
     this.dp,
-    this.name,
+    required this.name,
     //this.time,
-    this.msg,
-    this.isOnline,
-    this.counter,
+    required this.msg,
+    required this.isOnline,
+    required this.counter,
   }) : super(key: key);
 
   @override
@@ -38,7 +39,7 @@ class _ChatItemState extends State<ChatItem> {
         leading: Stack(
           children: <Widget>[
             CachedImage(
-              imageUrl: widget.dp!,
+              imageUrl: widget.dp,
               imageShape: BoxShape.circle,
               width: 50.0,
               height: 50.0,
@@ -57,7 +58,7 @@ class _ChatItemState extends State<ChatItem> {
                 child: Center(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: widget.isOnline! ? Colors.greenAccent : Colors.grey,
+                      color: widget.isOnline ? Colors.greenAccent : Colors.grey,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     height: 7,
@@ -70,21 +71,22 @@ class _ChatItemState extends State<ChatItem> {
         ),
         title: Text(
           "${widget.name}",
-          style: TextStyle(fontWeight: FontWeight.bold, color: MyColors.textLightColor),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, color: MyColors.textLightColor),
         ),
-        subtitle: widget.msg!.type == 'text'
+        subtitle: widget.msg.type == 'text'
             ? Text(
-                "${widget.msg!.message}",
+                "${widget.msg.message}",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: MyColors.textLightColor),
               )
             : Row(
                 children: [
-                  widget.msg!.type == 'audio'
+                  widget.msg.type == 'audio'
                       ? Icon(Icons.audiotrack, color: MyColors.iconLightColor)
                       : Icon(Icons.image, color: MyColors.iconLightColor),
-                  widget.msg!.type == 'audio'
+                  widget.msg.type == 'audio'
                       ? Text(
                           "Voice massage",
                           style: TextStyle(color: MyColors.textLightColor),
@@ -100,7 +102,7 @@ class _ChatItemState extends State<ChatItem> {
           children: <Widget>[
             SizedBox(height: 10),
             Text(
-              "${AppUtil.formatTimestamp(widget.msg!.timestamp)}",
+              "${AppUtil.formatTimestamp(widget.msg.timestamp)}",
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 color: MyColors.textLightColor,
@@ -135,12 +137,15 @@ class _ChatItemState extends State<ChatItem> {
           ],
         ),
         onTap: () async {
-          ValueKey key = widget.key as ValueKey;
-          String uid = key.value;
-          Message message = await Navigator.of(context).pushNamed('/conversation', arguments: {'other_uid': uid}) as Message;
-          setState(() {
-            widget.msg = message;
-          });
+          if (this.widget.key != null) {
+            ValueKey key = this.widget.key as ValueKey;
+            String uid = key.value;
+            var message = await Navigator.of(context).pushNamed('/conversation',
+                arguments: {'other_uid': uid}) as Message;
+            setState(() {
+              widget.msg = message;
+            });
+          }
         },
       ),
     );

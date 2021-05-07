@@ -141,7 +141,7 @@ class _EmailChangePageState extends State<EmailChangePage> {
     return InkWell(
       onTap: () async {
         try {
-          String validEmail = AppUtil.validateEmail(_email);
+          String? validEmail = AppUtil.validateEmail(_email);
           if (validEmail != null) {
             return;
           }
@@ -158,28 +158,31 @@ class _EmailChangePageState extends State<EmailChangePage> {
             AppUtil.showToast(language(
                 en: 'Email already in use!', ar: 'هذا البريد مستخدم بالفعل'));
           } else {
-            final BaseAuth auth = AuthProvider.of(context)!.auth!;
-            User firebaseUser = (await auth.signInWithEmailAndPassword(
-                Constants.currentFirebaseUser!.email!, _password))!;
-            if (firebaseUser == null) {
-              AppUtil.showToast(
-                  language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
-              return;
-            }
+            final BaseAuth? auth = AuthProvider.of(context)?.auth;
+            if (Constants.currentFirebaseUser != null &&
+                Constants.currentFirebaseUser!.email != null) {
+              User? firebaseUser = await auth?.signInWithEmailAndPassword(
+                  Constants.currentFirebaseUser!.email!, _password);
+              if (firebaseUser == null) {
+                AppUtil.showToast(
+                    language(en: 'Wrong Password', ar: 'كلمة المرور خاطئة'));
+                return;
+              }
 
-            await firebaseUser.updateEmail(_email);
-            await firebaseUser.sendEmailVerification();
-            await usersRef
-                .doc(Constants.currentUserID)
-                .update({'email': _email});
-            Constants.currentUser =
-                await DatabaseService.getUserWithId(firebaseUser.uid);
-            Constants.currentFirebaseUser = firebaseUser;
-            // print('Password reset e-mail sent');
-            AppUtil.showToast(language(
-                en: 'Email changed, verification email sent!',
-                ar: 'تم تغيير البريد، من فضلك قم بالتفعيل'));
-            Navigator.of(context).pop();
+              await firebaseUser.updateEmail(_email);
+              await firebaseUser.sendEmailVerification();
+              await usersRef
+                  .doc(Constants.currentUserID)
+                  .update({'email': _email});
+              Constants.currentUser =
+                  await DatabaseService.getUserWithId(firebaseUser.uid);
+              Constants.currentFirebaseUser = firebaseUser;
+              // print('Password reset e-mail sent');
+              AppUtil.showToast(language(
+                  en: 'Email changed, verification email sent!',
+                  ar: 'تم تغيير البريد، من فضلك قم بالتفعيل'));
+              Navigator.of(context).pop();
+            }
           }
 
           Navigator.of(context).pop();

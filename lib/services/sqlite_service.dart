@@ -33,19 +33,19 @@ class MelodySqlite {
     );
   }
 
-  static Future<int> insert(Melody melody) async {
-    if (db == null || !db!.isOpen) {
+  static Future<int?> insert(Melody melody) async {
+    if (db == null || db?.isOpen == false) {
       await open();
     }
     Map<String, Object> melodyMap = melody.toMap();
-    return await db!.insert(tableName, melodyMap);
+    return await db?.insert(tableName, melodyMap);
   }
 
   static Future<Melody?> getMelodyWithId(String id) async {
-    if (db == null || !db!.isOpen) {
+    if (db == null || db?.isOpen == false) {
       await open();
     }
-    List<Map<String, dynamic>> maps = await db!.query(tableName,
+    List<Map>? maps = await db?.query(tableName,
         columns: [
           'id',
           'name',
@@ -57,32 +57,33 @@ class MelodySqlite {
         ],
         where: 'id = ?',
         whereArgs: [id]);
-    if (maps.length > 0) {
-      return Melody.fromMap(maps.first);
+    if (maps != null && maps.length > 0) {
+      return Melody.fromMap(
+          maps.first.map((key, value) => MapEntry(key.toString(), value)));
     }
     return null;
   }
 
-  static Future<int> delete(String id) async {
-    if (db == null || !db!.isOpen) {
+  static Future<int?> delete(String id) async {
+    if (db == null || db?.isOpen == false) {
       await open();
     }
-    return await db!.delete(tableName, where: 'id = ?', whereArgs: [id]);
+    return await db?.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
 
-  static Future<int> update(Melody melody) async {
-    if (db == null || !db!.isOpen) {
+  static Future<int?> update(Melody melody) async {
+    if (db == null || db?.isOpen == false) {
       await open();
     }
-    return await db!.update(tableName, melody.toMap(),
+    return await db?.update(tableName, melody.toMap(),
         where: 'id = ?', whereArgs: [melody.id]);
   }
 
   static Future<List<Melody>?> getDownloads() async {
-    if (db == null || !db!.isOpen) {
+    if (db == null || db?.isOpen == false) {
       await open();
     }
-    List<Map<String, dynamic>> maps = await db!.query(
+    List<Map>? maps = await db?.query(
       tableName,
       columns: [
         'id',
@@ -95,12 +96,15 @@ class MelodySqlite {
       ],
     );
 
-    if (maps.length > 0) {
-      List<Melody> downloads = maps.map((map) => Melody.fromMap(map)).toList();
+    if (maps != null && maps.length > 0) {
+      List<Melody> downloads = maps
+          .map((map) => Melody.fromMap(
+              map.map((key, value) => MapEntry(key.toString(), value))))
+          .toList();
       return downloads;
     }
     return null;
   }
 
-  static Future close() async => db!.close();
+  static Future close() async => db?.close();
 }

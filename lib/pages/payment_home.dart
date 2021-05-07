@@ -10,6 +10,7 @@ class PaymentHomePage extends StatefulWidget {
   final String? amount;
 
   const PaymentHomePage({Key? key, this.amount}) : super(key: key);
+
   @override
   _PaymentHomePageState createState() => _PaymentHomePageState();
 }
@@ -100,23 +101,26 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
   }
 
   onItemPressed(BuildContext context, int index) async {
-    switch (index) {
-      case 0:
-        StripeTransactionResponse response =
-            await PaymentService.payViaCreditCard(context,
-                amount: widget.amount!, currency: 'USD');
-        AppUtil.showToast(response.message!);
-        Navigator.of(context).pop(response.success);
-        break;
-      case 1:
-        StripeTransactionResponse response = await PaymentService.nativePayment(
-          context,
-          widget.amount!,
-          'Songs Name',
-        );
-        AppUtil.showToast(response.message!);
-        Navigator.of(context).pop(response.success);
-        break;
+    if (widget.amount != null) {
+      switch (index) {
+        case 0:
+          StripeTransactionResponse response =
+              await PaymentService.payViaCreditCard(context,
+                  amount: widget.amount!, currency: 'USD');
+          AppUtil.showToast(response.message);
+          Navigator.of(context).pop(response.success);
+          break;
+        case 1:
+          StripeTransactionResponse response =
+              await PaymentService.nativePayment(
+            context,
+            widget.amount!,
+            'Songs Name',
+          );
+          AppUtil.showToast(response.message);
+          Navigator.of(context).pop(response.success);
+          break;
+      }
     }
   }
 }

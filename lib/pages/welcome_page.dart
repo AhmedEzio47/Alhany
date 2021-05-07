@@ -9,6 +9,7 @@ import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:apple_sign_in/apple_sign_in.dart';
+
 //import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:apple_sign_in/apple_sign_in.dart' as apple;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,7 +39,7 @@ class _WelcomePageState extends State<WelcomePage> {
   final FocusNode myFocusNodeName = FocusNode();
   final FocusNode myFocusNodeConfirmPassword = FocusNode();
 
-  int? _currentPage;
+  int _currentPage = 0;
   String _userId = "";
 
   TextEditingController _nameController = TextEditingController();
@@ -314,10 +315,12 @@ class _WelcomePageState extends State<WelcomePage> {
                             Navigator.of(context).pushNamed('/password-reset');
                           } else {
                             AppUtil.showLoader(context);
-                            await Constants.currentFirebaseUser!
-                                .sendEmailVerification();
+                            await Constants.currentFirebaseUser
+                                ?.sendEmailVerification();
                             Navigator.of(context).pop();
-                            AppUtil.showToast(language(en: 'Verification email sent', ar: 'تم ارسال رسالة التفعيل'));
+                            AppUtil.showToast(language(
+                                en: 'Verification email sent',
+                                ar: 'تم ارسال رسالة التفعيل'));
                           }
                         },
                       ),
@@ -530,7 +533,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                         new Expanded(
                                           child: new FlatButton(
                                             onPressed: () async {
-                                              User user =
+                                              User? user =
                                                   await signInWithGoogle();
                                               if (user != null) {
                                                 await AppUtil
@@ -687,6 +690,7 @@ class _WelcomePageState extends State<WelcomePage> {
   TextStyle defaultStyle =
       TextStyle(color: MyColors.textDarkColor, fontSize: 12);
   TextStyle linkStyle = TextStyle(color: Colors.blue);
+
   Widget SignupPage() {
     return new Container(
       height: MediaQuery.of(context).size.height,
@@ -1077,13 +1081,15 @@ class _WelcomePageState extends State<WelcomePage> {
           _passwordController.text.isNotEmpty) {
         await _login();
       } else {
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         AppUtil.showToast(language(
             en: 'Please enter your login details', ar: 'من فضلك املأ الخانات'));
       }
     } else if (_currentPage == 2) {
       if (!_isTermsOfTermsAgreed) {
-        AppUtil.showToast(language(en: 'Please agree to terms of use.', ar: 'من فضلك وافق على سياسة الخصوصية'));
+        AppUtil.showToast(language(
+            en: 'Please agree to terms of use.',
+            ar: 'من فضلك وافق على سياسة الخصوصية'));
         Navigator.of(context).pop();
         return;
       }
@@ -1102,18 +1108,18 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future _signUp() async {
-    final BaseAuth auth = AuthProvider.of(context)!.auth!;
+    final BaseAuth? auth = AuthProvider?.of(context)?.auth;
 
-    String validEmail = AppUtil.validateEmail(_emailController.text);
+    String? validEmail = AppUtil.validateEmail(_emailController.text);
 
     print('validEmail: $validEmail ');
 
     if (validEmail == null &&
         _passwordController.text == _confirmPasswordController.text) {
       // Validation Passed
-      _userId = (await auth.signUp(_nameController.text, _emailController.text,
-          _passwordController.text))!;
-
+      var t = await auth?.signUp(_nameController.text, _emailController.text,
+          _passwordController.text);
+      if (t != null) _userId = t;
       if (_userId == 'Email is already in use') {
         AppUtil.showToast(
             language(en: 'Email is already in use', ar: 'هذا العنوان محجوز'));
@@ -1156,26 +1162,26 @@ class _WelcomePageState extends State<WelcomePage> {
   Future _login() async {
     final appleSignInIsAvailable =
         Provider.of<AppleSignInAvailable>(context, listen: false);
-    final BaseAuth auth = AuthProvider.of(context)!.auth!;
-
+    final BaseAuth? auth = AuthProvider?.of(context)?.auth;
 
     try {
-      User user = (await auth.signInWithEmailAndPassword(
-          _emailController.text, _passwordController.text))!;
-      _userId = user.uid;
+      User? user = await auth?.signInWithEmailAndPassword(
+          _emailController.text, _passwordController.text);
+      if (user != null) _userId = user.uid;
       user_model.User temp = await DatabaseService.getUserWithId(_userId);
 
-      if (user.emailVerified && temp.id == null) {
+      if (user != null && user.emailVerified && temp.id == null) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String? name = prefs.getString('name');
         String username = await _createUsername();
-        await DatabaseService.addUserToDatabase(
-            _userId, user.email!, name!, username);
+        if (user.email != null && name != null)
+          await DatabaseService.addUserToDatabase(
+              _userId, user.email!, name, username);
 
         //TODO saveToken();
 
         Navigator.of(context).pushReplacementNamed('/');
-      } else if (!user.emailVerified) {
+      } else if (user != null && !user.emailVerified) {
         Navigator.of(context).pop();
         AppUtil.showAlertDialog(
             context: context,
@@ -1198,7 +1204,7 @@ class _WelcomePageState extends State<WelcomePage> {
     } catch (e) {
       // Email or Password Incorrect
       //Navigator.of(context).pop();
-      Navigator.of(context).pop();
+      // Navigator.of(context).pop();
       AppUtil.showToast(language(
           en: 'The email address or password is incorrect.',
           ar: 'خطأ ف البريد الإلكتروني أو كلمة المرور'));
@@ -1218,9 +1224,8 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  Future<User> signInWithGoogle() async {
-    final BaseAuth auth = AuthProvider.of(context)!.auth!;
-
+  Future<User?> signInWithGoogle() async {
+    final BaseAuth? auth = AuthProvider?.of(context)?.auth;
     final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
@@ -1228,24 +1233,27 @@ class _WelcomePageState extends State<WelcomePage> {
           en: 'Unknown error, please try another sign in method!',
           ar: 'خطأ غير معروف، رجاءا استخدام طريقة أخرى'));
     });
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount!.authentication;
+    final GoogleSignInAuthentication? googleSignInAuthentication =
+        await googleSignInAccount?.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
+      accessToken: googleSignInAuthentication?.accessToken,
+      idToken: googleSignInAuthentication?.idToken,
     );
 
-    final User user = (await auth.signInWithCredential(credential))!;
-    setState(() {
-      _nameController.text = user.displayName!;
-      _emailController.text = user.email!;
-    });
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
+    final User? user = await auth?.signInWithCredential(credential);
+    if (user != null && user.displayName != null && user.email != null)
+      setState(() {
+        _nameController.text = user.displayName!;
+        _emailController.text = user.email!;
+      });
+    if (user != null) {
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
 
-    final User currentUser = await auth.getCurrentUser();
-    assert(user.uid == currentUser.uid);
+      final User? currentUser = await auth?.getCurrentUser();
+      if (currentUser != null) assert(user.uid == currentUser.uid);
+    }
 
     return user;
   }
@@ -1299,20 +1307,22 @@ class _WelcomePageState extends State<WelcomePage> {
   // }
   Future<User?> _signInWithApple(BuildContext context) async {
     try {
-      final BaseAuth auth = AuthProvider.of(context)!.auth!;
+      final BaseAuth? auth = AuthProvider?.of(context)?.auth;
+      final user = await auth?.signInWithApple();
+      if (user != null && user.displayName != null && user.email != null)
+        setState(() {
+          _nameController.text = user.displayName!;
+          _emailController.text = user.email!;
+        });
+      if (user != null) {
+        assert(!user.isAnonymous);
+        assert(await user.getIdToken() != null);
 
-      final user = await auth.signInWithApple();
-      setState(() {
-        _nameController.text = user!.displayName!;
-        _emailController.text = user.email!;
-      });
-      assert(!user!.isAnonymous);
-      assert(await user!.getIdToken() != null);
+        final User? currentUser = await auth?.getCurrentUser();
+        if (currentUser != null) assert(user.uid == currentUser.uid);
 
-      final User currentUser = await auth.getCurrentUser();
-      assert(user!.uid == currentUser.uid);
-
-      print('uid: ${user!.uid}');
+        print('uid: ${user.uid}');
+      }
       return user;
     } catch (e) {
       // TODO: Show alert here
@@ -1321,8 +1331,7 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<User?> signInWithFacebook() async {
-    final BaseAuth auth = AuthProvider.of(context)!.auth!;
-
+    final BaseAuth? auth = AuthProvider?.of(context)?.auth;
 
     final FacebookLoginResult result = await FacebookLogin().logIn(
         permissions: [
@@ -1333,22 +1342,27 @@ class _WelcomePageState extends State<WelcomePage> {
 
     switch (result.status) {
       case FacebookLoginStatus.success:
-        FacebookAccessToken facebookAccessToken = result.accessToken!;
-        final AuthCredential credential =
-            FacebookAuthProvider.credential(facebookAccessToken.token);
-        user = await auth.signInWithCredential(credential);
+        FacebookAccessToken? facebookAccessToken = result.accessToken;
+        if (facebookAccessToken != null) {
+          final AuthCredential credential =
+              FacebookAuthProvider.credential(facebookAccessToken.token);
+          user = await auth?.signInWithCredential(credential);
 
-        print('${user!.displayName} signed in');
-        setState(() {
-          _nameController.text = user!.displayName!;
-          _emailController.text = user.email!;
-        });
-        print('${user.photoURL} FACEBOOK PHOTO');
-        assert(!user.isAnonymous);
-        assert(await user.getIdToken() != null);
+          print('${user?.displayName} signed in');
+          if (user != null && user.displayName != null && user.email != null)
+            setState(() {
+              _nameController.text = user!.displayName!;
+              _emailController.text = user.email!;
+            });
+          if (user != null) {
+            print('${user.photoURL} FACEBOOK PHOTO');
+            assert(!user.isAnonymous);
+            assert(await user.getIdToken() != null);
 
-        final User currentUser = await auth.getCurrentUser();
-        assert(user.uid == currentUser.uid);
+            final User? currentUser = await auth?.getCurrentUser();
+            if (currentUser != null) assert(user.uid == currentUser.uid);
+          }
+        }
         break;
       case FacebookLoginStatus.cancel:
         print('Cancelled');

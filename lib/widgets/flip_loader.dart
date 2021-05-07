@@ -11,6 +11,7 @@ class FlipLoader extends StatefulWidget {
   final String shape;
   final bool rotateIcon;
   final String message;
+
   FlipLoader(
       {this.loaderBackground = Colors.redAccent,
       this.iconColor = Colors.white,
@@ -32,16 +33,16 @@ class FlipLoader extends StatefulWidget {
 
 class _FlipLoaderState extends State<FlipLoader>
     with SingleTickerProviderStateMixin {
-  AnimationController? controller;
-  Animation<double>? rotationHorizontal;
-  Animation<double>? rotationVertical;
-  Color? loaderColor;
-  Color? iconColor;
-  IconData? icon;
+  late AnimationController controller;
+  late Animation<double> rotationHorizontal;
+  late Animation<double> rotationVertical;
+  Color loaderColor;
+  Color iconColor;
+  IconData icon;
   Widget? loaderIconChild;
-  String? animationType;
-  String? shape;
-  bool? rotateIcon;
+  String animationType;
+  String shape;
+  bool rotateIcon;
 
   _FlipLoaderState(this.loaderColor, this.iconColor, this.icon,
       this.animationType, this.shape, this.rotateIcon);
@@ -50,14 +51,14 @@ class _FlipLoaderState extends State<FlipLoader>
   void initState() {
     super.initState();
 
-    controller = createAnimationController(animationType!);
+    controller = createAnimationController(animationType);
 
-    controller!.addStatusListener((status) {
+    controller.addStatusListener((status) {
       // Play animation backwards and forwards for full flip
       if (animationType == "half_flip") {
         if (status == AnimationStatus.completed) {
           setState(() {
-            controller!.repeat();
+            controller.repeat();
           });
         }
       }
@@ -65,12 +66,12 @@ class _FlipLoaderState extends State<FlipLoader>
       else if (animationType == "full_flip") {
         if (status == AnimationStatus.dismissed) {
           setState(() {
-            controller!.forward();
+            controller.forward();
           });
         }
         if (status == AnimationStatus.completed) {
           setState(() {
-            controller!.repeat();
+            controller.repeat();
           });
         }
       }
@@ -80,12 +81,12 @@ class _FlipLoaderState extends State<FlipLoader>
       }
     });
 
-    controller!.forward();
+    controller.forward();
   }
 
   @override
   dispose() {
-    controller!.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -139,8 +140,8 @@ class _FlipLoaderState extends State<FlipLoader>
 
   Widget buildHalfFlipper(BuildContext context) {
     return new AnimatedBuilder(
-      animation: controller!,
-      builder: (BuildContext context, Widget? child) {
+      animation: controller,
+      builder: (context, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -149,8 +150,8 @@ class _FlipLoaderState extends State<FlipLoader>
               child: new Transform(
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, 0.006)
-                  ..rotateX(sin(2 * pi * rotationVertical!.value))
-                  ..rotateY(sin(2 * pi * rotationHorizontal!.value)),
+                  ..rotateX(sin(2 * pi * rotationVertical.value))
+                  ..rotateY(sin(2 * pi * rotationHorizontal.value)),
                 alignment: Alignment.center,
                 child: Container(
                     decoration: BoxDecoration(
@@ -166,9 +167,9 @@ class _FlipLoaderState extends State<FlipLoader>
                     height: 40.0,
                     child: rotateIcon == true
                         ? new RotationTransition(
-                            turns: rotationHorizontal!.value == 1.0
-                                ? rotationVertical!
-                                : rotationHorizontal!,
+                            turns: rotationHorizontal.value == 1.0
+                                ? rotationVertical
+                                : rotationHorizontal,
                             child: new Center(
                               child: Icon(
                                 icon,
@@ -201,8 +202,8 @@ class _FlipLoaderState extends State<FlipLoader>
 
   Widget buildFullFlipper(BuildContext context) {
     return new AnimatedBuilder(
-      animation: controller!,
-      builder: (BuildContext context, Widget? child) {
+      animation: controller,
+      builder: (context, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -211,8 +212,8 @@ class _FlipLoaderState extends State<FlipLoader>
               child: new Transform(
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, 0.006)
-                  ..rotateX((2 * pi * rotationVertical!.value))
-                  ..rotateY((2 * pi * rotationHorizontal!.value)),
+                  ..rotateX((2 * pi * rotationVertical.value))
+                  ..rotateY((2 * pi * rotationHorizontal.value)),
                 alignment: Alignment.center,
                 child: Container(
                   decoration: BoxDecoration(

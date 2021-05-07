@@ -18,39 +18,39 @@ class Melody {
   final Timestamp? timestamp;
 
   Melody(
-      { this.id,
-       this.name,
-       this.audioUrl,
+      {this.id,
+      this.name,
+      this.audioUrl,
       this.lyrics,
       this.levelUrls,
       this.levelDurations,
-       this.imageUrl,
+      this.imageUrl,
       this.authorId,
       this.singer,
       this.isSong,
       this.price,
       this.views,
       this.search,
-       this.duration,
+      this.duration,
       this.timestamp});
 
   factory Melody.fromDoc(DocumentSnapshot doc) {
     return Melody(
         id: doc.id,
-        name: doc.data()!['name'],
-        audioUrl: doc.data()!['audio_url'],
-        lyrics: doc.data()!['lyrics'],
-        levelUrls: doc.data()!['level_urls'],
-        levelDurations: doc.data()!['level_durations'],
-        imageUrl: doc.data()!['image_url'],
-        authorId: doc.data()!['author_id'],
-        singer: doc.data()!['singer'],
-        isSong: doc.data()!['is_song'],
-        price: doc.data()!['price'],
-        views: doc.data()!['views'],
-        duration: doc.data()!['duration'],
-        search: doc.data()!['search'],
-        timestamp: doc.data()!['timestamp']);
+        name: doc.data()?['name'],
+        audioUrl: doc.data()?['audio_url'],
+        lyrics: doc.data()?['lyrics'],
+        levelUrls: doc.data()?['level_urls'],
+        levelDurations: doc.data()?['level_durations'],
+        imageUrl: doc.data()?['image_url'],
+        authorId: doc.data()?['author_id'],
+        singer: doc.data()?['singer'],
+        isSong: doc.data()?['is_song'],
+        price: doc.data()?['price'],
+        views: doc.data()?['views'],
+        duration: doc.data()?['duration'],
+        search: doc.data()?['search'],
+        timestamp: doc.data()?['timestamp']);
   }
 
   factory Melody.fromMap(Map<String, dynamic> map) {

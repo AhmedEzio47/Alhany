@@ -30,6 +30,7 @@ class ProfilePage extends StatefulWidget {
   final String? userId;
 
   const ProfilePage({Key? key, this.userId}) : super(key: key);
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -57,24 +58,30 @@ class _ProfilePageState extends State<ProfilePage>
   bool isFollowing = false;
 
   List<SlideImage> _slideImages = [];
+
   getSlideImages() async {
     List<SlideImage> slideImages =
         await DatabaseService.getSlideImages('الصفحة الشخصية');
-    setState(() {
-      _slideImages = slideImages;
-    });
+    if (mounted)
+      setState(() {
+        _slideImages = slideImages;
+      });
   }
 
   getRecords() async {
-    List<Record> records = await DatabaseService.getUserRecords(widget.userId!);
-    if (mounted) {
-      setState(() {
-        _records = records;
-      });
+    if (widget.userId != null) {
+      List<Record> records =
+          await DatabaseService.getUserRecords(widget.userId!);
+      if (mounted) {
+        setState(() {
+          _records = records;
+        });
+      }
     }
   }
 
   List<Melody> _favourites = [];
+
   getFavourites() async {
     List<Melody> favourites = await DatabaseService.getFavourites();
     if (mounted) {
@@ -85,15 +92,18 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   getUser() async {
-    User user = await DatabaseService.getUserWithId(widget.userId!);
-    setState(() {
-      _user = user;
-    });
+    if (widget.userId != null) {
+      User user = await DatabaseService.getUserWithId(widget.userId!);
+      if (mounted)
+        setState(() {
+          _user = user;
+        });
+    }
   }
 
   configureTabs() {
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
-    _tabController!.addListener(() {
+    _tabController?.addListener(() {
       setState(() {});
     });
 
@@ -142,16 +152,16 @@ class _ProfilePageState extends State<ProfilePage>
     getRecords();
     getUser();
     _controllers = LinkedScrollControllerGroup();
-    _recordsScrollController = _controllers!.addAndGet();
-    _favouritesScrollController = _controllers!.addAndGet();
-    _mainScrollController = _controllers!.addAndGet();
+    _recordsScrollController = _controllers?.addAndGet();
+    _favouritesScrollController = _controllers?.addAndGet();
+    _mainScrollController = _controllers?.addAndGet();
     super.initState();
   }
 
   @override
   void dispose() {
-    _recordsScrollController!.dispose();
-    _mainScrollController!.dispose();
+    _recordsScrollController?.dispose();
+    _mainScrollController?.dispose();
     super.dispose();
   }
 
@@ -208,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage>
                               padding: const EdgeInsets.only(
                                 left: 15.0,
                               ),
-                              child: _user?.id != Constants.currentUserID
+                              child: Constants.currentRoute == '/profile-page'
                                   ? Builder(
                                       builder: (context) => InkWell(
                                         onTap: () {
@@ -274,11 +284,10 @@ class _ProfilePageState extends State<ProfilePage>
                                               ),
                                               itemCount: _slideImages.length,
                                               itemBuilder:
-                                                  (BuildContext context,
-                                                          int index, int useless) =>
+                                                  (context, index, realIndex) =>
                                                       CachedImage(
                                                 imageUrl:
-                                                    _slideImages[index].url!,
+                                                    _slideImages[index].url,
                                                 height: 200,
                                                 imageShape: BoxShape.rectangle,
                                                 width: MediaQuery.of(context)
@@ -324,16 +333,10 @@ class _ProfilePageState extends State<ProfilePage>
                                                     InkWell(
                                                       onTap: isFollowing
                                                           ? () {
-                                                              AppUtil.executeFunctionIfLoggedIn(
-                                                                  context,
-                                                                  () =>
-                                                                      unfollowUser());
+                                                              unfollowUser();
                                                             }
                                                           : () {
-                                                              AppUtil.executeFunctionIfLoggedIn(
-                                                                  context,
-                                                                  () =>
-                                                                      followUser());
+                                                              followUser();
                                                             },
                                                       child: Container(
                                                         margin: EdgeInsets.only(
@@ -363,18 +366,13 @@ class _ProfilePageState extends State<ProfilePage>
                                                     ),
                                                     InkWell(
                                                       onTap: () {
-                                                        AppUtil
-                                                            .executeFunctionIfLoggedIn(
-                                                                context, () {
-                                                          Navigator.of(context)
-                                                              .pushNamed(
-                                                                  '/conversation',
-                                                                  arguments: {
-                                                                'other_uid':
-                                                                    widget
-                                                                        .userId
-                                                              });
-                                                        });
+                                                        Navigator.of(context)
+                                                            .pushNamed(
+                                                                '/conversation',
+                                                                arguments: {
+                                                              'other_uid':
+                                                                  widget.userId
+                                                            });
                                                       },
                                                       child: Container(
                                                           margin:
@@ -411,7 +409,8 @@ class _ProfilePageState extends State<ProfilePage>
                                                       setState(() {
                                                         _editing = !_editing;
                                                       });
-                                                      if (_editing) {
+                                                      if (_editing &&
+                                                          _user != null) {
                                                         setState(() {
                                                           _nameController.text =
                                                               _user!.name!;
@@ -420,7 +419,8 @@ class _ProfilePageState extends State<ProfilePage>
                                                               _user!.username!;
                                                           _descriptionController
                                                                   .text =
-                                                              _user!.description!;
+                                                              _user!
+                                                                  .description!;
                                                         });
                                                       } else {
                                                         _saveEdits();
@@ -679,7 +679,8 @@ class _ProfilePageState extends State<ProfilePage>
   void unfollowUser() async {
     AppUtil.showLoader(context);
 
-    await DatabaseService.unfollowUser(widget.userId!);
+    if (widget.userId != null)
+      await DatabaseService.unfollowUser(widget.userId!);
 
     await checkIfUserIsFollowed();
 
@@ -689,8 +690,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   void followUser() async {
     AppUtil.showLoader(context);
-
-    await DatabaseService.followUser(widget.userId!);
+    if (widget.userId != null) await DatabaseService.followUser(widget.userId!);
     await checkIfUserIsFollowed();
 
     Navigator.of(context).pop();
@@ -751,13 +751,15 @@ class _ProfilePageState extends State<ProfilePage>
                       // if (musicPlayer != null) {
                       //   musicPlayer.stop();
                       // }
-                      musicPlayer = MusicPlayer(
-                        key: ValueKey(_favourites[index].id),
-                        melodyList: [_favourites[index]],
-                        title: _favourites[index].name,
-                        initialDuration: _favourites[index].duration,
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                      );
+                      if (_favourites[index].name != null &&
+                          _favourites[index].duration != null)
+                        musicPlayer = MusicPlayer(
+                          key: ValueKey(_favourites[index].id),
+                          melodyList: [_favourites[index]],
+                          title: _favourites[index].name!,
+                          initialDuration: _favourites[index].duration!,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                        );
                       setState(() {
                         _isPlaying = true;
                       });
@@ -773,48 +775,52 @@ class _ProfilePageState extends State<ProfilePage>
                   style: TextStyle(color: MyColors.textLightColor),
                 ),
               );
-        break;
-
       default:
         return Container();
     }
   }
 
   Future _saveEdits() async {
-    String validUsername = validateUsername(_usernameController.text);
+    String? validUsername = validateUsername(_usernameController.text);
     final taken = await isUsernameTaken(_usernameController.text);
     bool isValidUsername = true;
-
-    if (taken) {
-      // username exists
-      if (_usernameController.text != _user!.username) {
-        AppUtil.showToast(
-            '${_usernameController.text} is already in use. Please choose a different username.');
+    if (_user != null) {
+      if (taken) {
+        // username exists
+        if (_usernameController.text != _user!.username) {
+          AppUtil.showToast(
+              '${_usernameController.text} is already in use. Please choose a different username.');
+        }
+        isValidUsername = false;
       }
-      isValidUsername = false;
-    }
-    if (validUsername != null) {
-      if (_usernameController.text != _user!.username) {
-        AppUtil.showToast(
-            language(en: 'Invalid Username!', ar: 'اسم المستخدم غير مسموح'));
+      if (validUsername != null) {
+        if (_usernameController.text != _user!.username) {
+          AppUtil.showToast(
+              language(en: 'Invalid Username!', ar: 'اسم المستخدم غير مسموح'));
+        }
+        isValidUsername = false;
       }
-      isValidUsername = false;
     }
 
-    List<String> search = searchList(_nameController.text);
-    search.addAll(searchList(_usernameController.text));
+    List<String>? search = searchList(_nameController.text);
+    var te = searchList(_usernameController.text);
+    if (te != null) search?.addAll(te);
 
-    await usersRef.doc(Constants.currentUserID).update({
-      'username': isValidUsername ? _usernameController.text : _user!.username,
-      'name': _nameController.text,
-      'description': _descriptionController.text,
-      'search': search
-    });
+    if (_user != null)
+      await usersRef.doc(Constants.currentUserID).update({
+        'username':
+            isValidUsername ? _usernameController.text : _user!.username,
+        'name': _nameController.text,
+        'description': _descriptionController.text,
+        'search': search
+      });
 
-    User user = await DatabaseService.getUserWithId(Constants.currentUserID!);
-    setState(() {
-      _user = user;
-    });
+    if (Constants.currentUserID != null) {
+      User user = await DatabaseService.getUserWithId(Constants.currentUserID!);
+      setState(() {
+        _user = user;
+      });
+    }
   }
 
   Widget _profileImage() {
@@ -822,7 +828,7 @@ class _ProfilePageState extends State<ProfilePage>
       imageShape: BoxShape.circle,
       height: 60,
       width: 60,
-      imageUrl: _user!.profileImageUrl!,
+      imageUrl: _user?.profileImageUrl,
       defaultAssetImage: Strings.default_profile_image,
     );
   }
@@ -831,7 +837,7 @@ class _ProfilePageState extends State<ProfilePage>
     ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
     await bottomSheet.openBottomSheet(context);
 
-    File image;
+    File? image;
     if (bottomSheet.source == ImageSource.gallery) {
       image = await AppUtil.pickImageFromGallery();
     } else if (bottomSheet.source == ImageSource.camera) {
@@ -842,18 +848,20 @@ class _ProfilePageState extends State<ProfilePage>
     }
     AppUtil.showLoader(context);
 
-    String url = await AppUtil().uploadFile(image, context,
-        'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
-    await usersRef.doc(Constants.currentUserID).update({'profile_url': url});
-    Navigator.of(context).pop();
-    await getUser();
-    setState(() {
-      _editing = false;
-    });
+    if (image != null) {
+      String url = await AppUtil().uploadFile(image, context,
+          'profile_images/${Constants.currentUserID}${path.extension(image.path)}');
+      await usersRef.doc(Constants.currentUserID).update({'profile_url': url});
+      Navigator.of(context).pop();
+      await getUser();
+      setState(() {
+        _editing = false;
+      });
+    }
   }
 
-  String validateUsername(String value) {
-    String? errorMsgUsername = '';
+  String? validateUsername(String value) {
+    String? errorMsgUsername;
     String pattern =
         r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
@@ -869,13 +877,13 @@ class _ProfilePageState extends State<ProfilePage>
       setState(() {
         errorMsgUsername = "Invalid Username";
       });
-      return errorMsgUsername!;
+      return errorMsgUsername;
     } else {
       setState(() {
         errorMsgUsername = null;
       });
     }
-    return errorMsgUsername!;
+    return errorMsgUsername;
   }
 
   Future<bool> isUsernameTaken(String username) async {
@@ -884,13 +892,12 @@ class _ProfilePageState extends State<ProfilePage>
     return result.docs.isNotEmpty;
   }
 
-  Future<bool> _onBackPressed() async{
+  Future<bool> _onBackPressed() async {
     /// Navigate back to home page
     if (widget.userId == Constants.currentUserID)
       Navigator.of(context).pushReplacementNamed('/app-page');
     else
       Navigator.of(context).pop();
-
     return true;
   }
 }

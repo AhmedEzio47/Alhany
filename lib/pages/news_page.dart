@@ -19,6 +19,7 @@ class NewsPage extends StatefulWidget {
 
   const NewsPage({Key? key, this.news, this.isVideoVisible = true})
       : super(key: key);
+
   @override
   _NewsPageState createState() => _NewsPageState();
 }
@@ -29,33 +30,36 @@ class _NewsPageState extends State<NewsPage> {
   /// Submit Comment to save in firebase database
   void _submitButton() async {
     AppUtil.showLoader(context);
-
     if (_commentController.text.isNotEmpty) {
       DatabaseService.addComment(_commentController.text,
-          newsId: widget.news!.id);
+          newsId: widget.news?.id);
 
-      await NotificationHandler.sendNotification(
-          Constants.starUser!.id!,
-          Constants.currentUser!.name! + ' commented on your post',
-          _commentController.text,
-          widget.news!.id!,
-          'news_comment');
+      if (widget.news?.id != null &&
+          Constants.starUser?.id != null &&
+          Constants.currentUser?.name != null)
+        await NotificationHandler.sendNotification(
+            Constants.starUser!.id!,
+            Constants.currentUser!.name! + ' commented on your post',
+            _commentController.text,
+            widget.news!.id!,
+            'news_comment');
 
-      await AppUtil.checkIfContainsMention(
-          _commentController.text, widget.news!.id);
+      if (widget.news?.id != null)
+        await AppUtil.checkIfContainsMention(
+            _commentController.text, widget.news!.id!);
 
       Constants.currentRoute = '';
       Navigator.pop(context);
     } else {
-      showDialog(
+      await showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (BuildContext context) {
+        builder: (context) {
           // return object of type Dialog
           return AlertDialog(
             content: new Text("A comment can't be empty!"),
             actions: <Widget>[
-              new FlatButton(
+              FlatButton(
                 child: new Text("Ok"),
                 onPressed: () {
                   Constants.currentRoute = '';
@@ -67,26 +71,32 @@ class _NewsPageState extends State<NewsPage> {
         },
       );
     }
-    Constants.currentRoute = '';
-    Navigator.of(context).pop();
+    // Constants.currentRoute = '';
+    // Navigator.of(context).pop();
   }
 
   List<Comment> _comments = [];
 
   getComments() async {
-    List<Comment> comments =
-        await DatabaseService.getComments(newsId: widget.news!.id);
-    setState(() {
-      _comments = comments;
-    });
+    if (widget.news != null && widget.news!.id != null) {
+      List<Comment>? comments =
+          await DatabaseService.getComments(newsId: widget.news!.id!);
+      if (comments != null)
+        setState(() {
+          _comments = comments;
+        });
+    }
   }
 
   getAllComments() async {
-    List<Comment> comments =
-        await DatabaseService.getAllComments(newsId: widget.news!.id);
-    setState(() {
-      _comments = comments;
-    });
+    if (widget.news != null && widget.news!.id != null) {
+      List<Comment>? comments =
+          await DatabaseService.getAllComments(newsId: widget.news!.id!);
+      if (comments != null)
+        setState(() {
+          _comments = comments;
+        });
+    }
   }
 
   @override
@@ -149,10 +159,8 @@ class _NewsPageState extends State<NewsPage> {
                             slivers: [
                               SliverList(
                                 delegate: SliverChildListDelegate([
-                                  widget.isVideoVisible
-                                      ? NewsItem(
-                                          news: widget.news!,
-                                        )
+                                  widget.isVideoVisible && widget.news != null
+                                      ? NewsItem(news: widget.news!)
                                       : Container(),
                                   ListView.separated(
                                       separatorBuilder: (context, index) {
@@ -184,13 +192,14 @@ class _NewsPageState extends State<NewsPage> {
                                                   User commenter =
                                                       snapshot.data;
                                                   //print('commenter: $commenter and comment: $comment');
-
-                                                  return CommentItem2(
-                                                    news: widget.news!,
-                                                    comment: comment,
-                                                    commenter: commenter,
-                                                    isReply: false,
-                                                  );
+                                                  if (widget.news != null)
+                                                    return CommentItem2(
+                                                      news: widget.news!,
+                                                      comment: comment,
+                                                      commenter: commenter,
+                                                      isReply: false,
+                                                    );
+                                                  return SizedBox.shrink();
                                                 })
                                             : _comments.length > 20
                                                 ? InkWell(
@@ -268,7 +277,7 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Future<bool> _onBackPressed() async{
+  Future<bool> _onBackPressed() async {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
     return true;

@@ -6,14 +6,14 @@ class SlideImage {
   final String? page;
   final Timestamp? timestamp;
 
-  SlideImage({ this.id,  this.url,  this.page,  this.timestamp});
+  SlideImage({this.id, this.url, this.page, this.timestamp});
 
   factory SlideImage.fromDoc(DocumentSnapshot doc) {
     return SlideImage(
       id: doc.id,
-      url: doc.data()!['url'],
-      page: doc.data()!['page'],
-      timestamp: doc.data()!['timestamp'],
+      url: doc.data()?['url'],
+      page: doc.data()?['page'],
+      timestamp: doc.data()?['timestamp'],
     );
   }
 }

@@ -18,7 +18,7 @@ import 'package:badges/badges.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 
-AppUtil? appPageUtil;
+AppUtil appPageUtil = AppUtil();
 
 class AppPage extends StatefulWidget {
   @override
@@ -26,7 +26,7 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
-  PageController? _pageController;
+  late PageController _pageController;
 
   int _page = 2;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -34,16 +34,16 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   User? _currentUser;
   bool _fullScreenPage = false;
   PostFullscreen? _postFullscreen;
+
   @override
   void initState() {
     super.initState();
-    appPageUtil = AppUtil();
     initDynamicLinks();
     _currentUser = Constants.currentUser;
     NotificationHandler.receiveNotification(context, _scaffoldKey);
     userListener();
     _pageController = PageController(initialPage: 2);
-    appPageUtil?.addListener(() {
+    appPageUtil.addListener(() {
       if (mounted) {
         setState(() {
           _fullScreenPage = AppUtil.fullScreenPage;
@@ -54,14 +54,14 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
           );
         });
       }
-      print(AppUtil.fullScreenPage);
+      print('is postfullscreen:' + AppUtil.fullScreenPage.toString());
     });
   }
 
   void initDynamicLinks() async {
     FirebaseDynamicLinks.instance.onLink(
-        onSuccess: (PendingDynamicLinkData dynamicLink) async {
-      final Uri? deepLink = dynamicLink.link;
+        onSuccess: (PendingDynamicLinkData? dynamicLink) async {
+      final Uri? deepLink = dynamicLink?.link;
 
       if (deepLink != null) {
         if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
@@ -89,9 +89,9 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
       print(e.message);
     });
 
-    final PendingDynamicLinkData data =
+    final PendingDynamicLinkData? data =
         await FirebaseDynamicLinks.instance.getInitialLink();
-    final Uri? deepLink = data.link;
+    final Uri? deepLink = data?.link;
 
     if (deepLink != null) {
       if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
@@ -147,9 +147,11 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
             (_currentUser?.notificationsNumber ?? 0) > 0
                 ? Badge(
                     badgeColor: MyColors.accentColor,
-                    badgeContent: Text(_currentUser!.notificationsNumber! < 9
-                        ? _currentUser!.notificationsNumber.toString()
-                        : '+9'),
+                    badgeContent: Text(
+                        (_currentUser?.notificationsNumber ?? 0) < 9
+                            ? (_currentUser?.notificationsNumber ?? 0)
+                                .toString()
+                            : '+9'),
                     child: Icon(
                       Icons.notifications,
                       size: 30,
@@ -179,10 +181,13 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
               children: [
                 StarPage(),
                 NotificationsPage(),
-                _fullScreenPage ? _postFullscreen! : HomePage(),
+                _fullScreenPage
+                    ? _postFullscreen ?? SizedBox.shrink()
+                    : HomePage(),
                 Chats(),
+                // if (Constants.currentUserID != null)
                 ProfilePage(
-                  userId: Constants.currentUserID!,
+                  userId: Constants.currentUserID,
                 ),
               ],
             ),
@@ -193,7 +198,7 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   void navigationTapped(int page) {
 //    _pageController.animateToPage(page,
 //        duration: Duration(milliseconds: 400), curve: Curves.easeOut);
-    _pageController!.jumpToPage(page);
+    _pageController.jumpToPage(page);
   }
 
   void _onPageChanged(int page) {

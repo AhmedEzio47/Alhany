@@ -16,6 +16,7 @@ class CommentPage extends StatefulWidget {
   final Record? record;
   final News? news;
   final Comment? comment;
+
   const CommentPage({Key? key, this.record, this.news, this.comment})
       : super(key: key);
 
@@ -26,22 +27,35 @@ class CommentPage extends StatefulWidget {
 class _CommentPageState extends State<CommentPage> {
   TextEditingController _replyController = TextEditingController();
   ScrollController _repliesScrollController = ScrollController();
+
   void _submitButton() async {
     AppUtil.showLoader(context);
 
-    if (_replyController.text.isNotEmpty) {
+    if (_replyController.text.isNotEmpty &&
+        widget.comment != null &&
+        widget.comment!.id != null &&
+        widget.record != null &&
+        widget.news != null) {
       DatabaseService.addReply(widget.comment!.id!, _replyController.text,
-          recordId: widget.record?.id, newsId: widget.news?.id);
+          recordId: widget.record!.id, newsId: widget.news!.id);
 
-      await NotificationHandler.sendNotification(
-          (widget.record?.singerId ?? Constants.starUser!.id)!,
-          Constants.currentUser!.name! + ' commented on your post',
-          _replyController.text,
-          (widget.record?.id! ?? widget.news?.id!)!,
-          widget.record != null ? 'record_comment' : 'news_comment');
+      if (Constants.starUser != null &&
+          Constants.starUser!.id != null &&
+          Constants.currentUser != null &&
+          Constants.currentUser!.name != null &&
+          widget.news != null &&
+          widget.news!.id != null &&
+          widget.record != null)
+        await NotificationHandler.sendNotification(
+            widget.record!.singerId ?? (Constants.starUser!.id)!,
+            Constants.currentUser!.name! + ' commented on your post',
+            _replyController.text,
+            widget.record!.id ?? widget.news!.id!,
+            widget.record != null ? 'record_comment' : 'news_comment');
 
-      await AppUtil.checkIfContainsMention(
-          _replyController.text, widget.record?.id);
+      if (widget.record != null && widget.record!.id != null)
+        await AppUtil.checkIfContainsMention(
+            _replyController.text, widget.record!.id!);
 
       _onBackPressed();
     } else {
@@ -68,30 +82,38 @@ class _CommentPageState extends State<CommentPage> {
     Navigator.of(context).pop();
   }
 
-  List<Comment> _replies = [];
+  List<Comment>? _replies = [];
   Timestamp? lastVisiblePostSnapShot;
 
   getReplies() async {
-    List<Comment> replies = await DatabaseService.getCommentReplies(
-        widget.comment!.id!,
-        recordId: widget.record?.id,
-        newsId: widget.news?.id);
+    if (widget.comment != null && widget.comment!.id != null) {
+      List<Comment>? replies = await DatabaseService.getCommentReplies(
+          widget.comment!.id!,
+          recordId: widget.record?.id,
+          newsId: widget.news?.id);
 
-    setState(() {
-      _replies = replies;
-      this.lastVisiblePostSnapShot = replies.last.timestamp;
-    });
+      if (replies != null && replies.isNotEmpty) {
+        setState(() {
+          _replies = replies;
+          this.lastVisiblePostSnapShot = replies.last.timestamp;
+        });
+      }
+    }
   }
 
   nextReplies() async {
-    List<Comment> replies = await DatabaseService.getNextCommentReplies(
-        widget.comment!.id!, lastVisiblePostSnapShot!,
-        recordId: widget.record?.id, newsId: widget.news?.id);
-    if (replies.length > 0) {
-      setState(() {
-        replies.forEach((element) => _replies.add(element));
-        this.lastVisiblePostSnapShot = replies.last.timestamp;
-      });
+    if (widget.comment != null &&
+        widget.comment!.id != null &&
+        lastVisiblePostSnapShot != null) {
+      List<Comment>? replies = await DatabaseService.getNextCommentReplies(
+          widget.comment!.id!, lastVisiblePostSnapShot!,
+          recordId: widget.record?.id, newsId: widget.news?.id);
+      if (replies != null && replies.length > 0) {
+        setState(() {
+          replies.forEach((element) => _replies?.add(element));
+          this.lastVisiblePostSnapShot = replies.last.timestamp;
+        });
+      }
     }
   }
 
@@ -153,24 +175,30 @@ class _CommentPageState extends State<CommentPage> {
               SizedBox(
                 height: 40,
               ),
-              FutureBuilder(
-                  future: DatabaseService.getUserWithId(
-                    widget.comment!.commenterID!,
-                  ),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (!snapshot.hasData) {
-                      return SizedBox.shrink();
-                    }
-                    User commenter = snapshot.data;
-                    //print('commenter: $commenter and comment: $comment');
-                    return CommentItem2(
-                      record: widget.record!,
-                      news: widget.news!,
-                      comment: widget.comment!,
-                      commenter: commenter,
-                      isReply: false,
-                    );
-                  }),
+              if (widget.comment != null && widget.comment!.commenterID != null)
+                FutureBuilder(
+                    future: DatabaseService.getUserWithId(
+                      widget.comment!.commenterID!,
+                    ),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if (!snapshot.hasData) {
+                        return SizedBox.shrink();
+                      }
+                      User commenter = snapshot.data;
+                      //print('commenter: $commenter and comment: $comment');
+                      if (widget.record != null &&
+                          widget.news != null &&
+                          widget.comment != null)
+                        return CommentItem2(
+                          record: widget.record!,
+                          news: widget.news!,
+                          comment: widget.comment!,
+                          commenter: commenter,
+                          isReply: false,
+                        );
+                      else
+                        return SizedBox.shrink();
+                    }),
               Container(
                 margin: EdgeInsets.only(left: 8, right: 8, top: 8),
                 decoration: BoxDecoration(
@@ -197,41 +225,49 @@ class _CommentPageState extends State<CommentPage> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(),
-                  child: ListView.separated(
-                      separatorBuilder: (context, index) {
-                        return Divider(
-                          height: 2,
-                          thickness: 2,
-                          color: Colors.transparent,
-                        );
-                      },
-                      controller: _repliesScrollController,
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: _replies.length,
-                      itemBuilder: (context, index) {
-                        Comment comment = _replies[index];
-                        return FutureBuilder(
-                            future: DatabaseService.getUserWithId(
-                              comment.commenterID!,
-                            ),
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              if (!snapshot.hasData) {
-                                return SizedBox.shrink();
-                              }
-                              User commenter = snapshot.data;
-                              //print('commenter: $commenter and comment: $comment');
-                              return CommentItem2(
-                                record: widget.record!,
-                                news: widget.news!,
-                                comment: comment,
-                                commenter: commenter,
-                                parentComment: widget.comment!,
-                                isReply: true,
-                              );
-                            });
-                      }),
+                  child: (_replies != null)
+                      ? ListView.separated(
+                          separatorBuilder: (context, index) {
+                            return Divider(
+                              height: 2,
+                              thickness: 2,
+                              color: Colors.transparent,
+                            );
+                          },
+                          controller: _repliesScrollController,
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: _replies!.length,
+                          itemBuilder: (context, index) {
+                            Comment comment = _replies![index];
+                            if (comment.commenterID != null)
+                              return FutureBuilder(
+                                  future: DatabaseService.getUserWithId(
+                                    comment.commenterID!,
+                                  ),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return SizedBox.shrink();
+                                    }
+                                    User commenter = snapshot.data;
+                                    //print('commenter: $commenter and comment: $comment');
+                                    return (widget.record != null &&
+                                            widget.news != null &&
+                                            widget.comment != null)
+                                        ? CommentItem2(
+                                            record: widget.record!,
+                                            news: widget.news!,
+                                            comment: comment,
+                                            commenter: commenter,
+                                            parentComment: widget.comment!,
+                                            isReply: true,
+                                          )
+                                        : SizedBox.shrink();
+                                  });
+                            return SizedBox.shrink();
+                          })
+                      : SizedBox.shrink(),
                 ),
               )
             ],
@@ -244,6 +280,6 @@ class _CommentPageState extends State<CommentPage> {
   Future<bool> _onBackPressed() async {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
-    return false;
+    return true;
   }
 }

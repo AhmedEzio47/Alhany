@@ -14,6 +14,7 @@ class SingerItem extends StatefulWidget {
   final Singer? singer;
 
   const SingerItem({Key? key, this.singer}) : super(key: key);
+
   @override
   _SingerItemState createState() => _SingerItemState();
 }
@@ -34,41 +35,43 @@ class _SingerItemState extends State<SingerItem> {
       padding: EdgeInsets.symmetric(vertical: 8),
       width: MediaQuery.of(context).size.width,
       height: 70,
-      child: ListTile(
-        title: Text(
-          widget.singer!.name!,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        leading: CachedImage(
-          imageUrl: widget.singer!.imageUrl!,
-          defaultAssetImage: Strings.default_profile_image,
-          imageShape: BoxShape.rectangle,
-          height: 50,
-          width: 50,
-        ),
-        trailing: Constants.isAdmin
-            ? PopupMenuButton<String>(
-                color: MyColors.accentColor,
-                elevation: 0,
-                onCanceled: () {
-                  print('You have not chosen anything');
-                },
-                tooltip: 'This is tooltip',
-                onSelected: _select,
-                itemBuilder: (BuildContext context) {
-                  return choices.map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(
-                        choice,
-                        style: TextStyle(color: MyColors.textLightColor),
-                      ),
-                    );
-                  }).toList();
-                },
-              )
-            : SizedBox(),
-      ),
+      child: widget.singer != null
+          ? ListTile(
+              title: Text(
+                widget.singer!.name ?? "",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              leading: CachedImage(
+                imageUrl: widget.singer?.imageUrl,
+                defaultAssetImage: Strings.default_profile_image,
+                imageShape: BoxShape.rectangle,
+                height: 50,
+                width: 50,
+              ),
+              trailing: Constants.isAdmin
+                  ? PopupMenuButton<String>(
+                      color: MyColors.accentColor,
+                      elevation: 0,
+                      onCanceled: () {
+                        print('You have not chosen anything');
+                      },
+                      tooltip: 'This is tooltip',
+                      onSelected: _select,
+                      itemBuilder: (BuildContext context) {
+                        return choices.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(
+                              choice,
+                              style: TextStyle(color: MyColors.textLightColor),
+                            ),
+                          );
+                        }).toList();
+                      },
+                    )
+                  : SizedBox(),
+            )
+          : SizedBox.shrink(),
     );
   }
 
@@ -89,25 +92,28 @@ class _SingerItemState extends State<SingerItem> {
   }
 
   editImage() async {
-    File image = await AppUtil.pickImageFromGallery();
-    String ext = path.extension(image.path);
+    File? image = await AppUtil.pickImageFromGallery();
 
-    if (widget.singer!.imageUrl != null) {
-      String fileName =
+    if (widget.singer?.imageUrl != null) {
+      String? fileName =
           await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
       await storageRef.child('/singers_images/$fileName').delete();
     }
 
-    String url = await AppUtil()
-        .uploadFile(image, context, '/singers_images/${widget.singer!.id}$ext');
-    await singersRef.doc(widget.singer!.id).update({'image_url': url});
-    AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
+    if (image != null && widget.singer != null) {
+      String ext = path.extension(image.path);
+      String url = await AppUtil().uploadFile(
+          image, context, '/singers_images/${widget.singer!.id}$ext');
+      await singersRef.doc(widget.singer!.id).update({'image_url': url});
+      AppUtil.showToast(language(en: 'Image updated!', ar: 'تم تغيير الصورة'));
+    }
   }
 
   editName() async {
-    setState(() {
-      _nameController.text = widget.singer!.name!;
-    });
+    if (widget.singer != null && widget.singer!.name != null)
+      setState(() {
+        _nameController.text = widget.singer!.name!;
+      });
     Navigator.of(context).push(CustomModal(
         child: Container(
       height: 200,
@@ -135,10 +141,11 @@ class _SingerItemState extends State<SingerItem> {
               }
               Navigator.of(context).pop();
               AppUtil.showLoader(context);
-              await singersRef.doc(widget.singer!.id).update({
-                'name': _nameController.text,
-                'search': searchList(_nameController.text),
-              });
+              if (widget.singer != null && widget.singer!.id != null)
+                await singersRef.doc(widget.singer!.id!).update({
+                  'name': _nameController.text,
+                  'search': searchList(_nameController.text),
+                });
               AppUtil.showToast(
                   language(en: 'Name Updated', ar: 'تم تعديل الاسم'));
               Navigator.of(context).pop();
@@ -162,12 +169,13 @@ class _SingerItemState extends State<SingerItem> {
         firstFunc: () async {
           Navigator.of(context).pop();
           AppUtil.showLoader(context);
-          if (widget.singer!.imageUrl != null) {
-            String fileName =
-                await AppUtil.getStorageFileNameFromUrl(widget.singer!.imageUrl!);
+          if (widget.singer?.imageUrl != null) {
+            String? fileName = await AppUtil.getStorageFileNameFromUrl(
+                widget.singer!.imageUrl!);
             await storageRef.child('/singers_images/$fileName').delete();
           }
-          await singersRef.doc(widget.singer!.id).delete();
+          if (widget.singer != null && widget.singer!.id != null)
+            await singersRef.doc(widget.singer!.id!).delete();
           AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
           Navigator.of(context).pop();
         },

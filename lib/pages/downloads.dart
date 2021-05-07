@@ -8,9 +8,12 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/local_music_player.dart';
+
+//import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/music_player.dart';
 
 class DownloadsPage extends StatefulWidget {
   @override
@@ -178,41 +181,46 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playSong(int index) async {
-    String path = EncryptionService.decryptFile(_downloads[index].audioUrl!);
-    if (!_decryptedPaths.contains(path)) {
-      _decryptedPaths.add(path);
+    if (_downloads[index].audioUrl != null) {
+      String path = EncryptionService.decryptFile(_downloads[index].audioUrl!);
+      if (!_decryptedPaths.contains(path)) {
+        _decryptedPaths.add(path);
+      }
+      _downloads[index] = Melody(
+          id: _downloads[index].id,
+          isSong: _downloads[index].isSong,
+          duration: _downloads[index].duration,
+          name: _downloads[index].name,
+          singer: _downloads[index].singer,
+          audioUrl: path);
     }
-    _downloads[index] = Melody(
-        id: _downloads[index].id,
-        isSong: _downloads[index].isSong,
-        duration: _downloads[index].duration,
-        name: _downloads[index].name,
-        singer: _downloads[index].singer,
-        audioUrl: path);
-
-    musicPlayer = LocalMusicPlayer(
-      melodyList: [_downloads[index]],
-      initialDuration: _downloads[index].duration!,
-      title: _downloads[index].name!,
-      isLocal: true,
-      backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-    );
+    if (_downloads[index].duration != null && _downloads[index].name != null)
+      musicPlayer = MusicPlayer(
+        melodyList: [_downloads[index]],
+        initialDuration: _downloads[index].duration!,
+        title: _downloads[index].name!,
+        isLocal: true,
+        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+      );
   }
 
   playAllSongs() {
     List<Melody> decryptedDownload = [];
     for (Melody song in _downloads) {
-      String path = EncryptionService.decryptFile(song.audioUrl!);
-      if (!_decryptedPaths.contains(path)) {
-        _decryptedPaths.add(path);
+      if (song.audioUrl != null) {
+        String path = EncryptionService.decryptFile(song.audioUrl!);
+        if (!_decryptedPaths.contains(path)) {
+          _decryptedPaths.add(path);
+        }
+        decryptedDownload.add(song.copyWith(audioUrl: path));
       }
-      decryptedDownload.add(song.copyWith(audioUrl: path));
     }
-    musicPlayer = LocalMusicPlayer(
-      melodyList: decryptedDownload,
-      initialDuration: decryptedDownload[0].duration!,
-      isLocal: true,
-      backColor: MyColors.lightPrimaryColor.withOpacity(.9),
-    );
+    if (decryptedDownload[0].duration != null)
+      musicPlayer = MusicPlayer(
+        melodyList: decryptedDownload,
+        initialDuration: decryptedDownload[0].duration!,
+        isLocal: true,
+        backColor: MyColors.lightPrimaryColor.withOpacity(.9),
+      );
   }
 }

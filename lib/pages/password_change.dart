@@ -50,7 +50,7 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
   }
 
   Widget _entryField(String title,
-      {FocusNode? focusNode,
+      {required FocusNode focusNode,
       bool isCurrentPassword = false,
       bool isNewPassword = false,
       bool isConfirmPassword = false}) {
@@ -261,18 +261,18 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
   }
 
   Future _changePassword() async {
-    final BaseAuth baseAuth = AuthProvider.of(context)!.auth!;
+    final BaseAuth? baseAuth = AuthProvider?.of(context)?.auth;
 
     AppUtil.showLoader(context);
 
     try {
-      String email = (await firebaseAuth.currentUser!.email!);
-      await firebaseAuth.signInWithEmailAndPassword(
-          email: email, password: _currentPassword);
+      var u = await firebaseAuth.currentUser;
+      if (u != null && u.email != null)
+        await firebaseAuth.signInWithEmailAndPassword(
+            email: u.email!, password: _currentPassword);
     } catch (ex) {
       print('authResult: ${ex.toString()}');
-
-      if ((ex as PlatformException).code == 'ERROR_WRONG_PASSWORD') {
+      if (ex == 'ERROR_WRONG_PASSWORD' || ex == 'wrong-password') {
         AppUtil.showToast(language(
             en: 'Current Password is not correct!',
             ar: 'كلمة المرور الحالية غير صحيحة'));
@@ -284,7 +284,7 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
     if (_newPassword == _confirmPassword) {
       // Validation Passed
 
-      String errorCode = (await baseAuth.changePassword(_newPassword))!;
+      String? errorCode = await baseAuth?.changePassword(_newPassword);
       print('change pass error: $errorCode');
       if (errorCode == null) {
         AppUtil.showToast(language(

@@ -129,6 +129,7 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   String _recordingText = '';
+
   Widget _recordingTimerText() {
     return Container(
       margin: EdgeInsets.all(20),
@@ -141,7 +142,7 @@ class _UploadNewsState extends State<UploadNews> {
 
   @override
   void dispose() {
-    recorder!.dispose();
+    recorder?.dispose();
     super.dispose();
   }
 
@@ -192,21 +193,26 @@ class _UploadNewsState extends State<UploadNews> {
     final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
     MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
     _duration =
-        double.parse(info.getMediaProperties()!['duration'].toString()).toInt();
+        double.parse(info.getMediaProperties()?['duration'].toString() ?? "0")
+            .toInt();
   }
 
   _recordVideo() async {
-    PickedFile? video = await ImagePicker().getVideo(source: ImageSource.camera);
-    setState(() {
-      if (video != null) _contentFile = File(video.path);
-      _contentType = 'video';
-    });
-    getDuration(_contentFile!.path);
+    var vid = await ImagePicker().getVideo(source: ImageSource.camera);
+    if (vid != null) {
+      File video = File(vid.path);
+      setState(() {
+        _contentFile = video;
+        _contentType = 'video';
+      });
+      if (_contentFile != null) getDuration(_contentFile!.path);
+    }
   }
 
   AudioRecorder? recorder;
+
   _recordAudio() async {
-    recorder!.startRecording();
+    recorder?.startRecording();
     setState(() {
       isRecording = true;
     });
@@ -214,7 +220,7 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _stopAudioRecording() async {
-    String? result = await recorder!.stopRecording();
+    String? result = await recorder?.stopRecording();
     setState(() {
       isRecording = false;
     });
@@ -222,14 +228,14 @@ class _UploadNewsState extends State<UploadNews> {
     setState(() {
       if (result != null) _contentFile = File(result);
     });
-    getDuration(_contentFile!.path);
+    if (_contentFile != null) getDuration(_contentFile!.path);
   }
 
   _pickImage() async {
     ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
     await bottomSheet.openBottomSheet(context);
 
-    File image;
+    File? image;
     if (bottomSheet.source == ImageSource.gallery) {
       image = await AppUtil.pickImageFromGallery();
     } else if (bottomSheet.source == ImageSource.camera) {
@@ -251,16 +257,19 @@ class _UploadNewsState extends State<UploadNews> {
       if (audio != null) _contentFile = audio;
       _contentType = 'audio';
     });
-    getDuration(_contentFile!.path);
+    if (_contentFile != null) getDuration(_contentFile!.path);
   }
 
   _chooseVideo() async {
-    PickedFile? video = await ImagePicker().getVideo(source: ImageSource.gallery);
-    setState(() {
-      if (video != null) _contentFile = File(video.path);
-      _contentType = 'video';
-    });
-    getDuration(_contentFile!.path);
+    var vid = await ImagePicker().getVideo(source: ImageSource.gallery);
+    if (vid != null) {
+      File video = File(vid.path);
+      setState(() {
+        _contentFile = video;
+        _contentType = 'video';
+      });
+      if (_contentFile != null) getDuration(_contentFile!.path);
+    }
   }
 
   _submit() async {
@@ -270,19 +279,21 @@ class _UploadNewsState extends State<UploadNews> {
     }
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
-    String ext = path.extension(_contentFile!.path);
-    String url =
-        await AppUtil().uploadFile(_contentFile!, context, 'news/$id$ext');
-    await newsRef.doc(id).set({
-      'text': _textController.text,
-      'content_url': url,
-      'duration': _duration,
-      'type': _contentType,
-      'timestamp': FieldValue.serverTimestamp()
-    });
-    AppUtil.showToast('Submitted');
+    if (_contentFile != null) {
+      String ext = path.extension(_contentFile!.path);
+      String url =
+          await AppUtil().uploadFile(_contentFile, context, 'news/$id$ext');
+      await newsRef.doc(id).set({
+        'text': _textController.text,
+        'content_url': url,
+        'duration': _duration,
+        'type': _contentType,
+        'timestamp': FieldValue.serverTimestamp()
+      });
+      AppUtil.showToast('Submitted');
 
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    }
   }
 }

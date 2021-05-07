@@ -6,7 +6,9 @@ class CustomModal extends ModalRoute<void> {
   final Function? onWillPop;
 
   BuildContext? _context;
+
   CustomModal({this.onWillPop, this.child});
+
   @override
   Color get barrierColor => Colors.black.withOpacity(0.5);
 
@@ -46,11 +48,11 @@ class CustomModal extends ModalRoute<void> {
     );
   }
 
-  Future<bool> onBackPressed() async{
+  Future<bool> onBackPressed() async {
     if (onWillPop != null) {
       onWillPop!();
     } else {
-      Navigator.of(_context!).pop();
+      if (_context != null) Navigator.of(_context!).pop();
     }
     return true;
   }
