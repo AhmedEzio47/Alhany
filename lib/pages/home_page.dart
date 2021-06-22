@@ -207,7 +207,8 @@ class _HomePageState extends State<HomePage>
         getCategories();
         break;
       case 1:
-        getSingers();
+        //getSingers();
+        getMelodies();
         getRecords();
         break;
       case 2:
@@ -486,97 +487,101 @@ class _HomePageState extends State<HomePage>
       child: CustomScrollView(
         controller: _melodiesPageScrollController,
         slivers: [
+          ///Mod 1
+          // SliverList(
+          //   delegate: SliverChildListDelegate([
+          //     Container(
+          //       height: 164,
+          //       child: Row(
+          //         children: [
+          //           Flexible(
+          //             fit: FlexFit.tight,
+          //             flex: 3,
+          //             child: Container(
+          //               padding: EdgeInsets.symmetric(vertical: 8),
+          //               color: Colors.black26,
+          //               child: ListView.builder(
+          //                   itemCount: _singers.length + 1,
+          //                   scrollDirection: Axis.horizontal,
+          //                   itemBuilder: (context, index) {
+          //                     return index < _singers.length
+          //                         ? InkWell(
+          //                             onTap: () {
+          //                               Navigator.of(context).pushNamed(
+          //                                   '/singer-page',
+          //                                   arguments: {
+          //                                     'singer': _singers[index],
+          //                                     'data_type': DataTypes.MELODIES
+          //                                   });
+          //                             },
+          //                             child: Container(
+          //                               key: ValueKey(_singers[index].id),
+          //                               height: 120,
+          //                               width: 120,
+          //                               child: Column(
+          //                                 children: [
+          //                                   CachedImage(
+          //                                     width: 100,
+          //                                     height: 100,
+          //                                     imageShape: BoxShape.circle,
+          //                                     imageUrl:
+          //                                         _singers[index].imageUrl,
+          //                                     defaultAssetImage:
+          //                                         Strings.default_profile_image,
+          //                                   ),
+          //                                   Container(
+          //                                     width: 100,
+          //                                     child: Text(
+          //                                       _singers[index].name,
+          //                                       maxLines: 2,
+          //                                       overflow: TextOverflow.visible,
+          //                                       textAlign: TextAlign.center,
+          //                                       style: TextStyle(
+          //                                           color: MyColors
+          //                                               .textLightColor),
+          //                                     ),
+          //                                   )
+          //                                 ],
+          //                               ),
+          //                             ),
+          //                           )
+          //                         : _singers.length == 15
+          //                             ? InkWell(
+          //                                 onTap: () {
+          //                                   Navigator.of(context)
+          //                                       .pushNamed('/singers-page');
+          //                                 },
+          //                                 child: Padding(
+          //                                   padding: const EdgeInsets.only(
+          //                                       right: 8.0,
+          //                                       left: 8.0,
+          //                                       bottom: 70),
+          //                                   child: Center(
+          //                                       child: Container(
+          //                                     padding: EdgeInsets.all(8),
+          //                                     color: MyColors.lightPrimaryColor,
+          //                                     child: Text(
+          //                                       'VIEW ALL',
+          //                                       style: TextStyle(
+          //                                           color: MyColors
+          //                                               .darkPrimaryColor,
+          //                                           decoration: TextDecoration
+          //                                               .underline),
+          //                                     ),
+          //                                   )),
+          //                                 ),
+          //                               )
+          //                             : Container();
+          //                   }),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   ]),
+          // ),
           SliverList(
-            delegate: SliverChildListDelegate([
-              Container(
-                height: 164,
-                child: Row(
-                  children: [
-                    Flexible(
-                      fit: FlexFit.tight,
-                      flex: 3,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        color: Colors.black26,
-                        child: ListView.builder(
-                            itemCount: _singers.length + 1,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              return index < _singers.length
-                                  ? InkWell(
-                                      onTap: () {
-                                        Navigator.of(context).pushNamed(
-                                            '/singer-page',
-                                            arguments: {
-                                              'singer': _singers[index],
-                                              'data_type': DataTypes.MELODIES
-                                            });
-                                      },
-                                      child: Container(
-                                        key: ValueKey(_singers[index].id),
-                                        height: 120,
-                                        width: 120,
-                                        child: Column(
-                                          children: [
-                                            CachedImage(
-                                              width: 100,
-                                              height: 100,
-                                              imageShape: BoxShape.circle,
-                                              imageUrl:
-                                                  _singers[index].imageUrl,
-                                              defaultAssetImage:
-                                                  Strings.default_profile_image,
-                                            ),
-                                            Container(
-                                              width: 100,
-                                              child: Text(
-                                                _singers[index].name,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.visible,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: MyColors
-                                                        .textLightColor),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  : _singers.length == 15
-                                      ? InkWell(
-                                          onTap: () {
-                                            Navigator.of(context)
-                                                .pushNamed('/singers-page');
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 8.0,
-                                                left: 8.0,
-                                                bottom: 70),
-                                            child: Center(
-                                                child: Container(
-                                              padding: EdgeInsets.all(8),
-                                              color: MyColors.lightPrimaryColor,
-                                              child: Text(
-                                                'VIEW ALL',
-                                                style: TextStyle(
-                                                    color: MyColors
-                                                        .darkPrimaryColor,
-                                                    decoration: TextDecoration
-                                                        .underline),
-                                              ),
-                                            )),
-                                          ),
-                                        )
-                                      : Container();
-                            }),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
+            delegate: SliverChildListDelegate([_melodiesList()]),
           ),
           SliverList(
             delegate: SliverChildListDelegate([
@@ -587,6 +592,65 @@ class _HomePageState extends State<HomePage>
         ],
       ),
     );
+  }
+
+  _melodiesList() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: ListView.builder(
+          primary: false,
+          shrinkWrap: true,
+          controller: _melodiesPageScrollController,
+          itemCount: _melodies.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () async {
+                setState(() {
+                  musicPlayer = MusicPlayer(
+                    key: ValueKey(_melodies[index].id),
+                    melodyList: [_melodies[index]],
+                    backColor: MyColors.lightPrimaryColor,
+                    title: _melodies[index].name,
+                    initialDuration: _melodies[index].duration,
+                    isRecordBtnVisible: true,
+                  );
+                  _isPlaying = true;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                child: MelodyItem(
+                  padding: 0,
+                  imageSize: 40,
+                  isRounded: false,
+                  key: ValueKey('melody_item'),
+                  melody: _melodies[index],
+                ),
+              ),
+            );
+          }),
+    );
+  }
+
+  List _melodies = [];
+  getMelodies() async {
+    List<Melody> melodies = await DatabaseService.getMelodies();
+    if (mounted) {
+      setState(() {
+        _melodies = melodies;
+      });
+    }
+  }
+
+  nextMelodies() async {
+    List<Melody> melodies =
+        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
+    if (melodies.length > 0) {
+      setState(() {
+        melodies.forEach((element) => _melodies.add(element));
+        this.lastVisiblePostSnapShot = melodies.last.timestamp;
+      });
+    }
   }
 
   List<Melody> _favourites = [];
@@ -641,7 +705,19 @@ class _HomePageState extends State<HomePage>
     _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
-
+    _melodiesPageScrollController
+      ..addListener(() {
+        if (_melodiesPageScrollController.offset >=
+                _melodiesPageScrollController.position.maxScrollExtent &&
+            !_melodiesPageScrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextMelodies();
+        } else if (_melodiesPageScrollController.offset <=
+                _melodiesPageScrollController.position.minScrollExtent &&
+            !_melodiesPageScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     _recordsScrollController
       ..addListener(() {
         if (_recordsScrollController.offset >=

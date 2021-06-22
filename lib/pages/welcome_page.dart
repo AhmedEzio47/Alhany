@@ -1332,7 +1332,7 @@ class _WelcomePageState extends State<WelcomePage> {
     User user;
 
     switch (result.status) {
-      case FacebookLoginStatus.Success:
+      case FacebookLoginStatus.success:
         FacebookAccessToken facebookAccessToken = result.accessToken;
         final AuthCredential credential =
             FacebookAuthProvider.credential(facebookAccessToken.token);
@@ -1350,10 +1350,10 @@ class _WelcomePageState extends State<WelcomePage> {
         final User currentUser = await auth.getCurrentUser();
         assert(user.uid == currentUser.uid);
         break;
-      case FacebookLoginStatus.Cancel:
+      case FacebookLoginStatus.cancel:
         print('Cancelled');
         break;
-      case FacebookLoginStatus.Error:
+      case FacebookLoginStatus.error:
         print('Facebook login Error');
         break;
     }
