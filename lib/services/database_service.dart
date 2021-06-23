@@ -1138,9 +1138,8 @@ class DatabaseService {
           await AppUtil.getStorageFileNameFromUrl(melody.imageUrl);
       await storageRef.child('/melodies_images/$fileName').delete();
     }
-    if (melody.audioUrl != null) {
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(melody.audioUrl);
+    if (melody.songUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(melody.songUrl);
       if (melody.isSong) {
         await storageRef.child('/songs/$fileName').delete();
       } else {

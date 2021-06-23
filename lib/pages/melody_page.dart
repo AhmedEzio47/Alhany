@@ -123,8 +123,8 @@ class _MelodyPageState extends State<MelodyPage> {
         message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
 
     String url;
-    if (widget.melody.audioUrl != null) {
-      url = widget.melody.audioUrl;
+    if (widget.melody.melodyUrl != null) {
+      url = widget.melody.melodyUrl;
     } else if (Constants.currentMelodyLevel != null) {
       url = widget.melody.levelUrls[Constants.currentMelodyLevel];
     } else {
@@ -221,8 +221,8 @@ class _MelodyPageState extends State<MelodyPage> {
 
       await initRecorder();
       String url;
-      if (widget.melody.audioUrl != null) {
-        url = widget.melody.audioUrl;
+      if (widget.melody.melodyUrl != null) {
+        url = widget.melody.melodyUrl;
       } else if (Constants.currentMelodyLevel != null) {
         url = widget.melody.levelUrls[Constants.currentMelodyLevel];
       } else {
@@ -315,8 +315,8 @@ class _MelodyPageState extends State<MelodyPage> {
       MelodyPage.recordingStatus = RecordingStatus.Recording;
 
       String url;
-      if (widget.melody.audioUrl != null) {
-        url = widget.melody.audioUrl;
+      if (widget.melody.melodyUrl != null) {
+        url = widget.melody.melodyUrl;
       } else if (Constants.currentMelodyLevel != null) {
         url = widget.melody.levelUrls[Constants.currentMelodyLevel];
       } else {
@@ -579,10 +579,11 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (_type == Types.AUDIO) {
       melodyPlayer = MusicPlayer(
+        checkPrice: false,
         key: ValueKey('preview'),
         melodyList: [
           Melody(
-              audioUrl: mergedFilePath,
+              melodyUrl: mergedFilePath,
               name: 'Preview',
               singer: 'Preview',
               imageUrl: Strings.default_melody_image,
@@ -834,14 +835,14 @@ class _MelodyPageState extends State<MelodyPage> {
   prepareEnv() async {
     await createAppFolder();
 
-    if (widget.melody.audioUrl != null) {
-      await initMelodyPlayer(widget.melody.audioUrl);
+    if (widget.melody.melodyUrl != null) {
+      await initMelodyPlayer(widget.melody.melodyUrl);
     } else if (Constants.currentMelodyLevel != null) {
       await initMelodyPlayer(
           widget.melody.levelUrls[Constants.currentMelodyLevel]);
     } else {
       await initMelodyPlayer(
-          widget.melody.levelUrls.values.elementAt(0).toString());
+          widget.melody.levelUrls?.values?.elementAt(0)?.toString());
     }
 
     if (_type == Types.VIDEO) {
@@ -868,10 +869,11 @@ class _MelodyPageState extends State<MelodyPage> {
   initMelodyPlayer(String url) async {
     setState(() {
       melodyPlayer = new MusicPlayer(
+        checkPrice: false,
         key: ValueKey('main'),
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
-        initialDuration: widget.melody.duration,
+        initialDuration: widget.melody.melodyDuration,
         melodyList: [widget.melody],
       );
     });

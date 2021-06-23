@@ -137,7 +137,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
     urlList = [];
     for (Melody melody in widget.melodyList) {
-      urlList.add(melody.audioUrl);
+      if (melody.isSong)
+        urlList.add(melody.songUrl);
+      else
+        urlList.add(melody.melodyUrl);
     }
 
     myAudioPlayer = MyAudioPlayer(
@@ -186,6 +189,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 .doc(Constants.currentUserID)
                 .update({'bought_songs': boughtSongs});
 
+            Constants.currentUser =
+                await DatabaseService.getUserWithId(Constants.currentUserID);
+
+            Navigator.of(context).pop();
             return true;
           }
         },
@@ -233,22 +240,32 @@ class _MusicPlayerState extends State<MusicPlayer> {
       AppUtil.showLoader(context);
       await AppUtil.createAppDirectory();
       String path;
-      if (widget.melodyList[index].audioUrl != null) {
-        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
-            encrypt: true);
+      if (widget.melodyList[index].isSong) {
+        if (widget.melodyList[index].songUrl != null) {
+          path = await AppUtil.downloadFile(widget.melodyList[index].songUrl,
+              encrypt: true);
+        }
       } else {
-        path = await AppUtil.downloadFile(
-            widget.melodyList[index].levelUrls.values.elementAt(0),
-            encrypt: true);
+        if (widget.melodyList[index].melodyUrl != null) {
+          path = await AppUtil.downloadFile(widget.melodyList[index].melodyUrl,
+              encrypt: true);
+        }
       }
+      //  else {
+      //   path = await AppUtil.downloadFile(
+      //       widget.melodyList[index].levelUrls.values.elementAt(0),
+      //       encrypt: true);
+      // }
 
       Melody melody = Melody(
           id: widget.melodyList[index].id,
           authorId: widget.melodyList[index].authorId,
-          duration: widget.melodyList[index].duration,
+          duration: widget.melodyList[index].isSong
+              ? widget.melodyList[index].duration
+              : widget.melodyList[index].melodyDuration,
           imageUrl: widget.melodyList[index].imageUrl,
           name: widget.melodyList[index].name,
-          audioUrl: path);
+          songUrl: path);
       Melody storedMelody =
           await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
       if (storedMelody == null) {
@@ -336,7 +353,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ),
                   myAudioPlayer.position != null
                       ? Text(
-                          '${_numberFormatter.format(myAudioPlayer.position.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position.inSeconds % 60)}',
+                          '${_numberFormatter.format(myAudioPlayer.position?.inMinutes)}:${_numberFormatter.format(myAudioPlayer.position?.inSeconds % 60)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
@@ -384,7 +401,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
-                          '${_numberFormatter.format(widget.initialDuration ~/ 60)}:${_numberFormatter.format(widget.initialDuration % 60)}',
+                          '${_numberFormatter.format(widget.initialDuration ?? 0 ~/ 60)}:${_numberFormatter.format(widget.initialDuration ?? 0 % 60)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         ),
                   SizedBox(

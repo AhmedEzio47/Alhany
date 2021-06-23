@@ -436,7 +436,7 @@ class _NewsItemState extends State<NewsItem> {
         return MusicPlayer(
           melodyList: [
             Melody(
-              audioUrl: _news.contentUrl,
+              songUrl: _news.contentUrl,
               singer: Constants.starUser.name,
               imageUrl: Constants.starUser.profileImageUrl,
             ),

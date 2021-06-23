@@ -180,7 +180,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playSong(int index) async {
-    String path = EncryptionService.decryptFile(_downloads[index].audioUrl);
+    String path = EncryptionService.decryptFile(_downloads[index].songUrl);
     if (!_decryptedPaths.contains(path)) {
       _decryptedPaths.add(path);
     }
@@ -190,7 +190,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
         duration: _downloads[index].duration,
         name: _downloads[index].name,
         singer: _downloads[index].singer,
-        audioUrl: path);
+        songUrl: path);
 
     musicPlayer = MusicPlayer(
       melodyList: [_downloads[index]],
@@ -204,7 +204,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   playAllSongs() {
     List<Melody> decryptedDownload = [];
     for (Melody song in _downloads) {
-      String path = EncryptionService.decryptFile(song.audioUrl);
+      String path = EncryptionService.decryptFile(song.songUrl);
       if (!_decryptedPaths.contains(path)) {
         _decryptedPaths.add(path);
       }

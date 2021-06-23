@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Melody {
   final String id;
   final String name;
-  final String audioUrl;
+  final String songUrl;
+  final String melodyUrl;
   final String lyrics;
   final Map levelUrls;
   final Map levelDurations;
@@ -12,15 +13,18 @@ class Melody {
   final String singer;
   final bool isSong;
   final String price;
+  final String melodyPrice;
   final int views;
   final List search;
   final int duration;
+  final int melodyDuration;
   final Timestamp timestamp;
 
   Melody(
       {this.id,
       this.name,
-      this.audioUrl,
+      this.songUrl,
+      this.melodyUrl,
       this.lyrics,
       this.levelUrls,
       this.levelDurations,
@@ -29,16 +33,19 @@ class Melody {
       this.singer,
       this.isSong,
       this.price,
+      this.melodyPrice,
       this.views,
       this.search,
       this.duration,
+      this.melodyDuration,
       this.timestamp});
 
   factory Melody.fromDoc(DocumentSnapshot doc) {
     return Melody(
         id: doc.id,
         name: doc.data()['name'],
-        audioUrl: doc.data()['audio_url'],
+        songUrl: doc.data()['audio_url'],
+        melodyUrl: doc.data()['melody_url'],
         lyrics: doc.data()['lyrics'],
         levelUrls: doc.data()['level_urls'],
         levelDurations: doc.data()['level_durations'],
@@ -58,7 +65,7 @@ class Melody {
         id: map['id'],
         name: map['name'],
         authorId: map['author_id'],
-        audioUrl: map['audio_url'],
+        songUrl: map['audio_url'],
         imageUrl: map['image_url'],
         duration: map['duration'],
         singer: map['singer']);
@@ -68,7 +75,7 @@ class Melody {
     return Melody(
       id: this.id,
       name: this.name,
-      audioUrl: audioUrl,
+      songUrl: audioUrl,
       imageUrl: this.imageUrl,
       duration: this.duration,
       singer: this.singer,
@@ -80,7 +87,7 @@ class Melody {
       'id': this.id,
       'name': this.name,
       'author_id': this.authorId,
-      'audio_url': this.audioUrl,
+      'audio_url': this.songUrl,
       'image_url': this.imageUrl,
       'singer': this.singer,
       'duration': this.duration,
