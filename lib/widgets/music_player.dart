@@ -37,6 +37,7 @@ class MusicPlayer extends StatefulWidget {
   final PlayBtnPosition playBtnPosition;
   final bool isCompact;
   final bool isRecordBtnVisible;
+  final bool checkPrice;
 
   MusicPlayer(
       {Key key,
@@ -49,6 +50,7 @@ class MusicPlayer extends StatefulWidget {
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
       this.melodyList,
+      this.checkPrice = true,
       this.isRecordBtnVisible = false})
       : super(key: key);
 
@@ -102,7 +104,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void initState() {
-    checkPrice();
+    if (widget.checkPrice) checkPrice();
+
     if (widget.melodyList[index]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -267,7 +270,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Future play() async {
-    if (_isBought) {
+    if (_isBought || !widget.checkPrice) {
       myAudioPlayer.play();
     } else {
       AppUtil.executeFunctionIfLoggedIn(context, () async {
