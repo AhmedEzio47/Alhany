@@ -120,7 +120,10 @@ class _MelodyItemState extends State<MelodyItem> {
                     ),
                   ),
                 )
-              : null,
+              : Text(
+                  '${widget.melody.price} \$',
+                  style: TextStyle(color: MyColors.textLightColor),
+                ),
         ),
       ),
     );

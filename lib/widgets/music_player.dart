@@ -98,9 +98,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   int index = 0;
+  bool _isBought = false;
 
   @override
   void initState() {
+    checkPrice();
     if (widget.melodyList[index]?.isSong ?? true) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
@@ -149,8 +151,129 @@ class _MusicPlayerState extends State<MusicPlayer> {
     });
   }
 
+  Future<bool> checkPrice() async {
+    if ((double.parse(widget.melodyList[index].price) ?? 0) == 0) {
+      _isBought = true;
+      return true;
+    } else if ((Constants.currentUser?.boughtSongs ?? [])
+        .contains(widget.melodyList[index].id)) {
+      _isBought = true;
+      return true;
+    }
+    _isBought = false;
+    return false;
+  }
+
+  Future<bool> buySong() async {
+    await AppUtil.showAlertDialog(
+        context: context,
+        message: language(
+            ar: 'هل تريد شراء هذه الأغنية',
+            en: 'Do you want to buy this song?'),
+        firstBtnText: language(ar: 'نعم', en: 'Yes'),
+        secondBtnText: language(ar: 'لا', en: 'No'),
+        firstFunc: () async {
+          final success = await Navigator.of(context).pushNamed('/payment-home',
+              arguments: {'amount': widget.melodyList[index].price});
+          if (success) {
+            List boughtSongs = Constants.currentUser.boughtSongs;
+            boughtSongs.add(widget.melodyList[index].id);
+
+            await usersRef
+                .doc(Constants.currentUserID)
+                .update({'bought_songs': boughtSongs});
+
+            return true;
+          }
+        },
+        secondFunc: () {
+          Navigator.of(context).pop();
+          return false;
+        });
+
+    return false;
+  }
+
+  void _downloadMelody() async {
+    Token token = Token();
+    if (widget.melodyList[index].price == null ||
+        widget.melodyList[index].price == '0') {
+      token.tokenId = 'free';
+    } else {
+      DocumentSnapshot doc = await usersRef
+          .doc(Constants.currentUserID)
+          .collection('downloads')
+          .doc(widget.melodyList[index].id)
+          .get();
+      bool alreadyDownloaded = doc.exists;
+      print('alreadyDownloaded: $alreadyDownloaded');
+
+      if (!alreadyDownloaded) {
+        final success = await Navigator.of(context).pushNamed('/payment-home',
+            arguments: {'amount': widget.melodyList[index].price});
+        if (success) {
+          usersRef
+              .doc(Constants.currentUserID)
+              .collection('downloads')
+              .doc(widget.melodyList[index].id)
+              .set({'timestamp': FieldValue.serverTimestamp()});
+        }
+        token.tokenId = 'purchased';
+
+        print(token.tokenId);
+      } else {
+        token.tokenId = 'already purchased';
+        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
+      }
+    }
+    if (token.tokenId != null) {
+      AppUtil.showLoader(context);
+      await AppUtil.createAppDirectory();
+      String path;
+      if (widget.melodyList[index].audioUrl != null) {
+        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
+            encrypt: true);
+      } else {
+        path = await AppUtil.downloadFile(
+            widget.melodyList[index].levelUrls.values.elementAt(0),
+            encrypt: true);
+      }
+
+      Melody melody = Melody(
+          id: widget.melodyList[index].id,
+          authorId: widget.melodyList[index].authorId,
+          duration: widget.melodyList[index].duration,
+          imageUrl: widget.melodyList[index].imageUrl,
+          name: widget.melodyList[index].name,
+          audioUrl: path);
+      Melody storedMelody =
+          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
+      if (storedMelody == null) {
+        await MelodySqlite.insert(melody);
+        await usersRef
+            .doc(Constants.currentUserID)
+            .collection('downloads')
+            .doc(widget.melodyList[index].id)
+            .set({'timestamp': FieldValue.serverTimestamp()});
+        Navigator.of(context).pop();
+        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
+        Navigator.of(context).pushNamed('/downloads');
+      } else {
+        Navigator.of(context).pop();
+        AppUtil.showToast('Already downloaded!');
+        Navigator.of(context).pushNamed('/downloads');
+      }
+    }
+  }
+
   Future play() async {
-    myAudioPlayer.play();
+    if (_isBought) {
+      myAudioPlayer.play();
+    } else {
+      AppUtil.executeFunctionIfLoggedIn(context, () async {
+        _isBought = await buySong();
+      });
+    }
   }
 
   Future pause() async {
@@ -692,78 +815,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
         secondFunc: () {
           Navigator.of(context).pop();
         });
-  }
-
-  void _downloadMelody() async {
-    Token token = Token();
-    if (widget.melodyList[index].price == null ||
-        widget.melodyList[index].price == '0') {
-      token.tokenId = 'free';
-    } else {
-      DocumentSnapshot doc = await usersRef
-          .doc(Constants.currentUserID)
-          .collection('downloads')
-          .doc(widget.melodyList[index].id)
-          .get();
-      bool alreadyDownloaded = doc.exists;
-      print('alreadyDownloaded: $alreadyDownloaded');
-
-      if (!alreadyDownloaded) {
-        final success = await Navigator.of(context).pushNamed('/payment-home',
-            arguments: {'amount': widget.melodyList[index].price});
-        if (success) {
-          usersRef
-              .doc(Constants.currentUserID)
-              .collection('downloads')
-              .doc(widget.melodyList[index].id)
-              .set({'timestamp': FieldValue.serverTimestamp()});
-        }
-        token.tokenId = 'purchased';
-
-        print(token.tokenId);
-      } else {
-        token.tokenId = 'already purchased';
-        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
-      }
-    }
-    if (token.tokenId != null) {
-      AppUtil.showLoader(context);
-      await AppUtil.createAppDirectory();
-      String path;
-      if (widget.melodyList[index].audioUrl != null) {
-        path = await AppUtil.downloadFile(widget.melodyList[index].audioUrl,
-            encrypt: true);
-      } else {
-        path = await AppUtil.downloadFile(
-            widget.melodyList[index].levelUrls.values.elementAt(0),
-            encrypt: true);
-      }
-
-      Melody melody = Melody(
-          id: widget.melodyList[index].id,
-          authorId: widget.melodyList[index].authorId,
-          duration: widget.melodyList[index].duration,
-          imageUrl: widget.melodyList[index].imageUrl,
-          name: widget.melodyList[index].name,
-          audioUrl: path);
-      Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
-      if (storedMelody == null) {
-        await MelodySqlite.insert(melody);
-        await usersRef
-            .doc(Constants.currentUserID)
-            .collection('downloads')
-            .doc(widget.melodyList[index].id)
-            .set({'timestamp': FieldValue.serverTimestamp()});
-        Navigator.of(context).pop();
-        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
-        Navigator.of(context).pushNamed('/downloads');
-      } else {
-        Navigator.of(context).pop();
-        AppUtil.showToast('Already downloaded!');
-        Navigator.of(context).pushNamed('/downloads');
-      }
-    }
   }
 
   Widget nextBtn() {

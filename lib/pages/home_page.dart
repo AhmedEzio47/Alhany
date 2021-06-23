@@ -6,6 +6,7 @@ import 'package:Alhany/models/category_model.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
+import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -619,12 +620,21 @@ class _HomePageState extends State<HomePage>
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
-                child: MelodyItem(
-                  padding: 0,
-                  imageSize: 40,
-                  isRounded: false,
-                  key: ValueKey('melody_item'),
-                  melody: _melodies[index],
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) {
+                      return SongPage(
+                        song: _melodies[index],
+                      );
+                    }));
+                  },
+                  child: MelodyItem(
+                    padding: 0,
+                    imageSize: 40,
+                    isRounded: false,
+                    key: ValueKey('melody_item'),
+                    melody: _melodies[index],
+                  ),
                 ),
               ),
             );

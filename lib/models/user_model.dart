@@ -10,6 +10,7 @@ class User {
   final int violations;
   final int notificationsNumber;
   final List search;
+  final List boughtSongs;
   final dynamic online;
 
   User(
@@ -20,6 +21,7 @@ class User {
       this.email,
       this.description,
       this.violations,
+      this.boughtSongs,
       this.notificationsNumber,
       this.online,
       this.search});
@@ -33,6 +35,7 @@ class User {
         email: doc.data()['email'],
         description: doc.data()['description'] ?? '',
         violations: doc.data()['violations'],
+        boughtSongs: doc.data()['bought_songs'],
         notificationsNumber: doc.data()['notificationsNumber'],
         online: doc.data()['online'],
         search: doc.data()['search']);
