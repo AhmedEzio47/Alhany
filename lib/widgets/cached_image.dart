@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:Alhany/constants/strings.dart';
 import 'package:flutter/material.dart';
 
 class CachedImage extends StatefulWidget {
@@ -16,7 +15,8 @@ class CachedImage extends StatefulWidget {
     this.imageShape,
     this.width,
     this.height,
-    this.defaultAssetImage, this.assetFit,
+    this.defaultAssetImage,
+    this.assetFit = BoxFit.cover,
   }) : super(key: key);
 
   @override
@@ -26,11 +26,12 @@ class CachedImage extends StatefulWidget {
 class _CachedImageState extends State<CachedImage> {
   @override
   Widget build(BuildContext context) {
-    return _cacheRoundedImage(
-        widget.imageUrl, widget.imageShape, widget.width, widget.height, widget.defaultAssetImage, widget.assetFit);
+    return _cacheRoundedImage(widget.imageUrl, widget.imageShape, widget.width,
+        widget.height, widget.defaultAssetImage, widget.assetFit);
   }
 
-  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width, double height, String defaultAssetImage, BoxFit fit) {
+  Widget _cacheRoundedImage(String imageUrl, BoxShape boxShape, double width,
+      double height, String defaultAssetImage, BoxFit fit) {
     return Container(
       width: width,
       height: height,
@@ -45,7 +46,8 @@ class _CachedImageState extends State<CachedImage> {
                 height: height,
                 decoration: BoxDecoration(
                   shape: boxShape,
-                  image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                  image: DecorationImage(
+                      image: imageProvider, fit: widget.assetFit),
                 ),
               ),
               placeholder: (context, loggedInProfileImageURL) => Center(
@@ -55,14 +57,16 @@ class _CachedImageState extends State<CachedImage> {
                 height: height,
                 width: width,
               )),
-              errorWidget: (context, loggedInProfileImageURL, error) => Icon(Icons.error),
+              errorWidget: (context, loggedInProfileImageURL, error) =>
+                  Icon(Icons.error),
             )
           : Container(
               width: width,
               height: height,
               decoration: BoxDecoration(
                 shape: boxShape,
-                image: DecorationImage(image: AssetImage(defaultAssetImage), fit: BoxFit.cover),
+                image: DecorationImage(
+                    image: AssetImage(defaultAssetImage), fit: BoxFit.cover),
               ),
             ),
     );

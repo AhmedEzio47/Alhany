@@ -2,6 +2,9 @@ import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
+import 'package:Alhany/pages/tracks_page.dart';
+import 'package:Alhany/pages/upload_track.dart';
+import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
@@ -24,12 +27,70 @@ class _SongPageState extends State<SongPage> {
     Navigator.of(context).pop();
   }
 
+  Future<bool> buySong() async {
+    await AppUtil.showAlertDialog(
+        context: context,
+        message: language(
+            ar: 'هل تريد شراء هذه الأغنية',
+            en: 'Do you want to buy this song?'),
+        firstBtnText: language(ar: 'نعم', en: 'Yes'),
+        secondBtnText: language(ar: 'لا', en: 'No'),
+        firstFunc: () async {
+          final success = await Navigator.of(context).pushNamed('/payment-home',
+              arguments: {'amount': widget.song.price});
+          if (success) {
+            List boughtSongs = Constants.currentUser.boughtSongs ?? [];
+            boughtSongs.add(widget.song.id);
+
+            await usersRef
+                .doc(Constants.currentUserID)
+                .update({'bought_songs': boughtSongs});
+
+            Constants.currentUser =
+                await DatabaseService.getUserWithId(Constants.currentUserID);
+
+            Navigator.of(context).pop();
+            return true;
+          }
+        },
+        secondFunc: () {
+          Navigator.of(context).pop();
+          return false;
+        });
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: SafeArea(
         child: Scaffold(
+          floatingActionButton: Constants.isAdmin
+              ? Container(
+                  width: 100.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: MyColors.accentColor),
+                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                    color: MyColors.accentColor,
+                  ),
+                  child: new RawMaterialButton(
+                    shape: new CircleBorder(),
+                    elevation: 5.0,
+                    child: Text(
+                      'Add Track',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => UploadTrackPage(
+                                  song: widget.song,
+                                ))),
+                  ))
+              : null,
           body: Stack(
             children: [
               Container(
@@ -63,6 +124,7 @@ class _SongPageState extends State<SongPage> {
                             defaultAssetImage: Strings.default_cover_image,
                             imageUrl: widget.song.imageUrl,
                             imageShape: BoxShape.rectangle,
+                            assetFit: BoxFit.fill,
                           ),
                           Positioned.fill(
                             child: Padding(
@@ -93,6 +155,7 @@ class _SongPageState extends State<SongPage> {
                     MusicPlayer(
                       btnSize: 35,
                       isCompact: true,
+                      onBuy: buySong,
                       playBtnPosition: PlayBtnPosition.left,
                       initialDuration: widget.song.duration,
                       melodyList: [widget.song],
@@ -146,7 +209,11 @@ class _SongPageState extends State<SongPage> {
                       child: MaterialButton(
                         padding: EdgeInsets.all(16),
                         minWidth: MediaQuery.of(context).size.width,
-                        onPressed: () {},
+                        onPressed: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => TracksPage(
+                                      song: widget.song,
+                                    ))),
                         child: Text(
                           '>>>  Tracks  <<<',
                           style: TextStyle(fontSize: 20),

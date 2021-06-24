@@ -38,6 +38,9 @@ class MusicPlayer extends StatefulWidget {
   final bool isCompact;
   final bool isRecordBtnVisible;
   final bool checkPrice;
+  final bool isTrack;
+  final bool isTrackOwner;
+  final Function onBuy;
 
   MusicPlayer(
       {Key key,
@@ -50,7 +53,10 @@ class MusicPlayer extends StatefulWidget {
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
       this.melodyList,
+      this.onBuy,
       this.checkPrice = true,
+      this.isTrack = true,
+      this.isTrackOwner = false,
       this.isRecordBtnVisible = false})
       : super(key: key);
 
@@ -165,42 +171,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
         .contains(widget.melodyList[index].id)) {
       _isBought = true;
       return true;
+    } else if (widget.isTrackOwner) {
+      _isBought = true;
+      return true;
     }
     _isBought = false;
-    return false;
-  }
-
-  Future<bool> buySong() async {
-    await AppUtil.showAlertDialog(
-        context: context,
-        message: language(
-            ar: 'هل تريد شراء هذه الأغنية',
-            en: 'Do you want to buy this song?'),
-        firstBtnText: language(ar: 'نعم', en: 'Yes'),
-        secondBtnText: language(ar: 'لا', en: 'No'),
-        firstFunc: () async {
-          final success = await Navigator.of(context).pushNamed('/payment-home',
-              arguments: {'amount': widget.melodyList[index].price});
-          if (success) {
-            List boughtSongs = Constants.currentUser.boughtSongs;
-            boughtSongs.add(widget.melodyList[index].id);
-
-            await usersRef
-                .doc(Constants.currentUserID)
-                .update({'bought_songs': boughtSongs});
-
-            Constants.currentUser =
-                await DatabaseService.getUserWithId(Constants.currentUserID);
-
-            Navigator.of(context).pop();
-            return true;
-          }
-        },
-        secondFunc: () {
-          Navigator.of(context).pop();
-          return false;
-        });
-
     return false;
   }
 
@@ -287,11 +262,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   Future play() async {
+    print(_isBought);
     if (_isBought || !widget.checkPrice) {
       myAudioPlayer.play();
     } else {
       AppUtil.executeFunctionIfLoggedIn(context, () async {
-        _isBought = await buySong();
+        _isBought = await widget.onBuy();
       });
     }
   }

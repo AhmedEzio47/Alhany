@@ -8,6 +8,7 @@ import 'package:Alhany/models/notification_model.dart' as notification;
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/models/slide_image.dart';
+import 'package:Alhany/models/track_model.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -66,6 +67,17 @@ class DatabaseService {
     List<Melody> melodies =
         melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
     return melodies;
+  }
+
+  static Future<List<Track>> getTracks(String songId) async {
+    QuerySnapshot tracksSnapshot = await melodiesRef
+        .doc(songId)
+        .collection('tracks')
+        .orderBy('timestamp', descending: true)
+        .get();
+    List<Track> tracks =
+        tracksSnapshot.docs.map((doc) => Track.fromDoc(doc)).toList();
+    return tracks;
   }
 
   static Future<List<Melody>> getStarMelodies() async {
