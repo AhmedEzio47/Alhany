@@ -10,14 +10,12 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
-import 'package:Alhany/services/sqlite_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:stripe_payment/stripe_payment.dart';
 
 import 'custom_modal.dart';
 
@@ -38,9 +36,9 @@ class MusicPlayer extends StatefulWidget {
   final bool isCompact;
   final bool isRecordBtnVisible;
   final bool checkPrice;
-  final bool isTrack;
-  final bool isTrackOwner;
+  final bool showFavBtn;
   final Function onBuy;
+  final Function onDownload;
 
   MusicPlayer(
       {Key key,
@@ -52,11 +50,11 @@ class MusicPlayer extends StatefulWidget {
       this.initialDuration,
       this.playBtnPosition = PlayBtnPosition.bottom,
       this.isCompact = false,
+      this.showFavBtn = false,
       this.melodyList,
       this.onBuy,
+      this.onDownload,
       this.checkPrice = true,
-      this.isTrack = true,
-      this.isTrackOwner = false,
       this.isRecordBtnVisible = false})
       : super(key: key);
 
@@ -171,94 +169,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
         .contains(widget.melodyList[index].id)) {
       _isBought = true;
       return true;
-    } else if (widget.isTrackOwner) {
-      _isBought = true;
-      return true;
     }
     _isBought = false;
     return false;
-  }
-
-  void _downloadMelody() async {
-    Token token = Token();
-    if (widget.melodyList[index].price == null ||
-        widget.melodyList[index].price == '0') {
-      token.tokenId = 'free';
-    } else {
-      DocumentSnapshot doc = await usersRef
-          .doc(Constants.currentUserID)
-          .collection('downloads')
-          .doc(widget.melodyList[index].id)
-          .get();
-      bool alreadyDownloaded = doc.exists;
-      print('alreadyDownloaded: $alreadyDownloaded');
-
-      if (!alreadyDownloaded) {
-        final success = await Navigator.of(context).pushNamed('/payment-home',
-            arguments: {'amount': widget.melodyList[index].price});
-        if (success) {
-          usersRef
-              .doc(Constants.currentUserID)
-              .collection('downloads')
-              .doc(widget.melodyList[index].id)
-              .set({'timestamp': FieldValue.serverTimestamp()});
-        }
-        token.tokenId = 'purchased';
-
-        print(token.tokenId);
-      } else {
-        token.tokenId = 'already purchased';
-        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
-      }
-    }
-    if (token.tokenId != null) {
-      AppUtil.showLoader(context);
-      await AppUtil.createAppDirectory();
-      String path;
-      if (widget.melodyList[index].isSong) {
-        if (widget.melodyList[index].songUrl != null) {
-          path = await AppUtil.downloadFile(widget.melodyList[index].songUrl,
-              encrypt: true);
-        }
-      } else {
-        if (widget.melodyList[index].melodyUrl != null) {
-          path = await AppUtil.downloadFile(widget.melodyList[index].melodyUrl,
-              encrypt: true);
-        }
-      }
-      //  else {
-      //   path = await AppUtil.downloadFile(
-      //       widget.melodyList[index].levelUrls.values.elementAt(0),
-      //       encrypt: true);
-      // }
-
-      Melody melody = Melody(
-          id: widget.melodyList[index].id,
-          authorId: widget.melodyList[index].authorId,
-          duration: widget.melodyList[index].isSong
-              ? widget.melodyList[index].duration
-              : widget.melodyList[index].melodyDuration,
-          imageUrl: widget.melodyList[index].imageUrl,
-          name: widget.melodyList[index].name,
-          songUrl: path);
-      Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(widget.melodyList[index].id);
-      if (storedMelody == null) {
-        await MelodySqlite.insert(melody);
-        await usersRef
-            .doc(Constants.currentUserID)
-            .collection('downloads')
-            .doc(widget.melodyList[index].id)
-            .set({'timestamp': FieldValue.serverTimestamp()});
-        Navigator.of(context).pop();
-        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
-        Navigator.of(context).pushNamed('/downloads');
-      } else {
-        Navigator.of(context).pop();
-        AppUtil.showToast('Already downloaded!');
-        Navigator.of(context).pushNamed('/downloads');
-      }
-    }
   }
 
   Future play() async {
@@ -394,7 +307,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        (widget.melodyList[index]?.isSong ?? false)
+                        ((widget.melodyList[index]?.isSong ?? false) &&
+                                widget.showFavBtn)
                             ? favouriteBtn()
                             : Container(),
                         widget.melodyList.length > 1
@@ -495,8 +409,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                               )
                             : Container(),
                         Constants.currentRoute != '/downloads'
-                            ? downloadOrOptions()
-                            : Container()
+                            ? downloadBtn()
+                            : Container(),
+                        optionsBtn()
                       ],
                     )
                   : Container(),
@@ -602,7 +517,41 @@ class _MusicPlayerState extends State<MusicPlayer> {
     );
   }
 
-  Widget downloadOrOptions() {
+  Widget downloadBtn() {
+    return widget.onDownload != null ?? false
+        ? Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: InkWell(
+              onTap: () => AppUtil.executeFunctionIfLoggedIn(context, () async {
+                await widget.onDownload();
+              }),
+              child: Container(
+                height: widget.btnSize,
+                width: widget.btnSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade300,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black54,
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.file_download,
+                  color: MyColors.primaryColor,
+                  size: widget.btnSize - 10,
+                ),
+              ),
+            ),
+          )
+        : Container();
+  }
+
+  Widget optionsBtn() {
     return Constants.isAdmin ?? false
         ? Padding(
             padding: const EdgeInsets.only(left: 8.0),
@@ -647,37 +596,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
           )
-        : widget.melodyList[index]?.authorId != null ?? false
-            ? Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: InkWell(
-                  onTap: () async {
-                    _downloadMelody();
-                  },
-                  child: Container(
-                    height: widget.btnSize,
-                    width: widget.btnSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey.shade300,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black54,
-                          spreadRadius: 2,
-                          blurRadius: 4,
-                          offset: Offset(0, 2), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.file_download,
-                      color: MyColors.primaryColor,
-                      size: widget.btnSize - 10,
-                    ),
-                  ),
-                ),
-              )
-            : Container();
+        : Container();
   }
 
   void _select(String value) async {

@@ -4,10 +4,13 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/track_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 
 import '../app_util.dart';
 
@@ -116,12 +119,9 @@ class _TracksPageState extends State<TracksPage> {
                                       _index = index;
                                       setState(() {
                                         musicPlayer = MusicPlayer(
-                                          checkPrice: true,
-                                          isTrack: true,
-                                          isTrackOwner:
-                                              Constants.currentUserID ==
-                                                  _tracks[index].ownerId,
-                                          onBuy: buyTrack,
+                                          showFavBtn: false,
+                                          onDownload: downloadTrack,
+                                          checkPrice: false,
                                           key: ValueKey(_tracks[index].id),
                                           melodyList: [
                                             Melody(
@@ -206,9 +206,6 @@ class _TracksPageState extends State<TracksPage> {
           final success = await Navigator.of(context).pushNamed('/payment-home',
               arguments: {'amount': widget.song.price});
           if (success) {
-            List boughtSongs = Constants.currentUser.boughtSongs ?? [];
-            boughtSongs.add(widget.song.id);
-
             await melodiesRef
                 .doc(widget.song.id)
                 .collection('tracks')
@@ -225,5 +222,81 @@ class _TracksPageState extends State<TracksPage> {
         });
 
     return false;
+  }
+
+  Future downloadTrack() async {
+    Token token = Token();
+
+    if (_tracks[_index].price == null ||
+        double.parse(_tracks[_index].price) == 0) {
+      token.tokenId = 'free';
+    } else {
+      bool alreadyDownloaded =
+          (_tracks[_index].ownerId == Constants.currentUserID);
+      print('alreadyDownloaded: $alreadyDownloaded');
+
+      if (!alreadyDownloaded) {
+        final success = await Navigator.of(context).pushNamed('/payment-home',
+            arguments: {'amount': _tracks[_index].price});
+        if (success) {
+          await usersRef
+              .doc(Constants.currentUserID)
+              .collection('downloads')
+              .doc(_tracks[_index].id)
+              .set({'timestamp': FieldValue.serverTimestamp()});
+
+          await melodiesRef
+              .doc(widget.song.id)
+              .collection('tracks')
+              .doc(_tracks[_index].id)
+              .update({'owner_id': Constants.currentUserID});
+
+          token.tokenId = 'purchased';
+          print(token.tokenId);
+        }
+      } else {
+        token.tokenId = 'already purchased';
+        AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
+      }
+    }
+    if (token.tokenId != null) {
+      AppUtil.showLoader(context);
+      await AppUtil.createAppDirectory();
+      String path;
+
+      if (_tracks[_index].audio != null) {
+        path =
+            await AppUtil.downloadFile(_tracks[_index].audio, encrypt: false);
+      }
+
+      Melody melody = Melody(
+          id: _tracks[_index].id,
+          duration: _tracks[_index].duration,
+          imageUrl: _tracks[_index].image,
+          name: _tracks[_index].name,
+          isSong: true,
+          songUrl: path);
+
+      Melody storedMelody =
+          await MelodySqlite.getMelodyWithId(_tracks[_index].id);
+
+      if (storedMelody == null) {
+        await MelodySqlite.insert(melody);
+
+        await usersRef
+            .doc(Constants.currentUserID)
+            .collection('downloads')
+            .doc(_tracks[_index].id)
+            .set({'timestamp': FieldValue.serverTimestamp()});
+
+        Navigator.of(context).pop();
+        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
+        Navigator.of(context).pushNamed('/downloads');
+      } else {
+        Navigator.of(context).pop();
+        AppUtil.showToast('Already downloaded!');
+        Navigator.of(context).pushNamed('/downloads');
+      }
+    }
   }
 }

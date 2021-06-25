@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 //import 'package:Alhany/widgets/local_music_player.dart';
@@ -23,8 +20,6 @@ class _DownloadsPageState extends State<DownloadsPage> {
   List<Melody> _downloads = [];
 
   bool _isPlaying = false;
-
-  List<String> _decryptedPaths = [];
 
   getDownloads() async {
     List<Melody> downloads = await MelodySqlite.getDownloads();
@@ -54,8 +49,6 @@ class _DownloadsPageState extends State<DownloadsPage> {
               });
 
               AppUtil.showLoader(context);
-              AppUtil.showToast(language(
-                  en: 'Decrypting, please wait!', ar: 'برجاء الانتظار'));
               await playAllSongs();
               Navigator.of(context).pop();
             },
@@ -167,11 +160,6 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   Future<bool> _onBack() async {
-    for (String path in _decryptedPaths) {
-      File file = File(path);
-      await file.delete();
-    }
-    print('decrypted files deleted');
     setState(() {
       Constants.currentRoute = '';
     });
@@ -180,19 +168,16 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playSong(int index) async {
-    String path = EncryptionService.decryptFile(_downloads[index].songUrl);
-    if (!_decryptedPaths.contains(path)) {
-      _decryptedPaths.add(path);
-    }
     _downloads[index] = Melody(
         id: _downloads[index].id,
-        isSong: _downloads[index].isSong,
+        isSong: _downloads[index].isSong ?? true,
         duration: _downloads[index].duration,
         name: _downloads[index].name,
         singer: _downloads[index].singer,
-        songUrl: path);
+        songUrl: _downloads[index].songUrl);
 
     musicPlayer = MusicPlayer(
+      checkPrice: false,
       melodyList: [_downloads[index]],
       initialDuration: _downloads[index].duration,
       title: _downloads[index].name,
@@ -202,17 +187,9 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playAllSongs() {
-    List<Melody> decryptedDownload = [];
-    for (Melody song in _downloads) {
-      String path = EncryptionService.decryptFile(song.songUrl);
-      if (!_decryptedPaths.contains(path)) {
-        _decryptedPaths.add(path);
-      }
-      decryptedDownload.add(song.copyWith(audioUrl: path));
-    }
     musicPlayer = MusicPlayer(
-      melodyList: decryptedDownload,
-      initialDuration: decryptedDownload[0].duration,
+      melodyList: _downloads,
+      initialDuration: _downloads[0].duration,
       isLocal: true,
       backColor: MyColors.lightPrimaryColor.withOpacity(.9),
     );

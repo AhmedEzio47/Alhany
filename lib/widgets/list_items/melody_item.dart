@@ -91,10 +91,12 @@ class _MelodyItemState extends State<MelodyItem> {
           ),
           title: Text(widget.melody.name ?? '',
               style: TextStyle(color: MyColors.textLightColor)),
-          subtitle: Text(
-            _author?.name ?? widget.melody.singer ?? '',
-            style: TextStyle(color: MyColors.textLightColor),
-          ),
+          subtitle: (_author?.name != null || widget.melody.singer != null)
+              ? Text(
+                  _author?.name ?? widget.melody.singer ?? '',
+                  style: TextStyle(color: MyColors.textLightColor),
+                )
+              : null,
           trailing: widget.melody?.isSong ?? false
               ? InkWell(
                   onTap: () =>
@@ -120,10 +122,12 @@ class _MelodyItemState extends State<MelodyItem> {
                     ),
                   ),
                 )
-              : Text(
-                  '${widget.melody.price} \$',
-                  style: TextStyle(color: MyColors.textLightColor),
-                ),
+              : widget.melody.price != null
+                  ? Text(
+                      '${widget.melody.price} \$',
+                      style: TextStyle(color: MyColors.textLightColor),
+                    )
+                  : null,
         ),
       ),
     );
