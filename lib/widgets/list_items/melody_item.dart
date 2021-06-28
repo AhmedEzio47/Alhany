@@ -15,12 +15,16 @@ class MelodyItem extends StatefulWidget {
   final bool isRounded;
   final double imageSize;
   final double padding;
+  final bool showPrice;
+  final bool showFavBtn;
   MelodyItem(
       {Key key,
       this.melody,
       this.context,
       this.isRounded = true,
       this.imageSize = 50,
+      this.showPrice = true,
+      this.showFavBtn = true,
       this.padding = 4.0})
       : super(key: key);
 
@@ -97,7 +101,8 @@ class _MelodyItemState extends State<MelodyItem> {
                   style: TextStyle(color: MyColors.textLightColor),
                 )
               : null,
-          trailing: widget.melody?.isSong ?? false
+          trailing: (widget.melody?.songUrl != null ?? false) &&
+                  widget.showFavBtn
               ? InkWell(
                   onTap: () =>
                       AppUtil.executeFunctionIfLoggedIn(context, () async {
@@ -122,7 +127,7 @@ class _MelodyItemState extends State<MelodyItem> {
                     ),
                   ),
                 )
-              : widget.melody.price != null
+              : widget.melody.price != null && widget.showPrice
                   ? Text(
                       '${widget.melody.price} \$',
                       style: TextStyle(color: MyColors.textLightColor),

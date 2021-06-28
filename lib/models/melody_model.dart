@@ -11,7 +11,6 @@ class Melody {
   final String imageUrl;
   final String authorId;
   final String singer;
-  final bool isSong;
   final String price;
   final String melodyPrice;
   final int views;
@@ -31,7 +30,6 @@ class Melody {
       this.imageUrl,
       this.authorId,
       this.singer,
-      this.isSong,
       this.price,
       this.melodyPrice,
       this.views,
@@ -52,8 +50,8 @@ class Melody {
         imageUrl: doc.data()['image_url'],
         authorId: doc.data()['author_id'],
         singer: doc.data()['singer'],
-        isSong: doc.data()['is_song'],
         price: doc.data()['price'],
+        melodyPrice: doc.data()['melody_price'],
         views: doc.data()['views'],
         duration: doc.data()['duration'],
         search: doc.data()['search'],

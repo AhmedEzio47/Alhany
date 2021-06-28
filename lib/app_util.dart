@@ -280,7 +280,7 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> downloadFile(String url, {bool encrypt = false}) async {
-    var firstPath = appTempDirectoryPath;
+    var firstPath = (await getApplicationSupportDirectory()).path;
 
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];

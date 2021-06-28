@@ -170,7 +170,6 @@ class _DownloadsPageState extends State<DownloadsPage> {
   playSong(int index) async {
     _downloads[index] = Melody(
         id: _downloads[index].id,
-        isSong: _downloads[index].isSong ?? true,
         duration: _downloads[index].duration,
         name: _downloads[index].name,
         singer: _downloads[index].singer,

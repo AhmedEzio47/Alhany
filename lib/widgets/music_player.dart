@@ -37,6 +37,7 @@ class MusicPlayer extends StatefulWidget {
   final bool isRecordBtnVisible;
   final bool checkPrice;
   final bool showFavBtn;
+  final bool isMelody;
   final Function onBuy;
   final Function onDownload;
 
@@ -53,6 +54,7 @@ class MusicPlayer extends StatefulWidget {
       this.showFavBtn = false,
       this.melodyList,
       this.onBuy,
+      this.isMelody = false,
       this.onDownload,
       this.checkPrice = true,
       this.isRecordBtnVisible = false})
@@ -110,7 +112,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
   void initState() {
     if (widget.checkPrice) checkPrice();
 
-    if (widget.melodyList[index]?.isSong ?? true) {
+    if ((widget.melodyList[index]?.songUrl != null ?? true) &&
+        !widget.isMelody) {
       choices = [
         language(en: Strings.en_edit_image, ar: Strings.ar_edit_image),
         language(en: Strings.en_edit_name, ar: Strings.ar_edit_name),
@@ -141,7 +144,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
     urlList = [];
     for (Melody melody in widget.melodyList) {
-      if (melody.isSong)
+      if (melody.songUrl != null && !widget.isMelody)
         urlList.add(melody.songUrl);
       else
         urlList.add(melody.melodyUrl);
@@ -307,7 +310,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ((widget.melodyList[index]?.isSong ?? false) &&
+                        ((widget.melodyList[index]?.songUrl != null ?? false) &&
                                 widget.showFavBtn)
                             ? favouriteBtn()
                             : Container(),
@@ -316,13 +319,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
                             : Container(),
                         playPauseBtn(),
                         widget.melodyList.length > 1 ? nextBtn() : Container(),
-                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.songUrl != null ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.songUrl != null ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
@@ -362,13 +365,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 ),
                               )
                             : Container(),
-                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.songUrl != null ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? SizedBox(
                                 width: 20,
                               )
                             : Container(),
-                        (!(widget.melodyList[index]?.isSong ?? true) &&
+                        (!(widget.melodyList[index]?.songUrl != null ?? true) &&
                                 widget.isRecordBtnVisible)
                             ? InkWell(
                                 onTap: () => AppUtil.executeFunctionIfLoggedIn(
@@ -713,7 +716,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
           await DatabaseService.deleteMelody(widget.melodyList[index]);
           Singer singer = await DatabaseService.getSingerWithName(
               widget.melodyList[index].singer);
-          if (widget.melodyList[index].isSong) {
+          if (widget.melodyList[index].songUrl != null) {
             await singersRef
                 .doc(singer.id)
                 .update({'songs': FieldValue.increment(-1)});

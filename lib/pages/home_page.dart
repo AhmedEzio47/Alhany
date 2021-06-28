@@ -8,6 +8,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/drawer.dart';
@@ -187,6 +188,9 @@ class _HomePageState extends State<HomePage>
             ? FloatingActionButton(
                 child: Icon(Icons.playlist_play),
                 onPressed: () {
+                  if (_favourites.isEmpty) {
+                    return;
+                  }
                   setState(() {
                     musicPlayer = MusicPlayer(
                       melodyList: _favourites,
@@ -214,6 +218,7 @@ class _HomePageState extends State<HomePage>
         break;
       case 2:
         getFavourites();
+        getBoughtSongs();
         break;
     }
   }
@@ -631,6 +636,8 @@ class _HomePageState extends State<HomePage>
                   child: MelodyItem(
                     padding: 0,
                     imageSize: 40,
+                    showPrice: true,
+                    showFavBtn: false,
                     isRounded: false,
                     key: ValueKey('melody_item'),
                     melody: _melodies[index],
@@ -664,6 +671,7 @@ class _HomePageState extends State<HomePage>
   }
 
   List<Melody> _favourites = [];
+  List<Melody> _boughtSongs = [];
   getFavourites() async {
     List<Melody> favourites = await DatabaseService.getFavourites();
     if (mounted) {
@@ -673,38 +681,120 @@ class _HomePageState extends State<HomePage>
     }
   }
 
+  getBoughtSongs() async {
+    List<Melody> boughtSongs = await DatabaseService.getBoughtSongs();
+    if (mounted) {
+      setState(() {
+        _boughtSongs = boughtSongs;
+      });
+    }
+  }
+
+  ScrollController _favScrollController = ScrollController();
   _favouritesPage() {
-    return _favourites.length > 0
-        ? ListView.builder(
-            itemCount: _favourites.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () async {
-                  // if (musicPlayer != null) {
-                  //   musicPlayer.stop();
-                  // }
-                  musicPlayer = MusicPlayer(
-                    melodyList: [_favourites[index]],
-                    key: ValueKey(_favourites[index].id),
-                    backColor: Colors.white.withOpacity(.4),
-                    initialDuration: _favourites[index].duration,
-                    title: _favourites[index].name,
-                  );
-                  setState(() {
-                    _isPlaying = true;
-                  });
-                },
-                child: MelodyItem(
-                  padding: 4,
-                  melody: _favourites[index],
+    return CustomScrollView(
+      controller: _favScrollController,
+      slivers: [
+        if (_boughtSongs.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Constants.language == 'ar'
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Text(
+                  language(ar: 'الأغاني المشتراه', en: 'Bought songs'),
+                  style: TextStyle(color: MyColors.textLightColor),
                 ),
-              );
-            })
-        : Center(
-            child: Text(
-            language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
-            style: TextStyle(color: MyColors.textLightColor),
-          ));
+              ),
+            ),
+          ),
+        if (_boughtSongs.isNotEmpty)
+          SliverList(
+            delegate: SliverChildListDelegate([
+              ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: _boughtSongs.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () async {
+                        _boughtSongsIndex = index;
+                        musicPlayer = MusicPlayer(
+                          onDownload: downloadSong,
+                          melodyList: [_boughtSongs[index]],
+                          key: ValueKey(_boughtSongs[index].id),
+                          backColor: Colors.black.withOpacity(.7),
+                          initialDuration: _boughtSongs[index].duration,
+                          title: _boughtSongs[index].name,
+                        );
+                        setState(() {
+                          _isPlaying = true;
+                        });
+                      },
+                      child: MelodyItem(
+                        showPrice: false,
+                        padding: 4,
+                        melody: _boughtSongs[index],
+                      ),
+                    );
+                  })
+            ]),
+          ),
+        if (_favourites.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Constants.language == 'ar'
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Text(
+                  language(ar: 'المفضلات', en: 'Favorites'),
+                  style: TextStyle(color: MyColors.textLightColor),
+                ),
+              ),
+            ),
+          ),
+        SliverList(
+            delegate: SliverChildListDelegate([
+          _favourites.isNotEmpty
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: _favourites.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () async {
+                        // if (musicPlayer != null) {
+                        //   musicPlayer.stop();
+                        // }
+                        musicPlayer = MusicPlayer(
+                          melodyList: [_favourites[index]],
+                          key: ValueKey(_favourites[index].id),
+                          backColor: Colors.black.withOpacity(.7),
+                          initialDuration: _favourites[index].duration,
+                          title: _favourites[index].name,
+                        );
+                        setState(() {
+                          _isPlaying = true;
+                        });
+                      },
+                      child: MelodyItem(
+                        padding: 4,
+                        melody: _favourites[index],
+                      ),
+                    );
+                  })
+              : Center(
+                  child: Text(
+                  language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
+                  style: TextStyle(color: MyColors.textLightColor),
+                ))
+        ])),
+      ],
+    );
   }
 
   @override
@@ -822,5 +912,29 @@ class _HomePageState extends State<HomePage>
         ],
       ),
     )));
+  }
+
+  int _boughtSongsIndex = 0;
+  downloadSong() async {
+    String path;
+    if (_boughtSongs[_boughtSongsIndex].songUrl != null) {
+      path = await AppUtil.downloadFile(_boughtSongs[_boughtSongsIndex].songUrl,
+          encrypt: false);
+    }
+
+    Melody melody = Melody(
+        id: _boughtSongs[_boughtSongsIndex].id,
+        duration: _boughtSongs[_boughtSongsIndex].duration,
+        imageUrl: _boughtSongs[_boughtSongsIndex].imageUrl,
+        name: _boughtSongs[_boughtSongsIndex].name,
+        songUrl: path);
+
+    Melody storedMelody =
+        await MelodySqlite.getMelodyWithId(_boughtSongs[_boughtSongsIndex].id);
+
+    if (storedMelody == null) {
+      await MelodySqlite.insert(melody);
+    }
+    Navigator.of(context).pushNamed('/downloads');
   }
 }

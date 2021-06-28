@@ -134,6 +134,17 @@ class DatabaseService {
     return melodies;
   }
 
+  static Future<List<Melody>> getBoughtSongs() async {
+    List<Melody> melodies = [];
+
+    for (String songId in Constants.currentUser.boughtSongs) {
+      Melody melody = await getMelodyWithId(songId);
+      melodies.add(melody);
+    }
+
+    return melodies;
+  }
+
   static Future<List<Melody>> getSongs() async {
     QuerySnapshot melodiesSnapshot = await melodiesRef
         .where('is_song', isEqualTo: true)
@@ -1152,7 +1163,7 @@ class DatabaseService {
     }
     if (melody.songUrl != null) {
       String fileName = await AppUtil.getStorageFileNameFromUrl(melody.songUrl);
-      if (melody.isSong) {
+      if (melody.songUrl != null) {
         await storageRef.child('/songs/$fileName').delete();
       } else {
         await storageRef.child('/melodies/$fileName').delete();

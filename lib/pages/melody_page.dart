@@ -11,12 +11,14 @@ import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
+import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 //import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -29,6 +31,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pip_view/pip_view.dart';
 import 'package:random_string/random_string.dart';
 import 'package:screen/screen.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 import 'package:video_player/video_player.dart' as video_player;
 
 enum Types { VIDEO, AUDIO }
@@ -586,7 +589,6 @@ class _MelodyPageState extends State<MelodyPage> {
               songUrl: mergedFilePath,
               name: 'Preview',
               singer: 'Preview',
-              isSong: true,
               imageUrl: Strings.default_melody_image,
               duration: duration)
         ],
@@ -871,6 +873,7 @@ class _MelodyPageState extends State<MelodyPage> {
     setState(() {
       melodyPlayer = new MusicPlayer(
         checkPrice: false,
+        isMelody: true,
         key: ValueKey('main'),
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
@@ -1416,30 +1419,51 @@ class _MelodyPageState extends State<MelodyPage> {
             padding: const EdgeInsets.only(top: 70, right: 10),
             child: Align(
               alignment: Alignment.topRight,
-              child: DropdownButton(
-                dropdownColor: MyColors.lightPrimaryColor,
-                iconEnabledColor: MyColors.iconLightColor,
-                style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
-                value: _type,
-                items: [
-                  DropdownMenuItem(
-                    child: Text(language(en: 'Audio', ar: 'صوت')),
-                    value: Types.AUDIO,
+              // child: DropdownButton(
+              //   dropdownColor: MyColors.lightPrimaryColor,
+              //   iconEnabledColor: MyColors.iconLightColor,
+              //   style: TextStyle(color: MyColors.textLightColor, fontSize: 16),
+              //   value: _type,
+              //   items: [
+              //     DropdownMenuItem(
+              //       child: Text(language(en: 'Audio', ar: 'صوت')),
+              //       value: Types.AUDIO,
+              //     ),
+              //     DropdownMenuItem(
+              //       child: Text(language(en: 'Video', ar: 'فيديو')),
+              //       value: Types.VIDEO,
+              //     ),
+              //   ],
+              //   onChanged: (type) async {
+              //     setState(() {
+              //       _type = type;
+              //     });
+              //     print('Type: $_type');
+              //     if (_type == Types.VIDEO) {
+              //       await _initCamera();
+              //     }
+              //   },
+              // ),
+              child: InkWell(
+                onTap: downloadSong,
+                child: Container(
+                  margin: EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
+                  width: 70,
+                  color: MyColors.accentColor,
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_download),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text(
+                        '${widget.melody.melodyPrice}\$',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    ],
                   ),
-                  DropdownMenuItem(
-                    child: Text(language(en: 'Video', ar: 'فيديو')),
-                    value: Types.VIDEO,
-                  ),
-                ],
-                onChanged: (type) async {
-                  setState(() {
-                    _type = type;
-                  });
-                  print('Type: $_type');
-                  if (_type == Types.VIDEO) {
-                    await _initCamera();
-                  }
-                },
+                ),
               ),
             ),
           )),
@@ -1620,4 +1644,83 @@ class _MelodyPageState extends State<MelodyPage> {
       Navigator.of(context).pop();
     }
   }
+  //TODO download melody
+  // Future downloadSong() async {
+  //   Token token = Token();
+  //
+  //   if (widget.melody.melodyPrice == null ||
+  //       double.parse(widget.melody.melodyPrice) == 0) {
+  //     token.tokenId = 'free';
+  //   } else {
+  //     DocumentSnapshot doc = await usersRef
+  //         .doc(Constants.currentUserID)
+  //         .collection('downloads')
+  //         .doc(widget.melody.id)
+  //         .get();
+  //     bool alreadyDownloaded = doc.exists;
+  //     print('alreadyDownloaded: $alreadyDownloaded');
+  //
+  //     if (!alreadyDownloaded) {
+  //       final success = await Navigator.of(context).pushNamed('/payment-home',
+  //           arguments: {'amount': widget.melody.melodyPrice});
+  //       if (success) {
+  //         await usersRef
+  //             .doc(Constants.currentUserID)
+  //             .collection('downloads')
+  //             .doc(_tracks[_index].id)
+  //             .set({'timestamp': FieldValue.serverTimestamp()});
+  //
+  //         await melodiesRef
+  //             .doc(widget.song.id)
+  //             .collection('tracks')
+  //             .doc(_tracks[_index].id)
+  //             .update({'owner_id': Constants.currentUserID});
+  //
+  //         token.tokenId = 'purchased';
+  //         print(token.tokenId);
+  //       }
+  //     } else {
+  //       token.tokenId = 'already purchased';
+  //       AppUtil.showToast(language(en: 'already purchased', ar: 'تم الشراء'));
+  //     }
+  //   }
+  //   if (token.tokenId != null) {
+  //     AppUtil.showLoader(context);
+  //     await AppUtil.createAppDirectory();
+  //     String path;
+  //
+  //     if (_tracks[_index].audio != null) {
+  //       path =
+  //           await AppUtil.downloadFile(_tracks[_index].audio, encrypt: false);
+  //     }
+  //
+  //     Melody melody = Melody(
+  //         id: _tracks[_index].id,
+  //         duration: _tracks[_index].duration,
+  //         imageUrl: _tracks[_index].image,
+  //         name: _tracks[_index].name,
+  //         songUrl: path);
+  //
+  //     Melody storedMelody =
+  //         await MelodySqlite.getMelodyWithId(_tracks[_index].id);
+  //
+  //     if (storedMelody == null) {
+  //       await MelodySqlite.insert(melody);
+  //
+  //       await usersRef
+  //           .doc(Constants.currentUserID)
+  //           .collection('downloads')
+  //           .doc(_tracks[_index].id)
+  //           .set({'timestamp': FieldValue.serverTimestamp()});
+  //
+  //       Navigator.of(context).pop();
+  //       AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
+  //       Navigator.of(context).pushNamed('/downloads');
+  //     } else {
+  //       Navigator.of(context).pop();
+  //       AppUtil.showToast('Already downloaded!');
+  //       Navigator.of(context).pushNamed('/downloads');
+  //     }
+  //   }
+  // }
 }

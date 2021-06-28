@@ -128,7 +128,6 @@ class _TracksPageState extends State<TracksPage> {
                                                 price:
                                                     _tracks[index].price ?? '0',
                                                 name: _tracks[index].name,
-                                                isSong: true,
                                                 duration:
                                                     _tracks[index].duration,
                                                 songUrl: _tracks[index].audio)
@@ -274,7 +273,6 @@ class _TracksPageState extends State<TracksPage> {
           duration: _tracks[_index].duration,
           imageUrl: _tracks[_index].image,
           name: _tracks[_index].name,
-          isSong: true,
           songUrl: path);
 
       Melody storedMelody =
