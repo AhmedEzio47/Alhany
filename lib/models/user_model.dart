@@ -11,6 +11,8 @@ class User {
   final int notificationsNumber;
   final List search;
   final List boughtSongs;
+  final List boughtTracks;
+  final List boughtMelodies;
   final dynamic online;
 
   User(
@@ -22,6 +24,8 @@ class User {
       this.description,
       this.violations,
       this.boughtSongs,
+      this.boughtTracks,
+      this.boughtMelodies,
       this.notificationsNumber,
       this.online,
       this.search});
@@ -36,6 +40,8 @@ class User {
         description: doc.data()['description'] ?? '',
         violations: doc.data()['violations'],
         boughtSongs: doc.data()['bought_songs'],
+        boughtTracks: doc.data()['bought_tracks'],
+        boughtMelodies: doc.data()['bought_melodies'],
         notificationsNumber: doc.data()['notificationsNumber'],
         online: doc.data()['online'],
         search: doc.data()['search']);

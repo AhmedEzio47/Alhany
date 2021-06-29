@@ -704,7 +704,7 @@ class _HomePageState extends State<HomePage>
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 child: Text(
-                  language(ar: 'الأغاني المشتراه', en: 'Bought songs'),
+                  language(ar: 'الأغاني المشتراة', en: 'Bought songs'),
                   style: TextStyle(color: MyColors.textLightColor),
                 ),
               ),

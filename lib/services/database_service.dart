@@ -41,6 +41,18 @@ class DatabaseService {
     return Melody();
   }
 
+  static Future<Track> getTrackWithId(String songId, String trackId) async {
+    DocumentSnapshot melodyDocSnapshot = await melodiesRef
+        ?.doc(songId)
+        ?.collection('tracks')
+        ?.doc(trackId)
+        ?.get();
+    if (melodyDocSnapshot.exists) {
+      return Track.fromDoc(melodyDocSnapshot);
+    }
+    return Track();
+  }
+
   static addUserToDatabase(
       String id, String email, String name, String username) async {
     List search = searchList(name);
@@ -140,6 +152,28 @@ class DatabaseService {
     for (String songId in Constants.currentUser.boughtSongs) {
       Melody melody = await getMelodyWithId(songId);
       melodies.add(melody);
+    }
+
+    List<Map<String, dynamic>> tracks = [];
+
+    QuerySnapshot trackSnapshot = await usersRef
+        .doc(Constants.currentUserID)
+        .collection('owned_tracks')
+        .get();
+    trackSnapshot.docs.forEach((element) {
+      Map<String, dynamic> data = element.data();
+      data.putIfAbsent('id', () => element.id);
+      tracks.add(data);
+    });
+
+    for (var t in tracks) {
+      Track track = await getTrackWithId(t['song_id'], t['id']);
+      melodies.add(Melody(
+          id: track.id,
+          duration: track.duration,
+          imageUrl: track.image,
+          name: track.name,
+          songUrl: track.audio));
     }
 
     return melodies;

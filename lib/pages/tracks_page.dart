@@ -242,7 +242,10 @@ class _TracksPageState extends State<TracksPage> {
               .doc(Constants.currentUserID)
               .collection('owned_tracks')
               .doc(_tracks[_index].id)
-              .set({'timestamp': FieldValue.serverTimestamp()});
+              .set({
+            'timestamp': FieldValue.serverTimestamp(),
+            'song_id': widget.song.id
+          });
 
           await melodiesRef
               .doc(widget.song.id)

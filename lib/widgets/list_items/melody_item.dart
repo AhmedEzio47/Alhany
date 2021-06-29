@@ -57,9 +57,11 @@ class _MelodyItemState extends State<MelodyItem> {
 
   getAuthor() async {
     User author = await DatabaseService.getUserWithId(widget.melody.authorId);
-    setState(() {
-      _author = author;
-    });
+    if (mounted) {
+      setState(() {
+        _author = author;
+      });
+    }
   }
 
   isFavourite() async {
@@ -70,9 +72,11 @@ class _MelodyItemState extends State<MelodyItem> {
             .get())
         .exists;
 
-    setState(() {
-      _isFavourite = isFavourite;
-    });
+    if (mounted) {
+      setState(() {
+        _isFavourite = isFavourite;
+      });
+    }
   }
 
   @override
@@ -100,7 +104,7 @@ class _MelodyItemState extends State<MelodyItem> {
                   _author?.name ?? widget.melody.singer ?? '',
                   style: TextStyle(color: MyColors.textLightColor),
                 )
-              : null,
+              : Text(''),
           trailing: (widget.melody?.songUrl != null ?? false) &&
                   widget.showFavBtn
               ? InkWell(
