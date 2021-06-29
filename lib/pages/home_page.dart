@@ -184,24 +184,24 @@ class _HomePageState extends State<HomePage>
             ],
           ),
         ),
-        floatingActionButton: _page == 2
-            ? FloatingActionButton(
-                child: Icon(Icons.playlist_play),
-                onPressed: () {
-                  if (_favourites.isEmpty) {
-                    return;
-                  }
-                  setState(() {
-                    musicPlayer = MusicPlayer(
-                      melodyList: _favourites,
-                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                      initialDuration: 0,
-                    );
-                    _isPlaying = true;
-                  });
-                },
-              )
-            : null,
+        // floatingActionButton: _page == 2
+        //     ? FloatingActionButton(
+        //         child: Icon(Icons.playlist_play),
+        //         onPressed: () {
+        //           if (_favourites.isEmpty) {
+        //             return;
+        //           }
+        //           setState(() {
+        //             musicPlayer = MusicPlayer(
+        //               melodyList: _favourites,
+        //               backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+        //               initialDuration: 0,
+        //             );
+        //             _isPlaying = true;
+        //           });
+        //         },
+        //       )
+        //     : null,
       ),
     );
   }
@@ -722,6 +722,7 @@ class _HomePageState extends State<HomePage>
                       onTap: () async {
                         _boughtSongsIndex = index;
                         musicPlayer = MusicPlayer(
+                          checkPrice: false,
                           onDownload: downloadSong,
                           melodyList: [_boughtSongs[index]],
                           key: ValueKey(_boughtSongs[index].id),
@@ -916,6 +917,15 @@ class _HomePageState extends State<HomePage>
 
   int _boughtSongsIndex = 0;
   downloadSong() async {
+    AppUtil.showLoader(context);
+    Melody storedMelody =
+        await MelodySqlite.getMelodyWithId(_boughtSongs[_boughtSongsIndex].id);
+    if (storedMelody != null) {
+      AppUtil.showToast('Already downloaded');
+      Navigator.of(context).pop();
+      Navigator.of(context).pushNamed('/downloads');
+      return;
+    }
     String path;
     if (_boughtSongs[_boughtSongsIndex].songUrl != null) {
       path = await AppUtil.downloadFile(_boughtSongs[_boughtSongsIndex].songUrl,
@@ -929,12 +939,10 @@ class _HomePageState extends State<HomePage>
         name: _boughtSongs[_boughtSongsIndex].name,
         songUrl: path);
 
-    Melody storedMelody =
-        await MelodySqlite.getMelodyWithId(_boughtSongs[_boughtSongsIndex].id);
-
     if (storedMelody == null) {
       await MelodySqlite.insert(melody);
     }
+    Navigator.of(context).pop();
     Navigator.of(context).pushNamed('/downloads');
   }
 }

@@ -10,6 +10,7 @@ import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ext_storage/ext_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -280,7 +281,15 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> downloadFile(String url, {bool encrypt = false}) async {
-    var firstPath = (await getApplicationSupportDirectory()).path;
+    var firstPath = await ExtStorage.getExternalStoragePublicDirectory(
+            ExtStorage.DIRECTORY_DOWNLOADS) +
+        '/Alhani/';
+
+    final Directory alhaniFolder = Directory('$firstPath');
+
+    if (!(await alhaniFolder.exists())) {
+      await alhaniFolder.create(recursive: true);
+    }
 
     var response = await get(url);
     var contentDisposition = response.headers['content-disposition'];

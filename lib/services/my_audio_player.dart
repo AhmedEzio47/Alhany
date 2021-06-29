@@ -1,4 +1,3 @@
-
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
 //import 'package:audioplayers/audio_cache.dart';
@@ -22,9 +21,9 @@ class MyAudioPlayer with ChangeNotifier {
 
   MyAudioPlayer(
       {this.urlList,
-        this.isLocal = false,
-        this.onComplete,
-        this.onPlayingStarted}) {
+      this.isLocal = false,
+      this.onComplete,
+      this.onPlayingStarted}) {
     initAudioPlayer();
   }
 
@@ -84,7 +83,10 @@ class MyAudioPlayer with ChangeNotifier {
     if (index == null) {
       index = this.index;
     }
-
+    if (isLocal)
+      duration = await advancedPlayer.setFilePath(urlList[index]);
+    else
+      duration = await advancedPlayer.setUrl(urlList[index]);
     await advancedPlayer.play();
 
     notifyListeners();

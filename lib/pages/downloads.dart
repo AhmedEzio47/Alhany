@@ -120,6 +120,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
                                         child: MelodyItem(
                                           //Solves confusion between songs and melodies when adding to favourites
                                           key: ValueKey('song_item'),
+                                          showFavBtn: false,
                                           melody: _downloads[index],
                                         ),
                                       );
@@ -151,6 +152,21 @@ class _DownloadsPageState extends State<DownloadsPage> {
                         alignment: Alignment.bottomCenter,
                       ))
                     : Container(),
+                Positioned.fill(
+                    child: Align(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Text(
+                      language(
+                          en: 'You\'ll find downloaded  files in Downloads/Alhani',
+                          ar: 'ستجد الملفات المحملة في فولدر Downloads/Alhani'),
+                      style: TextStyle(
+                        color: MyColors.textLightColor,
+                      ),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                ))
               ],
             ),
           ),
@@ -187,6 +203,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
 
   playAllSongs() {
     musicPlayer = MusicPlayer(
+      checkPrice: false,
       melodyList: _downloads,
       initialDuration: _downloads[0].duration,
       isLocal: true,
