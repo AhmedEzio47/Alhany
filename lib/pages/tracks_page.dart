@@ -240,7 +240,7 @@ class _TracksPageState extends State<TracksPage> {
         if (success) {
           await usersRef
               .doc(Constants.currentUserID)
-              .collection('downloads')
+              .collection('owned_tracks')
               .doc(_tracks[_index].id)
               .set({'timestamp': FieldValue.serverTimestamp()});
 
@@ -283,7 +283,7 @@ class _TracksPageState extends State<TracksPage> {
 
         await usersRef
             .doc(Constants.currentUserID)
-            .collection('downloads')
+            .collection('owned_tracks')
             .doc(_tracks[_index].id)
             .set({'timestamp': FieldValue.serverTimestamp()});
 
