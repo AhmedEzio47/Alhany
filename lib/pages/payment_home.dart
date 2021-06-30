@@ -64,13 +64,14 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
                           if (Platform.isIOS) {
                             icon = Image.asset(Strings.apple);
                             text = Text('Use Apple Pay');
-                          } else if (Platform.isAndroid) {
-                            icon = Image.asset(
-                              Strings.google,
-                              scale: 20,
-                            );
-                            text = Text('Use Google Pay');
                           }
+                          // else if (Platform.isAndroid) {
+                          //   icon = Image.asset(
+                          //     Strings.google,
+                          //     scale: 20,
+                          //   );
+                          //   text = Text('Use Google Pay');
+                          // }
                           break;
                       }
                       return InkWell(

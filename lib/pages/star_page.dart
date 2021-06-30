@@ -9,12 +9,13 @@ import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/drawer.dart';
-import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 
 class StarPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class StarPage extends StatefulWidget {
 
 class _StarPageState extends State<StarPage>
     with SingleTickerProviderStateMixin {
-  ScrollController _melodiesScrollController = ScrollController();
+  ScrollController _exclusivesScrollController = ScrollController();
   TabController _tabController;
   int _page = 0;
   Timestamp lastVisiblePostSnapShot;
@@ -33,18 +34,18 @@ class _StarPageState extends State<StarPage>
 
   TextEditingController _searchController = TextEditingController();
 
-  List<Melody> _melodies = [];
-  List<Melody> _filteredMelodies = [];
+  List<Melody> _exclusives = [];
+  List<Melody> _filteredexclusives = [];
 
   ScrollController _scrollController = ScrollController();
 
-  getMelodies() async {
-    List<Melody> melodies = await DatabaseService.getStarMelodies();
+  getExclusives() async {
+    List<Melody> exclusives = await DatabaseService.getStarExclusives();
     if (mounted) {
       setState(() {
-        _melodies = melodies;
-        if (_melodies.length > 0)
-          this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        _exclusives = exclusives;
+        if (_exclusives.length > 0)
+          this.lastVisiblePostSnapShot = exclusives.last.timestamp;
       });
     }
   }
@@ -58,42 +59,46 @@ class _StarPageState extends State<StarPage>
     });
   }
 
-  nextMelodies() async {
-    List<Melody> melodies =
-        await DatabaseService.getNextMelodies(lastVisiblePostSnapShot);
-    if (melodies.length > 0) {
+  nextExclusives() async {
+    List<Melody> exclusives =
+        await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
+    if (exclusives.length > 0) {
       setState(() {
-        melodies.forEach((element) => _melodies.add(element));
-        this.lastVisiblePostSnapShot = melodies.last.timestamp;
+        exclusives.forEach((element) => _exclusives.add(element));
+        this.lastVisiblePostSnapShot = exclusives.last.timestamp;
       });
     }
   }
 
-  searchMelodies(String text) async {
-    List<Melody> filteredMelodies = await DatabaseService.searchMelodies(text);
+  searchexclusives(String text) async {
+    List<Melody> filteredexclusives =
+        await DatabaseService.searchExclusives(text);
     if (mounted) {
       setState(() {
-        _filteredMelodies = filteredMelodies;
+        _filteredexclusives = filteredexclusives;
       });
     }
   }
+
+  RemoteConfig _remoteConfig;
 
   @override
   void initState() {
-    getSlideImages();
-    getMelodies();
     super.initState();
+    fetchExclusiveFee();
+    getSlideImages();
+    getExclusives();
     _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
-    _melodiesScrollController
+    _exclusivesScrollController
       ..addListener(() {
-        if (_melodiesScrollController.offset >=
-                _melodiesScrollController.position.maxScrollExtent &&
-            !_melodiesScrollController.position.outOfRange) {
+        if (_exclusivesScrollController.offset >=
+                _exclusivesScrollController.position.maxScrollExtent &&
+            !_exclusivesScrollController.position.outOfRange) {
           print('reached the bottom');
-          if (!_isSearching) nextMelodies();
-        } else if (_melodiesScrollController.offset <=
-                _melodiesScrollController.position.minScrollExtent &&
-            !_melodiesScrollController.position.outOfRange) {
+          if (!_isSearching) nextExclusives();
+        } else if (_exclusivesScrollController.offset <=
+                _exclusivesScrollController.position.minScrollExtent &&
+            !_exclusivesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
       });
@@ -255,8 +260,8 @@ class _StarPageState extends State<StarPage>
                                   controller: _tabController,
                                   tabs: [
                                     Tab(
-                                      text: language(
-                                          en: 'Melodies', ar: 'آخر الأعمال'),
+                                      text:
+                                          language(en: 'Exclusive', ar: 'حصري'),
                                     ),
                                     Tab(
                                       text: language(
@@ -363,63 +368,159 @@ class _StarPageState extends State<StarPage>
               );
             });
       case 0:
-        return _isSearching
-            ? ListView.builder(
-                shrinkWrap: true,
-                primary: false,
-                controller: _melodiesScrollController,
-                itemCount: _filteredMelodies.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () async {
-                      setState(() {
-                        musicPlayer = MusicPlayer(
-                          key: ValueKey(_filteredMelodies[index].id),
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _filteredMelodies[index].name,
-                          btnSize: 30,
-                          initialDuration: _filteredMelodies[index].duration,
-                          melodyList: [_filteredMelodies[index]],
-                          isRecordBtnVisible: true,
-                        );
-                        _isPlaying = true;
-                      });
-                    },
-                    child: MelodyItem(
-                      context: context,
-                      key: ValueKey('melody_item'),
-                      melody: _filteredMelodies[index],
+        return Constants.currentUser.exclusiveLastDate == null
+            ? Padding(
+                padding: const EdgeInsets.only(top: 100),
+                child: Column(
+                  children: [
+                    Text(
+                      language(
+                          ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+                          en: 'Please subscribe in order to listen to exclusives'),
+                      style: TextStyle(color: MyColors.textLightColor),
                     ),
-                  );
-                })
-            : ListView.builder(
-                shrinkWrap: true,
-                primary: false,
-                controller: _melodiesScrollController,
-                itemCount: _melodies.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () async {
-                      setState(() {
-                        musicPlayer = MusicPlayer(
-                          key: ValueKey(_melodies[index].id),
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          title: _melodies[index].name,
-                          btnSize: 30,
-                          initialDuration: _melodies[index].duration,
-                          melodyList: [_melodies[index]],
-                          isRecordBtnVisible: true,
-                        );
-                        _isPlaying = true;
-                      });
-                    },
-                    child: MelodyItem(
-                      context: context,
-                      key: ValueKey('melody_item'),
-                      melody: _melodies[index],
+                    SizedBox(
+                      height: 10,
                     ),
-                  );
-                });
+                    MaterialButton(
+                      color: MyColors.accentColor,
+                      onPressed: subscribe,
+                      child: Text(language(ar: 'اشترك', en: 'Subscribe')),
+                    )
+                  ],
+                ),
+              )
+            : DateTime.now().difference(
+                        Constants.currentUser.exclusiveLastDate.toDate()) >
+                    Duration(days: 30)
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Column(
+                      children: [
+                        Text(
+                          language(
+                              ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
+                              en: 'Please renew subscription in order to listen to exclusives'),
+                          style: TextStyle(color: MyColors.textLightColor),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        MaterialButton(
+                          color: MyColors.accentColor,
+                          onPressed: subscribe,
+                          child: Text(language(ar: 'تجديد', en: 'Renew')),
+                        )
+                      ],
+                    ),
+                  )
+                : _isSearching
+                    ? GridView.builder(
+                        shrinkWrap: true,
+                        primary: false,
+                        controller: _exclusivesScrollController,
+                        itemCount: _filteredexclusives.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          childAspectRatio: .8,
+                          crossAxisCount: 2,
+                        ),
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () async {
+                              setState(() {
+                                musicPlayer = MusicPlayer(
+                                  checkPrice: false,
+                                  key: ValueKey(_filteredexclusives[index].id),
+                                  backColor: MyColors.lightPrimaryColor
+                                      .withOpacity(.8),
+                                  title: _filteredexclusives[index].name,
+                                  btnSize: 30,
+                                  initialDuration:
+                                      _filteredexclusives[index].duration,
+                                  melodyList: [_filteredexclusives[index]],
+                                  isRecordBtnVisible: true,
+                                );
+                                _isPlaying = true;
+                              });
+                            },
+                            child: Container(
+                              key: ValueKey('melody_item'),
+                              child: Column(
+                                children: [
+                                  CachedImage(
+                                    imageUrl:
+                                        _filteredexclusives[index].imageUrl,
+                                    width: 200,
+                                    height: 200,
+                                    defaultAssetImage:
+                                        Strings.default_melody_image,
+                                    imageShape: BoxShape.rectangle,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    _exclusives[index].name,
+                                    style: TextStyle(
+                                        color: MyColors.textLightColor),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        })
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        primary: false,
+                        controller: _exclusivesScrollController,
+                        itemCount: _exclusives.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          childAspectRatio: .8,
+                          crossAxisCount: 2,
+                        ),
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () async {
+                              setState(() {
+                                musicPlayer = MusicPlayer(
+                                  checkPrice: false,
+                                  key: ValueKey(_exclusives[index].id),
+                                  backColor: MyColors.lightPrimaryColor
+                                      .withOpacity(.8),
+                                  title: _exclusives[index].name,
+                                  btnSize: 30,
+                                  initialDuration: _exclusives[index].duration,
+                                  melodyList: [_exclusives[index]],
+                                  isRecordBtnVisible: true,
+                                );
+                                _isPlaying = true;
+                              });
+                            },
+                            child: Container(
+                              key: ValueKey('melody_item'),
+                              child: Column(
+                                children: [
+                                  CachedImage(
+                                    imageUrl: _exclusives[index].imageUrl,
+                                    width: 200,
+                                    height: 200,
+                                    defaultAssetImage:
+                                        Strings.default_melody_image,
+                                    imageShape: BoxShape.rectangle,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    _exclusives[index].name,
+                                    style: TextStyle(
+                                        color: MyColors.textLightColor),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        });
     }
   }
 
@@ -441,13 +542,13 @@ class _StarPageState extends State<StarPage>
                     style: TextStyle(color: _searchColor),
                     controller: _searchController,
                     onChanged: (text) async {
-                      await searchMelodies(text.toLowerCase());
+                      await searchexclusives(text.toLowerCase());
                     },
                     decoration: InputDecoration(
                         fillColor: _searchColor,
                         focusColor: _searchColor,
                         hoverColor: _searchColor,
-                        hintText: 'Search melodies...',
+                        hintText: 'Search exclusives...',
                         disabledBorder: new UnderlineInputBorder(
                             borderSide: new BorderSide(
                           color: _searchColor,
@@ -467,7 +568,7 @@ class _StarPageState extends State<StarPage>
                         suffixIcon: InkWell(
                           onTap: () {
                             _searchController.clear();
-                            _filteredMelodies = [];
+                            _filteredexclusives = [];
                           },
                           child: Icon(
                             Icons.close,
@@ -493,5 +594,41 @@ class _StarPageState extends State<StarPage>
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/app-page');
+  }
+
+  Future setupRemoteConfig() async {
+    await Firebase.initializeApp();
+    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    // Allow a fetch every millisecond. Default is 12 hours.
+    remoteConfig
+        .setConfigSettings(RemoteConfigSettings(minimumFetchIntervalMillis: 1));
+    remoteConfig.setDefaults(<String, dynamic>{
+      'welcome': 'default welcome',
+      'hello': 'default hello',
+    });
+    this._remoteConfig = remoteConfig;
+  }
+
+  Future subscribe() async {
+    String exFee = await fetchExclusiveFee();
+    final success = await Navigator.of(context)
+        .pushNamed('/payment-home', arguments: {'amount': exFee});
+    if (success ?? false) {
+      await usersRef
+          .doc(Constants.currentUserID)
+          .update({'exclusive_last_date': FieldValue.serverTimestamp()});
+
+      Constants.currentUser =
+          await DatabaseService.getUserWithId(Constants.currentUserID);
+      setState(() {});
+    }
+  }
+
+  Future<String> fetchExclusiveFee() async {
+    await setupRemoteConfig();
+    await _remoteConfig.fetch(expiration: const Duration(seconds: 0));
+    await _remoteConfig.activateFetched();
+    String exclusiveFee = _remoteConfig.getString('exclusives_fee');
+    return exclusiveFee;
   }
 }

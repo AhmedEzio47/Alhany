@@ -106,6 +106,8 @@ class _UploadSingleLevelMelodyState extends State<UploadSingleLevelMelody> {
                         });
                       },
                       items: (_singersNames)
+                          .where((element) => element != null)
+                          .toList()
                           .map<DropdownMenuItem<dynamic>>((dynamic value) {
                         return DropdownMenuItem<dynamic>(
                           value: value,

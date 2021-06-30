@@ -7,6 +7,7 @@ class User {
   final String profileImageUrl;
   final String email;
   final String description;
+  final Timestamp exclusiveLastDate;
   final int violations;
   final int notificationsNumber;
   final List search;
@@ -22,6 +23,7 @@ class User {
       this.profileImageUrl,
       this.email,
       this.description,
+      this.exclusiveLastDate,
       this.violations,
       this.boughtSongs,
       this.boughtTracks,
@@ -38,6 +40,7 @@ class User {
         profileImageUrl: doc.data()['profile_url'],
         email: doc.data()['email'],
         description: doc.data()['description'] ?? '',
+        exclusiveLastDate: doc.data()['exclusive_last_date'],
         violations: doc.data()['violations'],
         boughtSongs: doc.data()['bought_songs'],
         boughtTracks: doc.data()['bought_tracks'],

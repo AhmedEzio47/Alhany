@@ -89,8 +89,10 @@ class _UploadMultiLevelMelodyState extends State<UploadMultiLevelMelody> {
                     _singerName = text;
                   });
                 },
-                items:
-                    (_singers).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                items: (_singers)
+                    .where((element) => element != null)
+                    .toList()
+                    .map<DropdownMenuItem<dynamic>>((dynamic value) {
                   return DropdownMenuItem<dynamic>(
                     value: value,
                     child: Text(value),

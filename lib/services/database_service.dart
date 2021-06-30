@@ -92,10 +92,31 @@ class DatabaseService {
     return tracks;
   }
 
-  static Future<List<Melody>> getStarMelodies() async {
-    QuerySnapshot melodiesSnapshot = await melodiesRef
-        .where('is_song', isEqualTo: false)
-        .where('author_id', isEqualTo: Constants.starUser.id)
+  static Future<List<Melody>> getStarExclusives() async {
+    QuerySnapshot melodiesSnapshot = await exclusivesRef
+        .limit(20)
+        .orderBy('timestamp', descending: true)
+        .get();
+    List<Melody> melodies =
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static Future<List<Melody>> getNextExclusives(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot melodiesSnapshot = await exclusivesRef
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .get();
+    List<Melody> melodies =
+        melodiesSnapshot.docs.map((doc) => Melody.fromDoc(doc)).toList();
+    return melodies;
+  }
+
+  static searchExclusives(String text) async {
+    QuerySnapshot melodiesSnapshot = await exclusivesRef
+        .where('search', arrayContains: text)
         .limit(20)
         .orderBy('timestamp', descending: true)
         .get();

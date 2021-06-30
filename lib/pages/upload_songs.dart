@@ -131,10 +131,12 @@ class _UploadSongsState extends State<UploadSongs> {
                           });
                         },
                         items: (_singersNames)
+                            .where((element) => element != null)
+                            .toList()
                             .map<DropdownMenuItem<dynamic>>((dynamic value) {
                           return DropdownMenuItem<dynamic>(
                             value: value,
-                            child: Text(value),
+                            child: Text(value ?? ''),
                           );
                         }).toList(),
                       ),
