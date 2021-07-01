@@ -388,6 +388,10 @@ class _NewsItemState extends State<NewsItem> {
     if (_videoController != null) {
       _videoController.dispose();
     }
+
+    if (_chewieController != null) {
+      _chewieController.dispose();
+    }
     super.dispose();
   }
 
@@ -437,7 +441,8 @@ class _NewsItemState extends State<NewsItem> {
                     onTap: playVideo,
                     child: Container(
                         height: 200,
-                        child: _videoController != null
+                        child: _videoController != null &&
+                                _chewieController != null
                             ? Chewie(
                                 controller: _chewieController,
                               )
@@ -510,7 +515,7 @@ class _NewsItemState extends State<NewsItem> {
       ..initialize().then((value) {
         _videoController.play();
         _chewieController = ChewieController(
-          showControls: false,
+          showControls: true,
           videoPlayerController: _videoController,
           autoPlay: false,
           looping: true,
