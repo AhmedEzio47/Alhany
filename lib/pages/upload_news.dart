@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,7 +34,7 @@ class _UploadNewsState extends State<UploadNews> {
   @override
   void initState() {
     AppUtil.createAppDirectory();
-    recorder = AudioRecorder();
+    //recorder = AudioRecorder();
     super.initState();
   }
 
@@ -65,26 +66,26 @@ class _UploadNewsState extends State<UploadNews> {
               hint: Text('Content Type'),
               value: _type,
               items: [
-                DropdownMenuItem(
-                  child: Text('Record Audio'),
-                  value: Types.RECORD_AUDIO,
-                ),
-                DropdownMenuItem(
-                  child: Text('Record Video'),
-                  value: Types.RECORD_VIDEO,
-                ),
-                DropdownMenuItem(
-                  child: Text('Choose Audio'),
-                  value: Types.CHOOSE_AUDIO,
-                ),
+                // DropdownMenuItem(
+                //   child: Text('Record Audio'),
+                //   value: Types.RECORD_AUDIO,
+                // ),
+                // DropdownMenuItem(
+                //   child: Text('Record Video'),
+                //   value: Types.RECORD_VIDEO,
+                // ),
+                // DropdownMenuItem(
+                //   child: Text('Choose Audio'),
+                //   value: Types.CHOOSE_AUDIO,
+                // ),
                 DropdownMenuItem(
                   child: Text('Choose Video'),
                   value: Types.CHOOSE_VIDEO,
                 ),
-                DropdownMenuItem(
-                  child: Text('Image'),
-                  value: Types.IMAGE,
-                ),
+                // DropdownMenuItem(
+                //   child: Text('Image'),
+                //   value: Types.IMAGE,
+                // ),
               ],
               onChanged: (type) {
                 setState(() {
@@ -255,13 +256,15 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _chooseVideo() async {
-    File video = await ImagePicker.pickVideo(source: ImageSource.gallery);
+    File video = await AppUtil.chooseVideo();
     setState(() {
-      if (video != null) _contentFile = video;
+      if (video != null) _contentFile = File(video.path);
       _contentType = 'video';
     });
     getDuration(_contentFile.path);
   }
+
+  final FlutterFFmpeg flutterFFmpeg = new FlutterFFmpeg();
 
   _submit() async {
     if (_textController.text.isEmpty && _contentFile == null) {
@@ -271,11 +274,23 @@ class _UploadNewsState extends State<UploadNews> {
     AppUtil.showLoader(context);
     String id = randomAlphaNumeric(20);
     String ext = path.extension(_contentFile.path);
+    String thumbnailUrl;
+    if (_contentType == 'video') {
+      await AppUtil.createAppDirectory();
+      int success = await flutterFFmpeg.execute(
+          "-y -i ${_contentFile.path} -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");
+
+      thumbnailUrl = await AppUtil().uploadFile(
+          File('${appTempDirectoryPath}thumbnail.png'),
+          context,
+          'news_thumbnails/${Constants.currentUserID}/$id${path.extension('${appTempDirectoryPath}thumbnail.png')}');
+    }
     String url =
         await AppUtil().uploadFile(_contentFile, context, 'news/$id$ext');
     await newsRef.doc(id).set({
       'text': _textController.text,
       'content_url': url,
+      'thumbnail': thumbnailUrl,
       'duration': _duration,
       'type': _contentType,
       'timestamp': FieldValue.serverTimestamp()

@@ -4,6 +4,7 @@ class News {
   final String id;
   final String contentUrl;
   final String text;
+  final String thumbnail;
   final String type;
   final int duration;
   int likes;
@@ -16,6 +17,7 @@ class News {
       {this.id,
       this.contentUrl,
       this.text,
+      this.thumbnail,
       this.duration,
       this.type,
       this.likes,
@@ -28,6 +30,7 @@ class News {
     return News(
         id: doc.id,
         text: doc.data()['text'],
+        thumbnail: doc.data()['thumbnail'],
         contentUrl: doc.data()['content_url'],
         type: doc.data()['type'],
         duration: doc.data()['duration'],

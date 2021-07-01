@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
@@ -13,6 +14,7 @@ class AudioRecorder {
   }
 
   void init() async {
+    await AppUtil.createAppDirectory();
     String customPath = appTempDirectoryPath;
 
     // can add extension like ".mp4" ".wav" ".m4a" ".aac"

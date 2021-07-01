@@ -364,6 +364,7 @@ class _StarPageState extends State<StarPage>
             itemCount: _news.length,
             itemBuilder: (context, index) {
               return NewsItem(
+                key: ValueKey(_news[index].id),
                 news: _news[index],
               );
             });
@@ -444,6 +445,7 @@ class _StarPageState extends State<StarPage>
                               });
                             },
                             child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 5),
                               key: ValueKey('melody_item'),
                               child: Column(
                                 children: [
@@ -497,6 +499,7 @@ class _StarPageState extends State<StarPage>
                               });
                             },
                             child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 5),
                               key: ValueKey('melody_item'),
                               child: Column(
                                 children: [

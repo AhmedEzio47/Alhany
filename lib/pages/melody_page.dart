@@ -1449,16 +1449,17 @@ class _MelodyPageState extends State<MelodyPage> {
                 child: Container(
                   margin: EdgeInsets.all(8),
                   padding: EdgeInsets.all(8),
-                  width: 70,
+                  width: 80,
                   color: MyColors.accentColor,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Icon(Icons.file_download),
                       SizedBox(
                         width: 5,
                       ),
                       Text(
-                        '${widget.melody.melodyPrice}\$',
+                        '${widget.melody.melodyPrice ?? 0}\$',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       )
                     ],

@@ -44,7 +44,17 @@ class _NewsItemState extends State<NewsItem> {
       secondHalf = "";
     }
     if (widget.news.type == 'video') {
-      initVideoPlayer();
+      if (Constants.currentRoute == '/news-page' &&
+          widget.news.type == 'video') {
+        initVideoPlayer(widget.news.contentUrl);
+        setState(() {
+          _isPlaying = true;
+        });
+      } else {
+        setState(() {
+          _isPlaying = false;
+        });
+      }
     }
     initLikes(widget.news);
     super.initState();
@@ -117,10 +127,6 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   VideoPlayerController _videoController;
-  initVideoPlayer() async {
-    _videoController = VideoPlayerController.network(widget.news.contentUrl);
-    await _videoController.initialize();
-  }
 
   String firstHalf;
   String secondHalf;
@@ -386,8 +392,16 @@ class _NewsItemState extends State<NewsItem> {
 
   Widget playPauseBtn() {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed('/post-fullscreen',
-          arguments: {'news': _news, 'singer': Constants.starUser}),
+      onTap: () {
+        if (Constants.currentRoute != '/news-page') {
+          Navigator.of(context).pushNamed('/news-page', arguments: {
+            'news': _news,
+          });
+          Constants.currentRoute = '/news-page';
+        } else {
+          playVideo();
+        }
+      },
       child: Container(
         height: 40,
         width: 40,
@@ -417,19 +431,32 @@ class _NewsItemState extends State<NewsItem> {
       case 'video':
         return Stack(
           children: [
-            Container(
-                height: 200,
-                child: _videoController != null
-                    ? VideoPlayer(_videoController)
-                    : Container()),
-            Positioned.fill(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                child: playPauseBtn(),
-                alignment: Alignment.center,
-              ),
-            ))
+            Constants.currentRoute == '/news-page'
+                ? InkWell(
+                    onTap: playVideo,
+                    child: Container(
+                        height: 200,
+                        child: _videoController != null
+                            ? VideoPlayer(_videoController)
+                            : Container()),
+                  )
+                : CachedImage(
+                    imageUrl: _news.thumbnail,
+                    width: MediaQuery.of(context).size.width,
+                    imageShape: BoxShape.rectangle,
+                    defaultAssetImage: Strings.default_cover_image,
+                    height: 200,
+                  ),
+            !_isPlaying
+                ? Positioned.fill(
+                    child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      child: playPauseBtn(),
+                      alignment: Alignment.center,
+                    ),
+                  ))
+                : Container()
           ],
         );
       case 'audio':
@@ -457,6 +484,55 @@ class _NewsItemState extends State<NewsItem> {
         );
       default:
         return Container();
+    }
+  }
+
+  bool _isPlaying;
+
+  initVideoPlayer(String url) async {
+    if (_videoController != null) {
+      //await _controller.dispose();
+      setState(() {
+        _videoController = null;
+      });
+    }
+    _videoController = VideoPlayerController.network(url)
+      ..addListener(() {
+        // if (mounted) {
+        //   setState(() {});
+        // }
+      })
+      ..setLooping(false)
+      ..initialize().then((value) {
+        _videoController.play();
+        setState(() {
+          _isPlaying = true;
+        });
+        _videoController.setLooping(false);
+        print('aspect ratio: ${_videoController.value.aspectRatio}');
+      });
+  }
+
+  disposePlayer() async {
+    await _videoController.pause();
+    _videoController.removeListener(() {});
+    await _videoController.dispose();
+    if (mounted) {
+      _videoController = null;
+    }
+  }
+
+  void playVideo() {
+    if (_isPlaying) {
+      _videoController.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    } else {
+      _videoController.play();
+      setState(() {
+        _isPlaying = true;
+      });
     }
   }
 }
