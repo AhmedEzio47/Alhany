@@ -1085,6 +1085,14 @@ class DatabaseService {
             await AppUtil.getStorageFileNameFromUrl(news.contentUrl);
 
         await storageRef.child('/news/$fileName').delete();
+
+        if (news.thumbnail != null) {
+          String thumbnail =
+              await AppUtil.getStorageFileNameFromUrl(news.thumbnail);
+          await storageRef
+              .child('/news_thumbnails/${Constants.currentUserID}/$thumbnail')
+              .delete();
+        }
       }
       if (recordId != null) {
         Record record = await getRecordWithId(recordId);

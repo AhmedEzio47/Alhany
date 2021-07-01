@@ -369,7 +369,7 @@ class _StarPageState extends State<StarPage>
               );
             });
       case 0:
-        return Constants.currentUser.exclusiveLastDate == null
+        return Constants.currentUser?.exclusiveLastDate == null
             ? Padding(
                 padding: const EdgeInsets.only(top: 100),
                 child: Column(
@@ -614,17 +614,19 @@ class _StarPageState extends State<StarPage>
 
   Future subscribe() async {
     String exFee = await fetchExclusiveFee();
-    final success = await Navigator.of(context)
-        .pushNamed('/payment-home', arguments: {'amount': exFee});
-    if (success ?? false) {
-      await usersRef
-          .doc(Constants.currentUserID)
-          .update({'exclusive_last_date': FieldValue.serverTimestamp()});
+    AppUtil.executeFunctionIfLoggedIn(context, () async {
+      final success = await Navigator.of(context)
+          .pushNamed('/payment-home', arguments: {'amount': exFee});
+      if (success ?? false) {
+        await usersRef
+            .doc(Constants.currentUserID)
+            .update({'exclusive_last_date': FieldValue.serverTimestamp()});
 
-      Constants.currentUser =
-          await DatabaseService.getUserWithId(Constants.currentUserID);
-      setState(() {});
-    }
+        Constants.currentUser =
+            await DatabaseService.getUserWithId(Constants.currentUserID);
+        setState(() {});
+      }
+    });
   }
 
   Future<String> fetchExclusiveFee() async {

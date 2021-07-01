@@ -28,35 +28,38 @@ class _SongPageState extends State<SongPage> {
   }
 
   Future<bool> buySong() async {
-    await AppUtil.showAlertDialog(
-        context: context,
-        message: language(
-            ar: 'هل تريد شراء هذه الأغنية',
-            en: 'Do you want to buy this song?'),
-        firstBtnText: language(ar: 'نعم', en: 'Yes'),
-        secondBtnText: language(ar: 'لا', en: 'No'),
-        firstFunc: () async {
-          final success = await Navigator.of(context).pushNamed('/payment-home',
-              arguments: {'amount': widget.song.price});
-          if (success) {
-            List boughtSongs = Constants.currentUser.boughtSongs ?? [];
-            boughtSongs.add(widget.song.id);
+    AppUtil.executeFunctionIfLoggedIn(context, () async {
+      await AppUtil.showAlertDialog(
+          context: context,
+          message: language(
+              ar: 'هل تريد شراء هذه الأغنية',
+              en: 'Do you want to buy this song?'),
+          firstBtnText: language(ar: 'نعم', en: 'Yes'),
+          secondBtnText: language(ar: 'لا', en: 'No'),
+          firstFunc: () async {
+            final success = await Navigator.of(context).pushNamed(
+                '/payment-home',
+                arguments: {'amount': widget.song.price});
+            if (success) {
+              List boughtSongs = Constants.currentUser.boughtSongs ?? [];
+              boughtSongs.add(widget.song.id);
 
-            await usersRef
-                .doc(Constants.currentUserID)
-                .update({'bought_songs': boughtSongs});
+              await usersRef
+                  .doc(Constants.currentUserID)
+                  .update({'bought_songs': boughtSongs});
 
-            Constants.currentUser =
-                await DatabaseService.getUserWithId(Constants.currentUserID);
+              Constants.currentUser =
+                  await DatabaseService.getUserWithId(Constants.currentUserID);
 
+              Navigator.of(context).pop();
+              return true;
+            }
+          },
+          secondFunc: () {
             Navigator.of(context).pop();
-            return true;
-          }
-        },
-        secondFunc: () {
-          Navigator.of(context).pop();
-          return false;
-        });
+            return false;
+          });
+    });
 
     return false;
   }

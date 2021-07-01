@@ -11,6 +11,7 @@ import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:Alhany/widgets/url_text.dart';
+import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -437,7 +438,9 @@ class _NewsItemState extends State<NewsItem> {
                     child: Container(
                         height: 200,
                         child: _videoController != null
-                            ? VideoPlayer(_videoController)
+                            ? Chewie(
+                                controller: _chewieController,
+                              )
                             : Container()),
                   )
                 : CachedImage(
@@ -488,6 +491,7 @@ class _NewsItemState extends State<NewsItem> {
   }
 
   bool _isPlaying;
+  var _chewieController;
 
   initVideoPlayer(String url) async {
     if (_videoController != null) {
@@ -505,10 +509,20 @@ class _NewsItemState extends State<NewsItem> {
       ..setLooping(false)
       ..initialize().then((value) {
         _videoController.play();
+        _chewieController = ChewieController(
+          showControls: false,
+          videoPlayerController: _videoController,
+          autoPlay: false,
+          looping: true,
+        );
         setState(() {
           _isPlaying = true;
         });
         _videoController.setLooping(false);
+
+        // final playerWidget = Chewie(
+        //   controller: _chewieController,
+        // );
         print('aspect ratio: ${_videoController.value.aspectRatio}');
       });
   }

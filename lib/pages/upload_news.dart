@@ -142,7 +142,7 @@ class _UploadNewsState extends State<UploadNews> {
 
   @override
   void dispose() {
-    recorder.dispose();
+    //recorder.dispose();
     super.dispose();
   }
 
@@ -276,7 +276,10 @@ class _UploadNewsState extends State<UploadNews> {
     String ext = path.extension(_contentFile.path);
     String thumbnailUrl;
     if (_contentType == 'video') {
+      await AppUtil.deleteFiles();
       await AppUtil.createAppDirectory();
+      Directory directory = Directory(appTempDirectoryPath);
+      print('Directory exists:${await directory.exists()}');
       int success = await flutterFFmpeg.execute(
           "-y -i ${_contentFile.path} -ss 00:00:01.000 -vframes 1 ${appTempDirectoryPath}thumbnail.png");
 

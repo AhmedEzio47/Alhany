@@ -122,44 +122,49 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future _downloadMelody() async {
-    AppUtil.showLoader(context,
-        message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
+    AppUtil.executeFunctionIfLoggedIn(context, () async {
+      AppUtil.showLoader(context,
+          message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
 
-    String url;
-    if (widget.melody.melodyUrl != null) {
-      url = widget.melody.melodyUrl;
-    } else if (Constants.currentMelodyLevel != null) {
-      url = widget.melody.levelUrls[Constants.currentMelodyLevel];
-    } else {
-      url = widget.melody.levelUrls.values.elementAt(0).toString();
-    }
-    String filePath;
-    try {
-      filePath = await AppUtil.downloadFile(url);
-    } catch (ex) {
-      print('Melody download error:${ex.toString()}');
-      AppUtil.showToast(language(
-          en: 'Error, please try again.', ar: 'حدث خطأ برجاء إعادة المحاولة'));
-      Navigator.of(context).pop();
-      return;
-    }
-
-    MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
-    //print("File Duration: ${info.getMediaProperties()['duration']}");
-    _duration =
-        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
-
-    setState(() {
-      melodyPath = filePath;
-      if (_type == Types.AUDIO) {
-        mergedFilePath +=
-            '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+      String url;
+      if (widget.melody.melodyUrl != null) {
+        url = widget.melody.melodyUrl;
+      } else if (Constants.currentMelodyLevel != null) {
+        url = widget.melody.levelUrls[Constants.currentMelodyLevel];
       } else {
-        newFilePath += '${path.basenameWithoutExtension(filePath)}_rec.mp4';
-        mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new.mp4';
+        url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
+      String filePath;
+      try {
+        filePath = await AppUtil.downloadFile(url);
+      } catch (ex) {
+        print('Melody download error:${ex.toString()}');
+        AppUtil.showToast(language(
+            en: 'Error, please try again.',
+            ar: 'حدث خطأ برجاء إعادة المحاولة'));
+        Navigator.of(context).pop();
+        return;
+      }
+
+      MediaInformation info =
+          await _flutterFFprobe.getMediaInformation(filePath);
+      //print("File Duration: ${info.getMediaProperties()['duration']}");
+      _duration = double.parse(info.getMediaProperties()['duration'].toString())
+          .toInt();
+
+      setState(() {
+        melodyPath = filePath;
+        if (_type == Types.AUDIO) {
+          mergedFilePath +=
+              '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+        } else {
+          newFilePath += '${path.basenameWithoutExtension(filePath)}_rec.mp4';
+          mergedFilePath +=
+              '${path.basenameWithoutExtension(filePath)}_new.mp4';
+        }
+      });
+      Navigator.of(context).pop();
     });
-    Navigator.of(context).pop();
   }
 
   void _recordAudio() async {
