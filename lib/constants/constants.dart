@@ -11,6 +11,7 @@ final firestore = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instance.ref();
 final usersRef = firestore.collection('users');
 final melodiesRef = firestore.collection('melodies');
+final appointmentsRef = firestore.collection('appointments');
 final exclusivesRef = firestore.collection('exclusives');
 final recordsRef = firestore.collection('records');
 final chatsRef = firestore.collection('chats');

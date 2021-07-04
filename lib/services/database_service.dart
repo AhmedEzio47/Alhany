@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/models/appointment_model.dart';
 import 'package:Alhany/models/category_model.dart';
 import 'package:Alhany/models/comment_model.dart';
 import 'package:Alhany/models/melody_model.dart';
@@ -198,6 +199,16 @@ class DatabaseService {
     }
 
     return melodies;
+  }
+
+  static Future<Map<DateTime, List>> getAppointments() async {
+    Map<DateTime, List> appointments = Map<DateTime, List>();
+    QuerySnapshot appointmentsSnapshot = await appointmentsRef.get();
+    appointmentsSnapshot.docs.forEach((element) {
+      appointments.putIfAbsent(
+          (element.data()['timestamp'] as Timestamp).toDate(),
+          () => [Appointment.fromDoc(element)]);
+    });
   }
 
   static Future<List<Melody>> getSongs() async {

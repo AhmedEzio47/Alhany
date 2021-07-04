@@ -6,6 +6,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/slide_image.dart';
+import 'package:Alhany/pages/appointment_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/drawer.dart';
@@ -233,6 +234,16 @@ class _StarPageState extends State<StarPage>
                                           Strings.default_profile_image,
                                     ),
                                   ),
+                                  MaterialButton(
+                                    onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (_){
+                                      return AppointmentPage();
+                                    }));
+                                    },
+                                    color: MyColors.accentColor,
+                                    child: Text(language(
+                                        ar: 'تحديد موعد',
+                                        en: 'Make appointment')),
+                                  ),
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
@@ -241,7 +252,7 @@ class _StarPageState extends State<StarPage>
                                           color: MyColors.textLightColor,
                                           fontSize: 16),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ]),
