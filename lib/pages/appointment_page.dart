@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -28,9 +33,57 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   void initState() {
     super.initState();
-    getAvailableDays();
+    prepareCalendar();
     getAppointments();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+          body: _tableCalendar == null
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Stack(children: [
+                  SingleChildScrollView(
+                      child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    child: Column(
+                      children: [
+                        RegularAppbar(
+                          context,
+                          height: 50,
+                        ),
+                        _tableCalendar ?? Container(),
+                        Expanded(
+                            child: (_availableHours?.length ?? 0) > 0
+                                ? _buildHoursList()
+                                : Center(
+                                    child: Text(
+                                    'Weekend',
+                                    style: TextStyle(fontSize: 20),
+                                  )))
+                      ],
+                    ),
+                  ))
+                ])),
+    );
+  }
+
+  int _availableHoursStart;
+  int _availableHoursEnd;
+  prepareCalendar() async {
+    _availableHoursStart = jsonDecode(
+        await RemoteConfigService.getString('available_hours_start'));
+    _availableHoursEnd =
+        jsonDecode(await RemoteConfigService.getString('available_hours_end'));
+    weekends = List<int>.from(jsonDecode(
+        await RemoteConfigService.getString('appointment_weekends')));
+
     _tableCalendar = TableCalendar(
+      startDay: DateTime.now(),
+      weekendDays: weekends,
       onDaySelected: (datetime, events, list) =>
           _onDaySelected(datetime, events, list),
       calendarController: calendarController,
@@ -44,69 +97,95 @@ class _AppointmentPageState extends State<AppointmentPage> {
         holidayStyle: TextStyle(color: Colors.white),
       ),
     );
+    setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-          body: Stack(children: [
-        SingleChildScrollView(
-            child: Container(
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            children: [
-              RegularAppbar(
-                context,
-                height: 50,
-              ),
-              _tableCalendar ?? Container(),
-              Expanded(child: _buildHoursList())
-            ],
-          ),
-        ))
-      ])),
-    );
-  }
-
-  int _availableHoursStart = 9;
-  int _availableHoursEnd = 17;
   List _availableHours = [];
-  getAvailableDays() {
+  getAvailableHours(DateTime selectedDate) {
+    _availableHours = [];
     int hour = _availableHoursStart;
     while (hour <= _availableHoursEnd) {
-      _availableHours.add(hour);
+      DateTime selectedHour = DateTime(
+          selectedDate.year, selectedDate.month, selectedDate.day, hour);
+      if (!_appointments.keys.contains(selectedHour)) _availableHours.add(hour);
       hour++;
     }
+    setState(() {});
   }
 
+  Widget _hourListView;
   Widget _buildHoursList() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
       child: ListView.builder(
           itemCount: _availableHours.length,
           itemBuilder: (context, index) {
-            return Container(
-              margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-              color: MyColors.accentColor,
-              child: Center(
-                  child: Text(
-                _availableHours[index].toString(),
-                style: TextStyle(fontSize: 18),
-              )),
-              padding: EdgeInsets.all(16),
+            return InkWell(
+              onTap: () {
+                _selectedHour = _availableHours[index];
+                AppUtil.executeFunctionIfLoggedIn(
+                    context,
+                    () => createAppointment(DateTime(_selectedDay.year,
+                        _selectedDay.month, _selectedDay.day, _selectedHour)));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                color: MyColors.accentColor,
+                child: Center(
+                    child: Text(
+                  '${_availableHours[index].toString()} : 00',
+                  style: TextStyle(fontSize: 18),
+                )),
+                padding: EdgeInsets.all(16),
+              ),
             );
           }),
     );
   }
 
+  DateTime _selectedDay;
+  int _selectedHour;
+  List weekends;
+
   _onDaySelected(DateTime dateTime, List events, List args) {
-    if ([6, 7].contains(dateTime.weekday)) {
-      AppUtil.showToast('Weekend');
-    } else {}
+    if (weekends.contains(dateTime.weekday)) {
+      setState(() {
+        _availableHours = [];
+      });
+      //AppUtil.showToast('Weekend');
+    } else {
+      _selectedDay = dateTime;
+      getAvailableHours(dateTime);
+    }
   }
 
-  createEvent(
+  createAppointment(
     DateTime dateTime,
-  ) {}
+  ) async {
+    AppUtil.showAlertDialog(
+        context: context,
+        message: language(ar: 'تأكيد الموعد؟', en: 'Confirm appointment?'),
+        firstBtnText: language(ar: 'نعم', en: 'Yes'),
+        firstFunc: () async {
+          final success = await Navigator.of(context).pushNamed('/payment-home',
+              arguments: {
+                'amount': await RemoteConfigService.getString('appointment_fee')
+              });
+          if (success ?? false) {
+            await appointmentsRef.add({
+              'name': Constants.currentUser.name,
+              'email': Constants.currentUser.email,
+              'user_id': Constants.currentUserID,
+              'timestamp': Timestamp.fromDate(dateTime)
+            });
+
+            Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (_) {
+              return AppointmentPage();
+            }));
+          }
+        },
+        secondFunc: () => Navigator.pop(context),
+        secondBtnText: language(ar: 'لا', en: 'No'));
+  }
 }

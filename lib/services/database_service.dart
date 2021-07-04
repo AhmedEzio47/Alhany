@@ -203,12 +203,15 @@ class DatabaseService {
 
   static Future<Map<DateTime, List>> getAppointments() async {
     Map<DateTime, List> appointments = Map<DateTime, List>();
+
     QuerySnapshot appointmentsSnapshot = await appointmentsRef.get();
     appointmentsSnapshot.docs.forEach((element) {
+      Appointment appointment = Appointment.fromDoc(element);
       appointments.putIfAbsent(
-          (element.data()['timestamp'] as Timestamp).toDate(),
-          () => [Appointment.fromDoc(element)]);
+          appointment.timestamp.toDate(), () => [appointment]);
     });
+
+    return appointments;
   }
 
   static Future<List<Melody>> getSongs() async {

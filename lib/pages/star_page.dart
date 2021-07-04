@@ -8,6 +8,7 @@ import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/pages/appointment_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
@@ -15,8 +16,6 @@ import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 
 class StarPage extends StatefulWidget {
@@ -71,17 +70,15 @@ class _StarPageState extends State<StarPage>
     }
   }
 
-  searchexclusives(String text) async {
-    List<Melody> filteredexclusives =
+  searchExclusives(String text) async {
+    List<Melody> filteredExclusives =
         await DatabaseService.searchExclusives(text);
     if (mounted) {
       setState(() {
-        _filteredexclusives = filteredexclusives;
+        _filteredexclusives = filteredExclusives;
       });
     }
   }
-
-  RemoteConfig _remoteConfig;
 
   @override
   void initState() {
@@ -235,9 +232,11 @@ class _StarPageState extends State<StarPage>
                                     ),
                                   ),
                                   MaterialButton(
-                                    onPressed: () {Navigator.of(context).push(MaterialPageRoute(builder: (_){
-                                      return AppointmentPage();
-                                    }));
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(builder: (_) {
+                                        return AppointmentPage();
+                                      }));
                                     },
                                     color: MyColors.accentColor,
                                     child: Text(language(
@@ -556,7 +555,7 @@ class _StarPageState extends State<StarPage>
                     style: TextStyle(color: _searchColor),
                     controller: _searchController,
                     onChanged: (text) async {
-                      await searchexclusives(text.toLowerCase());
+                      await searchExclusives(text.toLowerCase());
                     },
                     decoration: InputDecoration(
                         fillColor: _searchColor,
@@ -610,19 +609,6 @@ class _StarPageState extends State<StarPage>
     Navigator.of(context).pushReplacementNamed('/app-page');
   }
 
-  Future setupRemoteConfig() async {
-    await Firebase.initializeApp();
-    final RemoteConfig remoteConfig = await RemoteConfig.instance;
-    // Allow a fetch every millisecond. Default is 12 hours.
-    remoteConfig
-        .setConfigSettings(RemoteConfigSettings(minimumFetchIntervalMillis: 1));
-    remoteConfig.setDefaults(<String, dynamic>{
-      'welcome': 'default welcome',
-      'hello': 'default hello',
-    });
-    this._remoteConfig = remoteConfig;
-  }
-
   Future subscribe() async {
     String exFee = await fetchExclusiveFee();
     AppUtil.executeFunctionIfLoggedIn(context, () async {
@@ -641,10 +627,6 @@ class _StarPageState extends State<StarPage>
   }
 
   Future<String> fetchExclusiveFee() async {
-    await setupRemoteConfig();
-    await _remoteConfig.fetch(expiration: const Duration(seconds: 0));
-    await _remoteConfig.activateFetched();
-    String exclusiveFee = _remoteConfig.getString('exclusives_fee');
-    return exclusiveFee;
+    return RemoteConfigService.getString('exclusives_fee');
   }
 }
