@@ -11,6 +11,7 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/models/track_model.dart';
 import 'package:Alhany/models/user_model.dart';
+import 'package:Alhany/services/notification_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../app_util.dart';
@@ -473,6 +474,12 @@ class DatabaseService {
         .set({
       'last_message_timestamp': FieldValue.serverTimestamp(),
     });
+    NotificationHandler.sendNotification(
+        otherUserId,
+        '${Constants.currentUser.name} sent a message',
+        message,
+        Constants.currentUserID,
+        type);
   }
 
   static Future<List<Message>> getMessages(String otherUserId) async {

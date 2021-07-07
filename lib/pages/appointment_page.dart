@@ -51,19 +51,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     height: MediaQuery.of(context).size.height,
                     child: Column(
                       children: [
-                        RegularAppbar(
-                          context,
-                          height: 50,
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 4),
+                          color: MyColors.primaryColor,
+                          child: RegularAppbar(
+                            context,
+                            height: 50,
+                          ),
                         ),
                         _tableCalendar ?? Container(),
-                        Expanded(
-                            child: (_availableHours?.length ?? 0) > 0
-                                ? _buildHoursList()
-                                : Center(
-                                    child: Text(
-                                    'Weekend',
-                                    style: TextStyle(fontSize: 20),
-                                  )))
+                        Expanded(child: _buildHoursList())
                       ],
                     ),
                   ))
@@ -149,6 +146,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
   _onDaySelected(DateTime dateTime, List events, List args) {
     if (weekends.contains(dateTime.weekday)) {
+      AppUtil.showToast('Weekend');
       setState(() {
         _availableHours = [];
       });
@@ -167,11 +165,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
         message: language(ar: 'تأكيد الموعد؟', en: 'Confirm appointment?'),
         firstBtnText: language(ar: 'نعم', en: 'Yes'),
         firstFunc: () async {
+          Navigator.of(context).pop();
           final success = await Navigator.of(context).pushNamed('/payment-home',
               arguments: {
                 'amount': await RemoteConfigService.getString('appointment_fee')
               });
-          if (success ?? false) {
+          if (success ?? true) {
+            //TODO make false
             await appointmentsRef.add({
               'name': Constants.currentUser.name,
               'email': Constants.currentUser.email,
@@ -179,10 +179,21 @@ class _AppointmentPageState extends State<AppointmentPage> {
               'timestamp': Timestamp.fromDate(dateTime)
             });
 
+            await DatabaseService.sendMessage(Constants.starUser.id, 'text',
+                'I scheduled an appointment with you at ${dateTime.toString()}');
+
             Navigator.of(context)
                 .pushReplacement(MaterialPageRoute(builder: (_) {
               return AppointmentPage();
             }));
+
+            AppUtil.showAlertDialog(
+                context: context,
+                message: language(
+                    ar: 'تم جهز الموعد بنجاح سيتم التواصل معك قريبا. اضغط رجوع للخروج',
+                    en: 'Appointment confirmed, you\'ll be contacted soon. Press back to dismiss'),
+                firstBtnText: '',
+                firstFunc: null);
           }
         },
         secondFunc: () => Navigator.pop(context),

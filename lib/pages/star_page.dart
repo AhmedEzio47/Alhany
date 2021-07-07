@@ -626,7 +626,7 @@ class _StarPageState extends State<StarPage>
     });
   }
 
-  Future<String> fetchExclusiveFee() async {
+  dynamic fetchExclusiveFee() async {
     return RemoteConfigService.getString('exclusives_fee');
   }
 }
