@@ -9,7 +9,6 @@ import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/flip_loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ext_storage/ext_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -28,7 +27,7 @@ import 'constants/constants.dart';
 import 'models/user_model.dart' as user_model;
 
 saveToken() async {
-  //if (Constants.currentUserID == null) return;
+  if (Constants.currentUserID == null) return;
   var token;
   if (Platform.isIOS || Platform.isMacOS) {
     token = await FirebaseMessaging.instance.getAPNSToken();
@@ -36,7 +35,7 @@ saveToken() async {
     print(await FirebaseMessaging.instance.getToken());
     token = await FirebaseMessaging.instance.getToken();
   }
-  usersRef
+  await usersRef
       .doc(Constants.currentUserID)
       .collection('tokens')
       .doc(token)
@@ -283,15 +282,7 @@ class AppUtil with ChangeNotifier {
   static Future<String> downloadFile(
     String url,
   ) async {
-    var firstPath = await ExtStorage.getExternalStoragePublicDirectory(
-            ExtStorage.DIRECTORY_DOWNLOADS) +
-        '/Alhani/';
-
-    final Directory alhaniFolder = Directory('$firstPath');
-
-    if (!(await alhaniFolder.exists())) {
-      await alhaniFolder.create(recursive: true);
-    }
+    var firstPath = appTempDirectoryPath;
 
     var response = await get(Uri.parse(url));
     var contentDisposition = response.headers['content-disposition'];
@@ -301,8 +292,7 @@ class AppUtil with ChangeNotifier {
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
     await file.writeAsBytes(response.bodyBytes);
-
-    return filePathAndName;
+    return file.path;
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {

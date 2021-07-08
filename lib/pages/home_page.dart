@@ -489,7 +489,7 @@ class _HomePageState extends State<HomePage>
 
   Widget _melodiesPage() {
     return SizedBox(
-      height: MediaQuery.of(context).size.height, // or something similar :)
+      //height: MediaQuery.of(context).size.height, // or something similar :)
       child: CustomScrollView(
         controller: _melodiesPageScrollController,
         slivers: [
@@ -606,7 +606,7 @@ class _HomePageState extends State<HomePage>
       child: ListView.builder(
           primary: false,
           shrinkWrap: true,
-          controller: _melodiesPageScrollController,
+          //controller: _melodiesPageScrollController,
           itemCount: _melodies.length,
           itemBuilder: (context, index) {
             return InkWell(

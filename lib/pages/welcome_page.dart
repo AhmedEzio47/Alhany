@@ -448,6 +448,11 @@ class _WelcomePageState extends State<WelcomePage> {
                                                           _emailController.text,
                                                           _nameController.text,
                                                           username);
+                                                  await AppUtil
+                                                      .setUserVariablesByFirebaseUser(
+                                                          user);
+
+                                                  saveToken();
                                                   //await user.sendEmailVerification();
                                                 }
                                                 // if (!user.isEmailVerified) {
@@ -470,7 +475,6 @@ class _WelcomePageState extends State<WelcomePage> {
                                                 //   Navigator.of(context).pushReplacementNamed('/');
                                                 //   return;
                                                 // }
-                                                saveToken();
                                                 Navigator.of(context)
                                                     .pushReplacementNamed('/');
                                               }
@@ -1174,7 +1178,7 @@ class _WelcomePageState extends State<WelcomePage> {
         String username = await _createUsername();
         await DatabaseService.addUserToDatabase(
             _userId, user.email, name, username);
-
+        await AppUtil.setUserVariablesByFirebaseUser(user);
         //TODO saveToken();
         saveToken();
         Navigator.of(context).pushReplacementNamed('/');
@@ -1194,6 +1198,7 @@ class _WelcomePageState extends State<WelcomePage> {
             });
         //await auth.signOut();
       } else {
+        await AppUtil.setUserVariablesByFirebaseUser(user);
         saveToken(); // We don't want to saveToken for non-verified users
         //AppUtil.showToast('Logged In!');
         Navigator.of(context).pushReplacementNamed('/');

@@ -176,9 +176,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestMicrophonePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.microphone);
+            .checkPermissionStatus(Permission.microphone);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -187,7 +187,7 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                //TODO open app settings
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -271,9 +271,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestMicrophonePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.microphone);
+            .checkPermissionStatus(Permission.microphone);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -282,7 +282,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                //TODO open app settings
+                //PermissionHandler().openAppSettings();
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -674,9 +675,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestStoragePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.storage);
+            .checkPermissionStatus(Permission.storage);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -685,7 +686,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                //TODO openapp settings
+                //PermissionHandler().openAppSettings();
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -797,14 +799,14 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initVideoPlayer() async {
     if (!await PermissionsService().hasStoragePermission()) {
-      PermissionsService().requestStoragePermission(
+      await PermissionsService().requestStoragePermission(
         context,
       );
     }
-    PermissionStatus status = await PermissionsService()
-        .checkPermissionStatus(PermissionGroup.storage);
+    PermissionStatus status =
+        await PermissionsService().checkPermissionStatus(Permission.storage);
 
-    if (status == PermissionStatus.neverAskAgain) {
+    if (status == PermissionStatus.permanentlyDenied) {
       AppUtil.showAlertDialog(
           context: context,
           message: language(
@@ -813,7 +815,8 @@ class _MelodyPageState extends State<MelodyPage> {
           firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
           firstFunc: () {
             Navigator.of(context).pop();
-            PermissionHandler().openAppSettings();
+            //TODO open app settings
+            //PermissionHandler().openAppSettings();
             return;
           },
           secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -1578,10 +1581,10 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {
       bool isGranted = await PermissionsService()
           .requestCameraPermission(context, onPermissionDenied: () async {
-        PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.camera);
+        PermissionStatus status =
+            await PermissionsService().checkPermissionStatus(Permission.camera);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -1590,7 +1593,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                //TODO open app settings
+                //PermissionHandler().openAppSettings();
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),

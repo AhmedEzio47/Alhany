@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsService {
-  final PermissionHandler _permissionHandler = PermissionHandler();
   BuildContext _context;
-  Future<bool> _requestPermission(PermissionGroup permission) async {
-    var result = await _permissionHandler.requestPermissions([permission]);
-    if (result[permission] == PermissionStatus.granted) {
+  Future<bool> _requestPermission(Permission permission) async {
+    var result = await permission.request();
+    if (result == PermissionStatus.granted) {
       return true;
     }
     return false;
   }
 
-  Future<PermissionStatus> checkPermissionStatus(
-      PermissionGroup permission) async {
-    PermissionStatus status =
-        await _permissionHandler.checkPermissionStatus(permission);
+  Future<PermissionStatus> checkPermissionStatus(Permission permission) async {
+    PermissionStatus status = await permission.status;
     return status;
   }
 
@@ -23,7 +20,7 @@ class PermissionsService {
   Future<bool> requestContactsPermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(PermissionGroup.contacts);
+    var granted = await _requestPermission(Permission.contacts);
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -34,7 +31,7 @@ class PermissionsService {
   Future<bool> requestStoragePermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(PermissionGroup.storage);
+    var granted = await _requestPermission(Permission.storage);
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -45,7 +42,7 @@ class PermissionsService {
   Future<bool> requestMicrophonePermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(PermissionGroup.microphone);
+    var granted = await _requestPermission(Permission.microphone);
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -56,7 +53,7 @@ class PermissionsService {
   Future<bool> requestCameraPermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(PermissionGroup.camera);
+    var granted = await _requestPermission(Permission.camera);
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -67,7 +64,7 @@ class PermissionsService {
   Future<bool> requestLocationPermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(PermissionGroup.location);
+    var granted = await _requestPermission(Permission.location);
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -76,32 +73,31 @@ class PermissionsService {
 
   /// Check if the app has already granted the Contacts Permission.
   Future<bool> hasContactsPermission() async {
-    return hasPermission(PermissionGroup.contacts);
+    return hasPermission(Permission.contacts);
   }
 
   /// Check if the app has already granted the Storage Permission.
   Future<bool> hasStoragePermission() async {
-    return hasPermission(PermissionGroup.storage);
+    return hasPermission(Permission.storage);
   }
 
   /// Check if the app has already granted the Microphone Permission.
   Future<bool> hasMicrophonePermission() async {
-    return hasPermission(PermissionGroup.microphone);
+    return hasPermission(Permission.microphone);
   }
 
   /// Check if the app has already granted the Camera Permission.
   Future<bool> hasCameraPermission() async {
-    return hasPermission(PermissionGroup.camera);
+    return hasPermission(Permission.camera);
   }
 
   /// Check if the app has already granted the Location Permission.
   Future<bool> hasLocationPermission() async {
-    return hasPermission(PermissionGroup.location);
+    return hasPermission(Permission.location);
   }
 
-  Future<bool> hasPermission(PermissionGroup permission) async {
-    var permissionStatus =
-        await _permissionHandler.checkPermissionStatus(permission);
+  Future<bool> hasPermission(Permission permission) async {
+    var permissionStatus = await permission.status;
     return permissionStatus == PermissionStatus.granted;
   }
 }
