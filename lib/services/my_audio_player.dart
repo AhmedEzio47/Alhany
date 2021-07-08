@@ -3,7 +3,7 @@ import 'package:Alhany/pages/melody_page.dart';
 //import 'package:audioplayers/audio_cache.dart';
 //import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+//import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:just_audio/just_audio.dart';
 
 class MyAudioPlayer with ChangeNotifier {
@@ -98,8 +98,7 @@ class MyAudioPlayer with ChangeNotifier {
     // position = null;
     // duration = null;
     notifyListeners();
-    if (onComplete != null &&
-        MelodyPage.recordingStatus == RecordingStatus.Recording) {
+    if (onComplete != null && MelodyPage.recordingStatus == true) {
       onComplete();
     }
   }

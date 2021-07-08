@@ -7,9 +7,9 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/main.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
+import 'package:Alhany/services/new_recorder.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -20,7 +20,7 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+//import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -39,7 +39,7 @@ enum Types { VIDEO, AUDIO }
 class MelodyPage extends StatefulWidget {
   final Melody melody;
   final Types type;
-  static RecordingStatus recordingStatus = RecordingStatus.Unset;
+  static bool recordingStatus = false;
 
   MelodyPage({Key key, this.melody, this.type = Types.VIDEO}) : super(key: key);
 
@@ -56,9 +56,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
   bool isMicrophoneGranted = false;
 
-  RecordingStatus recordingStatus = RecordingStatus.Unset;
+  bool recordingStatus = false;
   Widget melodyPlayer;
-  AudioRecorder recorder;
+  NewRecorder recorder;
 
   String recordingFilePath;
   String melodyPath;
@@ -223,9 +223,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = RecordingStatus.Recording;
+        recordingStatus = true;
       });
-      MelodyPage.recordingStatus = RecordingStatus.Recording;
+      MelodyPage.recordingStatus = true;
 
       await initRecorder();
       String url;
@@ -318,9 +318,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = RecordingStatus.Recording;
+        recordingStatus = true;
       });
-      MelodyPage.recordingStatus = RecordingStatus.Recording;
+      MelodyPage.recordingStatus = true;
 
       String url;
       if (widget.melody.melodyUrl != null) {
@@ -440,10 +440,10 @@ class _MelodyPageState extends State<MelodyPage> {
     PIPView.of(_context).presentBelow(MyApp());
 
     setState(() {
-      recordingStatus = RecordingStatus.Stopped;
+      recordingStatus = false;
       //_isFloating = true;
     });
-    MelodyPage.recordingStatus = RecordingStatus.Stopped;
+    MelodyPage.recordingStatus = false;
 
     await mySoundsPlayer.stop();
 
@@ -792,7 +792,7 @@ class _MelodyPageState extends State<MelodyPage> {
   initRecorder() async {
     //await AppUtil.createAppDirectory();
     recordingFilePath = appTempDirectoryPath;
-    recorder = AudioRecorder();
+    recorder = NewRecorder();
   }
 
   initVideoPlayer() async {
@@ -870,7 +870,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController.dispose();
       print('camera disposed');
     }
-    if (recorder != null) recorder.dispose();
+    //if (recorder != null) recorder.dispose();
     super.dispose();
   }
 
@@ -903,15 +903,14 @@ class _MelodyPageState extends State<MelodyPage> {
                 ? choosingImagePage(context)
                 : _progressVisible
                     ? progressPage()
-                    : recordingStatus == RecordingStatus.Recording &&
-                            _type == Types.VIDEO
+                    : recordingStatus == true && _type == Types.VIDEO
                         ? videoRecordingPage()
                         : mainPage(),
             floatingActionButton: !_progressVisible && !choosingImage
                 ? FloatingActionButton(
                     onPressed: () async {
                       //if (AudioService.running) AudioService.pause();
-                      if (recordingStatus == RecordingStatus.Recording) {
+                      if (recordingStatus == true) {
                         await saveRecord();
                       } else {
                         if ((await PermissionsService()
@@ -946,7 +945,7 @@ class _MelodyPageState extends State<MelodyPage> {
                       }
                     },
                     child: Icon(
-                      recordingStatus == RecordingStatus.Recording
+                      recordingStatus == true
                           ? Icons.stop
                           : _type == Types.VIDEO
                               ? Icons.videocam
@@ -1361,7 +1360,7 @@ class _MelodyPageState extends State<MelodyPage> {
               SizedBox(
                 height: 10,
               ),
-              recordingStatus != RecordingStatus.Recording
+              recordingStatus != true
                   ? melodyPlayer ?? Container()
                   : _recordingTimerText(),
               Expanded(
@@ -1535,11 +1534,9 @@ class _MelodyPageState extends State<MelodyPage> {
         //   timer.cancel();
         // }
         if (_type == Types.AUDIO) {
-          if (counter >= _duration ||
-              recordingStatus == RecordingStatus.Stopped) {}
+          if (counter >= _duration || recordingStatus == false) {}
         } else {
-          if (counter >= _duration &&
-              recordingStatus == RecordingStatus.Recording) {
+          if (counter >= _duration && recordingStatus == true) {
             saveRecord();
             counter = 0;
             timer.cancel();

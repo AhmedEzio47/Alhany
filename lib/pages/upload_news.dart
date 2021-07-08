@@ -5,7 +5,7 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/services/audio_recorder.dart';
+import 'package:Alhany/services/new_recorder.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -206,7 +206,7 @@ class _UploadNewsState extends State<UploadNews> {
     getDuration(_contentFile.path);
   }
 
-  AudioRecorder recorder;
+  NewRecorder recorder;
   _recordAudio() async {
     recorder.startRecording();
     setState(() {
