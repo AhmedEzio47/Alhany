@@ -197,9 +197,10 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _recordVideo() async {
-    File video = await ImagePicker.pickVideo(source: ImageSource.camera);
+    PickedFile video =
+        await ImagePicker.platform.pickVideo(source: ImageSource.camera);
     setState(() {
-      if (video != null) _contentFile = video;
+      if (video != null) _contentFile = File(video.path);
       _contentType = 'video';
     });
     getDuration(_contentFile.path);

@@ -267,8 +267,9 @@ class _TracksPageState extends State<TracksPage> {
       String path;
 
       if (_tracks[_index].audio != null) {
-        path =
-            await AppUtil.downloadFile(_tracks[_index].audio, encrypt: false);
+        path = await AppUtil.downloadFile(
+          _tracks[_index].audio,
+        );
       }
 
       Melody melody = Melody(

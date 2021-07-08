@@ -4,7 +4,6 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/encryption_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/services/share_link.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -29,11 +28,12 @@ import 'constants/constants.dart';
 import 'models/user_model.dart' as user_model;
 
 saveToken() async {
-  if (Constants.currentUserID == null) return;
-  String token;
+  //if (Constants.currentUserID == null) return;
+  var token;
   if (Platform.isIOS || Platform.isMacOS) {
     token = await FirebaseMessaging.instance.getAPNSToken();
   } else {
+    print(await FirebaseMessaging.instance.getToken());
     token = await FirebaseMessaging.instance.getToken();
   }
   usersRef
@@ -252,9 +252,9 @@ class AppUtil with ChangeNotifier {
   }
 
   static pickCompressedImageFromGallery() async {
-    File pickedFile = await ImagePicker.pickImage(
-        source: ImageSource.gallery, imageQuality: 50);
-    return pickedFile;
+    PickedFile pickedFile = await ImagePicker.platform
+        .pickImage(source: ImageSource.gallery, imageQuality: 50);
+    return File(pickedFile.path);
   }
 
   Future<String> uploadFile(
@@ -280,7 +280,9 @@ class AppUtil with ChangeNotifier {
     return url;
   }
 
-  static Future<String> downloadFile(String url, {bool encrypt = false}) async {
+  static Future<String> downloadFile(
+    String url,
+  ) async {
     var firstPath = await ExtStorage.getExternalStoragePublicDirectory(
             ExtStorage.DIRECTORY_DOWNLOADS) +
         '/Alhani/';
@@ -291,7 +293,7 @@ class AppUtil with ChangeNotifier {
       await alhaniFolder.create(recursive: true);
     }
 
-    var response = await get(url);
+    var response = await get(Uri.parse(url));
     var contentDisposition = response.headers['content-disposition'];
     String fileName =
         await getStorageFileNameFromContentDisposition(contentDisposition);
@@ -299,15 +301,13 @@ class AppUtil with ChangeNotifier {
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
     await file.writeAsBytes(response.bodyBytes);
-    if (encrypt) {
-      return EncryptionService.encryptFile(file.path);
-    }
+
     return filePathAndName;
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {
     var response = await get(
-      url,
+      Uri.parse(url),
     );
     var contentDisposition = response.headers['content-disposition'];
     String fileName = contentDisposition
@@ -361,9 +361,9 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> takePhoto() async {
-    File image = await ImagePicker.pickImage(
-        source: ImageSource.camera, imageQuality: 80);
-    return image;
+    PickedFile image = await ImagePicker.platform
+        .pickImage(source: ImageSource.camera, imageQuality: 80);
+    return File(image.path);
   }
 
   static showLoader(BuildContext context, {String message}) {
@@ -503,11 +503,11 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<File> recordVideo(Duration maxDuration) async {
-    File video = await ImagePicker.pickVideo(
+    PickedFile video = await ImagePicker.platform.pickVideo(
         source: ImageSource.camera,
         maxDuration: maxDuration,
         preferredCameraDevice: CameraDevice.front);
-    return video;
+    return File(video.path);
   }
 
   static sharePost(String postText, String imageUrl,

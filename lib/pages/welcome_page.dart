@@ -1176,7 +1176,7 @@ class _WelcomePageState extends State<WelcomePage> {
             _userId, user.email, name, username);
 
         //TODO saveToken();
-
+        saveToken();
         Navigator.of(context).pushReplacementNamed('/');
       } else if (!user.emailVerified) {
         Navigator.of(context).pop();

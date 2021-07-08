@@ -15,7 +15,7 @@ class PermissionsService {
   Future<PermissionStatus> checkPermissionStatus(
       PermissionGroup permission) async {
     PermissionStatus status =
-    await _permissionHandler.checkPermissionStatus(permission);
+        await _permissionHandler.checkPermissionStatus(permission);
     return status;
   }
 
@@ -101,7 +101,7 @@ class PermissionsService {
 
   Future<bool> hasPermission(PermissionGroup permission) async {
     var permissionStatus =
-    await _permissionHandler.checkPermissionStatus(permission);
+        await _permissionHandler.checkPermissionStatus(permission);
     return permissionStatus == PermissionStatus.granted;
   }
 }

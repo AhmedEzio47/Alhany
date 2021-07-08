@@ -163,9 +163,10 @@ class NotificationHandler {
   void configLocalNotification() {
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('ic_launcher');
+
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -177,12 +178,13 @@ class NotificationHandler {
         'Alhany',
         'your channel description',
         enableVibration: true,
-        importance: Importance.Max,
-        priority: Priority.High,
+        importance: Importance.max,
+        priority: Priority.high,
         autoCancel: true);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
         0,
         message['notification']['title'].toString(),

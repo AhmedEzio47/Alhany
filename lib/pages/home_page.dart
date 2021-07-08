@@ -928,8 +928,9 @@ class _HomePageState extends State<HomePage>
     }
     String path;
     if (_boughtSongs[_boughtSongsIndex].songUrl != null) {
-      path = await AppUtil.downloadFile(_boughtSongs[_boughtSongsIndex].songUrl,
-          encrypt: false);
+      path = await AppUtil.downloadFile(
+        _boughtSongs[_boughtSongsIndex].songUrl,
+      );
     }
 
     Melody melody = Melody(

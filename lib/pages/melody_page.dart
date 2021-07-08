@@ -1691,8 +1691,9 @@ class _MelodyPageState extends State<MelodyPage> {
       String path;
 
       if (widget.melody.melodyUrl != null) {
-        path =
-            await AppUtil.downloadFile(widget.melody.melodyUrl, encrypt: false);
+        path = await AppUtil.downloadFile(
+          widget.melody.melodyUrl,
+        );
       }
 
       Melody melody = Melody(
