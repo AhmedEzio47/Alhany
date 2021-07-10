@@ -205,7 +205,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                                     .createAppDirectory();
                                                 AppUtil.downloadFile(
                                                     widget.message,
-                                                    copyToDownloads: true);
+                                                    toDownloads: true);
                                               },
                                             ]),
                                       ),

@@ -274,7 +274,7 @@ class _TracksPageState extends State<TracksPage> {
         await AppUtil.deleteFiles();
         await AppUtil.createAppDirectory();
         path = await AppUtil.downloadFile(_tracks[_index].audio,
-            copyToDownloads: true);
+            toDownloads: true);
       }
 
       Melody melody = Melody(

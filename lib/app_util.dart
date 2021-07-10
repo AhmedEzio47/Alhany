@@ -19,8 +19,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -282,41 +282,33 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> downloadFile(String url,
-      {bool copyToDownloads = false}) async {
+      {bool toDownloads = false}) async {
     var firstPath = appTempDirectoryPath;
+
+    if (toDownloads && !Platform.isIOS) {
+      firstPath = await ExtStorage.getExternalStoragePublicDirectory(
+              ExtStorage.DIRECTORY_DOWNLOADS) +
+          '/Alhani/';
+
+      final Directory alhaniFolder = Directory('$firstPath');
+
+      if (!(await alhaniFolder.exists())) {
+        await alhaniFolder.create(recursive: true);
+      }
+    }
+
     var response = await get(Uri.parse(url));
     var contentDisposition = response.headers['content-disposition'];
     String fileName =
         await getStorageFileNameFromContentDisposition(contentDisposition);
-    String filePathAndName = firstPath + fileName;
+    String filePathAndName = firstPath + randomAlphaNumeric(2) + fileName;
     filePathAndName = filePathAndName.replaceAll(' ', '_');
     File file = new File(filePathAndName);
+    if (await file.exists()) {
+      await file.delete();
+    }
     await file.writeAsBytes(response.bodyBytes);
-    if (copyToDownloads) {
-      copyFileToDownloads(file);
-    }
     return file.path;
-  }
-
-  static Future<File> copyFileToDownloads(
-    File source,
-  ) async {
-    if (Platform.isIOS) return null;
-    var firstPath = await ExtStorage.getExternalStoragePublicDirectory(
-            ExtStorage.DIRECTORY_DOWNLOADS) +
-        '/Alhani/';
-
-    final Directory alhaniFolder = Directory('$firstPath');
-
-    if (!(await alhaniFolder.exists())) {
-      await alhaniFolder.create(recursive: true);
-    }
-
-    firstPath += path.basename(source.path);
-
-    File copied = await source.copy(firstPath);
-
-    return copied;
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {

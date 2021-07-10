@@ -935,7 +935,7 @@ class _HomePageState extends State<HomePage>
       await AppUtil.deleteFiles();
       await AppUtil.createAppDirectory();
       path = await AppUtil.downloadFile(_boughtSongs[_boughtSongsIndex].songUrl,
-          copyToDownloads: true);
+          toDownloads: true);
     }
 
     Melody melody = Melody(
