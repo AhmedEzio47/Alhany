@@ -20,7 +20,6 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -39,7 +38,7 @@ enum Types { VIDEO, AUDIO }
 class MelodyPage extends StatefulWidget {
   final Melody melody;
   final Types type;
-  static bool recordingStatus = false;
+  static RecordingStatus recordingStatus = RecordingStatus.Unset;
 
   MelodyPage({Key key, this.melody, this.type = Types.VIDEO}) : super(key: key);
 
@@ -56,7 +55,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   bool isMicrophoneGranted = false;
 
-  bool recordingStatus = false;
+  RecordingStatus recordingStatus = RecordingStatus.Unset;
   Widget melodyPlayer;
   NewRecorder recorder;
 
@@ -187,7 +186,7 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                //TODO open app settings
+                //Permission.openAppSettings();
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -223,9 +222,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = true;
+        recordingStatus = RecordingStatus.Recording;
       });
-      MelodyPage.recordingStatus = true;
+      MelodyPage.recordingStatus = RecordingStatus.Recording;
 
       await initRecorder();
       String url;
@@ -282,7 +281,6 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                //TODO open app settings
                 //PermissionHandler().openAppSettings();
                 return;
               },
@@ -319,9 +317,9 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (isMicrophoneGranted) {
       setState(() {
-        recordingStatus = true;
+        recordingStatus = RecordingStatus.Recording;
       });
-      MelodyPage.recordingStatus = true;
+      MelodyPage.recordingStatus = RecordingStatus.Recording;
 
       String url;
       if (widget.melody.melodyUrl != null) {
@@ -441,10 +439,10 @@ class _MelodyPageState extends State<MelodyPage> {
     PIPView.of(_context).presentBelow(MyApp());
 
     setState(() {
-      recordingStatus = false;
+      recordingStatus = RecordingStatus.Stopped;
       //_isFloating = true;
     });
-    MelodyPage.recordingStatus = false;
+    MelodyPage.recordingStatus = RecordingStatus.Stopped;
 
     await mySoundsPlayer.stop();
 
@@ -686,7 +684,6 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                //TODO openapp settings
                 //PermissionHandler().openAppSettings();
                 return;
               },
@@ -799,7 +796,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initVideoPlayer() async {
     if (!await PermissionsService().hasStoragePermission()) {
-      await PermissionsService().requestStoragePermission(
+      PermissionsService().requestStoragePermission(
         context,
       );
     }
@@ -815,7 +812,6 @@ class _MelodyPageState extends State<MelodyPage> {
           firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
           firstFunc: () {
             Navigator.of(context).pop();
-            //TODO open app settings
             //PermissionHandler().openAppSettings();
             return;
           },
@@ -906,14 +902,15 @@ class _MelodyPageState extends State<MelodyPage> {
                 ? choosingImagePage(context)
                 : _progressVisible
                     ? progressPage()
-                    : recordingStatus == true && _type == Types.VIDEO
+                    : recordingStatus == RecordingStatus.Recording &&
+                            _type == Types.VIDEO
                         ? videoRecordingPage()
                         : mainPage(),
             floatingActionButton: !_progressVisible && !choosingImage
                 ? FloatingActionButton(
                     onPressed: () async {
                       //if (AudioService.running) AudioService.pause();
-                      if (recordingStatus == true) {
+                      if (recordingStatus == RecordingStatus.Recording) {
                         await saveRecord();
                       } else {
                         if ((await PermissionsService()
@@ -948,7 +945,7 @@ class _MelodyPageState extends State<MelodyPage> {
                       }
                     },
                     child: Icon(
-                      recordingStatus == true
+                      recordingStatus == RecordingStatus.Recording
                           ? Icons.stop
                           : _type == Types.VIDEO
                               ? Icons.videocam
@@ -1363,7 +1360,7 @@ class _MelodyPageState extends State<MelodyPage> {
               SizedBox(
                 height: 10,
               ),
-              recordingStatus != true
+              recordingStatus != RecordingStatus.Recording
                   ? melodyPlayer ?? Container()
                   : _recordingTimerText(),
               Expanded(
@@ -1537,9 +1534,11 @@ class _MelodyPageState extends State<MelodyPage> {
         //   timer.cancel();
         // }
         if (_type == Types.AUDIO) {
-          if (counter >= _duration || recordingStatus == false) {}
+          if (counter >= _duration ||
+              recordingStatus == RecordingStatus.Stopped) {}
         } else {
-          if (counter >= _duration && recordingStatus == true) {
+          if (counter >= _duration &&
+              recordingStatus == RecordingStatus.Recording) {
             saveRecord();
             counter = 0;
             timer.cancel();
@@ -1593,7 +1592,6 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                //TODO open app settings
                 //PermissionHandler().openAppSettings();
                 return;
               },
