@@ -4,6 +4,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/track_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
@@ -267,8 +268,13 @@ class _TracksPageState extends State<TracksPage> {
       String path;
 
       if (_tracks[_index].audio != null) {
-        path =
-            await AppUtil.downloadFile(_tracks[_index].audio, encrypt: false);
+        if (!(await PermissionsService().hasStoragePermission())) {
+          await PermissionsService().requestStoragePermission(context);
+        }
+        await AppUtil.deleteFiles();
+        await AppUtil.createAppDirectory();
+        path = await AppUtil.downloadFile(_tracks[_index].audio,
+            copyToDownloads: true);
       }
 
       Melody melody = Melody(

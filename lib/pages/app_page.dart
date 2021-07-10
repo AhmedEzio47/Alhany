@@ -54,7 +54,7 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
           );
         });
       }
-      print('is postfullscreen:' + AppUtil.fullScreenPage.toString());
+      //print('is postfullscreen:' + AppUtil.fullScreenPage.toString());
     });
   }
 
@@ -166,6 +166,12 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
             Icon(Icons.person, size: 30),
           ],
           onTap: (index) {
+            if (index == 4) {
+              Constants.currentRoute = '/profile-page';
+              Constants.routeStack.add('/profile-page');
+            } else {
+              Constants.currentRoute = '/';
+            }
             navigationTapped(index);
           },
         ),

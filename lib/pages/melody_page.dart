@@ -7,9 +7,9 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/main.dart';
 import 'package:Alhany/models/melody_model.dart';
-import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/my_audio_player.dart';
+import 'package:Alhany/services/new_recorder.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -20,7 +20,6 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:flutter_ffmpeg/statistics.dart';
@@ -32,6 +31,7 @@ import 'package:pip_view/pip_view.dart';
 import 'package:random_string/random_string.dart';
 import 'package:screen/screen.dart';
 import 'package:stripe_payment/stripe_payment.dart';
+import 'package:system_settings/system_settings.dart';
 import 'package:video_player/video_player.dart' as video_player;
 
 enum Types { VIDEO, AUDIO }
@@ -58,7 +58,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   RecordingStatus recordingStatus = RecordingStatus.Unset;
   Widget melodyPlayer;
-  AudioRecorder recorder;
+  NewRecorder recorder;
 
   String recordingFilePath;
   String melodyPath;
@@ -122,49 +122,44 @@ class _MelodyPageState extends State<MelodyPage> {
   }
 
   Future _downloadMelody() async {
-    AppUtil.executeFunctionIfLoggedIn(context, () async {
-      AppUtil.showLoader(context,
-          message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
+    AppUtil.showLoader(context,
+        message: language(en: 'Preparing files', ar: 'جاري تجهيز الملفات'));
 
-      String url;
-      if (widget.melody.melodyUrl != null) {
-        url = widget.melody.melodyUrl;
-      } else if (Constants.currentMelodyLevel != null) {
-        url = widget.melody.levelUrls[Constants.currentMelodyLevel];
-      } else {
-        url = widget.melody.levelUrls.values.elementAt(0).toString();
-      }
-      String filePath;
-      try {
-        filePath = await AppUtil.downloadFile(url);
-      } catch (ex) {
-        print('Melody download error:${ex.toString()}');
-        AppUtil.showToast(language(
-            en: 'Error, please try again.',
-            ar: 'حدث خطأ برجاء إعادة المحاولة'));
-        Navigator.of(context).pop();
-        return;
-      }
-
-      MediaInformation info =
-          await _flutterFFprobe.getMediaInformation(filePath);
-      //print("File Duration: ${info.getMediaProperties()['duration']}");
-      _duration = double.parse(info.getMediaProperties()['duration'].toString())
-          .toInt();
-
-      setState(() {
-        melodyPath = filePath;
-        if (_type == Types.AUDIO) {
-          mergedFilePath +=
-              '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
-        } else {
-          newFilePath += '${path.basenameWithoutExtension(filePath)}_rec.mp4';
-          mergedFilePath +=
-              '${path.basenameWithoutExtension(filePath)}_new.mp4';
-        }
-      });
+    String url;
+    if (widget.melody.melodyUrl != null) {
+      url = widget.melody.melodyUrl;
+    } else if (Constants.currentMelodyLevel != null) {
+      url = widget.melody.levelUrls[Constants.currentMelodyLevel];
+    } else {
+      url = widget.melody.levelUrls.values.elementAt(0).toString();
+    }
+    String filePath;
+    try {
+      filePath = await AppUtil.downloadFile(url);
+    } catch (ex) {
+      print('Melody download error:${ex.toString()}');
+      AppUtil.showToast(language(
+          en: 'Error, please try again.', ar: 'حدث خطأ برجاء إعادة المحاولة'));
       Navigator.of(context).pop();
+      return;
+    }
+
+    MediaInformation info = await _flutterFFprobe.getMediaInformation(filePath);
+    //print("File Duration: ${info.getMediaProperties()['duration']}");
+    _duration =
+        double.parse(info.getMediaProperties()['duration'].toString()).toInt();
+
+    setState(() {
+      melodyPath = filePath;
+      if (_type == Types.AUDIO) {
+        mergedFilePath +=
+            '${path.basenameWithoutExtension(filePath)}_new${path.extension(filePath)}';
+      } else {
+        newFilePath += '${path.basenameWithoutExtension(filePath)}_rec.mp4';
+        mergedFilePath += '${path.basenameWithoutExtension(filePath)}_new.mp4';
+      }
     });
+    Navigator.of(context).pop();
   }
 
   void _recordAudio() async {
@@ -176,9 +171,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestMicrophonePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.microphone);
+            .checkPermissionStatus(Permission.microphone);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -187,7 +182,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                SystemSettings.apps();
+
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -252,10 +248,9 @@ class _MelodyPageState extends State<MelodyPage> {
             }
           });
       mySoundsPlayer.addListener(() {});
+      _recordingTimer();
 
       await mySoundsPlayer.play();
-
-      _recordingTimer();
     } else {}
   }
 
@@ -271,9 +266,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestMicrophonePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.microphone);
+            .checkPermissionStatus(Permission.microphone);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -282,7 +277,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                SystemSettings.apps();
+
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -674,9 +670,9 @@ class _MelodyPageState extends State<MelodyPage> {
       bool isGranted = await PermissionsService()
           .requestStoragePermission(context, onPermissionDenied: () async {
         PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.storage);
+            .checkPermissionStatus(Permission.storage);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -685,7 +681,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                SystemSettings.apps();
+
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -792,7 +789,7 @@ class _MelodyPageState extends State<MelodyPage> {
   initRecorder() async {
     //await AppUtil.createAppDirectory();
     recordingFilePath = appTempDirectoryPath;
-    recorder = AudioRecorder();
+    recorder = NewRecorder(recordingFilePath);
   }
 
   initVideoPlayer() async {
@@ -801,10 +798,10 @@ class _MelodyPageState extends State<MelodyPage> {
         context,
       );
     }
-    PermissionStatus status = await PermissionsService()
-        .checkPermissionStatus(PermissionGroup.storage);
+    PermissionStatus status =
+        await PermissionsService().checkPermissionStatus(Permission.storage);
 
-    if (status == PermissionStatus.neverAskAgain) {
+    if (status == PermissionStatus.permanentlyDenied) {
       AppUtil.showAlertDialog(
           context: context,
           message: language(
@@ -813,7 +810,8 @@ class _MelodyPageState extends State<MelodyPage> {
           firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
           firstFunc: () {
             Navigator.of(context).pop();
-            PermissionHandler().openAppSettings();
+            SystemSettings.apps();
+
             return;
           },
           secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -870,7 +868,7 @@ class _MelodyPageState extends State<MelodyPage> {
       cameraController.dispose();
       print('camera disposed');
     }
-    if (recorder != null) recorder.dispose();
+    //if (recorder != null) recorder.dispose();
     super.dispose();
   }
 
@@ -1454,10 +1452,9 @@ class _MelodyPageState extends State<MelodyPage> {
                 child: Container(
                   margin: EdgeInsets.all(8),
                   padding: EdgeInsets.all(8),
-                  width: 80,
+                  width: 70,
                   color: MyColors.accentColor,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Icon(Icons.file_download),
                       SizedBox(
@@ -1581,10 +1578,10 @@ class _MelodyPageState extends State<MelodyPage> {
     } else {
       bool isGranted = await PermissionsService()
           .requestCameraPermission(context, onPermissionDenied: () async {
-        PermissionStatus status = await PermissionsService()
-            .checkPermissionStatus(PermissionGroup.camera);
+        PermissionStatus status =
+            await PermissionsService().checkPermissionStatus(Permission.camera);
 
-        if (status == PermissionStatus.neverAskAgain) {
+        if (status == PermissionStatus.permanentlyDenied) {
           AppUtil.showAlertDialog(
               context: context,
               message: language(
@@ -1593,7 +1590,8 @@ class _MelodyPageState extends State<MelodyPage> {
               firstBtnText: language(en: 'Go to settings', ar: 'الذهاب للضبط'),
               firstFunc: () {
                 Navigator.of(context).pop();
-                PermissionHandler().openAppSettings();
+                SystemSettings.apps();
+
                 return;
               },
               secondBtnText: language(en: 'Cancel', ar: 'إلغاء'),
@@ -1691,8 +1689,11 @@ class _MelodyPageState extends State<MelodyPage> {
       String path;
 
       if (widget.melody.melodyUrl != null) {
-        path =
-            await AppUtil.downloadFile(widget.melody.melodyUrl, encrypt: false);
+        if (!(await PermissionsService().hasStoragePermission())) {
+          await PermissionsService().requestStoragePermission(context);
+        }
+        path = await AppUtil.downloadFile(widget.melody.melodyUrl,
+            copyToDownloads: true);
       }
 
       Melody melody = Melody(

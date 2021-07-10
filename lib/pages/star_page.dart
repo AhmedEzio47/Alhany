@@ -185,9 +185,9 @@ class _StarPageState extends State<StarPage>
                                         enlargeCenterPage: true,
                                       ),
                                       itemCount: _slideImages.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) =>
-                                              CachedImage(
+                                      itemBuilder: (BuildContext context,
+                                              int index, x) =>
+                                          CachedImage(
                                         imageUrl: _slideImages[index]?.url,
                                         height: 200,
                                         imageShape: BoxShape.rectangle,

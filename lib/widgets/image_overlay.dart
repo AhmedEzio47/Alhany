@@ -9,26 +9,37 @@ class ImageOverlay extends StatelessWidget {
   final File imageFile;
   final List<IconData> btnIcons;
   final List<Function> btnFunctions;
-  const ImageOverlay({Key key, this.imageUrl, this.imageFile, this.btnIcons, this.btnFunctions}) : super(key: key);
+  const ImageOverlay(
+      {Key key,
+      this.imageUrl,
+      this.imageFile,
+      this.btnIcons,
+      this.btnFunctions})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return imageOverlay(
         context,
         PhotoView(
-          imageProvider: imageUrl != null ? NetworkImage(imageUrl) : FileImage(imageFile),
+          imageProvider:
+              imageUrl != null ? NetworkImage(imageUrl) : FileImage(imageFile),
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.contained * 2,
           enableRotation: true,
-          loadingChild: Center(child: CircularProgressIndicator()),
-          backgroundDecoration: BoxDecoration(color: Colors.transparent.withOpacity(.3)),
+          loadingBuilder: (context, event) {
+            return Center(child: CircularProgressIndicator());
+          },
+          backgroundDecoration:
+              BoxDecoration(color: Colors.transparent.withOpacity(.3)),
         ),
         this.btnIcons,
         this.btnFunctions);
   }
 }
 
-imageOverlay(BuildContext context, Widget child, List<IconData> btnIcons, List<Function> btnFunctions) {
+imageOverlay(BuildContext context, Widget child, List<IconData> btnIcons,
+    List<Function> btnFunctions) {
   return Scaffold(
     appBar: AppBar(
         title: Text(""),

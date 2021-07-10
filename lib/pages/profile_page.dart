@@ -275,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage>
                                               itemCount: _slideImages.length,
                                               itemBuilder:
                                                   (BuildContext context,
-                                                          int index) =>
+                                                          int index, x) =>
                                                       CachedImage(
                                                 imageUrl:
                                                     _slideImages[index]?.url,
@@ -720,7 +720,7 @@ class _ProfilePageState extends State<ProfilePage>
                         },
                         child: RecordItem(
                           record: _records[index],
-                          key: UniqueKey(),
+                          key: ValueKey(_records[index].id),
                         ),
                       );
                     });

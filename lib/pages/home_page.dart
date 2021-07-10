@@ -8,6 +8,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -606,7 +607,7 @@ class _HomePageState extends State<HomePage>
       child: ListView.builder(
           primary: false,
           shrinkWrap: true,
-          controller: _melodiesPageScrollController,
+          //controller: _melodiesPageScrollController,
           itemCount: _melodies.length,
           itemBuilder: (context, index) {
             return InkWell(
@@ -928,8 +929,13 @@ class _HomePageState extends State<HomePage>
     }
     String path;
     if (_boughtSongs[_boughtSongsIndex].songUrl != null) {
+      if (!(await PermissionsService().hasStoragePermission())) {
+        await PermissionsService().requestStoragePermission(context);
+      }
+      await AppUtil.deleteFiles();
+      await AppUtil.createAppDirectory();
       path = await AppUtil.downloadFile(_boughtSongs[_boughtSongsIndex].songUrl,
-          encrypt: false);
+          copyToDownloads: true);
     }
 
     Melody melody = Melody(

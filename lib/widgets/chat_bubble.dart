@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/services/permissions_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -192,9 +193,19 @@ class _ChatBubbleState extends State<ChatBubble> {
                                               Icons.file_download
                                             ],
                                             btnFunctions: [
-                                              () {
+                                              () async {
+                                                if (!(await PermissionsService()
+                                                    .hasStoragePermission())) {
+                                                  await PermissionsService()
+                                                      .requestStoragePermission(
+                                                          context);
+                                                }
+                                                await AppUtil.deleteFiles();
+                                                await AppUtil
+                                                    .createAppDirectory();
                                                 AppUtil.downloadFile(
-                                                    widget.message);
+                                                    widget.message,
+                                                    copyToDownloads: true);
                                               },
                                             ]),
                                       ),

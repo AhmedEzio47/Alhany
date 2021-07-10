@@ -516,6 +516,7 @@ class _RecordItemState extends State<RecordItem> {
   Widget playPauseBtn() {
     return InkWell(
       onTap: () {
+        print('tapped 2');
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {
@@ -538,6 +539,7 @@ class _RecordItemState extends State<RecordItem> {
   playBtn() {
     return InkWell(
       onTap: () {
+        print('tapped');
         if (Constants.currentRoute == '/record-page' ||
             Constants.currentRoute == '/profile-page') {
           Navigator.of(context).pushNamed('/post-fullscreen', arguments: {

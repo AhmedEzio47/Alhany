@@ -170,8 +170,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
               arguments: {
                 'amount': await RemoteConfigService.getString('appointment_fee')
               });
-          if (success ?? true) {
-            //TODO make false
+          if (success ?? false) {
             await appointmentsRef.add({
               'name': Constants.currentUser.name,
               'email': Constants.currentUser.email,

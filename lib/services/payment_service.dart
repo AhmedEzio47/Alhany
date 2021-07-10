@@ -78,8 +78,8 @@ class PaymentService {
         'currency': currency,
         'payment_method_types[]': 'card'
       };
-      var response =
-          await http.post(paymentApiUrl, body: body, headers: headers);
+      var response = await http.post(Uri.parse(paymentApiUrl),
+          body: body, headers: headers);
       return jsonDecode(response.body);
     } catch (error) {
       print(error.toString());

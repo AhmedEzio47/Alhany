@@ -5,7 +5,7 @@ import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
-import 'package:Alhany/services/audio_recorder.dart';
+import 'package:Alhany/services/new_recorder.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -66,18 +66,18 @@ class _UploadNewsState extends State<UploadNews> {
               hint: Text('Content Type'),
               value: _type,
               items: [
-                // DropdownMenuItem(
-                //   child: Text('Record Audio'),
-                //   value: Types.RECORD_AUDIO,
-                // ),
-                // DropdownMenuItem(
-                //   child: Text('Record Video'),
-                //   value: Types.RECORD_VIDEO,
-                // ),
-                // DropdownMenuItem(
-                //   child: Text('Choose Audio'),
-                //   value: Types.CHOOSE_AUDIO,
-                // ),
+                DropdownMenuItem(
+                  child: Text('Record Audio'),
+                  value: Types.RECORD_AUDIO,
+                ),
+                DropdownMenuItem(
+                  child: Text('Record Video'),
+                  value: Types.RECORD_VIDEO,
+                ),
+                DropdownMenuItem(
+                  child: Text('Choose Audio'),
+                  value: Types.CHOOSE_AUDIO,
+                ),
                 DropdownMenuItem(
                   child: Text('Choose Video'),
                   value: Types.CHOOSE_VIDEO,
@@ -197,16 +197,19 @@ class _UploadNewsState extends State<UploadNews> {
   }
 
   _recordVideo() async {
-    File video = await ImagePicker.pickVideo(source: ImageSource.camera);
+    PickedFile video =
+        await ImagePicker.platform.pickVideo(source: ImageSource.camera);
     setState(() {
-      if (video != null) _contentFile = video;
+      if (video != null) _contentFile = File(video.path);
       _contentType = 'video';
     });
     getDuration(_contentFile.path);
   }
 
-  AudioRecorder recorder;
+  NewRecorder recorder = NewRecorder(appTempDirectoryPath);
   _recordAudio() async {
+    await AppUtil.deleteFiles();
+    await AppUtil.createAppDirectory();
     recorder.startRecording();
     setState(() {
       isRecording = true;

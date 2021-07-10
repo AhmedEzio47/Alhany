@@ -7,8 +7,8 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/message_model.dart';
 import 'package:Alhany/models/user_model.dart';
-import 'package:Alhany/services/audio_recorder.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/new_recorder.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/chat_bubble.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
@@ -16,7 +16,6 @@ import 'package:Alhany/widgets/image_overlay.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 //import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +45,7 @@ class _ConversationState extends State<Conversation>
   String messageText;
   bool _typing = false;
   FocusScopeNode _focusNode = FocusScopeNode();
-  AudioRecorder recorder;
+  NewRecorder recorder;
   var _url;
   List<Message> _messages;
 
@@ -66,8 +65,8 @@ class _ConversationState extends State<Conversation>
   _ConversationState();
 
   initRecorder() async {
-    recorder = AudioRecorder();
-    await recorder.init();
+    recorder = NewRecorder(appTempDirectoryPath);
+    //await recorder.init();
   }
 
   void loadUserData(String uid) async {
@@ -290,7 +289,7 @@ class _ConversationState extends State<Conversation>
     WidgetsBinding.instance.removeObserver(this);
     messagesSubscription.cancel();
     _scrollController.dispose();
-    recorder.dispose();
+    //recorder.dispose();
     super.dispose();
   }
 
