@@ -683,6 +683,7 @@ class _HomePageState extends State<HomePage>
   }
 
   getBoughtSongs() async {
+    if (Constants.currentUser == null) return;
     List<Melody> boughtSongs = await DatabaseService.getBoughtSongs();
     if (mounted) {
       setState(() {
