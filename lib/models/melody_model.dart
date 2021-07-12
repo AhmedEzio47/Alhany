@@ -54,6 +54,7 @@ class Melody {
         melodyPrice: doc.data()['melody_price'],
         views: doc.data()['views'],
         duration: doc.data()['duration'],
+        melodyDuration: doc.data()['melody_duration'],
         search: doc.data()['search'],
         timestamp: doc.data()['timestamp']);
   }

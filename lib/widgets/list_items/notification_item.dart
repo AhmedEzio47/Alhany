@@ -1,10 +1,10 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/strings.dart';
+import 'package:Alhany/models/notification_model.dart' as notification_model;
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
-import 'package:Alhany/models/notification_model.dart' as notification_model;
 
 class NotificationItem extends StatefulWidget {
   final notification_model.Notification notification;
@@ -12,7 +12,13 @@ class NotificationItem extends StatefulWidget {
   final String senderName;
   final int counter;
 
-  NotificationItem({Key key, @required this.notification, this.image, this.senderName, this.counter}) : super(key: key);
+  NotificationItem(
+      {Key key,
+      @required this.notification,
+      this.image,
+      this.senderName,
+      this.counter})
+      : super(key: key);
 
   @override
   _NotificationItemState createState() => _NotificationItemState();
@@ -28,7 +34,9 @@ class _NotificationItemState extends State<NotificationItem> {
 
   _buildItem(notification_model.Notification notification) {
     return Container(
-      color: notification.seen ? MyColors.lightPrimaryColor.withOpacity(.5) : Colors.transparent,
+      color: notification.seen
+          ? MyColors.lightPrimaryColor.withOpacity(.5)
+          : Colors.transparent,
       child: Container(
         padding: EdgeInsets.all(7),
         child: ListTile(
@@ -50,6 +58,8 @@ class _NotificationItemState extends State<NotificationItem> {
           ),
           subtitle: Text(
             "${widget.notification.body}",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Colors.grey.shade300,
             ),
@@ -95,7 +105,8 @@ class _NotificationItemState extends State<NotificationItem> {
           ),
           onTap: () {
             NotificationHandler.makeNotificationSeen(widget.notification.id);
-            NotificationHandler.navigateToScreen(context, widget.notification.type, widget.notification.objectId);
+            NotificationHandler.navigateToScreen(context,
+                widget.notification.type, widget.notification.objectId);
           },
         ),
       ),
