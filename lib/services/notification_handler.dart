@@ -7,15 +7,55 @@ import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'database_service.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print(message.data['title']);
+}
+
 class NotificationHandler {
+  // Create a [AndroidNotificationChannel] for heads up notifications
+  static AndroidNotificationChannel _channel;
+
+  /// Initialize the [FlutterLocalNotificationsPlugin] package.
+  static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+
   static receiveNotification(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
     StreamSubscription iosSubscription;
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    if (!kIsWeb) {
+      _channel = const AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // title
+        'This channel is used for important notifications.', // description
+        importance: Importance.high,
+      );
+
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+      /// Create an Android Notification Channel.
+      ///
+      /// We use this channel in the `AndroidManifest.xml` file to override the
+      /// default FCM channel to enable heads up notifications.
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_channel);
+
+      /// Update the iOS foreground notification presentation options to allow
+      /// heads up notifications.
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
@@ -32,57 +72,31 @@ class NotificationHandler {
       }
     });
 
-    /// Initalize the [FlutterLocalNotificationsPlugin] package.
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
-
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null && !kIsWeb) {
+        _flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                _channel.id,
+                _channel.name,
+                _channel.description,
+                // TODO add a proper drawable resource to android, for now using
+                //      one that already exists in example app.
+                icon: 'launch_background',
+              ),
+            ));
       }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
       navigateToScreen(
           context, message.data['type'], message.data['object_id']);
     });
-    // if (Platform.isIOS) {
-    //   iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-    //     // save the token  OR subscribe to a topic here
-    //   });
-    //
-    //   _fcm.requestNotificationPermissions(IosNotificationSettings());
-    // }
-    //
-    // _fcm.configure(
-    //   onMessage: (Map<String, dynamic> message) async {
-    //     print("onMessage: $message");
-    //     makeNotificationSeen(message['data']['id']);
-    //
-    //     AppUtil.showToast(
-    //       message['notification']['title'],
-    //     );
-    //
-    //     //showNotification(message);
-    //   },
-    //   onLaunch: (Map<String, dynamic> message) async {
-    //     print("onLaunch: $message");
-    //     makeNotificationSeen(message['data']['id']);
-    //
-    //     navigateToScreen(
-    //         context, message['data']['type'], message['data']['object_id']);
-    //   },
-    //   onResume: (Map<String, dynamic> message) async {
-    //     print("onResume: $message");
-    //     makeNotificationSeen(message['data']['id']);
-    //     navigateToScreen(
-    //         context, message['data']['type'], message['data']['object_id']);
-    //   },
-    // );
   }
 
   static makeNotificationSeen(String notificationId) {
@@ -157,21 +171,18 @@ class NotificationHandler {
     print('noti removed');
   }
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  void configLocalNotification() {
+  void configLocalNotification() async {
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('ic_launcher');
 
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   void showNotification(Map<String, dynamic> message) async {
-    configLocalNotification();
+    await configLocalNotification();
 
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         Platform.isAndroid ? 'com.devyat.alhani' : 'com.devyat.alhani',
@@ -185,7 +196,7 @@ class NotificationHandler {
     var platformChannelSpecifics = new NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
+    await _flutterLocalNotificationsPlugin.show(
         0,
         message['notification']['title'].toString(),
         message['notification']['body'].toString(),

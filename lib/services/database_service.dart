@@ -480,7 +480,7 @@ class DatabaseService {
         '${Constants.currentUser.name} sent a message',
         message,
         Constants.currentUserID,
-        type);
+        'message');
   }
 
   static Future<List<Message>> getMessages(String otherUserId) async {

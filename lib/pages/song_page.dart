@@ -166,44 +166,46 @@ class _SongPageState extends State<SongPage> {
                     SizedBox(
                       height: 50,
                     ),
-                    InkWell(
-                      onTap: () =>
-                          AppUtil.executeFunctionIfLoggedIn(context, () {
-                        if (!Constants.ongoingEncoding) {
-                          Navigator.of(context).pushNamed('/melody-page',
-                              arguments: {
-                                'melody': widget.song,
-                                'type': Types.AUDIO
-                              });
-                        } else {
-                          AppUtil.showToast(language(
-                              ar: 'من فضلك قم برفع الفيديو السابق أولا',
-                              en: 'Please upload the previous video first'));
-                        }
-                      }),
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black54,
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset:
-                                  Offset(0, 2), // changes position of shadow
+                    widget.song.melodyUrl != null
+                        ? InkWell(
+                            onTap: () =>
+                                AppUtil.executeFunctionIfLoggedIn(context, () {
+                              if (!Constants.ongoingEncoding) {
+                                Navigator.of(context).pushNamed('/melody-page',
+                                    arguments: {
+                                      'melody': widget.song,
+                                      'type': Types.AUDIO
+                                    });
+                              } else {
+                                AppUtil.showToast(language(
+                                    ar: 'من فضلك قم برفع الفيديو السابق أولا',
+                                    en: 'Please upload the previous video first'));
+                              }
+                            }),
+                            child: Container(
+                              height: 100,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey.shade300,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black54,
+                                    spreadRadius: 2,
+                                    blurRadius: 4,
+                                    offset: Offset(
+                                        0, 2), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.mic,
+                                color: MyColors.primaryColor,
+                                size: 70,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.mic,
-                          color: MyColors.primaryColor,
-                          size: 70,
-                        ),
-                      ),
-                    ),
+                          )
+                        : Container(),
                     SizedBox(
                       height: 50,
                     ),
