@@ -82,7 +82,6 @@ class _HomePageState extends State<HomePage>
                       TabBar(
                           onTap: (index) {
                             setState(() {
-                              //_isPlaying = false;
                               _page = index;
                             });
                             _pageController.animateToPage(
@@ -104,6 +103,9 @@ class _HomePageState extends State<HomePage>
                               text: language(en: 'Melodies', ar: 'الألحان'),
                             ),
                             Tab(
+                              text: language(en: 'Records', ar: 'تسجيلات'),
+                            ),
+                            Tab(
                               text: language(en: 'Favourites', ar: 'المفضلات'),
                             )
                           ]),
@@ -123,6 +125,7 @@ class _HomePageState extends State<HomePage>
                             children: [
                               _songsPage(),
                               _melodiesPage(),
+                              _recordsPage(),
                               _favouritesPage()
                             ],
                           ),
@@ -215,9 +218,11 @@ class _HomePageState extends State<HomePage>
       case 1:
         //getSingers();
         getMelodies();
-        getRecords();
         break;
       case 2:
+        getRecords();
+        break;
+      case 3:
         getFavourites();
         getBoughtSongs();
         break;
@@ -590,15 +595,14 @@ class _HomePageState extends State<HomePage>
           SliverList(
             delegate: SliverChildListDelegate([_melodiesList()]),
           ),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              MediaQuery.removePadding(
-                  context: context, removeTop: true, child: recordListView())
-            ]),
-          ),
         ],
       ),
     );
+  }
+
+  Widget _recordsPage() {
+    return MediaQuery.removePadding(
+        context: context, removeTop: true, child: recordListView());
   }
 
   _melodiesList() {
@@ -805,7 +809,7 @@ class _HomePageState extends State<HomePage>
     _pageController = PageController(
       initialPage: 0,
     );
-    _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 4, initialIndex: 0);
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
     _melodiesPageScrollController
