@@ -11,7 +11,6 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/services/database_service.dart';
-import 'package:Alhany/services/my_audio_player.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -73,17 +72,17 @@ class MusicPlayer extends StatefulWidget {
 class _MusicPlayerState extends State<MusicPlayer> {
   _MusicPlayerState();
 
-  MyAudioPlayer myAudioPlayer;
+  //MyAudioPlayer myAudioPlayer;
 
   get isPlaying => AudioService.playbackState == PlayerState.playing;
 
-  get durationText => myAudioPlayer.duration != null
-      ? myAudioPlayer.duration.toString().split('.').first
-      : '';
-
-  get positionText => myAudioPlayer.position != null
-      ? myAudioPlayer.position.toString().split('.').first
-      : '';
+  // get durationText => myAudioPlayer.duration != null
+  //     ? myAudioPlayer.duration.toString().split('.').first
+  //     : '';
+  //
+  // get positionText => myAudioPlayer.position != null
+  //     ? myAudioPlayer.position.toString().split('.').first
+  //     : '';
 
   bool isMuted = false;
   List<String> choices;
@@ -140,7 +139,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   @override
   void dispose() {
-    myAudioPlayer.stop();
+    //myAudioPlayer.stop();
     super.dispose();
   }
 
@@ -210,7 +209,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                     ),
               widget.melodyList.length > 1
                   ? Text(
-                      widget.melodyList[myAudioPlayer.index].name,
+                      widget.melodyList[audioServiceIndex].name,
                       style: TextStyle(
                           color: MyColors.textLightColor,
                           fontSize: 16,
@@ -1031,11 +1030,12 @@ class MediaLibrary {
     melodyList.forEach((element) {
       _items.add(MediaItem(
           id: element.songUrl ?? element.melodyUrl,
-          album: element.singer,
-          title: element.name,
-          artist: element.singer,
-          duration: Duration(seconds: element.duration),
-          artUri: Uri.parse(element.imageUrl)));
+          album: element.singer ?? '',
+          title: element.name ?? '',
+          artist: element.singer ?? '',
+          duration: Duration(seconds: element.duration ?? element.melodyUrl),
+          artUri:
+              element.imageUrl != null ? Uri.parse(element.imageUrl) : null));
     });
   }
 
