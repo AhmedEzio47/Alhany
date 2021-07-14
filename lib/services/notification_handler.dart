@@ -14,11 +14,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'database_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print(message.data['title']);
+  print(message.data['type']);
+  NotificationHandler.lastNotification = message.data;
 }
 
 class NotificationHandler {
   // Create a [AndroidNotificationChannel] for heads up notifications
+  static Map<String, dynamic> lastNotification;
   static AndroidNotificationChannel _channel;
 
   /// Initialize the [FlutterLocalNotificationsPlugin] package.

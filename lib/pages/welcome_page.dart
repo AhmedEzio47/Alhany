@@ -448,33 +448,14 @@ class _WelcomePageState extends State<WelcomePage> {
                                                           _emailController.text,
                                                           _nameController.text,
                                                           username);
-                                                  await AppUtil
-                                                      .setUserVariablesByFirebaseUser(
-                                                          user);
 
-                                                  saveToken();
                                                   //await user.sendEmailVerification();
                                                 }
-                                                // if (!user.isEmailVerified) {
-                                                //   AppUtil.showAlertDialog(
-                                                //       context: context,
-                                                //       message: language(
-                                                //           en: 'Please check your mail for the verification email',
-                                                //           ar: 'رجاءا قم بالتفعيل عبر بريدك'),
-                                                //       firstBtnText: language(en: 'OK', ar: 'تم'),
-                                                //       firstFunc: () => Navigator.of(context).pop(),
-                                                //       secondBtnText: language(en: 'Resend', ar: 'إعادة إرسال'),
-                                                //       secondFunc: () async {
-                                                //         Navigator.of(context).pop();
-                                                //         await user.sendEmailVerification();
-                                                //       });
-                                                //   //await auth.signOut();
-                                                // } else {
-                                                //   saveToken(); // We don't want to saveToken for non-verified users
-                                                //   //AppUtil.showToast('Logged In!');
-                                                //   Navigator.of(context).pushReplacementNamed('/');
-                                                //   return;
-                                                // }
+                                                await AppUtil
+                                                    .setUserVariablesByFirebaseUser(
+                                                        user);
+
+                                                saveToken();
                                                 Navigator.of(context)
                                                     .pushReplacementNamed('/');
                                               }

@@ -208,29 +208,31 @@ class _ProfilePageState extends State<ProfilePage>
                               padding: const EdgeInsets.only(
                                 left: 15.0,
                               ),
-                              child: Constants.currentRoute == '/profile-page'
-                                  ? Builder(
-                                      builder: (context) => InkWell(
-                                        onTap: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Icon(
-                                          Icons.arrow_back,
-                                          color: MyColors.accentColor,
+                              child:
+                                  Constants.currentRoute == '/profile-page' &&
+                                          Constants.currentUserID != _user?.id
+                                      ? Builder(
+                                          builder: (context) => InkWell(
+                                            onTap: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Icon(
+                                              Icons.arrow_back,
+                                              color: MyColors.accentColor,
+                                            ),
+                                          ),
+                                        )
+                                      : Builder(
+                                          builder: (context) => InkWell(
+                                            onTap: () {
+                                              Scaffold.of(context).openDrawer();
+                                            },
+                                            child: Icon(
+                                              Icons.menu,
+                                              color: MyColors.accentColor,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  : Builder(
-                                      builder: (context) => InkWell(
-                                        onTap: () {
-                                          Scaffold.of(context).openDrawer();
-                                        },
-                                        child: Icon(
-                                          Icons.menu,
-                                          color: MyColors.accentColor,
-                                        ),
-                                      ),
-                                    ),
                             ),
                           ),
                           alignment: Alignment.topCenter,

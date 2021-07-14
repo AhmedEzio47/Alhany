@@ -117,6 +117,21 @@ class _SongPageState extends State<SongPage> {
                 ),
                 child: Column(
                   children: [
+                    RegularAppbar(
+                      context,
+                      color: Colors.black,
+                      leading: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: MyColors.accentColor,
+                          ),
+                        ),
+                      ),
+                      margin: 10,
+                    ),
                     Container(
                       height: 200,
                       child: Stack(
@@ -227,16 +242,6 @@ class _SongPageState extends State<SongPage> {
                       ),
                     ),
                   ],
-                ),
-              ),
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: RegularAppbar(
-                    context,
-                    color: Colors.black,
-                    margin: 10,
-                  ),
                 ),
               ),
             ],

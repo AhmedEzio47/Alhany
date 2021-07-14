@@ -892,68 +892,71 @@ class _MelodyPageState extends State<MelodyPage> {
       _context = context;
       return WillPopScope(
         onWillPop: _onBackPressed,
-        child: SafeArea(
-          child: Scaffold(
-            //resizeToAvoidBottomInset: !isFloating,
-            key: _scaffoldKey,
-            backgroundColor: Colors.black,
-            body: choosingImage
-                ? choosingImagePage(context)
-                : _progressVisible
-                    ? progressPage()
-                    : recordingStatus == RecordingStatus.Recording &&
-                            _type == Types.VIDEO
-                        ? videoRecordingPage()
-                        : mainPage(),
-            floatingActionButton: !_progressVisible && !choosingImage
-                ? FloatingActionButton(
-                    onPressed: () async {
-                      //if (AudioService.running) AudioService.pause();
-                      if (recordingStatus == RecordingStatus.Recording) {
-                        await saveRecord();
-                      } else {
-                        if ((await PermissionsService()
-                                .hasStoragePermission()) &&
-                            (await PermissionsService()
-                                .hasMicrophonePermission())) {
-                          await createAppFolder();
-                          //await AppUtil.createAppDirectory();
-                          recordingFilePath = appTempDirectoryPath;
-                          melodyPath = appTempDirectoryPath;
-                          newFilePath = appTempDirectoryPath;
-                          mergedFilePath = appTempDirectoryPath;
-                          await _downloadMelody();
+        child: Container(
+          color: Colors.black,
+          child: SafeArea(
+            child: Scaffold(
+              //resizeToAvoidBottomInset: !isFloating,
+              key: _scaffoldKey,
+              backgroundColor: Colors.black,
+              body: choosingImage
+                  ? choosingImagePage(context)
+                  : _progressVisible
+                      ? progressPage()
+                      : recordingStatus == RecordingStatus.Recording &&
+                              _type == Types.VIDEO
+                          ? videoRecordingPage()
+                          : mainPage(),
+              floatingActionButton: !_progressVisible && !choosingImage
+                  ? FloatingActionButton(
+                      onPressed: () async {
+                        //if (AudioService.running) AudioService.pause();
+                        if (recordingStatus == RecordingStatus.Recording) {
+                          await saveRecord();
+                        } else {
+                          if ((await PermissionsService()
+                                  .hasStoragePermission()) &&
+                              (await PermissionsService()
+                                  .hasMicrophonePermission())) {
+                            await createAppFolder();
+                            //await AppUtil.createAppDirectory();
+                            recordingFilePath = appTempDirectoryPath;
+                            melodyPath = appTempDirectoryPath;
+                            newFilePath = appTempDirectoryPath;
+                            mergedFilePath = appTempDirectoryPath;
+                            await _downloadMelody();
 
-                          Navigator.of(context).push(CustomModal(
-                            child: _headphonesDialog(),
-                          ));
+                            Navigator.of(context).push(CustomModal(
+                              child: _headphonesDialog(),
+                            ));
+                          }
+                          if (!await PermissionsService()
+                              .hasStoragePermission()) {
+                            await PermissionsService().requestStoragePermission(
+                              context,
+                            );
+                          }
+                          if (!await PermissionsService()
+                              .hasMicrophonePermission()) {
+                            await PermissionsService()
+                                .requestMicrophonePermission(
+                              context,
+                            );
+                          }
                         }
-                        if (!await PermissionsService()
-                            .hasStoragePermission()) {
-                          await PermissionsService().requestStoragePermission(
-                            context,
-                          );
-                        }
-                        if (!await PermissionsService()
-                            .hasMicrophonePermission()) {
-                          await PermissionsService()
-                              .requestMicrophonePermission(
-                            context,
-                          );
-                        }
-                      }
-                    },
-                    child: Icon(
-                      recordingStatus == RecordingStatus.Recording
-                          ? Icons.stop
-                          : _type == Types.VIDEO
-                              ? Icons.videocam
-                              : Icons.mic,
-                      color: MyColors.primaryColor,
-                      size: 30,
-                    ),
-                  )
-                : null,
+                      },
+                      child: Icon(
+                        recordingStatus == RecordingStatus.Recording
+                            ? Icons.stop
+                            : _type == Types.VIDEO
+                                ? Icons.videocam
+                                : Icons.mic,
+                        color: MyColors.primaryColor,
+                        size: 30,
+                      ),
+                    )
+                  : null,
+            ),
           ),
         ),
       );

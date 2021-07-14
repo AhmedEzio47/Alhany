@@ -8,6 +8,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -20,6 +21,7 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../app_util.dart';
@@ -188,24 +190,24 @@ class _HomePageState extends State<HomePage>
             ],
           ),
         ),
-        // floatingActionButton: _page == 2
-        //     ? FloatingActionButton(
-        //         child: Icon(Icons.playlist_play),
-        //         onPressed: () {
-        //           if (_favourites.isEmpty) {
-        //             return;
-        //           }
-        //           setState(() {
-        //             musicPlayer = MusicPlayer(
-        //               melodyList: _favourites,
-        //               backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-        //               initialDuration: 0,
-        //             );
-        //             _isPlaying = true;
-        //           });
-        //         },
-        //       )
-        //     : null,
+        floatingActionButton: _page == 3
+            ? FloatingActionButton(
+                child: Icon(Icons.playlist_play),
+                onPressed: () {
+                  if (_favourites.isEmpty) {
+                    return;
+                  }
+                  setState(() {
+                    musicPlayer = MusicPlayer(
+                      melodyList: [..._boughtSongs, ..._favourites],
+                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                      initialDuration: 0,
+                    );
+                    _isPlaying = true;
+                  });
+                },
+              )
+            : null,
       ),
     );
   }
@@ -806,6 +808,22 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
+    SystemChannels.lifecycle.setMessageHandler((msg) {
+      print('SystemChannels> $msg');
+      switch (msg) {
+        case "AppLifecycleState.resumed":
+          if (NotificationHandler.lastNotification != null) {
+            NotificationHandler.navigateToScreen(
+                context,
+                NotificationHandler.lastNotification['type'],
+                NotificationHandler.lastNotification['object_id']);
+          }
+          NotificationHandler.lastNotification = null;
+          break;
+        default:
+      }
+      return;
+    });
     _pageController = PageController(
       initialPage: 0,
     );

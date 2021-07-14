@@ -164,7 +164,15 @@ class DatabaseService {
 
     for (DocumentSnapshot doc in melodiesSnapshot.docs) {
       Melody melody = await getMelodyWithId(doc.id);
-      melodies.add(melody);
+      if (melody.id != null) {
+        melodies.add(melody);
+      } else {
+        await usersRef
+            .doc(Constants.currentUserID)
+            .collection('favourites')
+            .doc(doc.id)
+            .delete();
+      }
     }
 
     return melodies;
