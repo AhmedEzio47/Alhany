@@ -147,6 +147,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Duration _duration;
 
   initAudioService() async {
+    if (AudioService.running) await AudioService.stop();
     List<Map<String, dynamic>> melodiesMapList =
         widget.melodyList.map((doc) => doc.toMap()).toList();
     if (!AudioService.connected) await AudioService.connect();
