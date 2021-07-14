@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
@@ -28,6 +30,20 @@ class _DownloadsPageState extends State<DownloadsPage> {
         _downloads = downloads;
       }
     });
+    for (var download in downloads) {
+      bool exists = await checkIfFileExists(download.songUrl);
+      if (!exists) {
+        setState(() {
+          _downloads.remove(download);
+        });
+        await MelodySqlite.delete(download.id);
+      }
+    }
+  }
+
+  Future<bool> checkIfFileExists(String path) async {
+    File file = File(path);
+    return await file.exists();
   }
 
   @override
