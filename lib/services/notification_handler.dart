@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:Alhany/constants/constants.dart';
-import 'package:Alhany/main.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,9 +16,9 @@ import 'database_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  MyApp.restartApp(NotificationHandler.context);
-  print(message.data['type']);
-  NotificationHandler.lastNotification = message.data;
+  // MyApp.restartApp(NotificationHandler.context);
+  // print(message.data['type']);
+  // NotificationHandler.lastNotification = message.data;
 }
 
 class NotificationHandler {
@@ -90,13 +89,15 @@ class NotificationHandler {
             notification.title,
             notification.body,
             NotificationDetails(
+              iOS: IOSNotificationDetails(
+                  presentAlert: true, presentSound: true),
               android: AndroidNotificationDetails(
                 _channel.id,
                 _channel.name,
                 _channel.description,
                 // TODO add a proper drawable resource to android, for now using
                 //      one that already exists in example app.
-                icon: 'launch_background',
+                icon: 'ic_notification',
               ),
             ));
       }
@@ -182,7 +183,7 @@ class NotificationHandler {
 
   void configLocalNotification() async {
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('ic_launcher');
+        new AndroidInitializationSettings('ic_notification');
 
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
