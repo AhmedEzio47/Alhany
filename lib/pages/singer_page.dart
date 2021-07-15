@@ -237,97 +237,112 @@ class _SingerPageState extends State<SingerPage>
                       fit: BoxFit.cover,
                     ),
                   ),
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildListDelegate([
-                          Container(
-                            height: 200,
-                            child: Stack(
-                              children: [
-                                CachedImage(
-                                  height: 200,
-                                  width: MediaQuery.of(context).size.width,
-                                  defaultAssetImage:
-                                      Strings.default_cover_image,
-                                  imageUrl: widget.singer.coverUrl,
-                                  imageShape: BoxShape.rectangle,
-                                ),
-                                Positioned.fill(
-                                    child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16.0, bottom: 16),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: CachedImage(
-                                      height: 100,
-                                      width: 100,
-                                      defaultAssetImage:
-                                          Strings.default_profile_image,
-                                      imageUrl: widget.singer.imageUrl,
-                                      imageShape: BoxShape.circle,
-                                    ),
-                                  ),
-                                )),
-                                Positioned.fill(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 4, horizontal: 16),
-                                        color: Colors.black.withOpacity(.6),
-                                        child: Text(
-                                          widget.singer.name,
-                                          style: TextStyle(
-                                              fontSize: 22,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
+                  child: Column(
+                    children: [
+                      RegularAppbar(
+                        context,
+                        color: Colors.black,
+                        margin: 10,
+                        leading: Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: InkWell(
+                            onTap: _onBackPressed,
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: MyColors.accentColor,
                             ),
                           ),
-                          widget.dataType == null
-                              ? TabBar(
-                                  onTap: (index) {
-                                    setState(() {
-                                      //_isPlaying = false;
-                                      _page = index;
-                                    });
-                                  },
-                                  labelColor: MyColors.accentColor,
-                                  unselectedLabelColor: Colors.grey,
-                                  controller: _tabController,
-                                  tabs: [
-                                      Tab(
-                                        text: language(
-                                            en: 'Melodies', ar: 'الألحان'),
+                        ),
+                      ),
+                      Expanded(
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                Container(
+                                  height: 200,
+                                  child: Stack(
+                                    children: [
+                                      CachedImage(
+                                        height: 200,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        defaultAssetImage:
+                                            Strings.default_cover_image,
+                                        imageUrl: widget.singer.coverUrl,
+                                        imageShape: BoxShape.rectangle,
                                       ),
-                                      Tab(
-                                        text: language(
-                                            en: 'Songs', ar: 'الأغاني'),
-                                      ),
-                                    ])
-                              : Container(),
-                          _currentPage()
-                        ]),
+                                      Positioned.fill(
+                                          child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 16.0, bottom: 16),
+                                        child: Align(
+                                          alignment: Alignment.bottomLeft,
+                                          child: CachedImage(
+                                            height: 100,
+                                            width: 100,
+                                            defaultAssetImage:
+                                                Strings.default_profile_image,
+                                            imageUrl: widget.singer.imageUrl,
+                                            imageShape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      )),
+                                      Positioned.fill(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 4, horizontal: 16),
+                                              color:
+                                                  Colors.black.withOpacity(.6),
+                                              child: Text(
+                                                widget.singer.name,
+                                                style: TextStyle(
+                                                    fontSize: 22,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                widget.dataType == null
+                                    ? TabBar(
+                                        onTap: (index) {
+                                          setState(() {
+                                            //_isPlaying = false;
+                                            _page = index;
+                                          });
+                                        },
+                                        labelColor: MyColors.accentColor,
+                                        unselectedLabelColor: Colors.grey,
+                                        controller: _tabController,
+                                        tabs: [
+                                            Tab(
+                                              text: language(
+                                                  en: 'Melodies',
+                                                  ar: 'الألحان'),
+                                            ),
+                                            Tab(
+                                              text: language(
+                                                  en: 'Songs', ar: 'الأغاني'),
+                                            ),
+                                          ])
+                                    : Container(),
+                                _currentPage()
+                              ]),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: RegularAppbar(
-                    context,
-                    color: Colors.black,
-                    margin: 10,
                   ),
                 ),
               ),
@@ -335,25 +350,32 @@ class _SingerPageState extends State<SingerPage>
                   ? Positioned.fill(
                       child: Align(
                       alignment: Alignment.topRight,
-                      child: PopupMenuButton<String>(
-                        color: MyColors.accentColor,
-                        elevation: 0,
-                        onCanceled: () {
-                          print('You have not chosen anything');
-                        },
-                        tooltip: 'This is tooltip',
-                        onSelected: _select,
-                        itemBuilder: (BuildContext context) {
-                          return choices.map((String choice) {
-                            return PopupMenuItem<String>(
-                              value: choice,
-                              child: Text(
-                                choice,
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            );
-                          }).toList();
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.settings,
+                            color: MyColors.accentColor,
+                          ),
+                          color: MyColors.accentColor,
+                          elevation: 0,
+                          onCanceled: () {
+                            print('You have not chosen anything');
+                          },
+                          tooltip: 'This is tooltip',
+                          onSelected: _select,
+                          itemBuilder: (BuildContext context) {
+                            return choices.map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(
+                                  choice,
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              );
+                            }).toList();
+                          },
+                        ),
                       ),
                     ))
                   : Container(),

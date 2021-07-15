@@ -207,23 +207,24 @@ class _MusicPlayerState extends State<MusicPlayer> {
                   : SizedBox(
                       height: 5,
                     ),
-              widget.melodyList.length > 1
-                  ? Text(
-                      widget.melodyList[audioServiceIndex].name,
-                      style: TextStyle(
-                          color: MyColors.textLightColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    )
-                  : widget.title != null
-                      ? Text(
-                          widget.title,
-                          style: TextStyle(
-                              color: MyColors.textLightColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        )
-                      : Container(),
+              // widget.melodyList.length > 1
+              //     ? Text(
+              //         widget.melodyList[audioServiceIndex].name,
+              //         style: TextStyle(
+              //             color: MyColors.textLightColor,
+              //             fontSize: 16,
+              //             fontWeight: FontWeight.bold),
+              //       )
+              //     : widget.title != null
+              //         ? Text(
+              //             widget.title,
+              //             style: TextStyle(
+              //                 color: MyColors.textLightColor,
+              //                 fontSize: 16,
+              //                 fontWeight: FontWeight.bold),
+              //           )
+              //         : Container(),
+              songName(),
               Row(
                 children: [
                   widget.isCompact
@@ -1028,14 +1029,28 @@ class MediaLibrary {
       _items.addAll(oldOne.items);
     }
     melodyList.forEach((element) {
-      _items.add(MediaItem(
+      MediaItem mediaItem = MediaItem(
           id: element.songUrl ?? element.melodyUrl,
           album: element.singer ?? '',
           title: element.name ?? '',
           artist: element.singer ?? '',
           duration: Duration(seconds: element.duration ?? element.melodyUrl),
-          artUri:
-              element.imageUrl != null ? Uri.parse(element.imageUrl) : null));
+          artUri: element.imageUrl != null
+              ? Uri.parse(element.imageUrl)
+              : Uri.parse(
+                  'https://firebasestorage.googleapis.com/v0/b/dubsmash-75a05.appspot.com/o/default_melody.jpg?alt=media&token=539a83da-df10-4648-b343-e788b01f866e'));
+
+      bool exists = false;
+      for (MediaItem item in _items) {
+        if (item.id == mediaItem.id) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) {
+        _items.add(mediaItem);
+      }
     });
   }
 
@@ -1117,12 +1132,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
         Map<String, dynamic> decoded = jsonDecode(arguments);
 
         Melody melody = Melody.fromMap(decoded);
-        _mediaLibrary = MediaLibrary([melody],
-            oldOne: _mediaLibrary != null ? _mediaLibrary : null);
+        _mediaLibrary = MediaLibrary([melody], oldOne: _mediaLibrary);
         // Load and broadcast the queue
         AudioServiceBackground.setQueue(queue);
         try {
-          print('Local File:${queue[0].id}');
+          print('Queue item:${queue[0].id}');
           _player.setAudioSource(ConcatenatingAudioSource(
             children: queue
                 .map((item) =>

@@ -73,6 +73,21 @@ class _TracksPageState extends State<TracksPage> {
                 ),
                 child: Column(
                   children: [
+                    RegularAppbar(
+                      context,
+                      color: Colors.black,
+                      margin: 10,
+                      leading: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: MyColors.accentColor,
+                          ),
+                        ),
+                      ),
+                    ),
                     Container(
                       height: 200,
                       child: Stack(
@@ -165,16 +180,6 @@ class _TracksPageState extends State<TracksPage> {
                           }),
                     )
                   ],
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: RegularAppbar(
-                  context,
-                  color: Colors.black,
-                  margin: 10,
                 ),
               ),
             ),

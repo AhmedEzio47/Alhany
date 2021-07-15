@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/main.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'database_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  MyApp.restartApp(NotificationHandler.context);
   print(message.data['type']);
   NotificationHandler.lastNotification = message.data;
 }
@@ -21,6 +25,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class NotificationHandler {
   // Create a [AndroidNotificationChannel] for heads up notifications
   static Map<String, dynamic> lastNotification;
+  static BuildContext context;
   static AndroidNotificationChannel _channel;
 
   /// Initialize the [FlutterLocalNotificationsPlugin] package.
@@ -28,6 +33,7 @@ class NotificationHandler {
 
   static receiveNotification(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
+    NotificationHandler.context = context;
     StreamSubscription iosSubscription;
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     if (!kIsWeb) {
@@ -58,6 +64,7 @@ class NotificationHandler {
         sound: true,
       );
     }
+
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
@@ -149,7 +156,7 @@ class NotificationHandler {
   static sendNotification(String receiverId, String title, String body,
       String objectId, String type) async {
     if (receiverId == Constants.currentUserID) return;
-    usersRef.doc(receiverId).collection('notifications').add({
+    await usersRef.doc(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
       'seen': false,
@@ -180,7 +187,10 @@ class NotificationHandler {
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (data) {
+      print('data: $data');
+    });
   }
 
   void showNotification(Map<String, dynamic> message) async {
