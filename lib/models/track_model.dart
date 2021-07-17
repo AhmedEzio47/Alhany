@@ -25,9 +25,9 @@ class Track {
         id: doc.id,
         name: doc.data()['name'],
         ownerId: doc.data()['owner_id'],
-        image: doc.data()['image'],
+        image: doc.data()['image_url'],
         price: doc.data()['price'],
-        audio: doc.data()['audio'],
+        audio: doc.data()['audio_url'],
         duration: doc.data()['duration'],
         timestamp: doc.data()['timestamp']);
   }
