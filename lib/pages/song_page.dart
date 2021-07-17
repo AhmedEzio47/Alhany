@@ -4,7 +4,6 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/pages/tracks_page.dart';
 import 'package:Alhany/pages/upload_track.dart';
-import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
@@ -25,43 +24,6 @@ class _SongPageState extends State<SongPage> {
   Future<bool> _onBackPressed() {
     Constants.currentRoute = '';
     Navigator.of(context).pop();
-  }
-
-  Future<bool> buySong() async {
-    AppUtil.executeFunctionIfLoggedIn(context, () async {
-      await AppUtil.showAlertDialog(
-          context: context,
-          message: language(
-              ar: 'هل تريد شراء هذه الأغنية',
-              en: 'Do you want to buy this song?'),
-          firstBtnText: language(ar: 'نعم', en: 'Yes'),
-          secondBtnText: language(ar: 'لا', en: 'No'),
-          firstFunc: () async {
-            final success = await Navigator.of(context).pushNamed(
-                '/payment-home',
-                arguments: {'amount': widget.song.price});
-            if (success) {
-              List boughtSongs = Constants.currentUser.boughtSongs ?? [];
-              boughtSongs.add(widget.song.id);
-
-              await usersRef
-                  .doc(Constants.currentUserID)
-                  .update({'bought_songs': boughtSongs});
-
-              Constants.currentUser =
-                  await DatabaseService.getUserWithId(Constants.currentUserID);
-
-              Navigator.of(context).pop();
-              return true;
-            }
-          },
-          secondFunc: () {
-            Navigator.of(context).pop();
-            return false;
-          });
-    });
-
-    return false;
   }
 
   @override
@@ -173,7 +135,7 @@ class _SongPageState extends State<SongPage> {
                     MusicPlayer(
                       btnSize: 35,
                       isCompact: true,
-                      onBuy: buySong,
+                      onBuy: () => Melody.buySong(context, widget.song),
                       playBtnPosition: PlayBtnPosition.left,
                       initialDuration: widget.song.duration,
                       melodyList: [widget.song],

@@ -437,6 +437,8 @@ class _StarPageState extends State<StarPage>
                         ),
                         itemBuilder: (context, index) {
                           return InkWell(
+                            onLongPress: () =>
+                                deleteExclusive(_exclusives[index]),
                             onTap: () async {
                               setState(() {
                                 musicPlayer = MusicPlayer(
@@ -492,6 +494,8 @@ class _StarPageState extends State<StarPage>
                         ),
                         itemBuilder: (context, index) {
                           return InkWell(
+                            onLongPress: () =>
+                                deleteExclusive(_exclusives[index]),
                             onTap: () async {
                               setState(() {
                                 musicPlayer = MusicPlayer(
@@ -607,6 +611,26 @@ class _StarPageState extends State<StarPage>
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/app-page');
+  }
+
+  deleteExclusive(Melody melody) async {
+    if (!Constants.isAdmin) return;
+    AppUtil.showAlertDialog(
+        context: context,
+        message: 'Are you sure you want to delete this exclusive?',
+        firstBtnText: 'Yes',
+        firstFunc: () async {
+          Navigator.of(context).pop();
+          AppUtil.showLoader(context);
+          await DatabaseService.deleteExclusive(melody);
+
+          AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
+          Navigator.of(context).pushReplacementNamed('/');
+        },
+        secondBtnText: 'No',
+        secondFunc: () {
+          Navigator.of(context).pop();
+        });
   }
 
   Future subscribe() async {

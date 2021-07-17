@@ -1285,6 +1285,21 @@ class DatabaseService {
     }
   }
 
+  static deleteExclusive(Melody melody) async {
+    if (melody.imageUrl != null) {
+      String fileName =
+          await AppUtil.getStorageFileNameFromUrl(melody.imageUrl);
+      await storageRef.child('/exclusives_images/$fileName').delete();
+    }
+    if (melody.songUrl != null) {
+      String fileName = await AppUtil.getStorageFileNameFromUrl(melody.songUrl);
+
+      await storageRef.child('/exclusives_songs/$fileName').delete();
+
+      await exclusivesRef.doc(melody.id).delete();
+    }
+  }
+
   static Future<Singer> getSingerWithName(String name) async {
     QuerySnapshot singerSnapshot =
         await singersRef.where('name', isEqualTo: name).get();

@@ -142,6 +142,8 @@ class _SingerPageState extends State<SingerPage>
               onTap: () async {
                 setState(() {
                   musicPlayer = MusicPlayer(
+                    checkPrice: true,
+                    onBuy: () => Melody.buySong(context, _songs[index]),
                     key: ValueKey(_songs[index].id),
                     melodyList: [_songs[index]],
                     backColor: MyColors.lightPrimaryColor,
@@ -179,6 +181,7 @@ class _SingerPageState extends State<SingerPage>
               onTap: () async {
                 setState(() {
                   musicPlayer = MusicPlayer(
+                    checkPrice: true,
                     key: ValueKey(_melodies[index].id),
                     melodyList: [_melodies[index]],
                     backColor: MyColors.lightPrimaryColor,
