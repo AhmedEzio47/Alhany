@@ -15,8 +15,6 @@ import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
-//import 'package:Alhany/widgets/local_music_player.dart';
-import 'package:Alhany/widgets/music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -876,7 +874,7 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initMelodyPlayer(String url) async {
     setState(() {
-      melodyPlayer = new MusicPlayer(
+      melodyPlayer = new LocalMusicPlayer(
         checkPrice: false,
         isMelody: true,
         key: ValueKey('main'),
