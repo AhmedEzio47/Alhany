@@ -910,14 +910,17 @@ class _MelodyPageState extends State<MelodyPage> {
               floatingActionButton: !_progressVisible && !choosingImage
                   ? FloatingActionButton(
                       onPressed: () async {
+                        print('FAB TAPPED!');
                         //if (AudioService.running) AudioService.pause();
                         if (recordingStatus == RecordingStatus.Recording) {
+                          print('Recording Status');
                           await saveRecord();
                         } else {
                           if ((await PermissionsService()
                                   .hasStoragePermission()) &&
                               (await PermissionsService()
                                   .hasMicrophonePermission())) {
+                            print('We got the required permissions...');
                             await createAppFolder();
                             //await AppUtil.createAppDirectory();
                             recordingFilePath = appTempDirectoryPath;
@@ -932,16 +935,20 @@ class _MelodyPageState extends State<MelodyPage> {
                           }
                           if (!await PermissionsService()
                               .hasStoragePermission()) {
+                            print('request storage permission');
                             await PermissionsService().requestStoragePermission(
                               context,
                             );
                           }
                           if (!await PermissionsService()
                               .hasMicrophonePermission()) {
+                            print('request mic permission');
                             await PermissionsService()
-                                .requestMicrophonePermission(
-                              context,
-                            );
+                                .requestMicrophonePermission(context,
+                                    onPermissionDenied: () {
+                              print(
+                                  'you can\'t use this feature without granting the permissions');
+                            });
                           }
                         }
                       },
@@ -1056,7 +1063,7 @@ class _MelodyPageState extends State<MelodyPage> {
                                     print(
                                         'mergedFilePath + $mergedFilePath + _image.path + ${_image.path} + imageVideoPath + $imageVideoPath');
                                     int success = await flutterFFmpeg.execute(
-                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:trunc(ow/a/2)*2,format=yuv420p\" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest $imageVideoPath');
+                                        '-loop 1 -i ${_image.path} -i $mergedFilePath -vf \"scale=720:trunc(ow/a/2)*2\" -c:v libx264 -tune stillimage -c:a libmp3lame -b:a 192k -shortest $imageVideoPath');
                                     print('conversion success:$success');
                                     if (success != 0) {
                                       AppUtil.showToast(language(

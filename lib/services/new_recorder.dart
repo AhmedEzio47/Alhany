@@ -16,21 +16,19 @@ class NewRecorder {
 
   startRecording() async {
     try {
-      if (await _audioRecorder.hasPermission()) {
-        // can add extension like ".mp4" ".wav" ".m4a" ".aac"
-        var customPath =
-            path + DateTime.now().millisecondsSinceEpoch.toString() + '.mp3';
-        _audioRecorder.start(
-          path: customPath,
-          // encoder: AudioEncoder.AAC,
-          // samplingRate: 44100,
-        );
+      // can add extension like ".mp4" ".wav" ".m4a" ".aac"
+      var customPath =
+          path + DateTime.now().millisecondsSinceEpoch.toString() + '.m4a';
+      _audioRecorder.start(
+        path: customPath,
+        // encoder: AudioEncoder.AAC,
+        // samplingRate: 44100,
+      );
 
-        bool isRecording = await _audioRecorder.isRecording();
+      bool isRecording = await _audioRecorder.isRecording();
 
-        _isRecording = isRecording;
-        _recordDuration = 0;
-      }
+      _isRecording = isRecording;
+      _recordDuration = 0;
     } catch (e) {
       print(e);
     }
