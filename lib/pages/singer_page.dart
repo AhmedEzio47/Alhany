@@ -115,6 +115,8 @@ class _SingerPageState extends State<SingerPage>
         } else {}
       });
     _tabController = TabController(vsync: this, length: 2, initialIndex: 1);
+    getSongs();
+
     super.initState();
   }
 
@@ -339,7 +341,7 @@ class _SingerPageState extends State<SingerPage>
                                             ),
                                           ])
                                     : Container(),
-                                _currentPage()
+                                _songsPage()
                               ]),
                             ),
                           ],

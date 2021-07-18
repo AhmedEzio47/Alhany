@@ -60,6 +60,12 @@ class AppUtil with ChangeNotifier {
   static user_model.User fullscreenSinger;
   static Melody fullscreenMelody;
 
+  static String urlFullyEncode(String url) {
+    String result = url.replaceAll('(', '%28').replaceAll(')', '%29');
+    print(result);
+    return result;
+  }
+
   static executeFunctionIfLoggedIn(BuildContext context, Function function) {
     if (authStatus == AuthStatus.LOGGED_IN) {
       function();

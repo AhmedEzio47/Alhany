@@ -23,8 +23,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class NotificationHandler {
   // Create a [AndroidNotificationChannel] for heads up notifications
-  static Map<String, dynamic> lastNotification;
-  static BuildContext context;
   static AndroidNotificationChannel _channel;
 
   /// Initialize the [FlutterLocalNotificationsPlugin] package.
@@ -32,7 +30,6 @@ class NotificationHandler {
 
   static receiveNotification(
       BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
-    NotificationHandler.context = context;
     StreamSubscription iosSubscription;
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     if (!kIsWeb) {

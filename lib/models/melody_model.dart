@@ -46,7 +46,7 @@ class Melody {
     return Melody(
         id: doc.id,
         name: doc.data()['name'],
-        songUrl: doc.data()['audio_url'],
+        songUrl: AppUtil.urlFullyEncode(doc.data()['audio_url']),
         melodyUrl: doc.data()['melody_url'],
         lyrics: doc.data()['lyrics'],
         levelUrls: doc.data()['level_urls'],
