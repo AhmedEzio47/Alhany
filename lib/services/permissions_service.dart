@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,7 +33,12 @@ class PermissionsService {
   Future<bool> requestStoragePermission(BuildContext context,
       {Function onPermissionDenied}) async {
     this._context = context;
-    var granted = await _requestPermission(Permission.storage);
+    var granted;
+    if (Platform.isIOS) {
+      granted = await _requestPermission(Permission.mediaLibrary);
+    } else {
+      granted = await _requestPermission(Permission.storage);
+    }
     if (!granted && onPermissionDenied != null) {
       onPermissionDenied();
     }
@@ -78,6 +85,9 @@ class PermissionsService {
 
   /// Check if the app has already granted the Storage Permission.
   Future<bool> hasStoragePermission() async {
+    if (Platform.isIOS) {
+      return hasPermission(Permission.mediaLibrary);
+    }
     return hasPermission(Permission.storage);
   }
 
