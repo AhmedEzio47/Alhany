@@ -47,7 +47,7 @@ class Melody {
         id: doc.id,
         name: doc.data()['name'],
         songUrl: AppUtil.urlFullyEncode(doc.data()['audio_url']),
-        melodyUrl: doc.data()['melody_url'],
+        melodyUrl: AppUtil.urlFullyEncode(doc.data()['melody_url']),
         lyrics: doc.data()['lyrics'],
         levelUrls: doc.data()['level_urls'],
         levelDurations: doc.data()['level_durations'],
@@ -68,7 +68,7 @@ class Melody {
         id: map['id'],
         name: map['name'],
         authorId: map['author_id'],
-        songUrl: map['audio_url'],
+        songUrl: AppUtil.urlFullyEncode(map['audio_url']),
         imageUrl: map['image_url'],
         duration: map['duration'],
         singer: map['singer']);

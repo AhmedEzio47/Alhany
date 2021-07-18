@@ -589,7 +589,7 @@ class _MelodyPageState extends State<MelodyPage> {
         key: ValueKey('preview'),
         melodyList: [
           Melody(
-              songUrl: mergedFilePath,
+              melodyUrl: mergedFilePath,
               name: 'Preview',
               singer: 'Preview',
               imageUrl: Strings.default_melody_image,

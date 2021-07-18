@@ -1,3 +1,4 @@
+import 'package:Alhany/app_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Track {
@@ -27,7 +28,7 @@ class Track {
         ownerId: doc.data()['owner_id'],
         image: doc.data()['image_url'],
         price: doc.data()['price'],
-        audio: doc.data()['audio_url'],
+        audio: AppUtil.urlFullyEncode(doc.data()['audio_url']),
         duration: doc.data()['duration'],
         timestamp: doc.data()['timestamp']);
   }

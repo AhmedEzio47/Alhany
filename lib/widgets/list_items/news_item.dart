@@ -14,6 +14,7 @@ import 'package:Alhany/widgets/url_text.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 class NewsItem extends StatefulWidget {
@@ -392,6 +393,12 @@ class _NewsItemState extends State<NewsItem> {
     if (_chewieController != null) {
       _chewieController.dispose();
     }
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.dispose();
   }
 
@@ -515,6 +522,7 @@ class _NewsItemState extends State<NewsItem> {
       ..initialize().then((value) {
         _videoController.play();
         _chewieController = ChewieController(
+          deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
           showControls: true,
           videoPlayerController: _videoController,
           autoPlay: false,

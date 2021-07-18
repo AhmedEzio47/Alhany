@@ -1,3 +1,4 @@
+import 'package:Alhany/app_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class News {
@@ -31,7 +32,7 @@ class News {
         id: doc.id,
         text: doc.data()['text'],
         thumbnail: doc.data()['thumbnail'],
-        contentUrl: doc.data()['content_url'],
+        contentUrl: AppUtil.urlFullyEncode(doc.data()['content_url']),
         type: doc.data()['type'],
         duration: doc.data()['duration'],
         likes: doc.data()['likes'],
