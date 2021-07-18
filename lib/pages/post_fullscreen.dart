@@ -244,6 +244,7 @@ class _PostFullscreenState extends State<PostFullscreen> {
       ..setLooping(false)
       ..initialize().then((value) {
         _controller.play();
+        _controller.setVolume(1.0);
         _controller.setLooping(false);
         print('aspect ratio: ${_controller.value.aspectRatio}');
       });
