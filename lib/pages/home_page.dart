@@ -188,24 +188,25 @@ class _HomePageState extends State<HomePage>
             ],
           ),
         ),
-        floatingActionButton: _page == 3
-            ? FloatingActionButton(
-                child: Icon(Icons.playlist_play),
-                onPressed: () {
-                  if (_favourites.isEmpty) {
-                    return;
-                  }
-                  setState(() {
-                    musicPlayer = MusicPlayer(
-                      melodyList: [..._boughtSongs, ..._favourites],
-                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                      initialDuration: 0,
-                    );
-                    _isPlaying = true;
-                  });
-                },
-              )
-            : null,
+        floatingActionButton:
+            _page == 3 && (_favourites.length + _boughtSongs.length) > 1
+                ? FloatingActionButton(
+                    child: Icon(Icons.playlist_play),
+                    onPressed: () {
+                      if (_favourites.isEmpty) {
+                        return;
+                      }
+                      setState(() {
+                        musicPlayer = MusicPlayer(
+                          melodyList: [..._boughtSongs, ..._favourites],
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                          initialDuration: 0,
+                        );
+                        _isPlaying = true;
+                      });
+                    },
+                  )
+                : null,
       ),
     );
   }

@@ -140,6 +140,7 @@ class _ProfilePageState extends State<ProfilePage>
     checkIfUserIsFollowed();
     configureTabs();
     getRecords();
+    getFavourites();
     getUser();
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
@@ -633,7 +634,7 @@ class _ProfilePageState extends State<ProfilePage>
             ),
           ),
         ),
-        floatingActionButton: _page == 1
+        floatingActionButton: _page == 1 && (_favourites.length) > 1
             ? FloatingActionButton(
                 child: Icon(Icons.playlist_play),
                 onPressed: () {
@@ -730,7 +731,6 @@ class _ProfilePageState extends State<ProfilePage>
           },
         );
       case 1:
-        getFavourites();
         return _favourites.length > 0
             ? ListView.builder(
                 controller: _favouritesScrollController,
