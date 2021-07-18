@@ -8,7 +8,7 @@ import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/singer_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
@@ -100,7 +100,7 @@ class _SearchPageState extends State<SearchPage> {
                                 onTap: () {
                                   print('are we here?!');
                                   setState(() {
-                                    musicPlayer = MusicPlayer(
+                                    musicPlayer = LocalMusicPlayer(
                                       key: ValueKey(_results[index].id),
                                       backColor: MyColors.lightPrimaryColor
                                           .withOpacity(.8),

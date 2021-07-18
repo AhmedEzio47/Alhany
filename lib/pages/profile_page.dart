@@ -16,7 +16,7 @@ import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/image_edit_bottom_sheet.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -639,7 +639,7 @@ class _ProfilePageState extends State<ProfilePage>
                 child: Icon(Icons.playlist_play),
                 onPressed: () {
                   setState(() {
-                    musicPlayer = MusicPlayer(
+                    musicPlayer = LocalMusicPlayer(
                       melodyList: _favourites,
                       backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                       initialDuration: 0,
@@ -713,7 +713,7 @@ class _ProfilePageState extends State<ProfilePage>
                           // if (musicPlayer != null) {
                           //   musicPlayer.stop();
                           // }
-                          // musicPlayer = MusicPlayer(
+                          // musicPlayer = LocalMusicPlayer(
                           //   url: _records[index].url,
                           //   backColor: Colors.white.withOpacity(.4),
                           // );
@@ -742,7 +742,7 @@ class _ProfilePageState extends State<ProfilePage>
                       // if (musicPlayer != null) {
                       //   musicPlayer.stop();
                       // }
-                      musicPlayer = MusicPlayer(
+                      musicPlayer = LocalMusicPlayer(
                         key: ValueKey(_favourites[index].id),
                         melodyList: [_favourites[index]],
                         title: _favourites[index].name,

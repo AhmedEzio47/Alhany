@@ -7,11 +7,10 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 //import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
-
-import '../widgets/music_player.dart';
 
 class DownloadsPage extends StatefulWidget {
   @override
@@ -207,7 +206,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
         singer: _downloads[index].singer,
         songUrl: _downloads[index].songUrl);
 
-    musicPlayer = MusicPlayer(
+    musicPlayer = LocalMusicPlayer(
       checkPrice: false,
       melodyList: [_downloads[index]],
       initialDuration: _downloads[index].duration,
@@ -218,7 +217,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   playAllSongs() {
-    musicPlayer = MusicPlayer(
+    musicPlayer = LocalMusicPlayer(
       checkPrice: false,
       melodyList: _downloads,
       initialDuration: _downloads[0].duration,

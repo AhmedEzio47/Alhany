@@ -4,7 +4,7 @@ import 'package:Alhany/services/AppleSignInAvailable.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
 import 'package:Alhany/services/route_generator.dart';
-import 'package:audio_service/audio_service.dart';
+//import 'package:audio_service/audio_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,7 +57,7 @@ class _RestartWidgetState extends State<MyApp> {
             brightness: Brightness.light,
           ),
           debugShowCheckedModeBanner: false,
-          home: AudioServiceWidget(child: RootPage()),
+          home: RootPage(),
           onGenerateRoute: RouteGenerator.generateRoute,
         ),
       ),

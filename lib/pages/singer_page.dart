@@ -10,7 +10,7 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -143,7 +143,7 @@ class _SingerPageState extends State<SingerPage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = MusicPlayer(
+                  musicPlayer = LocalMusicPlayer(
                     checkPrice: true,
                     onBuy: () => Melody.buySong(context, _songs[index]),
                     key: ValueKey(_songs[index].id),
@@ -182,7 +182,7 @@ class _SingerPageState extends State<SingerPage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = MusicPlayer(
+                  musicPlayer = LocalMusicPlayer(
                     checkPrice: true,
                     key: ValueKey(_melodies[index].id),
                     melodyList: [_melodies[index]],

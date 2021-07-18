@@ -272,7 +272,7 @@ class _RecordItemState extends State<RecordItem> {
                   ),
                 ),
               ),
-              // MusicPlayer(
+              // LocalMusicPlayer(
               //   url: widget.record.audioUrl,
               //   backColor: Colors.transparent,
               //   btnSize: 26,

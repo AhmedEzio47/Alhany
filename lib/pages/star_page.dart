@@ -12,7 +12,7 @@ import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/news_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -441,7 +441,7 @@ class _StarPageState extends State<StarPage>
                                 deleteExclusive(_exclusives[index]),
                             onTap: () async {
                               setState(() {
-                                musicPlayer = MusicPlayer(
+                                musicPlayer = LocalMusicPlayer(
                                   checkPrice: false,
                                   key: ValueKey(_filteredexclusives[index].id),
                                   backColor: MyColors.lightPrimaryColor
@@ -498,7 +498,7 @@ class _StarPageState extends State<StarPage>
                                 deleteExclusive(_exclusives[index]),
                             onTap: () async {
                               setState(() {
-                                musicPlayer = MusicPlayer(
+                                musicPlayer = LocalMusicPlayer(
                                   checkPrice: false,
                                   key: ValueKey(_exclusives[index].id),
                                   backColor: MyColors.lightPrimaryColor

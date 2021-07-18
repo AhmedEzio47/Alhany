@@ -5,7 +5,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:flutter/material.dart';
 
 class SongsPage extends StatefulWidget {
@@ -94,7 +94,7 @@ class _SongsPageState extends State<SongsPage> {
                               // }
 
                               setState(() {
-                                musicPlayer = MusicPlayer(
+                                musicPlayer = LocalMusicPlayer(
                                   melodyList: [
                                     Melody(songUrl: _songs[index].songUrl)
                                   ],

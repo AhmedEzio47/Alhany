@@ -7,7 +7,7 @@ import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -134,7 +134,7 @@ class _TracksPageState extends State<TracksPage> {
                                     onTap: () async {
                                       _index = index;
                                       setState(() {
-                                        musicPlayer = MusicPlayer(
+                                        musicPlayer = LocalMusicPlayer(
                                           showFavBtn: false,
                                           onDownload: downloadTrack,
                                           checkPrice: false,

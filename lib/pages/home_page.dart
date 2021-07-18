@@ -15,7 +15,7 @@ import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -197,7 +197,7 @@ class _HomePageState extends State<HomePage>
                         return;
                       }
                       setState(() {
-                        musicPlayer = MusicPlayer(
+                        musicPlayer = LocalMusicPlayer(
                           melodyList: [..._boughtSongs, ..._favourites],
                           backColor: MyColors.lightPrimaryColor.withOpacity(.8),
                           initialDuration: 0,
@@ -476,7 +476,7 @@ class _HomePageState extends State<HomePage>
           return InkWell(
             onTap: () {
               // setState(() {
-              //   musicPlayer = MusicPlayer(
+              //   musicPlayer = LocalMusicPlayer(
               //     url: _records[index].url,
               //     backColor: MyColors.lightPrimaryColor.withOpacity(.8),
               //     btnSize: 35,
@@ -618,7 +618,7 @@ class _HomePageState extends State<HomePage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = MusicPlayer(
+                  musicPlayer = LocalMusicPlayer(
                     key: ValueKey(_melodies[index].id),
                     melodyList: [_melodies[index]],
                     backColor: MyColors.lightPrimaryColor,
@@ -728,7 +728,7 @@ class _HomePageState extends State<HomePage>
                     return InkWell(
                       onTap: () async {
                         _boughtSongsIndex = index;
-                        musicPlayer = MusicPlayer(
+                        musicPlayer = LocalMusicPlayer(
                           checkPrice: false,
                           onDownload: downloadSong,
                           melodyList: [_boughtSongs[index]],
@@ -778,7 +778,7 @@ class _HomePageState extends State<HomePage>
                         // if (musicPlayer != null) {
                         //   musicPlayer.stop();
                         // }
-                        musicPlayer = MusicPlayer(
+                        musicPlayer = LocalMusicPlayer(
                           melodyList: [_favourites[index]],
                           key: ValueKey(_favourites[index].id),
                           backColor: Colors.black.withOpacity(.7),

@@ -8,7 +8,7 @@ import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/post_bottom_sheet.dart';
 import 'package:Alhany/widgets/url_text.dart';
 import 'package:chewie/chewie.dart';
@@ -475,7 +475,7 @@ class _NewsItemState extends State<NewsItem> {
           ],
         );
       case 'audio':
-        return MusicPlayer(
+        return LocalMusicPlayer(
           melodyList: [
             Melody(
               songUrl: _news.contentUrl,

@@ -5,7 +5,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/pages/tracks_page.dart';
 import 'package:Alhany/pages/upload_track.dart';
 import 'package:Alhany/widgets/cached_image.dart';
-import 'package:Alhany/widgets/music_player.dart';
+import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
 
@@ -132,7 +132,7 @@ class _SongPageState extends State<SongPage> {
                     SizedBox(
                       height: 25,
                     ),
-                    MusicPlayer(
+                    LocalMusicPlayer(
                       btnSize: 35,
                       isCompact: true,
                       onBuy: () => Melody.buySong(context, widget.song),
