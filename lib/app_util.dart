@@ -63,7 +63,7 @@ class AppUtil with ChangeNotifier {
   static String urlFullyEncode(String url) {
     if (url == null) return null;
     String result = url.replaceAll('(', '%28').replaceAll(')', '%29');
-    print(result);
+    //print(result);
     return result;
   }
 

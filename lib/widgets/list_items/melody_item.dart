@@ -110,11 +110,19 @@ class _MelodyItemState extends State<MelodyItem> {
               ? InkWell(
                   onTap: () =>
                       AppUtil.executeFunctionIfLoggedIn(context, () async {
-                    _isFavourite
-                        ? await DatabaseService.deleteMelodyFromFavourites(
-                            widget.melody.id)
-                        : await DatabaseService.addMelodyToFavourites(
-                            widget.melody.id);
+                    if (_isFavourite)
+                      await DatabaseService.deleteMelodyFromFavourites(
+                          widget.melody.id);
+                    else if (Constants.currentUser.boughtSongs
+                            .contains(widget.melody.id) ||
+                        (widget.melody.price == '0' ||
+                            widget.melody.price == null)) {
+                      await DatabaseService.addMelodyToFavourites(
+                          widget.melody.id);
+                    } else {
+                      AppUtil.showToast(language(
+                          ar: 'قم بشراء الأغنية أولا', en: 'Buy song first'));
+                    }
 
                     await isFavourite();
                   }),
