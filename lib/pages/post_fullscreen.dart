@@ -230,7 +230,6 @@ class _PostFullscreenState extends State<PostFullscreen> {
 
   initVideoPlayer(String url) async {
     if (_controller != null) {
-      //await _controller.dispose();
       setState(() {
         _controller = null;
       });
