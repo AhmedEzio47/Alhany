@@ -141,7 +141,7 @@ class _SongPageState extends State<SongPage> {
                       melodyList: [widget.song],
                     ),
                     SizedBox(
-                      height: 50,
+                      height: MediaQuery.of(context).size.width / 4,
                     ),
                     widget.song.melodyUrl != null
                         ? InkWell(
@@ -160,8 +160,8 @@ class _SongPageState extends State<SongPage> {
                               }
                             }),
                             child: Container(
-                              height: 100,
-                              width: 100,
+                              height: MediaQuery.of(context).size.width / 6,
+                              width: MediaQuery.of(context).size.width / 6,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.grey.shade300,
@@ -178,16 +178,16 @@ class _SongPageState extends State<SongPage> {
                               child: Icon(
                                 Icons.mic,
                                 color: MyColors.primaryColor,
-                                size: 70,
+                                size: MediaQuery.of(context).size.width / 8,
                               ),
                             ),
                           )
                         : Container(),
                     SizedBox(
-                      height: 50,
+                      height: MediaQuery.of(context).size.width / 4,
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: MaterialButton(
                         padding: EdgeInsets.all(16),
                         minWidth: MediaQuery.of(context).size.width,

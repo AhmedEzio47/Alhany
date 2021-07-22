@@ -67,7 +67,12 @@ class _WelcomePageState extends State<WelcomePage> {
       ),
       child: SingleChildScrollView(
         child: new Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 5,
+            ),
             Container(
               padding: EdgeInsets.only(top: 100.0),
               child: Container(
@@ -81,10 +86,12 @@ class _WelcomePageState extends State<WelcomePage> {
                 )),
               ),
             ),
-            new Container(
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 3,
+            ),
+            Container(
               width: MediaQuery.of(context).size.width,
-              margin:
-                  const EdgeInsets.only(left: 30.0, right: 30.0, top: 110.0),
+              margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 30.0),
               alignment: Alignment.center,
               child: new Row(
                 children: <Widget>[
@@ -119,7 +126,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
             ),
-            new Container(
+            Container(
               width: MediaQuery.of(context).size.width,
               margin: const EdgeInsets.only(left: 30.0, right: 30.0, top: 30.0),
               alignment: Alignment.center,
@@ -161,9 +168,6 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 20,
-            )
           ],
         ),
       ),
@@ -612,8 +616,10 @@ class _WelcomePageState extends State<WelcomePage> {
                     : Container(),
                 Platform.isIOS && appleSignInIsAvailable.isAvailable
                     ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 20),
                         child: AppleSignInButton(
+                          cornerRadius: 50,
                           style: apple.ButtonStyle.black,
                           type: apple.ButtonType.signIn,
                           onPressed: () async {

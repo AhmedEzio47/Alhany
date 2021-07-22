@@ -1654,7 +1654,7 @@ class _MelodyPageState extends State<MelodyPage> {
   Future<bool> _onBackPressed() async {
     if (Constants.ongoingEncoding) {
       PIPView.of(_context).presentBelow(MyApp());
-    } else {
+    } else if (recordingStatus != RecordingStatus.Recording) {
       Navigator.of(context).pop();
     }
   }

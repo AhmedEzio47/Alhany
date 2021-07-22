@@ -101,6 +101,9 @@ class _SearchPageState extends State<SearchPage> {
                                   print('are we here?!');
                                   setState(() {
                                     musicPlayer = LocalMusicPlayer(
+                                      checkPrice: true,
+                                      onBuy: () => Melody.buySong(
+                                          context, _results[index]),
                                       key: ValueKey(_results[index].id),
                                       backColor: MyColors.lightPrimaryColor
                                           .withOpacity(.8),
