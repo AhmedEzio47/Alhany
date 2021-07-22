@@ -71,14 +71,13 @@ class _WelcomePageState extends State<WelcomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
-              height: MediaQuery.of(context).size.height / 5,
+              height: MediaQuery.of(context).size.height / 7,
             ),
             Container(
               padding: EdgeInsets.only(top: 100.0),
               child: Container(
                 color: Colors.black.withOpacity(.3),
-                height: 170,
-                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 5,
                 child: Center(
                     child: Image.asset(
                   Strings.app_icon,
@@ -87,7 +86,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height / 3,
+              height: MediaQuery.of(context).size.height / 6,
             ),
             Container(
               width: MediaQuery.of(context).size.width,
