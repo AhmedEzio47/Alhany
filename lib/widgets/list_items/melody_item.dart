@@ -113,10 +113,12 @@ class _MelodyItemState extends State<MelodyItem> {
                     if (_isFavourite)
                       await DatabaseService.deleteMelodyFromFavourites(
                           widget.melody.id);
-                    else if (Constants.currentUser.boughtSongs
-                            .contains(widget.melody.id) ||
+                    else if (Constants.currentUser.boughtSongs != null &&
+                            Constants.currentUser.boughtSongs
+                                .contains(widget.melody.id) ||
                         (widget.melody.price == '0' ||
                             widget.melody.price == null)) {
+                      print('Song can be added to favorites');
                       await DatabaseService.addMelodyToFavourites(
                           widget.melody.id);
                     } else {

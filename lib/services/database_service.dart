@@ -181,9 +181,11 @@ class DatabaseService {
   static Future<List<Melody>> getBoughtSongs() async {
     List<Melody> melodies = [];
 
-    for (String songId in Constants.currentUser.boughtSongs) {
-      Melody melody = await getMelodyWithId(songId);
-      melodies.add(melody);
+    if (Constants.currentUser.boughtSongs != null) {
+      for (String songId in Constants.currentUser.boughtSongs) {
+        Melody melody = await getMelodyWithId(songId);
+        melodies.add(melody);
+      }
     }
 
     List<Map<String, dynamic>> tracks = [];
