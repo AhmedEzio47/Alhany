@@ -181,11 +181,9 @@ class DatabaseService {
   static Future<List<Melody>> getBoughtSongs() async {
     List<Melody> melodies = [];
 
-    if (Constants.currentUser.boughtSongs != null) {
-      for (String songId in Constants.currentUser.boughtSongs) {
-        Melody melody = await getMelodyWithId(songId);
-        melodies.add(melody);
-      }
+    for (String songId in Constants.currentUser.boughtSongs) {
+      Melody melody = await getMelodyWithId(songId);
+      melodies.add(melody);
     }
 
     List<Map<String, dynamic>> tracks = [];
@@ -1252,38 +1250,63 @@ class DatabaseService {
 
   static deleteMelody(Melody melody) async {
     if (melody.imageUrl != null) {
-      String fileName =
-          await AppUtil.getStorageFileNameFromUrl(melody.imageUrl);
-      await storageRef.child('/melodies_images/$fileName').delete();
+      try {
+        String fileName =
+            await AppUtil.getStorageFileNameFromUrl(melody.imageUrl);
+        await storageRef
+            .child('/melodies_images/${Uri.decodeComponent(fileName)}')
+            .delete();
+      } catch (ex) {
+        print(ex);
+      }
     }
     if (melody.songUrl != null) {
-      String fileName = await AppUtil.getStorageFileNameFromUrl(melody.songUrl);
-      if (melody.songUrl != null) {
-        await storageRef.child('/songs/$fileName').delete();
-      } else {
-        await storageRef.child('/melodies/$fileName').delete();
+      try {
+        String fileName =
+            await AppUtil.getStorageFileNameFromUrl(melody.songUrl);
+        if (melody.songUrl != null) {
+          await storageRef
+              .child('/songs/${Uri.decodeComponent(fileName)}')
+              .delete();
+        } else {
+          await storageRef
+              .child('/melodies/${Uri.decodeComponent(fileName)}')
+              .delete();
+        }
+      } catch (ex) {
+        print(ex);
       }
     }
     if (melody.levelUrls != null) {
-      for (String url in melody.levelUrls.values) {
-        String fileName = await AppUtil.getStorageFileNameFromUrl(url);
+      try {
+        for (String url in melody.levelUrls.values) {
+          String fileName = await AppUtil.getStorageFileNameFromUrl(url);
 
-        await storageRef.child('/melodies/$fileName').delete();
+          await storageRef
+              .child('/melodies/${Uri.decodeComponent(fileName)}')
+              .delete();
+        }
+      } catch (ex) {
+        print(ex);
       }
     }
-    await melodiesRef.doc(melody.id).delete();
-    List<User> users = await getUsers();
-    for (User user in users) {
-      await usersRef
-          .doc(user.id)
-          .collection('favourites')
-          .doc(melody.id)
-          .delete();
-      await usersRef
-          .doc(user.id)
-          .collection('downloads')
-          .doc(melody.id)
-          .delete();
+    try {
+      await melodiesRef.doc(melody.id).delete();
+      List<User> users = await getUsers();
+      for (User user in users) {
+        await usersRef
+            .doc(user.id)
+            .collection('favourites')
+            .doc(melody.id)
+            .delete();
+        await usersRef
+            .doc(user.id)
+            .collection('downloads')
+            .doc(melody.id)
+            .delete();
+      }
+    } catch (ex) {
+      print(ex);
     }
   }
 

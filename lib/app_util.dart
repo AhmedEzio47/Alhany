@@ -319,16 +319,22 @@ class AppUtil with ChangeNotifier {
   }
 
   static Future<String> getStorageFileNameFromUrl(String url) async {
-    var response = await get(
-      Uri.parse(url),
-    );
-    var contentDisposition = response.headers['content-disposition'];
-    String fileName = contentDisposition
-        .split('filename*=utf-8')
-        .last
-        .replaceAll(RegExp('%20'), ' ')
-        .replaceAll(RegExp('%2C|\''), '');
-    return fileName;
+    try {
+      var response = await get(
+        Uri.parse(url),
+      );
+      var contentDisposition = response.headers['content-disposition'];
+      String fileName = contentDisposition
+          .split('filename*=utf-8')
+          .last
+          .replaceAll(RegExp('%20'), ' ')
+          .replaceAll(RegExp('%2C|\''), '');
+
+      return fileName;
+    } catch (ex) {
+      print(ex);
+      return '';
+    }
   }
 
   static Future<String> getStorageFileNameFromContentDisposition(
@@ -545,7 +551,8 @@ class AppUtil with ChangeNotifier {
     authStatus = AuthStatus.LOGGED_IN;
     print('star id:${Strings.starId}');
     Constants.isAdmin = (Constants.currentUserID == Strings.starId ||
-        Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2');
+        Constants.currentUserID == 'u4kxq4Rsa5Vq13chXWFrtzll12L2' ||
+        Constants.currentUserID == 'uyVyvE3IHda1bYA0qzWMuqOLvTj1');
     Constants.isFacebookOrGoogleUser = false;
   }
 }
