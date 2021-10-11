@@ -47,6 +47,8 @@ android {
         multiDexEnabled true
     }
 
+    aaptOptions { cruncherEnabled = false }
+
 
     signingConfigs {
         release {

@@ -379,165 +379,118 @@ class _StarPageState extends State<StarPage>
               );
             });
       case 0:
-        return Constants.currentUser?.exclusiveLastDate == null
-            ? Padding(
-                padding: const EdgeInsets.only(top: 100),
-                child: Column(
-                  children: [
-                    Text(
-                      language(
-                          ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
-                          en: 'Please subscribe in order to listen to exclusives'),
-                      style: TextStyle(color: MyColors.textLightColor),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    MaterialButton(
-                      color: MyColors.accentColor,
-                      onPressed: subscribe,
-                      child: Text(language(ar: 'اشترك', en: 'Subscribe')),
-                    )
-                  ],
+        return _isSearching
+            ? GridView.builder(
+                shrinkWrap: true,
+                primary: false,
+                controller: _exclusivesScrollController,
+                itemCount: _filteredexclusives.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: .8,
+                  crossAxisCount: 2,
                 ),
-              )
-            : DateTime.now().difference(
-                        Constants.currentUser.exclusiveLastDate.toDate()) >
-                    Duration(days: 30)
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 100),
-                    child: Column(
-                      children: [
-                        Text(
-                          language(
-                              ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
-                              en: 'Please renew subscription in order to listen to exclusives'),
-                          style: TextStyle(color: MyColors.textLightColor),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        MaterialButton(
-                          color: MyColors.accentColor,
-                          onPressed: subscribe,
-                          child: Text(language(ar: 'تجديد', en: 'Renew')),
-                        )
-                      ],
-                    ),
-                  )
-                : _isSearching
-                    ? GridView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        controller: _exclusivesScrollController,
-                        itemCount: _filteredexclusives.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: .8,
-                          crossAxisCount: 2,
-                        ),
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onLongPress: () =>
-                                deleteExclusive(_exclusives[index]),
-                            onTap: () async {
-                              setState(() {
-                                musicPlayer = LocalMusicPlayer(
-                                  checkPrice: false,
-                                  key: ValueKey(_filteredexclusives[index].id),
-                                  backColor: MyColors.lightPrimaryColor
-                                      .withOpacity(.8),
-                                  title: _filteredexclusives[index].name,
-                                  btnSize: 30,
-                                  initialDuration:
-                                      _filteredexclusives[index].duration,
-                                  melodyList: [_filteredexclusives[index]],
-                                  isRecordBtnVisible: true,
-                                );
-                                _isPlaying = true;
-                              });
-                            },
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 5),
-                              key: ValueKey('melody_item'),
-                              child: Column(
-                                children: [
-                                  CachedImage(
-                                    imageUrl:
-                                        _filteredexclusives[index].imageUrl,
-                                    width: 200,
-                                    height: 200,
-                                    defaultAssetImage:
-                                        Strings.default_melody_image,
-                                    imageShape: BoxShape.rectangle,
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    _exclusives[index].name,
-                                    style: TextStyle(
-                                        color: MyColors.textLightColor),
-                                  )
-                                ],
-                              ),
-                            ),
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onLongPress: () => deleteExclusive(_exclusives[index]),
+                    onTap: () async {
+                      validateSubscription(() {
+                        setState(() {
+                          print('current user: ${Constants.currentUser}');
+                          musicPlayer = LocalMusicPlayer(
+                            checkPrice: false,
+                            key: ValueKey(_filteredexclusives[index].id),
+                            backColor:
+                                MyColors.lightPrimaryColor.withOpacity(.8),
+                            title: _filteredexclusives[index].name,
+                            btnSize: 30,
+                            initialDuration:
+                                _filteredexclusives[index].duration,
+                            melodyList: [_filteredexclusives[index]],
+                            isRecordBtnVisible: true,
                           );
-                        })
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        controller: _exclusivesScrollController,
-                        itemCount: _exclusives.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: .8,
-                          crossAxisCount: 2,
-                        ),
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onLongPress: () =>
-                                deleteExclusive(_exclusives[index]),
-                            onTap: () async {
-                              setState(() {
-                                musicPlayer = LocalMusicPlayer(
-                                  checkPrice: false,
-                                  key: ValueKey(_exclusives[index].id),
-                                  backColor: MyColors.lightPrimaryColor
-                                      .withOpacity(.8),
-                                  title: _exclusives[index].name,
-                                  btnSize: 30,
-                                  initialDuration: _exclusives[index].duration,
-                                  melodyList: [_exclusives[index]],
-                                  isRecordBtnVisible: true,
-                                );
-                                _isPlaying = true;
-                              });
-                            },
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 5),
-                              key: ValueKey('melody_item'),
-                              child: Column(
-                                children: [
-                                  CachedImage(
-                                    imageUrl: _exclusives[index].imageUrl,
-                                    width: 200,
-                                    height: 200,
-                                    defaultAssetImage:
-                                        Strings.default_melody_image,
-                                    imageShape: BoxShape.rectangle,
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    _exclusives[index].name,
-                                    style: TextStyle(
-                                        color: MyColors.textLightColor),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
+                          _isPlaying = true;
                         });
+                      });
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 5),
+                      key: ValueKey('melody_item'),
+                      child: Column(
+                        children: [
+                          CachedImage(
+                            imageUrl: _filteredexclusives[index].imageUrl,
+                            width: 200,
+                            height: 200,
+                            defaultAssetImage: Strings.default_melody_image,
+                            imageShape: BoxShape.rectangle,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            _exclusives[index].name,
+                            style: TextStyle(color: MyColors.textLightColor),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                })
+            : GridView.builder(
+                shrinkWrap: true,
+                primary: false,
+                controller: _exclusivesScrollController,
+                itemCount: _exclusives.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: .8,
+                  crossAxisCount: 2,
+                ),
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onLongPress: () => deleteExclusive(_exclusives[index]),
+                    onTap: () async {
+                      validateSubscription(() {
+                        setState(() {
+                          print('current user2: ${Constants.currentUser}');
+                          musicPlayer = LocalMusicPlayer(
+                            checkPrice: false,
+                            key: ValueKey(_exclusives[index].id),
+                            backColor:
+                                MyColors.lightPrimaryColor.withOpacity(.8),
+                            title: _exclusives[index].name,
+                            btnSize: 30,
+                            initialDuration: _exclusives[index].duration,
+                            melodyList: [_exclusives[index]],
+                            isRecordBtnVisible: true,
+                          );
+                          _isPlaying = true;
+                        });
+                      });
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 5),
+                      key: ValueKey('melody_item'),
+                      child: Column(
+                        children: [
+                          CachedImage(
+                            imageUrl: _exclusives[index].imageUrl,
+                            width: 200,
+                            height: 200,
+                            defaultAssetImage: Strings.default_melody_image,
+                            imageShape: BoxShape.rectangle,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            _exclusives[index].name,
+                            style: TextStyle(color: MyColors.textLightColor),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                });
     }
   }
 
@@ -652,5 +605,33 @@ class _StarPageState extends State<StarPage>
 
   dynamic fetchExclusiveFee() async {
     return RemoteConfigService.getString('exclusives_fee');
+  }
+
+  validateSubscription(Function showUI) {
+    Constants.currentUser?.exclusiveLastDate == null
+        ? AppUtil.showAlertDialog(
+            context: context,
+            firstFunc: subscribe,
+            firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+            message: language(
+                ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+                en: 'Please subscribe in order to listen to exclusives'),
+            secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+            secondFunc: () => Navigator.of(context).pop(),
+          )
+        : DateTime.now().difference(
+                    Constants.currentUser.exclusiveLastDate.toDate()) >
+                Duration(days: 30)
+            ? AppUtil.showAlertDialog(
+                context: context,
+                firstFunc: subscribe,
+                firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
+                message: language(
+                    ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
+                    en: 'Please renew subscription in order to listen to exclusives'),
+                secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+                secondFunc: () => Navigator.of(context).pop(),
+              )
+            : showUI;
   }
 }

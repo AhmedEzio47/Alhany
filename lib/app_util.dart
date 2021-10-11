@@ -131,37 +131,43 @@ class AppUtil with ChangeNotifier {
         context: context,
         builder: (context) {
           return AlertDialog(
+            backgroundColor: Colors.black,
             title: heading != null ? Text(heading) : null,
             content: Text(
               message,
+              style: TextStyle(color: MyColors.textLightColor),
               textAlign: TextAlign.center,
             ),
-            actions: <Widget>[
-              MaterialButton(
-                onPressed: firstFunc,
-                child: Text(
-                  firstBtnText,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+            actions: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: firstFunc,
+                    child: Text(
+                      firstBtnText,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  secondBtnText != null
+                      ? TextButton(
+                          onPressed: secondFunc,
+                          child: Text(
+                            secondBtnText,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : Container(),
+                  thirdBtnText != null
+                      ? TextButton(
+                          onPressed: thirdFunc,
+                          child: Text(
+                            thirdBtnText,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : Container()
+                ],
               ),
-              secondBtnText != null
-                  ? MaterialButton(
-                      onPressed: secondFunc,
-                      child: Text(
-                        secondBtnText,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  : Container(),
-              thirdBtnText != null
-                  ? MaterialButton(
-                      onPressed: thirdFunc,
-                      child: Text(
-                        thirdBtnText,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  : Container(),
             ],
           );
         });
