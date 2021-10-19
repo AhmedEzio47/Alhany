@@ -39,16 +39,16 @@ class _StarPageState extends State<StarPage>
 
   ScrollController _scrollController = ScrollController();
 
-  getExclusives() async {
-    List<Melody> exclusives = await DatabaseService.getStarExclusives();
-    if (mounted) {
-      setState(() {
-        _exclusives = exclusives;
-        if (_exclusives.length > 0)
-          this.lastVisiblePostSnapShot = exclusives.last.timestamp;
-      });
-    }
-  }
+  // getExclusives() async {
+  //   List<Melody> exclusives = await DatabaseService.getStarExclusives();
+  //   if (mounted) {
+  //     setState(() {
+  //       _exclusives = exclusives;
+  //       if (_exclusives.length > 0)
+  //         this.lastVisiblePostSnapShot = exclusives.last.timestamp;
+  //     });
+  //   }
+  // }
 
   List<SlideImage> _slideImages = [];
   getSlideImages() async {
@@ -59,47 +59,47 @@ class _StarPageState extends State<StarPage>
     });
   }
 
-  nextExclusives() async {
-    List<Melody> exclusives =
-        await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
-    if (exclusives.length > 0) {
-      setState(() {
-        exclusives.forEach((element) => _exclusives.add(element));
-        this.lastVisiblePostSnapShot = exclusives.last.timestamp;
-      });
-    }
-  }
+  // nextExclusives() async {
+  //   List<Melody> exclusives =
+  //       await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
+  //   if (exclusives.length > 0) {
+  //     setState(() {
+  //       exclusives.forEach((element) => _exclusives.add(element));
+  //       this.lastVisiblePostSnapShot = exclusives.last.timestamp;
+  //     });
+  //   }
+  // }
 
-  searchExclusives(String text) async {
-    List<Melody> filteredExclusives =
-        await DatabaseService.searchExclusives(text);
-    if (mounted) {
-      setState(() {
-        _filteredexclusives = filteredExclusives;
-      });
-    }
-  }
+  // searchExclusives(String text) async {
+  //   List<Melody> filteredExclusives =
+  //       await DatabaseService.searchExclusives(text);
+  //   if (mounted) {
+  //     setState(() {
+  //       _filteredexclusives = filteredExclusives;
+  //     });
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
     fetchExclusiveFee();
     getSlideImages();
-    getExclusives();
-    _tabController = TabController(vsync: this, length: 2, initialIndex: 0);
-    _exclusivesScrollController
-      ..addListener(() {
-        if (_exclusivesScrollController.offset >=
-                _exclusivesScrollController.position.maxScrollExtent &&
-            !_exclusivesScrollController.position.outOfRange) {
-          print('reached the bottom');
-          if (!_isSearching) nextExclusives();
-        } else if (_exclusivesScrollController.offset <=
-                _exclusivesScrollController.position.minScrollExtent &&
-            !_exclusivesScrollController.position.outOfRange) {
-          print("reached the top");
-        } else {}
-      });
+    //getExclusives();
+    _tabController = TabController(vsync: this, length: 1, initialIndex: 0);
+    // _exclusivesScrollController
+    //   ..addListener(() {
+    //     if (_exclusivesScrollController.offset >=
+    //             _exclusivesScrollController.position.maxScrollExtent &&
+    //         !_exclusivesScrollController.position.outOfRange) {
+    //       print('reached the bottom');
+    //       if (!_isSearching) nextExclusives();
+    //     } else if (_exclusivesScrollController.offset <=
+    //             _exclusivesScrollController.position.minScrollExtent &&
+    //         !_exclusivesScrollController.position.outOfRange) {
+    //       print("reached the top");
+    //     } else {}
+    //   });
   }
 
   bool _isPlaying = false;
@@ -269,10 +269,10 @@ class _StarPageState extends State<StarPage>
                                   unselectedLabelColor: Colors.grey,
                                   controller: _tabController,
                                   tabs: [
-                                    Tab(
-                                      text:
-                                          language(en: 'Exclusive', ar: 'حصري'),
-                                    ),
+                                    // Tab(
+                                    //   text:
+                                    //       language(en: 'Exclusive', ar: 'حصري'),
+                                    // ),
                                     Tab(
                                       text: language(
                                           en: 'News', ar: 'آخر الأخبار'),
@@ -366,7 +366,7 @@ class _StarPageState extends State<StarPage>
 
   Widget _currentPage() {
     switch (_page) {
-      case 1:
+      case 0:
         getNews();
         return ListView.builder(
             primary: false,
@@ -378,119 +378,120 @@ class _StarPageState extends State<StarPage>
                 news: _news[index],
               );
             });
-      case 0:
-        return _isSearching
-            ? GridView.builder(
-                shrinkWrap: true,
-                primary: false,
-                controller: _exclusivesScrollController,
-                itemCount: _filteredexclusives.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: .8,
-                  crossAxisCount: 2,
-                ),
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onLongPress: () => deleteExclusive(_exclusives[index]),
-                    onTap: () async {
-                      validateSubscription(() {
-                        setState(() {
-                          print('current user: ${Constants.currentUser}');
-                          musicPlayer = LocalMusicPlayer(
-                            checkPrice: false,
-                            key: ValueKey(_filteredexclusives[index].id),
-                            backColor:
-                                MyColors.lightPrimaryColor.withOpacity(.8),
-                            title: _filteredexclusives[index].name,
-                            btnSize: 30,
-                            initialDuration:
-                                _filteredexclusives[index].duration,
-                            melodyList: [_filteredexclusives[index]],
-                            isRecordBtnVisible: true,
-                          );
-                          _isPlaying = true;
-                        });
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      key: ValueKey('melody_item'),
-                      child: Column(
-                        children: [
-                          CachedImage(
-                            imageUrl: _filteredexclusives[index].imageUrl,
-                            width: 200,
-                            height: 200,
-                            defaultAssetImage: Strings.default_melody_image,
-                            imageShape: BoxShape.rectangle,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            _exclusives[index].name,
-                            style: TextStyle(color: MyColors.textLightColor),
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                })
-            : GridView.builder(
-                shrinkWrap: true,
-                primary: false,
-                controller: _exclusivesScrollController,
-                itemCount: _exclusives.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: .8,
-                  crossAxisCount: 2,
-                ),
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onLongPress: () => deleteExclusive(_exclusives[index]),
-                    onTap: () async {
-                      validateSubscription(() {
-                        setState(() {
-                          print('current user2: ${Constants.currentUser}');
-                          musicPlayer = LocalMusicPlayer(
-                            checkPrice: false,
-                            key: ValueKey(_exclusives[index].id),
-                            backColor:
-                                MyColors.lightPrimaryColor.withOpacity(.8),
-                            title: _exclusives[index].name,
-                            btnSize: 30,
-                            initialDuration: _exclusives[index].duration,
-                            melodyList: [_exclusives[index]],
-                            isRecordBtnVisible: true,
-                          );
-                          _isPlaying = true;
-                        });
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      key: ValueKey('melody_item'),
-                      child: Column(
-                        children: [
-                          CachedImage(
-                            imageUrl: _exclusives[index].imageUrl,
-                            width: 200,
-                            height: 200,
-                            defaultAssetImage: Strings.default_melody_image,
-                            imageShape: BoxShape.rectangle,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            _exclusives[index].name,
-                            style: TextStyle(color: MyColors.textLightColor),
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                });
+      //case 0:
+      //  return Container();
+        // return _isSearching
+        //     ? GridView.builder(
+        //         shrinkWrap: true,
+        //         primary: false,
+        //         controller: _exclusivesScrollController,
+        //         itemCount: _filteredexclusives.length,
+        //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        //           childAspectRatio: .8,
+        //           crossAxisCount: 2,
+        //         ),
+        //         itemBuilder: (context, index) {
+        //           return InkWell(
+        //             onLongPress: () => deleteExclusive(_exclusives[index]),
+        //             onTap: () async {
+        //               validateSubscription(() {
+        //                 setState(() {
+        //                   print('current user: ${Constants.currentUser}');
+        //                   musicPlayer = LocalMusicPlayer(
+        //                     checkPrice: false,
+        //                     key: ValueKey(_filteredexclusives[index].id),
+        //                     backColor:
+        //                         MyColors.lightPrimaryColor.withOpacity(.8),
+        //                     title: _filteredexclusives[index].name,
+        //                     btnSize: 30,
+        //                     initialDuration:
+        //                         _filteredexclusives[index].duration,
+        //                     melodyList: [_filteredexclusives[index]],
+        //                     isRecordBtnVisible: true,
+        //                   );
+        //                   _isPlaying = true;
+        //                 });
+        //               });
+        //             },
+        //             child: Container(
+        //               margin: EdgeInsets.symmetric(horizontal: 5),
+        //               key: ValueKey('melody_item'),
+        //               child: Column(
+        //                 children: [
+        //                   CachedImage(
+        //                     imageUrl: _filteredexclusives[index].imageUrl,
+        //                     width: 200,
+        //                     height: 200,
+        //                     defaultAssetImage: Strings.default_melody_image,
+        //                     imageShape: BoxShape.rectangle,
+        //                   ),
+        //                   SizedBox(
+        //                     height: 10,
+        //                   ),
+        //                   Text(
+        //                     _exclusives[index].name,
+        //                     style: TextStyle(color: MyColors.textLightColor),
+        //                   )
+        //                 ],
+        //               ),
+        //             ),
+        //           );
+        //         })
+        //     : GridView.builder(
+        //         shrinkWrap: true,
+        //         primary: false,
+        //         controller: _exclusivesScrollController,
+        //         itemCount: _exclusives.length,
+        //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        //           childAspectRatio: .8,
+        //           crossAxisCount: 2,
+        //         ),
+        //         itemBuilder: (context, index) {
+        //           return InkWell(
+        //             onLongPress: () => deleteExclusive(_exclusives[index]),
+        //             onTap: () async {
+        //               validateSubscription(() {
+        //                 setState(() {
+        //                   print('current user2: ${Constants.currentUser}');
+        //                   musicPlayer = LocalMusicPlayer(
+        //                     checkPrice: false,
+        //                     key: ValueKey(_exclusives[index].id),
+        //                     backColor:
+        //                         MyColors.lightPrimaryColor.withOpacity(.8),
+        //                     title: _exclusives[index].name,
+        //                     btnSize: 30,
+        //                     initialDuration: _exclusives[index].duration,
+        //                     melodyList: [_exclusives[index]],
+        //                     isRecordBtnVisible: true,
+        //                   );
+        //                   _isPlaying = true;
+        //                 });
+        //               });
+        //             },
+        //             child: Container(
+        //               margin: EdgeInsets.symmetric(horizontal: 5),
+        //               key: ValueKey('melody_item'),
+        //               child: Column(
+        //                 children: [
+        //                   CachedImage(
+        //                     imageUrl: _exclusives[index].imageUrl,
+        //                     width: 200,
+        //                     height: 200,
+        //                     defaultAssetImage: Strings.default_melody_image,
+        //                     imageShape: BoxShape.rectangle,
+        //                   ),
+        //                   SizedBox(
+        //                     height: 10,
+        //                   ),
+        //                   Text(
+        //                     _exclusives[index].name,
+        //                     style: TextStyle(color: MyColors.textLightColor),
+        //                   )
+        //                 ],
+        //               ),
+        //             ),
+        //           );
+        //         });
     }
   }
 
@@ -512,7 +513,8 @@ class _StarPageState extends State<StarPage>
                     style: TextStyle(color: _searchColor),
                     controller: _searchController,
                     onChanged: (text) async {
-                      await searchExclusives(text.toLowerCase());
+                      return Container();
+                      //await searchExclusives(text.toLowerCase());
                     },
                     decoration: InputDecoration(
                         fillColor: _searchColor,
@@ -607,31 +609,31 @@ class _StarPageState extends State<StarPage>
     return RemoteConfigService.getString('exclusives_fee');
   }
 
-  validateSubscription(Function showUI) {
-    Constants.currentUser?.exclusiveLastDate == null
-        ? AppUtil.showAlertDialog(
-            context: context,
-            firstFunc: subscribe,
-            firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
-            message: language(
-                ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
-                en: 'Please subscribe in order to listen to exclusives'),
-            secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-            secondFunc: () => Navigator.of(context).pop(),
-          )
-        : DateTime.now().difference(
-                    Constants.currentUser.exclusiveLastDate.toDate()) >
-                Duration(days: 30)
-            ? AppUtil.showAlertDialog(
-                context: context,
-                firstFunc: subscribe,
-                firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
-                message: language(
-                    ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
-                    en: 'Please renew subscription in order to listen to exclusives'),
-                secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-                secondFunc: () => Navigator.of(context).pop(),
-              )
-            : showUI;
-  }
+  // validateSubscription(Function showUI) {
+  //   Constants.currentUser?.exclusiveLastDate == null
+  //       ? AppUtil.showAlertDialog(
+  //           context: context,
+  //           firstFunc: subscribe,
+  //           firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+  //           message: language(
+  //               ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+  //               en: 'Please subscribe in order to listen to exclusives'),
+  //           secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+  //           secondFunc: () => Navigator.of(context).pop(),
+  //         )
+  //       : DateTime.now().difference(
+  //                   Constants.currentUser.exclusiveLastDate.toDate()) >
+  //               Duration(days: 30)
+  //           ? AppUtil.showAlertDialog(
+  //               context: context,
+  //               firstFunc: subscribe,
+  //               firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
+  //               message: language(
+  //                   ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
+  //                   en: 'Please renew subscription in order to listen to exclusives'),
+  //               secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+  //               secondFunc: () => Navigator.of(context).pop(),
+  //             )
+  //           : showUI;
+  // }
 }

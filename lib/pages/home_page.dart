@@ -9,6 +9,7 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
+import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
@@ -33,7 +34,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
+  ScrollController _exclusivesScrollController = ScrollController();
+  List<Melody> _exclusives = [];
   int _page = 0;
+  bool _isSearching = false;
+  List<Melody> _filteredexclusives = [];
   bool _isPlaying = false;
 
   PageController _pageController;
@@ -106,7 +111,7 @@ class _HomePageState extends State<HomePage>
                               text: language(en: 'Records', ar: 'تسجيلات'),
                             ),
                             Tab(
-                              text: language(en: 'Favourites', ar: 'المفضلات'),
+                              text: language(en: 'Exclusives', ar: 'الحصري'),
                             )
                           ]),
                       MediaQuery.removePadding(
@@ -224,8 +229,9 @@ class _HomePageState extends State<HomePage>
         getRecords();
         break;
       case 3:
-        getFavourites();
-        getBoughtSongs();
+        exclusivesWidget();
+        //getFavourites();
+        //getBoughtSongs();
         break;
     }
   }
@@ -767,37 +773,11 @@ class _HomePageState extends State<HomePage>
           ),
         SliverList(
             delegate: SliverChildListDelegate([
-          _favourites.isNotEmpty
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _favourites.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        // if (musicPlayer != null) {
-                        //   musicPlayer.stop();
-                        // }
-                        musicPlayer = LocalMusicPlayer(
-                          melodyList: [_favourites[index]],
-                          key: ValueKey(_favourites[index].id),
-                          backColor: Colors.black.withOpacity(.7),
-                          initialDuration: _favourites[index].duration,
-                          title: _favourites[index].name,
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        padding: 4,
-                        melody: _favourites[index],
-                      ),
-                    );
-                  })
+          _exclusives.isNotEmpty
+              ? exclusivesWidget()
               : Center(
                   child: Text(
-                  language(en: 'No favourites yet', ar: 'لا توجد مفضلات'),
+                  language(en: 'No exclusives yet', ar: 'لا توجد حصريات'),
                   style: TextStyle(color: MyColors.textLightColor),
                 ))
         ])),
@@ -827,6 +807,19 @@ class _HomePageState extends State<HomePage>
       initialPage: 0,
     );
     _tabController = TabController(vsync: this, length: 4, initialIndex: 0);
+    _exclusivesScrollController
+      ..addListener(() {
+        if (_exclusivesScrollController.offset >=
+            _exclusivesScrollController.position.maxScrollExtent &&
+            !_exclusivesScrollController.position.outOfRange) {
+          print('reached the bottom');
+          if (!_isSearching) nextExclusives();
+        } else if (_exclusivesScrollController.offset <=
+            _exclusivesScrollController.position.minScrollExtent &&
+            !_exclusivesScrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     _controllers = LinkedScrollControllerGroup();
     _recordsScrollController = _controllers.addAndGet();
     _melodiesPageScrollController
@@ -856,6 +849,7 @@ class _HomePageState extends State<HomePage>
         } else {}
       });
     _melodiesPageScrollController = _controllers.addAndGet();
+    getExclusives();
     getCategories();
     super.initState();
   }
@@ -878,6 +872,28 @@ class _HomePageState extends State<HomePage>
       return Future.value(false);
     }
     return Future.value(true);
+  }
+
+  getExclusives() async {
+    List<Melody> exclusives = await DatabaseService.getStarExclusives();
+    if (mounted) {
+      setState(() {
+        _exclusives = exclusives;
+        if (_exclusives.length > 0)
+          this.lastVisiblePostSnapShot = exclusives.last.timestamp;
+      });
+    }
+  }
+
+  nextExclusives() async {
+    List<Melody> exclusives =
+    await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
+    if (exclusives.length > 0) {
+      setState(() {
+        exclusives.forEach((element) => _exclusives.add(element));
+        this.lastVisiblePostSnapShot = exclusives.last.timestamp;
+      });
+    }
   }
 
   editCategory(Category category) async {
@@ -973,4 +989,198 @@ class _HomePageState extends State<HomePage>
     Navigator.of(context).pop();
     Navigator.of(context).pushNamed('/downloads');
   }
+
+  deleteExclusive(Melody melody) async {
+    if (!Constants.isAdmin) return;
+    AppUtil.showAlertDialog(
+        context: context,
+        message: 'Are you sure you want to delete this exclusive?',
+        firstBtnText: 'Yes',
+        firstFunc: () async {
+          Navigator.of(context).pop();
+          AppUtil.showLoader(context);
+          await DatabaseService.deleteExclusive(melody);
+
+          AppUtil.showToast(language(en: 'Deleted!', ar: 'تم الحذف'));
+          Navigator.of(context).pushReplacementNamed('/');
+        },
+        secondBtnText: 'No',
+        secondFunc: () {
+          Navigator.of(context).pop();
+        });
+  }
+
+  dynamic fetchExclusiveFee() async {
+    return RemoteConfigService.getString('exclusives_fee');
+  }
+
+  Future subscribe() async {
+    String exFee = await fetchExclusiveFee();
+    AppUtil.executeFunctionIfLoggedIn(context, () async {
+      final success = await Navigator.of(context)
+          .pushNamed('/payment-home', arguments: {'amount': exFee});
+      if (success ?? false) {
+        await usersRef
+            .doc(Constants.currentUserID)
+            .update({'exclusive_last_date': FieldValue.serverTimestamp()});
+
+        Constants.currentUser =
+        await DatabaseService.getUserWithId(Constants.currentUserID);
+        setState(() {});
+      }
+    });
+  }
+
+  validateSubscription(Function showUI) {
+    Constants.currentUser?.exclusiveLastDate == null
+        ? AppUtil.showAlertDialog(
+      context: context,
+      firstFunc: subscribe,
+      firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+      message: language(
+          ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+          en: 'Please subscribe in order to listen to exclusives'),
+      secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+      secondFunc: () => Navigator.of(context).pop(),
+    )
+        : DateTime.now().difference(
+        Constants.currentUser.exclusiveLastDate.toDate()) >
+        Duration(days: 30)
+        ? AppUtil.showAlertDialog(
+      context: context,
+      firstFunc: subscribe,
+      firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
+      message: language(
+          ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
+          en: 'Please renew subscription in order to listen to exclusives'),
+      secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+      secondFunc: () => Navigator.of(context).pop(),
+    )
+        : showUI;
+  }
+
+  searchExclusives(String text) async {
+    List<Melody> filteredExclusives =
+    await DatabaseService.searchExclusives(text);
+    if (mounted) {
+      setState(() {
+        _filteredexclusives = filteredExclusives;
+      });
+    }
+  }
+
+  Widget exclusivesWidget() {
+    return _isSearching
+        ? GridView.builder(
+        shrinkWrap: true,
+        primary: false,
+        controller: _exclusivesScrollController,
+        itemCount: _filteredexclusives.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          childAspectRatio: .8,
+          crossAxisCount: 2,
+        ),
+        itemBuilder: (context, index) {
+          return InkWell(
+            onLongPress: () => deleteExclusive(_exclusives[index]),
+            onTap: () async {
+              validateSubscription(() {
+                setState(() {
+                  print('current user: ${Constants.currentUser}');
+                  musicPlayer = LocalMusicPlayer(
+                    checkPrice: false,
+                    key: ValueKey(_filteredexclusives[index].id),
+                    backColor:
+                    MyColors.lightPrimaryColor.withOpacity(.8),
+                    title: _filteredexclusives[index].name,
+                    btnSize: 30,
+                    initialDuration:
+                    _filteredexclusives[index].duration,
+                    melodyList: [_filteredexclusives[index]],
+                    isRecordBtnVisible: true,
+                  );
+                  _isPlaying = true;
+                });
+              });
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              key: ValueKey('melody_item'),
+              child: Column(
+                children: [
+                  CachedImage(
+                    imageUrl: _filteredexclusives[index].imageUrl,
+                    width: 200,
+                    height: 200,
+                    defaultAssetImage: Strings.default_melody_image,
+                    imageShape: BoxShape.rectangle,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    _exclusives[index].name,
+                    style: TextStyle(color: MyColors.textLightColor),
+                  )
+                ],
+              ),
+            ),
+          );
+        })
+        : GridView.builder(
+        shrinkWrap: true,
+        primary: false,
+        controller: _exclusivesScrollController,
+        itemCount: _exclusives.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        childAspectRatio: .8,
+        crossAxisCount: 2,
+    ),
+    itemBuilder: (context, index) {
+    return InkWell(
+    onLongPress: () => deleteExclusive(_exclusives[index]),
+    onTap: () async {
+    validateSubscription(() {
+    setState(() {
+    print('current user2: ${Constants.currentUser}');
+    musicPlayer = LocalMusicPlayer(
+    checkPrice: false,
+    key: ValueKey(_exclusives[index].id),
+    backColor:
+    MyColors.lightPrimaryColor.withOpacity(.8),
+    title: _exclusives[index].name,
+    btnSize: 30,
+    initialDuration: _exclusives[index].duration,
+    melodyList: [_exclusives[index]],
+    isRecordBtnVisible: true,
+    );
+    _isPlaying = true;
+    });
+    });
+    },
+    child: Container(
+    margin: EdgeInsets.symmetric(horizontal: 5),
+    key: ValueKey('melody_item'),
+    child: Column(
+    children: [
+    CachedImage(
+    imageUrl: _exclusives[index].imageUrl,
+    width: 200,
+    height: 200,
+    defaultAssetImage: Strings.default_melody_image,
+    imageShape: BoxShape.rectangle,
+    ),
+    SizedBox(
+    height: 10,
+    ),
+    Text(
+    _exclusives[index].name,
+    style: TextStyle(color: MyColors.textLightColor),
+    )
+    ],
+    ),
+    ),
+    );
+
+    });}
 }
