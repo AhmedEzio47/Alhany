@@ -98,7 +98,7 @@ class PaymentService {
       BuildContext context, String amount, songName,
       {var controller}) async {
     if (Platform.isIOS) {
-      controller.jumpTo(450);
+      //controller.jumpTo(450);
     }
     try {
       Token token = await StripePayment.paymentRequestWithNativePay(
@@ -107,6 +107,7 @@ class PaymentService {
           currencyCode: "USD",
         ),
         applePayOptions: ApplePayPaymentOptions(
+          countryCode: 'IQ',
           currencyCode: 'USD',
           items: [
             ApplePayItem(
