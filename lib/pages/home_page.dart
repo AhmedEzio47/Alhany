@@ -12,6 +12,7 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
+import 'package:Alhany/services/purchase_api.dart';
 import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -24,12 +25,7 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:in_app_purchase_android/billing_client_wrappers.dart';
-import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_ios/in_app_purchase_ios.dart';
-import 'package:in_app_purchase_ios/store_kit_wrappers.dart';
 
 import '../app_util.dart';
 import 'singer_page.dart';
@@ -41,24 +37,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  // In-app Purchase Plugin
-  InAppPurchase _inAppPurchase = InAppPurchase.instance;
-
-  // Products for sale
-  List<ProductDetails> _products = [];
-
-  // Past purchases
-  List<PurchaseDetails> _purchases = [];
-
-  // Updates to purchases
-  StreamSubscription _subscription;
-  bool _available = true;
-  List<String> _kProductIds = <String>[
-    Constants.exclusivesSubscription,
-  ];
-  String _queryProductError;
-  bool _purchasePending = false;
-
   TabController _tabController;
   ScrollController _exclusivesScrollController = ScrollController();
   List<Melody> _exclusives = [];
@@ -813,21 +791,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    final Stream<List<PurchaseDetails>> purchaseUpdated =
-        _inAppPurchase.purchaseStream;
-
-    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
-      setState(() {
-        _purchases.addAll(purchaseDetailsList);
-        _listenToPurchaseUpdated(purchaseDetailsList);
-      });
-    }, onDone: () {
-      _subscription?.cancel();
-    }, onError: (error) {
-      _subscription?.cancel();
-    });
-
-    _initialize();
     // SystemChannels.lifecycle.setMessageHandler((msg) {
     //   print('SystemChannels> $msg');
     //   switch (msg) {
@@ -851,12 +814,12 @@ class _HomePageState extends State<HomePage>
     _exclusivesScrollController
       ..addListener(() {
         if (_exclusivesScrollController.offset >=
-            _exclusivesScrollController.position.maxScrollExtent &&
+                _exclusivesScrollController.position.maxScrollExtent &&
             !_exclusivesScrollController.position.outOfRange) {
           print('reached the bottom');
           if (!_isSearching) nextExclusives();
         } else if (_exclusivesScrollController.offset <=
-            _exclusivesScrollController.position.minScrollExtent &&
+                _exclusivesScrollController.position.minScrollExtent &&
             !_exclusivesScrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -899,92 +862,7 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     _recordsScrollController.dispose();
     _melodiesPageScrollController.dispose();
-    if (Platform.isIOS) {
-      var iosPlatformAddition = _inAppPurchase
-          .getPlatformAddition<InAppPurchaseIosPlatformAddition>();
-      iosPlatformAddition.setDelegate(null);
-    }
-    _subscription.cancel();
     super.dispose();
-  }
-
-  void _initialize() async {
-    final bool available = await _inAppPurchase.isAvailable();
-
-    print('init _available= $_available');
-    if (Platform.isIOS) {
-      var iosPlatformAddition = _inAppPurchase
-          .getPlatformAddition<InAppPurchaseIosPlatformAddition>();
-      await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
-    }
-
-    ProductDetailsResponse productDetailResponse =
-    await _inAppPurchase.queryProductDetails(_kProductIds.toSet());
-    if (productDetailResponse.error != null) {
-      setState(() {
-        _queryProductError = productDetailResponse.error.message;
-        _available = available;
-        _products = productDetailResponse.productDetails;
-        _purchases = [];
-        _purchasePending = false;
-      });
-      return;
-    }
-
-    if (productDetailResponse.productDetails.isEmpty) {
-      setState(() {
-        _queryProductError = null;
-        _available = available;
-        _products = productDetailResponse.productDetails;
-        _purchases = [];
-        _purchasePending = false;
-      });
-      return;
-    }
-    List<ProductDetails> products = await _getProducts(
-      productIds: Set<String>.from(
-        [Constants.exclusivesSubscription],
-      ),
-    );
-
-    setState(() {
-      _products = products;
-    });
-  }
-
-  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
-    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
-      switch (purchaseDetails.status) {
-        case PurchaseStatus.pending:
-        //  _showPendingUI();
-          break;
-        case PurchaseStatus.purchased:
-        case PurchaseStatus.restored:
-        // bool valid = await _verifyPurchase(purchaseDetails);
-        // if (!valid) {
-        //   _handleInvalidPurchase(purchaseDetails);
-        // }
-          break;
-        case PurchaseStatus.error:
-          print(purchaseDetails.error);
-          // _handleError(purchaseDetails.error!);
-          break;
-        default:
-          break;
-      }
-
-      if (purchaseDetails.pendingCompletePurchase) {
-        await _inAppPurchase.completePurchase(purchaseDetails);
-      }
-    });
-  }
-
-  Future<List<ProductDetails>> _getProducts(
-      {Set<String> productIds}) async {
-    ProductDetailsResponse response =
-    await _inAppPurchase.queryProductDetails(productIds);
-
-    return response.productDetails;
   }
 
   var currentBackPressTime;
@@ -1013,7 +891,7 @@ class _HomePageState extends State<HomePage>
 
   nextExclusives() async {
     List<Melody> exclusives =
-    await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
+        await DatabaseService.getNextExclusives(lastVisiblePostSnapShot);
     if (exclusives.length > 0) {
       setState(() {
         exclusives.forEach((element) => _exclusives.add(element));
@@ -1151,43 +1029,54 @@ class _HomePageState extends State<HomePage>
             .update({'exclusive_last_date': FieldValue.serverTimestamp()});
 
         Constants.currentUser =
-        await DatabaseService.getUserWithId(Constants.currentUserID);
+            await DatabaseService.getUserWithId(Constants.currentUserID);
         setState(() {});
       }
     });
   }
 
+  Future fetchOffers() async{
+    final offerings = await PurchaseApi.fetchOffers();
+    if(offerings.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('The app currently has no offers'),));
+    }else {
+      //final offer = offerings.first;
+      //print('Offer: $offer');
+      final packages = offerings.map((offer)=> offer.availablePackages).expand((pair) => pair).toList();
+
+    }
+  }
   validateSubscription(Function showUI) {
     Constants.currentUser?.exclusiveLastDate == null
         ? AppUtil.showAlertDialog(
-      context: context,
-      firstFunc: subscribe,
-      firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
-      message: language(
-          ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
-          en: 'Please subscribe in order to listen to exclusives'),
-      secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-      secondFunc: () => Navigator.of(context).pop(),
-    )
+            context: context,
+            firstFunc: subscribe,
+            firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+            message: language(
+                ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+                en: 'Please subscribe in order to listen to exclusives'),
+            secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+            secondFunc: () => Navigator.of(context).pop(),
+          )
         : DateTime.now().difference(
-        Constants.currentUser.exclusiveLastDate.toDate()) >
-        Duration(days: 30)
-        ? AppUtil.showAlertDialog(
-      context: context,
-      firstFunc: subscribe,
-      firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
-      message: language(
-          ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
-          en: 'Please renew subscription in order to listen to exclusives'),
-      secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-      secondFunc: () => Navigator.of(context).pop(),
-    )
-        : showUI;
+                    Constants.currentUser.exclusiveLastDate.toDate()) >
+                Duration(days: 30)
+            ? AppUtil.showAlertDialog(
+                context: context,
+                firstFunc: subscribe,
+                firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
+                message: language(
+                    ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
+                    en: 'Please renew subscription in order to listen to exclusives'),
+                secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+                secondFunc: () => Navigator.of(context).pop(),
+              )
+            : showUI;
   }
 
   searchExclusives(String text) async {
     List<Melody> filteredExclusives =
-    await DatabaseService.searchExclusives(text);
+        await DatabaseService.searchExclusives(text);
     if (mounted) {
       setState(() {
         _filteredexclusives = filteredExclusives;
@@ -1202,72 +1091,53 @@ class _HomePageState extends State<HomePage>
         controller: _exclusivesScrollController,
         itemCount: _exclusives.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        childAspectRatio: .8,
-        crossAxisCount: 2,
-    ),
-    itemBuilder: (context, index) {
-    return InkWell(
-    onLongPress: () => deleteExclusive(_exclusives[index]),
-    onTap: () async {
-    validateSubscription(() {
-    setState(() {
-    print('current user2: ${Constants.currentUser}');
-    musicPlayer = LocalMusicPlayer(
-    checkPrice: false,
-    key: ValueKey(_exclusives[index].id),
-    backColor:
-    MyColors.lightPrimaryColor.withOpacity(.8),
-    title: _exclusives[index].name,
-    btnSize: 30,
-    initialDuration: _exclusives[index].duration,
-    melodyList: [_exclusives[index]],
-    isRecordBtnVisible: true,
-    );
-    _isPlaying = true;
-    });
-    });
-    },
-    child: Container(
-    margin: EdgeInsets.symmetric(horizontal: 5),
-    key: ValueKey('melody_item'),
-    child: Column(
-    children: [
-    CachedImage(
-    imageUrl: _exclusives[index].imageUrl,
-    width: 200,
-    height: 200,
-    defaultAssetImage: Strings.default_melody_image,
-    imageShape: BoxShape.rectangle,
-    ),
-    SizedBox(
-    height: 10,
-    ),
-    Text(
-    _exclusives[index].name,
-    style: TextStyle(color: MyColors.textLightColor),
-    )
-    ],
-    ),
-    ),
-    );
-
-    });}
-}
-
-/// Example implementation of the
-/// [`SKPaymentQueueDelegate`](https://developer.apple.com/documentation/storekit/skpaymentqueuedelegate?language=objc).
-///
-/// The payment queue delegate can be implementated to provide information
-/// needed to complete transactions.
-class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
-  @override
-  bool shouldContinueTransaction(
-      SKPaymentTransactionWrapper transaction, SKStorefrontWrapper storefront) {
-    return true;
-  }
-
-  @override
-  bool shouldShowPriceConsent() {
-    return false;
+          childAspectRatio: .8,
+          crossAxisCount: 2,
+        ),
+        itemBuilder: (context, index) {
+          return InkWell(
+            onLongPress: () => deleteExclusive(_exclusives[index]),
+            onTap: () async {
+              validateSubscription(() {
+                setState(() {
+                  print('current user2: ${Constants.currentUser}');
+                  musicPlayer = LocalMusicPlayer(
+                    checkPrice: false,
+                    key: ValueKey(_exclusives[index].id),
+                    backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                    title: _exclusives[index].name,
+                    btnSize: 30,
+                    initialDuration: _exclusives[index].duration,
+                    melodyList: [_exclusives[index]],
+                    isRecordBtnVisible: true,
+                  );
+                  _isPlaying = true;
+                });
+              });
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              key: ValueKey('melody_item'),
+              child: Column(
+                children: [
+                  CachedImage(
+                    imageUrl: _exclusives[index].imageUrl,
+                    width: 200,
+                    height: 200,
+                    defaultAssetImage: Strings.default_melody_image,
+                    imageShape: BoxShape.rectangle,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    _exclusives[index].name,
+                    style: TextStyle(color: MyColors.textLightColor),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

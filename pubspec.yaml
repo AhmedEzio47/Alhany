@@ -74,7 +74,8 @@ dependencies:
   chewie: ^1.1.0
   table_calendar: ^2.3.3
   system_settings: 2.0.0
-  in_app_purchase: ^1.0.9
+  #in_app_purchase: ^1.0.9
+  purchases_flutter: ^3.4.6
 
 dev_dependencies:
   flutter_test:

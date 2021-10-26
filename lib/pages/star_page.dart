@@ -7,7 +7,6 @@ import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
-import 'package:Alhany/models/purchasable_product.dart';
 import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/pages/appointment_page.dart';
 import 'package:Alhany/services/database_service.dart';
@@ -20,7 +19,6 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 
 class StarPage extends StatefulWidget with ChangeNotifier {
   @override
@@ -29,9 +27,6 @@ class StarPage extends StatefulWidget with ChangeNotifier {
 
 class _StarPageState extends State<StarPage>
     with SingleTickerProviderStateMixin {
-
-  StreamSubscription<List<PurchaseDetails>> _subscription;
-  final iapConnection = InAppPurchase.instance;
 
   ScrollController _exclusivesScrollController = ScrollController();
   TabController _tabController;
@@ -89,7 +84,6 @@ class _StarPageState extends State<StarPage>
   // }
   @override
   void dispose() {
-    _subscription.cancel();
     super.dispose();
   }
 
