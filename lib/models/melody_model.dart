@@ -98,28 +98,40 @@ class Melody {
     return map;
   }
 
-  static Future<bool> buySong(BuildContext context, Melody song) async {
+  static Future<bool> buySong(BuildContext context, Melody song, {bool isMelody = false}) async {
     AppUtil.executeFunctionIfLoggedIn(context, () async {
+      String message = isMelody ? language(
+          ar: 'يجب شراء هذا اللحن أولاً . هل ترغب بإتمام عملية الشراء ؟',
+          en: 'You must buy this melody first. Would you like to proceed?') : language(
+          ar: 'هل تريد شراء هذه الأغنية',
+          en: 'Do you want to buy this song?');
       await AppUtil.showAlertDialog(
           context: context,
-          message: language(
-              ar: 'هل تريد شراء هذه الأغنية',
-              en: 'Do you want to buy this song?'),
+          message: message,
           firstBtnText: language(ar: 'نعم', en: 'Yes'),
           secondBtnText: language(ar: 'لا', en: 'No'),
           firstFunc: () async {
             final success = await Navigator.of(context)
-                .pushNamed('/payment-home', arguments: {'amount': song.price});
+                .pushNamed('/payment-home', arguments: {'amount': isMelody ? song.melodyPrice : song.price});
             if (success) {
-              List boughtSongs = Constants.currentUser.boughtSongs ?? [];
-              boughtSongs.add(song.id);
+              if(isMelody){
+                List boughtMelodies = Constants.currentUser.boughtMelodies ?? [];
+                boughtMelodies.add(song.id);
 
-              await usersRef
-                  .doc(Constants.currentUserID)
-                  .update({'bought_songs': boughtSongs});
+                await usersRef
+                    .doc(Constants.currentUserID)
+                    .update({'bought_melodies': boughtMelodies});
+              } else {
+                List boughtSongs = Constants.currentUser.boughtSongs ?? [];
+                boughtSongs.add(song.id);
 
-              Constants.currentUser =
-                  await DatabaseService.getUserWithId(Constants.currentUserID);
+                await usersRef
+                    .doc(Constants.currentUserID)
+                    .update({'bought_songs': boughtSongs});
+              }
+              //REDUNDANT
+              // Constants.currentUser =
+              //     await DatabaseService.getUserWithId(Constants.currentUserID);
 
               Navigator.of(context).pop();
               return true;

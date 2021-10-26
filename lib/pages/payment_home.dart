@@ -25,6 +25,13 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+            builder: (context) => InkWell(
+                onTap: _onBackPressed,
+                child: Icon(
+                  Icons.arrow_back,
+                  color: MyColors.accentColor,
+                ))),
         title: Text('Payment'),
       ),
       body: Container(
@@ -119,5 +126,9 @@ class _PaymentHomePageState extends State<PaymentHomePage> {
         Navigator.of(context).pop(response.success);
         break;
     }
+  }
+
+   _onBackPressed() {
+    Navigator.of(context).pop(false);
   }
 }

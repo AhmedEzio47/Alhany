@@ -27,6 +27,23 @@ class _TracksPageState extends State<TracksPage> {
   List<Track> _tracks = [];
   int _index = 0;
   bool _isPlaying = false;
+  bool visible = true ;
+
+  loadProgress(){
+
+    if(visible == true){
+      setState(() {
+        visible = false;
+      });
+    }
+    else{
+      setState(() {
+        visible = true;
+      });
+    }
+
+  }
+
   getTracks() async {
     List<Track> tracks = await DatabaseService.getTracks(widget.song.id);
     setState(() {
@@ -46,6 +63,16 @@ class _TracksPageState extends State<TracksPage> {
       child: Scaffold(
         body: Stack(
           children: [
+            Visibility(
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                visible: visible,
+                child: Container(
+                    margin: EdgeInsets.only(top: 50, bottom: 30),
+                    child: CircularProgressIndicator()
+                )
+            ),
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -127,56 +154,89 @@ class _TracksPageState extends State<TracksPage> {
                       child: ListView.builder(
                           itemCount: _tracks.length,
                           itemBuilder: (context, index) {
-                            return _tracks[index].ownerId == null ||
-                                    _tracks[index].ownerId ==
-                                        Constants.currentUserID
-                                ? ListTile(
-                                    onTap: () async {
-                                      _index = index;
-                                      setState(() {
-                                        musicPlayer = LocalMusicPlayer(
-                                          showFavBtn: false,
-                                          onDownload: downloadTrack,
-                                          checkPrice: false,
-                                          key: ValueKey(_tracks[index].id),
-                                          melodyList: [
-                                            Melody(
-                                                price:
-                                                    _tracks[index].price ?? '0',
-                                                name: _tracks[index].name,
-                                                duration:
-                                                    _tracks[index].duration,
-                                                songUrl: _tracks[index].audio)
-                                          ],
-                                          backColor: MyColors.lightPrimaryColor,
-                                          title: _tracks[index].name,
-                                          initialDuration:
-                                              _tracks[index].duration,
-                                        );
-                                        _isPlaying = true;
-                                      });
-                                    },
-                                    tileColor: Colors.white.withOpacity(.5),
-                                    title: Text(
-                                      _tracks[index].name,
-                                      style: TextStyle(
-                                          color: MyColors.textLightColor),
-                                    ),
-                                    leading: CachedImage(
-                                      height: 50,
-                                      width: 50,
-                                      imageShape: BoxShape.rectangle,
-                                      imageUrl: _tracks[index].image,
-                                      defaultAssetImage:
-                                          Strings.default_melody_image,
-                                    ),
-                                    trailing: Text(
-                                      '${_tracks[index].price} \$',
-                                      style: TextStyle(
-                                          color: MyColors.textLightColor),
-                                    ),
-                                  )
-                                : Container();
+                            if(_tracks[index].duration != 0 && _tracks[index].ownerId == null ||
+                                _tracks[index].ownerId ==
+                                    Constants.currentUserID){
+                              return ListTile(
+                                onTap: () async {
+                                  _index = index;
+                                  setState(() {
+                                    musicPlayer = LocalMusicPlayer(
+                                      showFavBtn: false,
+                                      onDownload: downloadTrack,
+                                      checkPrice: false,
+                                      key: ValueKey(_tracks[index].id),
+                                      melodyList: [
+                                        Melody(
+                                            price:
+                                            _tracks[index].price ?? '0',
+                                            name: _tracks[index].name,
+                                            duration:
+                                            _tracks[index].duration,
+                                            songUrl: _tracks[index].audio)
+                                      ],
+                                      backColor: MyColors.lightPrimaryColor,
+                                      title: _tracks[index].name,
+                                      initialDuration:
+                                      _tracks[index].duration,
+                                    );
+                                    _isPlaying = true;
+                                  });
+                                },
+                                tileColor: Colors.white.withOpacity(.5),
+                                title: Text(
+                                  _tracks[index].name,
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor),
+                                ),
+                                leading: CachedImage(
+                                  height: 50,
+                                  width: 50,
+                                  imageShape: BoxShape.rectangle,
+                                  imageUrl: _tracks[index].image,
+                                  defaultAssetImage:
+                                  Strings.default_melody_image,
+                                ),
+                                trailing: Text(
+                                  '${_tracks[index].price} \$',
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor),
+                                ),
+                              );
+                            }else if(_tracks[index].duration == 0 && _tracks[index].ownerId == null ||
+                                _tracks[index].ownerId ==
+                                    Constants.currentUserID){
+                              print('we are here!');
+                              return ListTile(
+                                onTap: () async {
+                                  _index = index;
+                                  bool _canUseThisTrack = await hasPurchasedThisTrack(_tracks[index]);
+                                  if(!_canUseThisTrack){
+                                    buyTrack(_tracks[index]);
+                                    return;
+                                  }
+                                },
+                                tileColor: Colors.white.withOpacity(.5),
+                                title: Text(
+                                  _tracks[index].name,
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor),
+                                ),
+                                leading: CachedImage(
+                                  height: 50,
+                                  width: 50,
+                                  imageShape: BoxShape.rectangle,
+                                  imageUrl: _tracks[index].image,
+                                  defaultAssetImage:
+                                  Strings.default_melody_image,
+                                ),
+                                trailing: Text(
+                                  '${_tracks[index].price} \$',
+                                  style: TextStyle(
+                                      color: MyColors.textLightColor),
+                                ),
+                              );
+                            }return Container();
                           }),
                     )
                   ],
@@ -199,24 +259,27 @@ class _TracksPageState extends State<TracksPage> {
     );
   }
 
-  Future<bool> buyTrack() async {
+  Future<bool> buyTrack(Track track) async {
     await AppUtil.showAlertDialog(
         context: context,
         message: language(
-            ar: 'هل تريد شراء هذه الأغنية',
-            en: 'Do you want to buy this song?'),
+            ar: 'هل تريد شراء هذا العرض ؟',
+            en: 'Do you want to buy this offer?'),
         firstBtnText: language(ar: 'نعم', en: 'Yes'),
         secondBtnText: language(ar: 'لا', en: 'No'),
         firstFunc: () async {
+          loadProgress();
           final success = await Navigator.of(context).pushNamed('/payment-home',
-              arguments: {'amount': widget.song.price});
+              arguments: {'amount': track.price});
           if (success) {
             await melodiesRef
                 .doc(widget.song.id)
                 .collection('tracks')
-                .doc(_tracks[_index].id)
+                .doc(track.id)
                 .update({'owner_id': Constants.currentUserID});
 
+            await downloadTrack();
+            loadProgress();
             Navigator.of(context).pop();
             return true;
           }
@@ -310,5 +373,16 @@ class _TracksPageState extends State<TracksPage> {
         Navigator.of(context).pushNamed('/downloads');
       }
     }
+  }
+
+  Future<bool> hasPurchasedThisTrack(Track track) async {
+    if ((double.parse(track.price) ?? 0) == 0) {
+      print('Price: ${track.price} ');
+      return true; // This melody is FREE to use
+    } else if ((Constants.currentUser?.boughtTracks ?? [])
+        .contains(track.id)) {
+      return true; // User has already purchased this melody
+    }
+    return false;
   }
 }

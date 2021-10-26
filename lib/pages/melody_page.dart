@@ -583,6 +583,7 @@ class _MelodyPageState extends State<MelodyPage> {
     if (_type == Types.AUDIO) {
       // await AudioService.stop();
       melodyPlayer = LocalMusicPlayer(
+        isMelody: true,
         checkPrice: false,
         key: ValueKey('preview'),
         melodyList: [
@@ -875,8 +876,9 @@ class _MelodyPageState extends State<MelodyPage> {
   initMelodyPlayer(String url) async {
     setState(() {
       melodyPlayer = new LocalMusicPlayer(
-        checkPrice: false,
+        checkPrice: true,
         isMelody: true,
+        onBuy: () => Melody.buySong(context, widget.melody, isMelody: true),
         key: ValueKey('main'),
         isRecordBtnVisible: false,
         backColor: Colors.transparent,
@@ -910,6 +912,11 @@ class _MelodyPageState extends State<MelodyPage> {
               floatingActionButton: !_progressVisible && !choosingImage
                   ? FloatingActionButton(
                       onPressed: () async {
+                        bool _canUseThisMelody = await hasPurchasedThisMelody();
+                        if(!_canUseThisMelody){
+                          Melody.buySong(context, widget.melody, isMelody: true);
+                          return;
+                        }
                         print('FAB TAPPED!');
                         //if (AudioService.running) AudioService.pause();
                         if (recordingStatus == RecordingStatus.Recording) {
@@ -1734,5 +1741,16 @@ class _MelodyPageState extends State<MelodyPage> {
         Navigator.of(context).pushNamed('/downloads');
       }
     }
+  }
+
+  Future<bool> hasPurchasedThisMelody() async {
+    if ((double.parse(widget.melody.melodyPrice) ?? 0) == 0) {
+      print('Price: ${widget.melody.melodyPrice} ');
+      return true; // This melody is FREE to use
+    } else if ((Constants.currentUser?.boughtMelodies ?? [])
+        .contains(widget.melody.id)) {
+      return true; // User has already purchased this melody
+    }
+    return false;
   }
 }

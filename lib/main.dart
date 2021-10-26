@@ -9,11 +9,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appleSignInAvailable = await AppleSignInAvailable.check();
   await Firebase.initializeApp();
+  InAppPurchaseAndroidPlatformAddition.enablePendingPurchases();
   runApp(Provider<AppleSignInAvailable>.value(
     value: appleSignInAvailable,
     child: MyApp(),

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/sizes.dart';
@@ -21,7 +24,12 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_ios/in_app_purchase_ios.dart';
+import 'package:in_app_purchase_ios/store_kit_wrappers.dart';
 
 import '../app_util.dart';
 import 'singer_page.dart';
@@ -33,6 +41,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
+  // In-app Purchase Plugin
+  InAppPurchase _inAppPurchase = InAppPurchase.instance;
+
+  // Products for sale
+  List<ProductDetails> _products = [];
+
+  // Past purchases
+  List<PurchaseDetails> _purchases = [];
+
+  // Updates to purchases
+  StreamSubscription _subscription;
+  bool _available = true;
+  List<String> _kProductIds = <String>[
+    Constants.exclusivesSubscription,
+  ];
+  String _queryProductError;
+  bool _purchasePending = false;
+
   TabController _tabController;
   ScrollController _exclusivesScrollController = ScrollController();
   List<Melody> _exclusives = [];
@@ -648,7 +674,7 @@ class _HomePageState extends State<HomePage>
                   child: MelodyItem(
                     padding: 0,
                     imageSize: 40,
-                    showPrice: true,
+                    showPrice: false,
                     showFavBtn: false,
                     isRounded: false,
                     key: ValueKey('melody_item'),
@@ -708,69 +734,69 @@ class _HomePageState extends State<HomePage>
     return CustomScrollView(
       controller: _favScrollController,
       slivers: [
-        if (_boughtSongs.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Constants.language == 'ar'
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: Text(
-                  language(ar: 'الأغاني المشتراة', en: 'Bought songs'),
-                  style: TextStyle(color: MyColors.textLightColor),
-                ),
-              ),
-            ),
-          ),
-        if (_boughtSongs.isNotEmpty)
-          SliverList(
-            delegate: SliverChildListDelegate([
-              ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _boughtSongs.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () async {
-                        _boughtSongsIndex = index;
-                        musicPlayer = LocalMusicPlayer(
-                          checkPrice: false,
-                          onDownload: downloadSong,
-                          melodyList: [_boughtSongs[index]],
-                          key: ValueKey(_boughtSongs[index].id),
-                          backColor: Colors.black.withOpacity(.7),
-                          initialDuration: _boughtSongs[index].duration,
-                          title: _boughtSongs[index].name,
-                        );
-                        setState(() {
-                          _isPlaying = true;
-                        });
-                      },
-                      child: MelodyItem(
-                        showPrice: false,
-                        padding: 4,
-                        melody: _boughtSongs[index],
-                      ),
-                    );
-                  })
-            ]),
-          ),
-        if (_favourites.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Constants.language == 'ar'
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: Text(
-                  language(ar: 'المفضلات', en: 'Favorites'),
-                  style: TextStyle(color: MyColors.textLightColor),
-                ),
-              ),
-            ),
-          ),
+        // if (_boughtSongs.isNotEmpty)
+        //   SliverToBoxAdapter(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(8.0),
+        //       child: Align(
+        //         alignment: Constants.language == 'ar'
+        //             ? Alignment.centerRight
+        //             : Alignment.centerLeft,
+        //         child: Text(
+        //           language(ar: 'الأغاني المشتراة', en: 'Bought songs'),
+        //           style: TextStyle(color: MyColors.textLightColor),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // if (_boughtSongs.isNotEmpty)
+        //   SliverList(
+        //     delegate: SliverChildListDelegate([
+        //       ListView.builder(
+        //           physics: NeverScrollableScrollPhysics(),
+        //           shrinkWrap: true,
+        //           itemCount: _boughtSongs.length,
+        //           itemBuilder: (context, index) {
+        //             return InkWell(
+        //               onTap: () async {
+        //                 _boughtSongsIndex = index;
+        //                 musicPlayer = LocalMusicPlayer(
+        //                   checkPrice: false,
+        //                   onDownload: downloadSong,
+        //                   melodyList: [_boughtSongs[index]],
+        //                   key: ValueKey(_boughtSongs[index].id),
+        //                   backColor: Colors.black.withOpacity(.7),
+        //                   initialDuration: _boughtSongs[index].duration,
+        //                   title: _boughtSongs[index].name,
+        //                 );
+        //                 setState(() {
+        //                   _isPlaying = true;
+        //                 });
+        //               },
+        //               child: MelodyItem(
+        //                 showPrice: false,
+        //                 padding: 4,
+        //                 melody: _boughtSongs[index],
+        //               ),
+        //             );
+        //           })
+        //     ]),
+        //   ),
+        // if (_favourites.isNotEmpty)
+        //   SliverToBoxAdapter(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(8.0),
+        //       child: Align(
+        //         alignment: Constants.language == 'ar'
+        //             ? Alignment.centerRight
+        //             : Alignment.centerLeft,
+        //         child: Text(
+        //           language(ar: 'المفضلات', en: 'Favorites'),
+        //           style: TextStyle(color: MyColors.textLightColor),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
         SliverList(
             delegate: SliverChildListDelegate([
           _exclusives.isNotEmpty
@@ -787,6 +813,21 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
+    final Stream<List<PurchaseDetails>> purchaseUpdated =
+        _inAppPurchase.purchaseStream;
+
+    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
+      setState(() {
+        _purchases.addAll(purchaseDetailsList);
+        _listenToPurchaseUpdated(purchaseDetailsList);
+      });
+    }, onDone: () {
+      _subscription?.cancel();
+    }, onError: (error) {
+      _subscription?.cancel();
+    });
+
+    _initialize();
     // SystemChannels.lifecycle.setMessageHandler((msg) {
     //   print('SystemChannels> $msg');
     //   switch (msg) {
@@ -858,7 +899,92 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     _recordsScrollController.dispose();
     _melodiesPageScrollController.dispose();
+    if (Platform.isIOS) {
+      var iosPlatformAddition = _inAppPurchase
+          .getPlatformAddition<InAppPurchaseIosPlatformAddition>();
+      iosPlatformAddition.setDelegate(null);
+    }
+    _subscription.cancel();
     super.dispose();
+  }
+
+  void _initialize() async {
+    final bool available = await _inAppPurchase.isAvailable();
+
+    print('init _available= $_available');
+    if (Platform.isIOS) {
+      var iosPlatformAddition = _inAppPurchase
+          .getPlatformAddition<InAppPurchaseIosPlatformAddition>();
+      await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
+    }
+
+    ProductDetailsResponse productDetailResponse =
+    await _inAppPurchase.queryProductDetails(_kProductIds.toSet());
+    if (productDetailResponse.error != null) {
+      setState(() {
+        _queryProductError = productDetailResponse.error.message;
+        _available = available;
+        _products = productDetailResponse.productDetails;
+        _purchases = [];
+        _purchasePending = false;
+      });
+      return;
+    }
+
+    if (productDetailResponse.productDetails.isEmpty) {
+      setState(() {
+        _queryProductError = null;
+        _available = available;
+        _products = productDetailResponse.productDetails;
+        _purchases = [];
+        _purchasePending = false;
+      });
+      return;
+    }
+    List<ProductDetails> products = await _getProducts(
+      productIds: Set<String>.from(
+        [Constants.exclusivesSubscription],
+      ),
+    );
+
+    setState(() {
+      _products = products;
+    });
+  }
+
+  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+      switch (purchaseDetails.status) {
+        case PurchaseStatus.pending:
+        //  _showPendingUI();
+          break;
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
+        // bool valid = await _verifyPurchase(purchaseDetails);
+        // if (!valid) {
+        //   _handleInvalidPurchase(purchaseDetails);
+        // }
+          break;
+        case PurchaseStatus.error:
+          print(purchaseDetails.error);
+          // _handleError(purchaseDetails.error!);
+          break;
+        default:
+          break;
+      }
+
+      if (purchaseDetails.pendingCompletePurchase) {
+        await _inAppPurchase.completePurchase(purchaseDetails);
+      }
+    });
+  }
+
+  Future<List<ProductDetails>> _getProducts(
+      {Set<String> productIds}) async {
+    ProductDetailsResponse response =
+    await _inAppPurchase.queryProductDetails(productIds);
+
+    return response.productDetails;
   }
 
   var currentBackPressTime;
@@ -1070,64 +1196,7 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget exclusivesWidget() {
-    return _isSearching
-        ? GridView.builder(
-        shrinkWrap: true,
-        primary: false,
-        controller: _exclusivesScrollController,
-        itemCount: _filteredexclusives.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: .8,
-          crossAxisCount: 2,
-        ),
-        itemBuilder: (context, index) {
-          return InkWell(
-            onLongPress: () => deleteExclusive(_exclusives[index]),
-            onTap: () async {
-              validateSubscription(() {
-                setState(() {
-                  print('current user: ${Constants.currentUser}');
-                  musicPlayer = LocalMusicPlayer(
-                    checkPrice: false,
-                    key: ValueKey(_filteredexclusives[index].id),
-                    backColor:
-                    MyColors.lightPrimaryColor.withOpacity(.8),
-                    title: _filteredexclusives[index].name,
-                    btnSize: 30,
-                    initialDuration:
-                    _filteredexclusives[index].duration,
-                    melodyList: [_filteredexclusives[index]],
-                    isRecordBtnVisible: true,
-                  );
-                  _isPlaying = true;
-                });
-              });
-            },
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 5),
-              key: ValueKey('melody_item'),
-              child: Column(
-                children: [
-                  CachedImage(
-                    imageUrl: _filteredexclusives[index].imageUrl,
-                    width: 200,
-                    height: 200,
-                    defaultAssetImage: Strings.default_melody_image,
-                    imageShape: BoxShape.rectangle,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    _exclusives[index].name,
-                    style: TextStyle(color: MyColors.textLightColor),
-                  )
-                ],
-              ),
-            ),
-          );
-        })
-        : GridView.builder(
+    return GridView.builder(
         shrinkWrap: true,
         primary: false,
         controller: _exclusivesScrollController,
@@ -1183,4 +1252,22 @@ class _HomePageState extends State<HomePage>
     );
 
     });}
+}
+
+/// Example implementation of the
+/// [`SKPaymentQueueDelegate`](https://developer.apple.com/documentation/storekit/skpaymentqueuedelegate?language=objc).
+///
+/// The payment queue delegate can be implementated to provide information
+/// needed to complete transactions.
+class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
+  @override
+  bool shouldContinueTransaction(
+      SKPaymentTransactionWrapper transaction, SKStorefrontWrapper storefront) {
+    return true;
+  }
+
+  @override
+  bool shouldShowPriceConsent() {
+    return false;
+  }
 }

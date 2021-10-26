@@ -74,9 +74,9 @@ class DatabaseService {
 
   static Future<List<Melody>> getMelodies() async {
     QuerySnapshot melodiesSnapshot = await melodiesRef
-        .where('price', isNotEqualTo: '0')
+        .where('melody_price', isGreaterThanOrEqualTo: '0')
         .limit(20)
-        .orderBy('price')
+        .orderBy('melody_price')
         .orderBy('timestamp', descending: true)
         .get();
     List<Melody> melodies =
@@ -88,7 +88,7 @@ class DatabaseService {
     QuerySnapshot tracksSnapshot = await melodiesRef
         .doc(songId)
         .collection('tracks')
-        .orderBy('timestamp', descending: true)
+        .orderBy('duration', descending: true)
         .get();
     List<Track> tracks =
         tracksSnapshot.docs.map((doc) => Track.fromDoc(doc)).toList();

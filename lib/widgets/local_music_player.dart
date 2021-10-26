@@ -165,7 +165,12 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   }
 
   Future<bool> checkPrice() async {
-    if ((double.parse(widget.melodyList[index].price) ?? 0) == 0) {
+    if (!(widget.isMelody) && (double.parse(widget.melodyList[index].price) ?? 0) == 0) {
+      print('Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].price} ');
+      _isBought = true;
+      return true;
+    } else if (widget.isMelody && (double.parse(widget.melodyList[index].melodyPrice) ?? 0) == 0) {
+      print('Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].melodyPrice} ');
       _isBought = true;
       return true;
     } else if ((Constants.currentUser?.boughtSongs ?? [])
@@ -178,8 +183,9 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   }
 
   Future play() async {
-    print(_isBought);
+    print('_isBought: $_isBought');
     if (_isBought || !widget.checkPrice) {
+
       myAudioPlayer.play();
     } else {
       AppUtil.executeFunctionIfLoggedIn(context, () async {

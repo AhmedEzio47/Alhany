@@ -53,4 +53,5 @@ class Constants {
   static int endPositionOffsetInMilliSeconds = 600;
 
   static bool ongoingEncoding = false;
+  static const String exclusivesSubscription = 'exclusives_sub';
 }
