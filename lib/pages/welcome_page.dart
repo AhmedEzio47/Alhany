@@ -409,95 +409,96 @@ class _WelcomePageState extends State<WelcomePage> {
                       const EdgeInsets.only(left: 30.0, right: 30.0, top: 20.0),
                   child: new Row(
                     children: <Widget>[
-                      new Expanded(
-                        child: new Container(
-                          margin: EdgeInsets.only(right: 8.0),
-                          alignment: Alignment.center,
-                          child: new Row(
-                            children: <Widget>[
-                              new Expanded(
-                                child: new FlatButton(
-                                  shape: new RoundedRectangleBorder(
-                                    borderRadius:
-                                        new BorderRadius.circular(30.0),
-                                  ),
-                                  color: Color(0Xff3B5998),
-                                  onPressed: () async {},
-                                  child: new Container(
-                                    child: new Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        new Expanded(
-                                          child: new FlatButton(
-                                            onPressed: () async {
-                                              print('trying to login with fb');
-                                              User user =
-                                                  await signInWithFacebook();
-                                              if (user != null) {
-                                                await AppUtil
-                                                    .setUserVariablesByFirebaseUser(
-                                                        user);
-                                                if ((await DatabaseService
-                                                            .getUserWithId(
-                                                                user.uid))
-                                                        .id ==
-                                                    null) {
-                                                  String username =
-                                                      await _createUsername();
-                                                  await DatabaseService
-                                                      .addUserToDatabase(
-                                                          user.uid,
-                                                          _emailController.text,
-                                                          _nameController.text,
-                                                          username);
-
-                                                  //await user.sendEmailVerification();
-                                                }
-                                                await AppUtil
-                                                    .setUserVariablesByFirebaseUser(
-                                                        user);
-
-                                                saveToken();
-                                                Navigator.of(context)
-                                                    .pushReplacementNamed('/');
-                                              }
-                                            },
-                                            padding: EdgeInsets.only(
-                                              top: 10.0,
-                                              bottom: 10.0,
-                                            ),
-                                            child: new Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: <Widget>[
-                                                Image.asset(
-                                                  'assets/images/facebook.png',
-                                                  height: 25,
-                                                  width: 25,
-                                                ),
-                                                Text(
-                                                  "FACEBOOK",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: MyColors
-                                                          .textLightColor,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      //TODO: Fix the crash issue with Facebook Login
+                      // new Expanded(
+                      //   child: new Container(
+                      //     margin: EdgeInsets.only(right: 8.0),
+                      //     alignment: Alignment.center,
+                      //     child: new Row(
+                      //       children: <Widget>[
+                      //         new Expanded(
+                      //           child: new FlatButton(
+                      //             shape: new RoundedRectangleBorder(
+                      //               borderRadius:
+                      //                   new BorderRadius.circular(30.0),
+                      //             ),
+                      //             color: Color(0Xff3B5998),
+                      //             onPressed: () async {},
+                      //             child: new Container(
+                      //               child: new Row(
+                      //                 mainAxisAlignment:
+                      //                     MainAxisAlignment.center,
+                      //                 children: <Widget>[
+                      //                   new Expanded(
+                      //                     child: new FlatButton(
+                      //                       onPressed: () async {
+                      //                         print('trying to login with fb');
+                      //                         User user =
+                      //                             await signInWithFacebook();
+                      //                         if (user != null) {
+                      //                           await AppUtil
+                      //                               .setUserVariablesByFirebaseUser(
+                      //                                   user);
+                      //                           if ((await DatabaseService
+                      //                                       .getUserWithId(
+                      //                                           user.uid))
+                      //                                   .id ==
+                      //                               null) {
+                      //                             String username =
+                      //                                 await _createUsername();
+                      //                             await DatabaseService
+                      //                                 .addUserToDatabase(
+                      //                                     user.uid,
+                      //                                     _emailController.text,
+                      //                                     _nameController.text,
+                      //                                     username);
+                      //
+                      //                             //await user.sendEmailVerification();
+                      //                           }
+                      //                           await AppUtil
+                      //                               .setUserVariablesByFirebaseUser(
+                      //                                   user);
+                      //
+                      //                           saveToken();
+                      //                           Navigator.of(context)
+                      //                               .pushReplacementNamed('/');
+                      //                         }
+                      //                       },
+                      //                       padding: EdgeInsets.only(
+                      //                         top: 10.0,
+                      //                         bottom: 10.0,
+                      //                       ),
+                      //                       child: new Row(
+                      //                         mainAxisAlignment:
+                      //                             MainAxisAlignment.spaceEvenly,
+                      //                         children: <Widget>[
+                      //                           Image.asset(
+                      //                             'assets/images/facebook.png',
+                      //                             height: 25,
+                      //                             width: 25,
+                      //                           ),
+                      //                           Text(
+                      //                             "FACEBOOK",
+                      //                             textAlign: TextAlign.center,
+                      //                             style: TextStyle(
+                      //                                 color: MyColors
+                      //                                     .textLightColor,
+                      //                                 fontWeight:
+                      //                                     FontWeight.bold),
+                      //                           ),
+                      //                         ],
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 ],
+                      //               ),
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                       new Expanded(
                         child: new Container(
                           margin: EdgeInsets.only(left: 8.0),
