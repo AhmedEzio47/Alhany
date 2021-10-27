@@ -3,6 +3,7 @@ import 'package:Alhany/pages/root.dart';
 import 'package:Alhany/services/AppleSignInAvailable.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
+import 'package:Alhany/services/purchase_api.dart';
 import 'package:Alhany/services/route_generator.dart';
 //import 'package:audio_service/audio_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,6 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appleSignInAvailable = await AppleSignInAvailable.check();
   await Firebase.initializeApp();
+  await PurchaseApi.init();
   runApp(Provider<AppleSignInAvailable>.value(
     value: appleSignInAvailable,
     child: MyApp(),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
@@ -10,6 +9,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
+import 'package:Alhany/provider/revenuecat.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/purchase_api.dart';
@@ -21,11 +21,13 @@ import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
+import 'package:Alhany/widgets/paywall_widget.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+import 'package:provider/provider.dart';
 
 import '../app_util.dart';
 import 'singer_page.dart';
@@ -51,171 +53,175 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-        drawer: BuildDrawer(),
-        body: GestureDetector(
-          onTap: () {
-            setState(() {
-              _isPlaying = false;
-            });
-          },
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  gradient: new LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      MyColors.primaryColor,
-                    ],
+
+    return ChangeNotifierProvider<RevenueCatProvider>(
+      create: (context) => RevenueCatProvider(),lazy: false,
+      child: WillPopScope(
+        onWillPop: _onBackPressed,
+        child: Scaffold(
+          drawer: BuildDrawer(),
+          body: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isPlaying = false;
+              });
+            },
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: new LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black,
+                        MyColors.primaryColor,
+                      ],
+                    ),
+                    color: MyColors.primaryColor,
+                    image: DecorationImage(
+                      colorFilter: new ColorFilter.mode(
+                          Colors.black.withOpacity(0.1), BlendMode.dstATop),
+                      image: AssetImage(Strings.default_bg),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  color: MyColors.primaryColor,
-                  image: DecorationImage(
-                    colorFilter: new ColorFilter.mode(
-                        Colors.black.withOpacity(0.1), BlendMode.dstATop),
-                    image: AssetImage(Strings.default_bg),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      top: Sizes.home_screen_page_view_padding),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TabBar(
-                          onTap: (index) {
-                            setState(() {
-                              _page = index;
-                            });
-                            _pageController.animateToPage(
-                              index,
-                              duration: Duration(milliseconds: 800),
-                              curve: Curves.easeOut,
-                            );
-                          },
-                          labelStyle: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          labelColor: MyColors.accentColor,
-                          unselectedLabelColor: Colors.grey,
-                          controller: _tabController,
-                          tabs: [
-                            Tab(
-                              text: language(en: 'Songs', ar: 'الأغاني'),
-                            ),
-                            Tab(
-                              text: language(en: 'Melodies', ar: 'الألحان'),
-                            ),
-                            Tab(
-                              text: language(en: 'Records', ar: 'تسجيلات'),
-                            ),
-                            Tab(
-                              text: language(en: 'Exclusives', ar: 'الحصري'),
-                            )
-                          ]),
-                      MediaQuery.removePadding(
-                        context: context,
-                        removeTop: true,
-                        child: Expanded(
-                          child: PageView(
-                            controller: _pageController,
-                            onPageChanged: (index) {
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: Sizes.home_screen_page_view_padding),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TabBar(
+                            onTap: (index) {
                               setState(() {
-                                _tabController.index = index;
                                 _page = index;
                               });
-                              _currentPage();
+                              _pageController.animateToPage(
+                                index,
+                                duration: Duration(milliseconds: 800),
+                                curve: Curves.easeOut,
+                              );
                             },
-                            children: [
-                              _songsPage(),
-                              _melodiesPage(),
-                              _recordsPage(),
-                              _favouritesPage()
-                            ],
+                            labelStyle: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                            labelColor: MyColors.accentColor,
+                            unselectedLabelColor: Colors.grey,
+                            controller: _tabController,
+                            tabs: [
+                              Tab(
+                                text: language(en: 'Songs', ar: 'الأغاني'),
+                              ),
+                              Tab(
+                                text: language(en: 'Melodies', ar: 'الألحان'),
+                              ),
+                              Tab(
+                                text: language(en: 'Records', ar: 'تسجيلات'),
+                              ),
+                              Tab(
+                                text: language(en: 'Exclusives', ar: 'الحصري'),
+                              )
+                            ]),
+                        MediaQuery.removePadding(
+                          context: context,
+                          removeTop: true,
+                          child: Expanded(
+                            child: PageView(
+                              controller: _pageController,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _tabController.index = index;
+                                  _page = index;
+                                });
+                                _currentPage();
+                              },
+                              children: [
+                                _songsPage(),
+                                _melodiesPage(),
+                                _recordsPage(),
+                                _favouritesPage()
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                _isPlaying
+                    ? Positioned.fill(
+                        child: Align(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: musicPlayer,
+                        ),
+                        alignment: Alignment.bottomCenter,
+                      ))
+                    : Container(),
+                Positioned.fill(
+                    child: Align(
+                  child: RegularAppbar(
+                    context,
+                    color: Colors.black,
+                    height: Sizes.appbar_height,
+                    margin: 25,
+                    leading: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 15.0,
+                      ),
+                      child: Builder(
+                        builder: (context) => InkWell(
+                          onTap: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                          child: Icon(
+                            Icons.menu,
+                            color: MyColors.accentColor,
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              _isPlaying
-                  ? Positioned.fill(
-                      child: Align(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: musicPlayer,
                       ),
-                      alignment: Alignment.bottomCenter,
-                    ))
-                  : Container(),
-              Positioned.fill(
-                  child: Align(
-                child: RegularAppbar(
-                  context,
-                  color: Colors.black,
-                  height: Sizes.appbar_height,
-                  margin: 25,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 15.0,
                     ),
-                    child: Builder(
-                      builder: (context) => InkWell(
-                        onTap: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                        child: Icon(
-                          Icons.menu,
-                          color: MyColors.accentColor,
+                    trailing: Padding(
+                      padding: const EdgeInsets.only(right: 15),
+                      child: Builder(
+                        builder: (context) => InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/search-page');
+                          },
+                          child: Icon(
+                            Icons.search,
+                            color: MyColors.accentColor,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  trailing: Padding(
-                    padding: const EdgeInsets.only(right: 15),
-                    child: Builder(
-                      builder: (context) => InkWell(
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/search-page');
-                        },
-                        child: Icon(
-                          Icons.search,
-                          color: MyColors.accentColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                alignment: Alignment.topCenter,
-              )),
-            ],
+                  alignment: Alignment.topCenter,
+                )),
+              ],
+            ),
           ),
+          floatingActionButton:
+              _page == 3 && (_favourites.length + _boughtSongs.length) > 1
+                  ? FloatingActionButton(
+                      child: Icon(Icons.playlist_play),
+                      onPressed: () {
+                        if (_favourites.isEmpty) {
+                          return;
+                        }
+                        setState(() {
+                          musicPlayer = LocalMusicPlayer(
+                            melodyList: [..._boughtSongs, ..._favourites],
+                            backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                            initialDuration: 0,
+                          );
+                          _isPlaying = true;
+                        });
+                      },
+                    )
+                  : null,
         ),
-        floatingActionButton:
-            _page == 3 && (_favourites.length + _boughtSongs.length) > 1
-                ? FloatingActionButton(
-                    child: Icon(Icons.playlist_play),
-                    onPressed: () {
-                      if (_favourites.isEmpty) {
-                        return;
-                      }
-                      setState(() {
-                        musicPlayer = LocalMusicPlayer(
-                          melodyList: [..._boughtSongs, ..._favourites],
-                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                          initialDuration: 0,
-                        );
-                        _isPlaying = true;
-                      });
-                    },
-                  )
-                : null,
       ),
     );
   }
@@ -952,7 +958,7 @@ class _HomePageState extends State<HomePage>
               'Update',
               style: TextStyle(color: Colors.white),
             ),
-          )
+          ),
         ],
       ),
     )));
@@ -1035,43 +1041,42 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  Future fetchOffers() async{
+  Future fetchOffers() async {
     final offerings = await PurchaseApi.fetchOffers();
-    if(offerings.isEmpty){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('The app currently has no offers'),));
-    }else {
+    print('fetchOffers.offerings $offerings');
+    if (offerings.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('The app currently has no offers'),
+      ));
+    } else {
       //final offer = offerings.first;
       //print('Offer: $offer');
-      final packages = offerings.map((offer)=> offer.availablePackages).expand((pair) => pair).toList();
-
+      final packages = offerings
+          .map((offer) => offer.availablePackages)
+          .expand((pair) => pair)
+          .toList();
+      _settingModalBottomSheet(packages);
     }
   }
-  validateSubscription(Function showUI) {
-    Constants.currentUser?.exclusiveLastDate == null
-        ? AppUtil.showAlertDialog(
-            context: context,
-            firstFunc: subscribe,
-            firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
-            message: language(
-                ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
-                en: 'Please subscribe in order to listen to exclusives'),
-            secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-            secondFunc: () => Navigator.of(context).pop(),
-          )
-        : DateTime.now().difference(
-                    Constants.currentUser.exclusiveLastDate.toDate()) >
-                Duration(days: 30)
-            ? AppUtil.showAlertDialog(
-                context: context,
-                firstFunc: subscribe,
-                firstBtnText: language(ar: 'تجديد الإشتراك', en: 'Renew'),
-                message: language(
-                    ar: 'من فضلك قم بتجديد الاشتراك لكي تستمع بالحصريات',
-                    en: 'Please renew subscription in order to listen to exclusives'),
-                secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-                secondFunc: () => Navigator.of(context).pop(),
-              )
-            : showUI;
+
+  validateSubscription(Entitlement entitlement, Function showUI) {
+    switch (entitlement) {
+      case Entitlement.exclusives:
+        showUI();
+        return;
+      case Entitlement.free:
+      default:
+      return AppUtil.showAlertDialog(
+        context: context,
+        firstFunc: fetchOffers,
+        firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+        message: language(
+            ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+            en: 'Please subscribe in order to listen to exclusives'),
+        secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+        secondFunc: () => Navigator.of(context).pop(),
+      );
+    }
   }
 
   searchExclusives(String text) async {
@@ -1098,7 +1103,8 @@ class _HomePageState extends State<HomePage>
           return InkWell(
             onLongPress: () => deleteExclusive(_exclusives[index]),
             onTap: () async {
-              validateSubscription(() {
+              print('EntitlementStatus= ${Provider.of<RevenueCatProvider>(context, listen: false).entitlement}');
+              validateSubscription(Provider.of<RevenueCatProvider>(context, listen: false).entitlement, () {
                 setState(() {
                   print('current user2: ${Constants.currentUser}');
                   musicPlayer = LocalMusicPlayer(
@@ -1137,6 +1143,23 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
             ),
+          );
+        });
+  }
+
+  void _settingModalBottomSheet(List packages) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return PaywallWidget(
+            packages: packages,
+            title: '🌟 Subscribe to exclusives',
+            description: 'Get access to Alhani\'s exclusives',
+            onClickedPackage: (package) async {
+              await PurchaseApi.purchasePackage(package);
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
           );
         });
   }
