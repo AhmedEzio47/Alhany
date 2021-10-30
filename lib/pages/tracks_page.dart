@@ -3,14 +3,18 @@ import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/track_model.dart';
+import 'package:Alhany/provider/revenuecat.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
+import 'package:Alhany/services/purchase_api.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
+import 'package:Alhany/widgets/paywall_widget.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
 import '../app_util.dart';
@@ -28,6 +32,7 @@ class _TracksPageState extends State<TracksPage> {
   int _index = 0;
   bool _isPlaying = false;
   bool visible = true ;
+  Track selectedTrack;
 
   loadProgress(){
 
@@ -260,6 +265,7 @@ class _TracksPageState extends State<TracksPage> {
   }
 
   Future<bool> buyTrack(Track track) async {
+    selectedTrack = track;
     await AppUtil.showAlertDialog(
         context: context,
         message: language(
@@ -269,20 +275,9 @@ class _TracksPageState extends State<TracksPage> {
         secondBtnText: language(ar: 'لا', en: 'No'),
         firstFunc: () async {
           loadProgress();
-          final success = await Navigator.of(context).pushNamed('/payment-home',
-              arguments: {'amount': track.price});
-          if (success) {
-            await melodiesRef
-                .doc(widget.song.id)
-                .collection('tracks')
-                .doc(track.id)
-                .update({'owner_id': Constants.currentUserID});
-
-            await downloadTrack();
-            loadProgress();
-            Navigator.of(context).pop();
-            return true;
-          }
+          track.price == 14.99 ? fetchOffers(PurchaseTracks.oneTrackPurchaseID) : fetchOffers(PurchaseTracks.allTracksPurchaseID);
+          //final success = await Navigator.of(context).pushNamed('/payment-home',
+          //    arguments: {'amount': track.price});
         },
         secondFunc: () {
           Navigator.of(context).pop();
@@ -384,5 +379,92 @@ class _TracksPageState extends State<TracksPage> {
       return true; // User has already purchased this melody
     }
     return false;
+  }
+
+  validateInAppPurchase(Entitlement entitlement, Function showUI) {
+    switch (entitlement) {
+      case Entitlement.exclusives:
+        showUI();
+        return;
+      case Entitlement.free:
+      default:
+        return AppUtil.showAlertDialog(
+          context: context,
+          firstFunc: fetchOffers,
+          firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+          message: language(
+              ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+              en: 'Please subscribe in order to listen to exclusives'),
+          secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+          secondFunc: () => Navigator.of(context).pop(),
+        );
+    }
+  }
+
+  Future fetchOffers(String offer) async {
+    final offerings = await PurchaseApi.fetchOffersByIds([offer]);
+    print('fetchOffers.offerings $offerings');
+    if (offerings.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(language(
+            ar: 'هذا العنصر غير متوفر للشراء حالياً',
+            en: 'The app currently has no offers')),
+      ));
+    } else {
+      //final offer = offerings.first;
+      //print('Offer: $offer');
+      final packages = offerings
+          .map((offer) => offer.availablePackages)
+          .expand((pair) => pair)
+          .toList();
+      _settingModalBottomSheet(packages);
+    }
+  }
+
+  void _settingModalBottomSheet(List packages) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return PaywallWidget(
+            packages: packages,
+            title: language(
+                ar: '🌟 امتلك هذا التراك',
+                en: '🌟 Own this track'),
+            description: language(
+                ar: 'احصل على حقوق ملكية استخدام هذا التراك',
+                en: 'Use this track with no copyrights'),
+            onClickedPackage: (package) async {
+              final success = await PurchaseApi.purchasePackage(package);
+              if(success){
+                //final provider = Provider.of<RevenueCatProvider>(context,listen: false);
+                //provider.updateUI();
+                //downloadTrack and enable listening
+                await melodiesRef
+                    .doc(widget.song.id)
+                    .collection('tracks')
+                    .doc(selectedTrack.id)
+                    .update({'owner_id': Constants.currentUserID});
+
+                await downloadTrack();
+                loadProgress();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(language(
+                      ar: 'تمت عملية الشراء بنجاح',
+                      en: 'Purchase success')),
+                ));
+              } else{
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(language(
+                      ar: 'لم تتم عملية الشراء',
+                      en: 'Purchase Failed')),
+                ));
+              }
+              Future.delayed(Duration(milliseconds: 1000), () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              });
+            },
+          );
+        });
   }
 }
