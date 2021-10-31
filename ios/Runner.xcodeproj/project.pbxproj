@@ -16,6 +16,7 @@
 		9AF23B3725BF935B007FC472 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AF23B3625BF935B007FC472 /* NetworkExtension.framework */; };
 		FCE35F8DBB5475C7BC1A8C8D /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E3884444A2208D98A5F4FC5 /* Pods_Runner.framework */; };
 		FD63DA2826278F4E005A1C08 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FD63DA2726278F4E005A1C08 /* GoogleService-Info.plist */; };
+		FDF6D8B7272ACDFA00D94D73 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF6D8B6272ACDFA00D94D73 /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -53,6 +54,7 @@
 		9E3884444A2208D98A5F4FC5 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD63DA2726278F4E005A1C08 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FDD3B55E26AB7DA300E94CD3 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		FDF6D8B6272ACDFA00D94D73 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDF6D8B7272ACDFA00D94D73 /* StoreKit.framework in Frameworks */,
 				9AF23B3725BF935B007FC472 /* NetworkExtension.framework in Frameworks */,
 				FCE35F8DBB5475C7BC1A8C8D /* Pods_Runner.framework in Frameworks */,
 			);
@@ -71,6 +74,7 @@
 		54FE31E4555C2BF2DF33E7D4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FDF6D8B6272ACDFA00D94D73 /* StoreKit.framework */,
 				9AF23B3625BF935B007FC472 /* NetworkExtension.framework */,
 				9E3884444A2208D98A5F4FC5 /* Pods_Runner.framework */,
 			);
@@ -388,7 +392,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = CGYHXY7VCP;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -533,7 +537,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/RunnerDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = CGYHXY7VCP;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -569,7 +573,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = CGYHXY7VCP;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
