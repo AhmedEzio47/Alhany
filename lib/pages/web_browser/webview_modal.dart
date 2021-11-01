@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
@@ -33,7 +34,7 @@ class WebViewModal extends ModalRoute<void> {
   ) {
     // This makes sure that text and other content follows the material style
     return Material(
-      type: MaterialType.transparency,
+      type: MaterialType.canvas,
       // make sure that the overlay content is not cut off
       child: SafeArea(
         child: _buildOverlayContent(context),
@@ -54,6 +55,12 @@ class WebViewModal extends ModalRoute<void> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
+        Container(
+          child: RegularAppbar(
+            context,
+            color: Colors.black,
+          ),
+        ),
         Flexible(
             flex: 5,
             child: Stack(

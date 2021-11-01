@@ -166,12 +166,16 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   }
 
   Future<bool> checkPrice() async {
-    if (!(widget.isMelody) && (double.parse(widget.melodyList[index].price) ?? 0) == 0) {
-      print('Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].price} ');
+    if (!(widget.isMelody) &&
+        (double.parse(widget.melodyList[index].price) ?? 0) == 0) {
+      print(
+          'Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].price} ');
       _isBought = true;
       return true;
-    } else if (widget.isMelody && (double.parse(widget.melodyList[index].melodyPrice) ?? 0) == 0) {
-      print('Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].melodyPrice} ');
+    } else if (widget.isMelody &&
+        (double.parse(widget.melodyList[index].melodyPrice) ?? 0) == 0) {
+      print(
+          'Melody: ${widget.isMelody}, Price: ${widget.melodyList[index].melodyPrice} ');
       _isBought = true;
       return true;
     } else if ((Constants.currentUser?.boughtSongs ?? [])
@@ -186,7 +190,6 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   Future play() async {
     print('_isBought: $_isBought');
     if (_isBought || !widget.checkPrice) {
-
       myAudioPlayer.play();
     } else {
       AppUtil.executeFunctionIfLoggedIn(context, () async {
@@ -300,7 +303,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
                           style: TextStyle(color: MyColors.textLightColor),
                         )
                       : Text(
-                          '${_numberFormatter.format(widget.initialDuration ?? 0 ~/ 60)}:${_numberFormatter.format(widget.initialDuration ?? 0 % 60)}',
+                          '${_numberFormatter.format(0)}:${_numberFormatter.format(0)}',
                           style: TextStyle(color: MyColors.textLightColor),
                         ),
                   SizedBox(
@@ -439,55 +442,78 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   }
 
   Widget playPauseBtn() {
-    return !isPlaying
-        ? InkWell(
-            onTap: () => isPlaying ? null : play(),
-            child: Container(
-              height: widget.btnSize,
-              width: widget.btnSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.play_arrow,
-                size: widget.btnSize - 5,
+    return myAudioPlayer.duration == null
+        ? Container(
+            height: widget.btnSize,
+            width: widget.btnSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey.shade300,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black54,
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: Offset(0, 2), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(
                 color: MyColors.primaryColor,
               ),
             ),
           )
-        : InkWell(
-            onTap: isPlaying ? () => pause() : null,
-            child: Container(
-              height: widget.btnSize,
-              width: widget.btnSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade300,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2), // changes position of shadow
+        : !isPlaying
+            ? InkWell(
+                onTap: () => isPlaying ? null : play(),
+                child: Container(
+                  height: widget.btnSize,
+                  width: widget.btnSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade300,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black54,
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Icon(
-                Icons.pause,
-                color: MyColors.primaryColor,
-                size: widget.btnSize - 5,
-              ),
-            ),
-          );
+                  child: Icon(
+                    Icons.play_arrow,
+                    size: widget.btnSize - 5,
+                    color: MyColors.primaryColor,
+                  ),
+                ),
+              )
+            : InkWell(
+                onTap: isPlaying ? () => pause() : null,
+                child: Container(
+                  height: widget.btnSize,
+                  width: widget.btnSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade300,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black54,
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.pause,
+                    color: MyColors.primaryColor,
+                    size: widget.btnSize - 5,
+                  ),
+                ),
+              );
   }
 
   Widget favouriteBtn() {
