@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage>
                               });
                               _pageController.animateToPage(
                                 index,
-                                duration: Duration(milliseconds: 800),
+                                duration: Duration(milliseconds: 200),
                                 curve: Curves.easeOut,
                               );
                             },
@@ -1042,25 +1042,7 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  Future fetchOffers() async {
-    final offerings = await PurchaseApi.fetchOffers(all: false);
-    print('fetchOffers.offerings $offerings');
-    if (offerings.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(language(
-            ar: 'هذا العنصر غير متوفر للشراء حالياً',
-            en: 'The app currently has no offers')),
-      ));
-    } else {
-      //final offer = offerings.first;
-      //print('Offer: $offer');
-      final packages = offerings
-          .map((offer) => offer.availablePackages)
-          .expand((pair) => pair)
-          .toList();
-      _settingModalBottomSheet(packages);
-    }
-  }
+
 
   validateSubscription(Entitlement entitlement, Function showUI) {
     switch (entitlement) {
@@ -1146,45 +1128,6 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
             ),
-          );
-        });
-  }
-
-  void _settingModalBottomSheet(List packages) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return PaywallWidget(
-            packages: packages,
-            title: language(
-                ar: '🌟 الاشتراك في الحصريات',
-                en: '🌟 Subscribe to exclusives'),
-            description: language(
-                ar: 'احصل على صلاحية الإستماع لحصريات ألحاني',
-                en: 'Get access to Alhani\'s exclusives'),
-            onClickedPackage: (package) async {
-              final success = await PurchaseApi.purchasePackage(package);
-              if(success){
-                await usersRef
-                    .doc(Constants.currentUserID)
-                    .update({'exclusive_last_date': FieldValue.serverTimestamp()});
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(language(
-                      ar: 'تمت عملية الشراء بنجاح',
-                      en: 'Purchase success')),
-                ));
-              }else{
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(language(
-                      ar: 'لم تتم عملية الشراء',
-                      en: 'Purchase Failed')),
-                ));
-              }
-              Future.delayed(Duration(milliseconds: 1000), () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              });
-            },
           );
         });
   }
