@@ -13,7 +13,6 @@ import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/provider/revenuecat.dart';
 import 'package:Alhany/services/database_service.dart';
 import 'package:Alhany/services/permissions_service.dart';
-import 'package:Alhany/services/purchase_api.dart';
 import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
 import 'package:Alhany/widgets/cached_image.dart';
@@ -22,7 +21,6 @@ import 'package:Alhany/widgets/drawer.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/record_item.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
-import 'package:Alhany/widgets/paywall_widget.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +45,7 @@ class _HomePageState extends State<HomePage>
   bool _isSearching = false;
   List<Melody> _filteredexclusives = [];
   bool _isPlaying = false;
+  List<Singer> _singers = [];
 
   PageController _pageController;
 
@@ -141,7 +140,7 @@ class _HomePageState extends State<HomePage>
                                 _songsPage(),
                                 _melodiesPage(),
                                 _recordsPage(),
-                                _favouritesPage()
+                                _exclusivesPage()
                               ],
                             ),
                           ),
@@ -203,25 +202,25 @@ class _HomePageState extends State<HomePage>
               ],
             ),
           ),
-          floatingActionButton:
-              _page == 3 && (_favourites.length + _boughtSongs.length) > 1
-                  ? FloatingActionButton(
-                      child: Icon(Icons.playlist_play),
-                      onPressed: () {
-                        if (_favourites.isEmpty) {
-                          return;
-                        }
-                        setState(() {
-                          musicPlayer = LocalMusicPlayer(
-                            melodyList: [..._boughtSongs, ..._favourites],
-                            backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                            initialDuration: 0,
-                          );
-                          _isPlaying = true;
-                        });
-                      },
-                    )
-                  : null,
+          // floatingActionButton:
+          //     _page == 3 && (_favourites.length + _boughtSongs.length) > 1
+          //         ? FloatingActionButton(
+          //             child: Icon(Icons.playlist_play),
+          //             onPressed: () {
+          //               if (_favourites.isEmpty) {
+          //                 return;
+          //               }
+          //               setState(() {
+          //                 musicPlayer = LocalMusicPlayer(
+          //                   melodyList: [..._boughtSongs, ..._favourites],
+          //                   backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+          //                   initialDuration: 0,
+          //                 );
+          //                 _isPlaying = true;
+          //               });
+          //             },
+          //           )
+          //         : null,
         ),
       ),
     );
@@ -447,7 +446,6 @@ class _HomePageState extends State<HomePage>
         });
   }
 
-  List<Singer> _singers = [];
   getSingers() async {
     List<Singer> singers = await DatabaseService.getSingersHaveMelodies();
     if (mounted) {
@@ -693,16 +691,16 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  List<Melody> _favourites = [];
+  //List<Melody> _favourites = [];
   List<Melody> _boughtSongs = [];
-  getFavourites() async {
-    List<Melody> favourites = await DatabaseService.getFavourites();
-    if (mounted) {
-      setState(() {
-        _favourites = favourites;
-      });
-    }
-  }
+  // getFavourites() async {
+  //   List<Melody> favourites = await DatabaseService.getFavourites();
+  //   if (mounted) {
+  //     setState(() {
+  //       _favourites = favourites;
+  //     });
+  //   }
+  // }
 
   getBoughtSongs() async {
     if (Constants.currentUser == null) return;
@@ -715,7 +713,7 @@ class _HomePageState extends State<HomePage>
   }
 
   ScrollController _favScrollController = ScrollController();
-  _favouritesPage() {
+  _exclusivesPage() {
     return CustomScrollView(
       controller: _favScrollController,
       slivers: [
