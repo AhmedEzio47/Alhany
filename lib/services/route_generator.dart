@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/routes.dart';
 import 'package:Alhany/pages/add_singer.dart';
 import 'package:Alhany/pages/app_page.dart';
 import 'package:Alhany/pages/category_page.dart';
@@ -7,6 +8,7 @@ import 'package:Alhany/pages/comment_page.dart';
 import 'package:Alhany/pages/conversation.dart';
 import 'package:Alhany/pages/downloads.dart';
 import 'package:Alhany/pages/email_change.dart';
+import 'package:Alhany/pages/iap_details.dart';
 import 'package:Alhany/pages/lyrics_editor.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:Alhany/pages/news_page.dart';
@@ -169,6 +171,9 @@ class RouteGenerator {
 
       case '/password-change':
         return MaterialPageRoute(builder: (_) => PasswordChangePage());
+
+      case Routes.IAPDetails:
+        return MaterialPageRoute(builder: (_) => IAPDetails());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

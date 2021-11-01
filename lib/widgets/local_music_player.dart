@@ -134,6 +134,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   @override
   void dispose() {
     myAudioPlayer.stop();
+    myAudioPlayer.dispose();
     super.dispose();
   }
 

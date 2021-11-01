@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/routes.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/category_model.dart';
@@ -1070,7 +1071,7 @@ class _HomePageState extends State<HomePage>
       default:
       return AppUtil.showAlertDialog(
         context: context,
-        firstFunc: fetchOffers,
+        firstFunc: () => Navigator.of(context).pushNamed(Routes.IAPDetails),
         firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
         message: language(
             ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
