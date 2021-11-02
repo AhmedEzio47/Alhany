@@ -1,6 +1,7 @@
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/routes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/pages/web_browser/webview_modal.dart';
 import 'package:Alhany/services/purchase_api.dart';
@@ -188,9 +189,10 @@ class _IAPDetailsState extends State<IAPDetails> {
                 ));
               }
               Future.delayed(Duration(milliseconds: 1000), () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacementNamed(Routes.homePage,
+                    arguments: {
+                      'selectedPage': 3,
+                    });
               });
             },
           );

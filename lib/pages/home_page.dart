@@ -33,6 +33,9 @@ import '../app_util.dart';
 import 'singer_page.dart';
 
 class HomePage extends StatefulWidget {
+  final int selectedPage;
+
+  const HomePage({Key key, this.selectedPage = 0}) : super(key: key);
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -801,7 +804,7 @@ class _HomePageState extends State<HomePage>
     _pageController = PageController(
       initialPage: 0,
     );
-    _tabController = TabController(vsync: this, length: 4, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 4, initialIndex: widget.selectedPage);
     _exclusivesScrollController
       ..addListener(() {
         if (_exclusivesScrollController.offset >=

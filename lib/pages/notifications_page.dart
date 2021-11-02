@@ -1,4 +1,5 @@
 import 'package:Alhany/constants/colors.dart';
+import 'package:Alhany/constants/routes.dart';
 import 'package:Alhany/constants/sizes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/notification_model.dart' as notification_model;
@@ -171,6 +172,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
-    Navigator.of(context).pushReplacementNamed('/home');
+    return Navigator.of(context).pushReplacementNamed(Routes.homePage);
   }
 }

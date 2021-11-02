@@ -8,6 +8,7 @@ import 'package:Alhany/pages/comment_page.dart';
 import 'package:Alhany/pages/conversation.dart';
 import 'package:Alhany/pages/downloads.dart';
 import 'package:Alhany/pages/email_change.dart';
+import 'package:Alhany/pages/home_page.dart';
 import 'package:Alhany/pages/iap_details.dart';
 import 'package:Alhany/pages/lyrics_editor.dart';
 import 'package:Alhany/pages/melody_page.dart';
@@ -42,6 +43,12 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => RootPage());
 
+      case Routes.homePage:
+        Constants.currentRoute = settings.name;
+        return MaterialPageRoute(
+            builder: (_) => HomePage(
+              selectedPage: args['selectedPage'],
+            ));
       case '/app-page':
         return MaterialPageRoute(builder: (_) => AppPage());
 
