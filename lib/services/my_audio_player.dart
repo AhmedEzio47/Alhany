@@ -1,6 +1,8 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:rxdart/rxdart.dart';
+
 //import 'package:audioplayers/audio_cache.dart';
 //import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
@@ -37,15 +39,6 @@ class MyAudioPlayer with ChangeNotifier {
     //advancedPlayer = AudioPlayer();
     //audioCache = AudioCache(fixedPlayer: advancedPlayer);
 
-    // Inform the operating system of our app's audio attributes etc.
-    // We pick a reasonable default for an app that plays speech.
-    final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration.speech());
-    // Listen to errors during playback.
-    _player.playbackEventStream.listen((event) {},
-        onError: (Object e, StackTrace stackTrace) {
-          print('A stream error occurred: $e');
-        });
     // Try to load audio from a source and catch any errors.
     try {
       await _player.setAudioSource(AudioSource.uri(Uri.parse(
@@ -66,8 +59,8 @@ class MyAudioPlayer with ChangeNotifier {
         }
       }
       position = p;
-      print('P:${p.inMilliseconds}');
-      print('D:${duration.inMilliseconds}');
+      //print('P:${p.inMilliseconds}');
+      //print('D:${duration.inMilliseconds}');
       notifyListeners();
 
       if (duration.inMilliseconds - p.inMilliseconds <
