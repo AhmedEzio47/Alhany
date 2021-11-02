@@ -4,9 +4,11 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SongsPage extends StatefulWidget {
   final Singer singer;
@@ -94,13 +96,16 @@ class _SongsPageState extends State<SongsPage> {
                               // }
 
                               setState(() {
-                                musicPlayer = LocalMusicPlayer(
-                                  melodyList: [
-                                    Melody(songUrl: _songs[index].songUrl)
-                                  ],
-                                  backColor: MyColors.lightPrimaryColor,
-                                  title: _songs[index].name,
-                                  initialDuration: _songs[index].duration,
+                                musicPlayer = ChangeNotifierProvider(
+                                  create: (context) => MyAudioPlayer(),
+                                  child: LocalMusicPlayer(
+                                    melodyList: [
+                                      Melody(songUrl: _songs[index].songUrl)
+                                    ],
+                                    backColor: MyColors.lightPrimaryColor,
+                                    title: _songs[index].name,
+                                    initialDuration: _songs[index].duration,
+                                  ),
                                 );
                                 _isPlaying = true;
                               });

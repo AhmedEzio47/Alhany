@@ -27,6 +27,7 @@ import 'package:path/path.dart' as path;
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pip_view/pip_view.dart';
+import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
 import 'package:screen/screen.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -231,7 +232,8 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      mySoundsPlayer = MyAudioPlayer(
+      mySoundsPlayer = MyAudioPlayer();
+      mySoundsPlayer.initAudioPlayer(
           urlList: [melodyPath],
           onComplete: saveRecord,
           isLocal: true,
@@ -325,7 +327,8 @@ class _MelodyPageState extends State<MelodyPage> {
       } else {
         url = widget.melody.levelUrls.values.elementAt(0).toString();
       }
-      mySoundsPlayer = MyAudioPlayer(
+      mySoundsPlayer = MyAudioPlayer();
+      mySoundsPlayer.initAudioPlayer(
           urlList: [melodyPath], onComplete: saveRecord, isLocal: true);
       mySoundsPlayer.addListener(() {});
 
@@ -582,21 +585,24 @@ class _MelodyPageState extends State<MelodyPage> {
 
     if (_type == Types.AUDIO) {
       // await AudioService.stop();
-      melodyPlayer = LocalMusicPlayer(
-        isMelody: true,
-        checkPrice: false,
-        key: ValueKey('preview'),
-        melodyList: [
-          Melody(
-              melodyUrl: mergedFilePath,
-              name: 'Preview',
-              singer: 'Preview',
-              imageUrl: Strings.default_melody_image,
-              duration: duration)
-        ],
-        isLocal: true,
-        backColor: MyColors.primaryColor,
-        initialDuration: duration,
+      melodyPlayer = ChangeNotifierProvider(
+        create: (context) => MyAudioPlayer(),
+        child: LocalMusicPlayer(
+          isMelody: true,
+          checkPrice: false,
+          key: ValueKey('preview'),
+          melodyList: [
+            Melody(
+                melodyUrl: mergedFilePath,
+                name: 'Preview',
+                singer: 'Preview',
+                imageUrl: Strings.default_melody_image,
+                duration: duration)
+          ],
+          isLocal: true,
+          backColor: MyColors.primaryColor,
+          initialDuration: duration,
+        ),
       );
     } else {
       await initVideoPlayer();
@@ -875,15 +881,18 @@ class _MelodyPageState extends State<MelodyPage> {
 
   initMelodyPlayer(String url) async {
     setState(() {
-      melodyPlayer = new LocalMusicPlayer(
-        checkPrice: true,
-        isMelody: true,
-        onBuy: () => Melody.buySong(context, widget.melody, isMelody: true),
-        key: ValueKey('main'),
-        isRecordBtnVisible: false,
-        backColor: Colors.transparent,
-        initialDuration: widget.melody.melodyDuration,
-        melodyList: [widget.melody],
+      melodyPlayer = ChangeNotifierProvider(
+        create: (context) => MyAudioPlayer(),
+        child: new LocalMusicPlayer(
+          checkPrice: true,
+          isMelody: true,
+          onBuy: () => Melody.buySong(context, widget.melody, isMelody: true),
+          key: ValueKey('main'),
+          isRecordBtnVisible: false,
+          backColor: Colors.transparent,
+          initialDuration: widget.melody.melodyDuration,
+          melodyList: [widget.melody],
+        ),
       );
     });
   }
@@ -913,8 +922,9 @@ class _MelodyPageState extends State<MelodyPage> {
                   ? FloatingActionButton(
                       onPressed: () async {
                         bool _canUseThisMelody = await hasPurchasedThisMelody();
-                        if(!_canUseThisMelody){
-                          Melody.buySong(context, widget.melody, isMelody: true);
+                        if (!_canUseThisMelody) {
+                          Melody.buySong(context, widget.melody,
+                              isMelody: true);
                           return;
                         }
                         print('FAB TAPPED!');

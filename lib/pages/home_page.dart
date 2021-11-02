@@ -12,6 +12,7 @@ import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/song_page.dart';
 import 'package:Alhany/provider/revenuecat.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/remote_config_service.dart';
 import 'package:Alhany/services/sqlite_service.dart';
@@ -53,7 +54,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -616,13 +616,16 @@ class _HomePageState extends State<HomePage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = LocalMusicPlayer(
-                    key: ValueKey(_melodies[index].id),
-                    melodyList: [_melodies[index]],
-                    backColor: MyColors.lightPrimaryColor,
-                    title: _melodies[index].name,
-                    initialDuration: _melodies[index].duration,
-                    isRecordBtnVisible: true,
+                  musicPlayer = ChangeNotifierProvider(
+                    create: (context) => MyAudioPlayer(),
+                    child: LocalMusicPlayer(
+                      key: ValueKey(_melodies[index].id),
+                      melodyList: [_melodies[index]],
+                      backColor: MyColors.lightPrimaryColor,
+                      title: _melodies[index].name,
+                      initialDuration: _melodies[index].duration,
+                      isRecordBtnVisible: true,
+                    ),
                   );
                   _isPlaying = true;
                 });
@@ -1023,8 +1026,6 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-
-
   validateSubscription(Entitlement entitlement, Function showUI) {
     switch (entitlement) {
       case Entitlement.exclusives:
@@ -1032,16 +1033,16 @@ class _HomePageState extends State<HomePage>
         return;
       case Entitlement.free:
       default:
-      return AppUtil.showAlertDialog(
-        context: context,
-        firstFunc: () => Navigator.of(context).pushNamed(Routes.IAPDetails),
-        firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
-        message: language(
-            ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
-            en: 'Please subscribe in order to listen to exclusives'),
-        secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
-        secondFunc: () => Navigator.of(context).pop(),
-      );
+        return AppUtil.showAlertDialog(
+          context: context,
+          firstFunc: () => Navigator.of(context).pushNamed(Routes.IAPDetails),
+          firstBtnText: language(ar: 'اشتراك', en: 'Subscribe'),
+          message: language(
+              ar: 'من فضلك قم بالاشتراك لكي تستمع للحصريات',
+              en: 'Please subscribe in order to listen to exclusives'),
+          secondBtnText: language(ar: 'إلغاء', en: 'Cancel'),
+          secondFunc: () => Navigator.of(context).pop(),
+        );
     }
   }
 
@@ -1073,15 +1074,18 @@ class _HomePageState extends State<HomePage>
               validateSubscription(RevenueCatProvider().entitlement, () {
                 setState(() {
                   print('current user2: ${Constants.currentUser}');
-                  musicPlayer = LocalMusicPlayer(
-                    checkPrice: false,
-                    key: ValueKey(_exclusives[index].id),
-                    backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                    title: _exclusives[index].name,
-                    btnSize: 30,
-                    initialDuration: _exclusives[index].duration,
-                    melodyList: [_exclusives[index]],
-                    isRecordBtnVisible: true,
+                  musicPlayer = ChangeNotifierProvider(
+                    create: (context) => MyAudioPlayer(),
+                    child: LocalMusicPlayer(
+                      checkPrice: false,
+                      key: ValueKey(_exclusives[index].id),
+                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                      title: _exclusives[index].name,
+                      btnSize: 30,
+                      initialDuration: _exclusives[index].duration,
+                      melodyList: [_exclusives[index]],
+                      isRecordBtnVisible: true,
+                    ),
                   );
                   _isPlaying = true;
                 });

@@ -1,8 +1,5 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
-import 'package:audio_session/audio_session.dart';
-import 'package:rxdart/rxdart.dart';
-
 //import 'package:audioplayers/audio_cache.dart';
 //import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,31 +15,25 @@ class MyAudioPlayer with ChangeNotifier {
 
   Duration duration;
   Duration position;
-  final List<String> urlList;
-  final Function onComplete;
-  final Function onPlayingStarted;
-  final bool isLocal;
-
-  MyAudioPlayer(
-      {this.urlList,
-      this.isLocal = false,
-      this.onComplete,
-      this.onPlayingStarted}) {
-    initAudioPlayer();
-  }
+  List<String> urlList;
+  Function onComplete;
+  Function onPlayingStarted;
+  bool isLocal;
 
   int index = 0;
 
   bool onPlayingStartedCalled = false;
 
-  initAudioPlayer() async {
-    //advancedPlayer = AudioPlayer();
-    //audioCache = AudioCache(fixedPlayer: advancedPlayer);
+  initAudioPlayer(
+      {urlList, isLocal = false, onComplete, onPlayingStarted}) async {
+    this.urlList = urlList;
+    this.isLocal = isLocal;
+    this.onComplete = onComplete;
+    this.onPlayingStarted = onPlayingStarted;
 
     // Try to load audio from a source and catch any errors.
     try {
-      await _player.setAudioSource(AudioSource.uri(Uri.parse(
-          urlList[index])));
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(urlList[index])));
     } catch (e) {
       print("Error loading audio source: $e");
     }
@@ -110,6 +101,7 @@ class MyAudioPlayer with ChangeNotifier {
     // position = null;
     // duration = null;
     notifyListeners();
+
     if (onComplete != null &&
         MelodyPage.recordingStatus == RecordingStatus.Recording) {
       onComplete();
@@ -133,6 +125,7 @@ class MyAudioPlayer with ChangeNotifier {
     else
       this.index = 0;
     notifyListeners();
+
     play(index: this.index);
   }
 
@@ -143,6 +136,24 @@ class MyAudioPlayer with ChangeNotifier {
     else
       this.index = urlList.length - 1;
     notifyListeners();
+
     play(index: this.index);
+  }
+
+  bool _mounted = true;
+
+  @override
+  void dispose() {
+    _mounted = false;
+    pause();
+    seek(Duration.zero);
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (_mounted) {
+      super.notifyListeners();
+    }
   }
 }

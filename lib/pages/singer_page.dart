@@ -7,6 +7,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_modal.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
@@ -15,6 +16,7 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 
 enum DataTypes { SONGS, MELODIES }
 
@@ -143,14 +145,17 @@ class _SingerPageState extends State<SingerPage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = LocalMusicPlayer(
-                    checkPrice: true,
-                    onBuy: () => Melody.buySong(context, _songs[index]),
-                    key: ValueKey(_songs[index].id),
-                    melodyList: [_songs[index]],
-                    backColor: MyColors.lightPrimaryColor,
-                    title: _songs[index].name,
-                    initialDuration: _songs[index].duration,
+                  musicPlayer = ChangeNotifierProvider(
+                    create: (context) => MyAudioPlayer(),
+                    child: LocalMusicPlayer(
+                      checkPrice: true,
+                      onBuy: () => Melody.buySong(context, _songs[index]),
+                      key: ValueKey(_songs[index].id),
+                      melodyList: [_songs[index]],
+                      backColor: MyColors.lightPrimaryColor,
+                      title: _songs[index].name,
+                      initialDuration: _songs[index].duration,
+                    ),
                   );
                   _isPlaying = true;
                 });
@@ -182,14 +187,17 @@ class _SingerPageState extends State<SingerPage>
             return InkWell(
               onTap: () async {
                 setState(() {
-                  musicPlayer = LocalMusicPlayer(
-                    checkPrice: true,
-                    key: ValueKey(_melodies[index].id),
-                    melodyList: [_melodies[index]],
-                    backColor: MyColors.lightPrimaryColor,
-                    title: _melodies[index].name,
-                    initialDuration: _melodies[index].duration,
-                    isRecordBtnVisible: true,
+                  musicPlayer = ChangeNotifierProvider(
+                    create: (context) => MyAudioPlayer(),
+                    child: LocalMusicPlayer(
+                      checkPrice: true,
+                      key: ValueKey(_melodies[index].id),
+                      melodyList: [_melodies[index]],
+                      backColor: MyColors.lightPrimaryColor,
+                      title: _melodies[index].name,
+                      initialDuration: _melodies[index].duration,
+                      isRecordBtnVisible: true,
+                    ),
                   );
                   _isPlaying = true;
                 });
@@ -533,5 +541,10 @@ class _SingerPageState extends State<SingerPage>
         secondFunc: () {
           Navigator.of(context).pop();
         });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

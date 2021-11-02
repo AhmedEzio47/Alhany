@@ -5,6 +5,7 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/track_model.dart';
 import 'package:Alhany/provider/revenuecat.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/permissions_service.dart';
 import 'package:Alhany/services/purchase_api.dart';
 import 'package:Alhany/services/sqlite_service.dart';
@@ -15,7 +16,6 @@ import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stripe_payment/stripe_payment.dart';
 
 import '../app_util.dart';
 
@@ -31,22 +31,19 @@ class _TracksPageState extends State<TracksPage> {
   List<Track> _tracks = [];
   int _index = 0;
   bool _isPlaying = false;
-  bool visible = true ;
+  bool visible = true;
   Track selectedTrack;
 
-  loadProgress(){
-
-    if(visible == true){
+  loadProgress() {
+    if (visible == true) {
       setState(() {
         visible = false;
       });
-    }
-    else{
+    } else {
       setState(() {
         visible = true;
       });
     }
-
   }
 
   getTracks() async {
@@ -75,9 +72,7 @@ class _TracksPageState extends State<TracksPage> {
                 visible: visible,
                 child: Container(
                     margin: EdgeInsets.only(top: 50, bottom: 30),
-                    child: CircularProgressIndicator()
-                )
-            ),
+                    child: CircularProgressIndicator())),
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -159,31 +154,35 @@ class _TracksPageState extends State<TracksPage> {
                       child: ListView.builder(
                           itemCount: _tracks.length,
                           itemBuilder: (context, index) {
-                            if(_tracks[index].duration != 0 && _tracks[index].ownerId == null ||
+                            if (_tracks[index].duration != 0 &&
+                                    _tracks[index].ownerId == null ||
                                 _tracks[index].ownerId ==
-                                    Constants.currentUserID){
+                                    Constants.currentUserID) {
                               return ListTile(
                                 onTap: () async {
                                   _index = index;
                                   setState(() {
-                                    musicPlayer = LocalMusicPlayer(
-                                      showFavBtn: false,
-                                      onDownload: () => buyTrack(_tracks[index]),
-                                      checkPrice: false,
-                                      key: ValueKey(_tracks[index].id),
-                                      melodyList: [
-                                        Melody(
-                                            price:
-                                            _tracks[index].price ?? '0',
-                                            name: _tracks[index].name,
-                                            duration:
+                                    musicPlayer = ChangeNotifierProvider(
+                                      create: (context) => MyAudioPlayer(),
+                                      child: LocalMusicPlayer(
+                                        showFavBtn: false,
+                                        onDownload: () =>
+                                            buyTrack(_tracks[index]),
+                                        checkPrice: false,
+                                        key: ValueKey(_tracks[index].id),
+                                        melodyList: [
+                                          Melody(
+                                              price:
+                                                  _tracks[index].price ?? '0',
+                                              name: _tracks[index].name,
+                                              duration: _tracks[index].duration,
+                                              songUrl: _tracks[index].audio)
+                                        ],
+                                        backColor: MyColors.lightPrimaryColor,
+                                        title: _tracks[index].name,
+                                        initialDuration:
                                             _tracks[index].duration,
-                                            songUrl: _tracks[index].audio)
-                                      ],
-                                      backColor: MyColors.lightPrimaryColor,
-                                      title: _tracks[index].name,
-                                      initialDuration:
-                                      _tracks[index].duration,
+                                      ),
                                     );
                                     _isPlaying = true;
                                   });
@@ -191,8 +190,8 @@ class _TracksPageState extends State<TracksPage> {
                                 tileColor: Colors.white.withOpacity(.5),
                                 title: Text(
                                   _tracks[index].name,
-                                  style: TextStyle(
-                                      color: MyColors.textLightColor),
+                                  style:
+                                      TextStyle(color: MyColors.textLightColor),
                                 ),
                                 leading: CachedImage(
                                   height: 50,
@@ -200,23 +199,26 @@ class _TracksPageState extends State<TracksPage> {
                                   imageShape: BoxShape.rectangle,
                                   imageUrl: _tracks[index].image,
                                   defaultAssetImage:
-                                  Strings.default_melody_image,
+                                      Strings.default_melody_image,
                                 ),
                                 trailing: Text(
                                   '${_tracks[index].price} \$',
-                                  style: TextStyle(
-                                      color: MyColors.textLightColor),
+                                  style:
+                                      TextStyle(color: MyColors.textLightColor),
                                 ),
                               );
-                            }else if(_tracks[index].duration == 0 && _tracks[index].ownerId == null ||
+                            } else if (_tracks[index].duration == 0 &&
+                                    _tracks[index].ownerId == null ||
                                 _tracks[index].ownerId ==
-                                    Constants.currentUserID){
+                                    Constants.currentUserID) {
                               print('we are here!');
                               return ListTile(
                                 onTap: () async {
                                   _index = index;
-                                  bool _canUseThisTrack = await hasPurchasedThisTrack(_tracks[index]);
-                                  if(!_canUseThisTrack){
+                                  bool _canUseThisTrack =
+                                      await hasPurchasedThisTrack(
+                                          _tracks[index]);
+                                  if (!_canUseThisTrack) {
                                     buyTrack(_tracks[index]);
                                     return;
                                   }
@@ -224,8 +226,8 @@ class _TracksPageState extends State<TracksPage> {
                                 tileColor: Colors.white.withOpacity(.5),
                                 title: Text(
                                   _tracks[index].name,
-                                  style: TextStyle(
-                                      color: MyColors.textLightColor),
+                                  style:
+                                      TextStyle(color: MyColors.textLightColor),
                                 ),
                                 leading: CachedImage(
                                   height: 50,
@@ -233,15 +235,16 @@ class _TracksPageState extends State<TracksPage> {
                                   imageShape: BoxShape.rectangle,
                                   imageUrl: _tracks[index].image,
                                   defaultAssetImage:
-                                  Strings.default_melody_image,
+                                      Strings.default_melody_image,
                                 ),
                                 trailing: Text(
                                   '${_tracks[index].price} \$',
-                                  style: TextStyle(
-                                      color: MyColors.textLightColor),
+                                  style:
+                                      TextStyle(color: MyColors.textLightColor),
                                 ),
                               );
-                            }return Container();
+                            }
+                            return Container();
                           }),
                     )
                   ],
@@ -275,7 +278,9 @@ class _TracksPageState extends State<TracksPage> {
         secondBtnText: language(ar: 'لا', en: 'No'),
         firstFunc: () async {
           loadProgress();
-          track.price == "14.99" ? fetchOffers(PurchaseTracks.oneTrackPurchaseID) : fetchOffers(PurchaseTracks.allTracksPurchaseID);
+          track.price == "14.99"
+              ? fetchOffers(PurchaseTracks.oneTrackPurchaseID)
+              : fetchOffers(PurchaseTracks.allTracksPurchaseID);
           //final success = await Navigator.of(context).pushNamed('/payment-home',
           //    arguments: {'amount': track.price});
         },
@@ -288,55 +293,52 @@ class _TracksPageState extends State<TracksPage> {
   }
 
   Future downloadTrack() async {
-      AppUtil.showLoader(context);
+    AppUtil.showLoader(context);
+    await AppUtil.createAppDirectory();
+    String path;
+
+    if (selectedTrack.audio != null) {
+      if (!(await PermissionsService().hasStoragePermission())) {
+        await PermissionsService().requestStoragePermission(context);
+      }
+      await AppUtil.deleteFiles();
       await AppUtil.createAppDirectory();
-      String path;
+      path = await AppUtil.downloadFile(selectedTrack.audio, toDownloads: true);
+    }
 
-      if (selectedTrack.audio != null) {
-        if (!(await PermissionsService().hasStoragePermission())) {
-          await PermissionsService().requestStoragePermission(context);
-        }
-        await AppUtil.deleteFiles();
-        await AppUtil.createAppDirectory();
-        path = await AppUtil.downloadFile(selectedTrack.audio,
-            toDownloads: true);
-      }
+    Melody melody = Melody(
+        id: selectedTrack.id,
+        duration: selectedTrack.duration,
+        imageUrl: selectedTrack.image,
+        name: selectedTrack.name,
+        songUrl: path);
 
-      Melody melody = Melody(
-          id: selectedTrack.id,
-          duration: selectedTrack.duration,
-          imageUrl: selectedTrack.image,
-          name: selectedTrack.name,
-          songUrl: path);
+    Melody storedMelody = await MelodySqlite.getMelodyWithId(selectedTrack.id);
 
-      Melody storedMelody =
-          await MelodySqlite.getMelodyWithId(selectedTrack.id);
+    if (storedMelody == null) {
+      await MelodySqlite.insert(melody);
 
-      if (storedMelody == null) {
-        await MelodySqlite.insert(melody);
+      await usersRef
+          .doc(Constants.currentUserID)
+          .collection('owned_tracks')
+          .doc(selectedTrack.id)
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
-        await usersRef
-            .doc(Constants.currentUserID)
-            .collection('owned_tracks')
-            .doc(selectedTrack.id)
-            .set({'timestamp': FieldValue.serverTimestamp()});
-
-        Navigator.of(context).pop();
-        AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
-        Navigator.of(context).pushNamed('/downloads');
-      } else {
-        Navigator.of(context).pop();
-        AppUtil.showToast('Already downloaded!');
-        Navigator.of(context).pushNamed('/downloads');
-      }
+      Navigator.of(context).pop();
+      AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
+      Navigator.of(context).pushNamed('/downloads');
+    } else {
+      Navigator.of(context).pop();
+      AppUtil.showToast('Already downloaded!');
+      Navigator.of(context).pushNamed('/downloads');
+    }
   }
 
   Future<bool> hasPurchasedThisTrack(Track track) async {
     if ((double.parse(track.price) ?? 0) == 0) {
       print('Price: ${track.price} ');
       return true; // This melody is FREE to use
-    } else if ((Constants.currentUser?.boughtTracks ?? [])
-        .contains(track.id)) {
+    } else if ((Constants.currentUser?.boughtTracks ?? []).contains(track.id)) {
       return true; // User has already purchased this melody
     }
     return false;
@@ -388,15 +390,13 @@ class _TracksPageState extends State<TracksPage> {
         builder: (BuildContext bc) {
           return PaywallWidget(
             packages: packages,
-            title: language(
-                ar: '🌟 امتلك هذا التراك',
-                en: '🌟 Own this track'),
+            title: language(ar: '🌟 امتلك هذا التراك', en: '🌟 Own this track'),
             description: language(
                 ar: 'احصل على حقوق ملكية استخدام هذا التراك',
                 en: 'Use this track with no copyrights'),
             onClickedPackage: (package) async {
               final success = await PurchaseApi.purchasePackage(package);
-              if(success){
+              if (success) {
                 //final provider = Provider.of<RevenueCatProvider>(context,listen: false);
                 //provider.updateUI();
                 //downloadTrack and enable listening
@@ -419,14 +419,12 @@ class _TracksPageState extends State<TracksPage> {
                 loadProgress();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(language(
-                      ar: 'تمت عملية الشراء بنجاح',
-                      en: 'Purchase success')),
+                      ar: 'تمت عملية الشراء بنجاح', en: 'Purchase success')),
                 ));
-              } else{
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(language(
-                      ar: 'لم تتم عملية الشراء',
-                      en: 'Purchase Failed')),
+                      ar: 'لم تتم عملية الشراء', en: 'Purchase Failed')),
                 ));
               }
               Future.delayed(Duration(milliseconds: 1000), () {

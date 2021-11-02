@@ -6,10 +6,12 @@ import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
 import 'package:Alhany/pages/singer_page.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/widgets/list_items/melody_item.dart';
 import 'package:Alhany/widgets/list_items/singer_item.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -100,17 +102,21 @@ class _SearchPageState extends State<SearchPage> {
                                 onTap: () {
                                   print('are we here?!');
                                   setState(() {
-                                    musicPlayer = LocalMusicPlayer(
-                                      checkPrice: true,
-                                      onBuy: () => Melody.buySong(
-                                          context, _results[index]),
-                                      key: ValueKey(_results[index].id),
-                                      backColor: MyColors.lightPrimaryColor
-                                          .withOpacity(.8),
-                                      title: _results[index].name,
-                                      btnSize: 30,
-                                      initialDuration: _results[index].duration,
-                                      melodyList: [_results[index]],
+                                    musicPlayer = ChangeNotifierProvider(
+                                      create: (context) => MyAudioPlayer(),
+                                      child: LocalMusicPlayer(
+                                        checkPrice: true,
+                                        onBuy: () => Melody.buySong(
+                                            context, _results[index]),
+                                        key: ValueKey(_results[index].id),
+                                        backColor: MyColors.lightPrimaryColor
+                                            .withOpacity(.8),
+                                        title: _results[index].name,
+                                        btnSize: 30,
+                                        initialDuration:
+                                            _results[index].duration,
+                                        melodyList: [_results[index]],
+                                      ),
                                     );
                                     _isPlaying = true;
                                   });

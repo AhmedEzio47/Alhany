@@ -4,10 +4,12 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/pages/tracks_page.dart';
 import 'package:Alhany/pages/upload_track.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
 import 'package:Alhany/widgets/regular_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../app_util.dart';
 import 'melody_page.dart';
@@ -132,13 +134,16 @@ class _SongPageState extends State<SongPage> {
                     SizedBox(
                       height: 25,
                     ),
-                    LocalMusicPlayer(
-                      btnSize: 35,
-                      isCompact: true,
-                      onBuy: () => Melody.buySong(context, widget.song),
-                      playBtnPosition: PlayBtnPosition.left,
-                      initialDuration: widget.song.duration,
-                      melodyList: [widget.song],
+                    ChangeNotifierProvider(
+                      create: (context) => MyAudioPlayer(),
+                      child: LocalMusicPlayer(
+                        btnSize: 35,
+                        isCompact: true,
+                        onBuy: () => Melody.buySong(context, widget.song),
+                        playBtnPosition: PlayBtnPosition.left,
+                        initialDuration: widget.song.duration,
+                        melodyList: [widget.song],
+                      ),
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.width / 4,

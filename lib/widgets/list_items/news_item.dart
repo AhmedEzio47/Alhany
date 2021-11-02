@@ -6,6 +6,7 @@ import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/news_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/services/notification_handler.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/local_music_player.dart';
@@ -15,6 +16,7 @@ import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class NewsItem extends StatefulWidget {
@@ -475,19 +477,22 @@ class _NewsItemState extends State<NewsItem> {
           ],
         );
       case 'audio':
-        return LocalMusicPlayer(
-          melodyList: [
-            Melody(
-              songUrl: _news.contentUrl,
-              singer: Constants.starUser.name,
-              imageUrl: Constants.starUser.profileImageUrl,
-            ),
-          ],
-          backColor: Colors.transparent,
-          btnSize: 26,
-          initialDuration: _news.duration,
-          playBtnPosition: PlayBtnPosition.left,
-          isCompact: true,
+        return ChangeNotifierProvider(
+          create: (context) => MyAudioPlayer(),
+          child: LocalMusicPlayer(
+            melodyList: [
+              Melody(
+                songUrl: _news.contentUrl,
+                singer: Constants.starUser.name,
+                imageUrl: Constants.starUser.profileImageUrl,
+              ),
+            ],
+            backColor: Colors.transparent,
+            btnSize: 26,
+            initialDuration: _news.duration,
+            playBtnPosition: PlayBtnPosition.left,
+            isCompact: true,
+          ),
         );
       case 'image':
         return CachedImage(

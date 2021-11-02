@@ -10,6 +10,7 @@ import 'package:Alhany/models/record_model.dart';
 import 'package:Alhany/models/slide_image.dart';
 import 'package:Alhany/models/user_model.dart';
 import 'package:Alhany/services/database_service.dart';
+import 'package:Alhany/services/my_audio_player.dart';
 import 'package:Alhany/widgets/cached_image.dart';
 import 'package:Alhany/widgets/custom_ovelay.dart';
 import 'package:Alhany/widgets/drawer.dart';
@@ -25,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -639,10 +641,13 @@ class _ProfilePageState extends State<ProfilePage>
                 child: Icon(Icons.playlist_play),
                 onPressed: () {
                   setState(() {
-                    musicPlayer = LocalMusicPlayer(
-                      melodyList: _favourites,
-                      backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-                      initialDuration: 0,
+                    musicPlayer = ChangeNotifierProvider(
+                      create: (context) => MyAudioPlayer(),
+                      child: LocalMusicPlayer(
+                        melodyList: _favourites,
+                        backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                        initialDuration: 0,
+                      ),
                     );
                     _isPlaying = true;
                   });
@@ -742,12 +747,15 @@ class _ProfilePageState extends State<ProfilePage>
                       // if (musicPlayer != null) {
                       //   musicPlayer.stop();
                       // }
-                      musicPlayer = LocalMusicPlayer(
-                        key: ValueKey(_favourites[index].id),
-                        melodyList: [_favourites[index]],
-                        title: _favourites[index].name,
-                        initialDuration: _favourites[index].duration,
-                        backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                      musicPlayer = ChangeNotifierProvider(
+                        create: (context) => MyAudioPlayer(),
+                        child: LocalMusicPlayer(
+                          key: ValueKey(_favourites[index].id),
+                          melodyList: [_favourites[index]],
+                          title: _favourites[index].name,
+                          initialDuration: _favourites[index].duration,
+                          backColor: MyColors.lightPrimaryColor.withOpacity(.8),
+                        ),
                       );
                       setState(() {
                         _isPlaying = true;
