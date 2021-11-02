@@ -82,27 +82,27 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   bool isMuted = false;
   List<String> choices;
 
-  bool _isFavourite = false;
+  //bool _isFavourite = false;
 
-  isFavourite() async {
-    bool isFavourite = (await usersRef
-            .doc(Constants.currentUserID)
-            .collection('favourites')
-            .doc(widget.melodyList[index]?.id)
-            .get())
-        .exists;
-
-    if (mounted) {
-      setState(() {
-        _isFavourite = isFavourite;
-      });
-    }
-  }
+  // isFavourite() async {
+  //   bool isFavourite = (await usersRef
+  //           .doc(Constants.currentUserID)
+  //           .collection('favourites')
+  //           .doc(widget.melodyList[index]?.id)
+  //           .get())
+  //       .exists;
+  //
+  //   if (mounted) {
+  //     setState(() {
+  //       _isFavourite = isFavourite;
+  //     });
+  //   }
+  // }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    await isFavourite();
+    //await isFavourite();
   }
 
   int index = 0;
@@ -320,10 +320,10 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ((widget.melodyList[index]?.songUrl != null ?? false) &&
-                                widget.showFavBtn)
-                            ? favouriteBtn()
-                            : Container(),
+                        // ((widget.melodyList[index]?.songUrl != null ?? false) &&
+                        //         widget.showFavBtn)
+                        //     ? favouriteBtn()
+                        //     : Container(),
                         widget.melodyList.length > 1
                             ? previousBtn()
                             : Container(),
@@ -516,42 +516,42 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
               );
   }
 
-  Widget favouriteBtn() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: InkWell(
-        onTap: () async {
-          _isFavourite
-              ? await DatabaseService.deleteMelodyFromFavourites(
-                  widget.melodyList[index].id)
-              : await DatabaseService.addMelodyToFavourites(
-                  widget.melodyList[index].id);
-
-          await isFavourite();
-        },
-        child: Container(
-          height: widget.btnSize,
-          width: widget.btnSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.grey.shade300,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black54,
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: Offset(0, 2), // changes position of shadow
-              ),
-            ],
-          ),
-          child: Icon(
-            _isFavourite ? Icons.favorite : Icons.favorite_border,
-            color: MyColors.primaryColor,
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget favouriteBtn() {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(right: 8.0),
+  //     child: InkWell(
+  //       onTap: () async {
+  //         _isFavourite
+  //             ? await DatabaseService.deleteMelodyFromFavourites(
+  //                 widget.melodyList[index].id)
+  //             : await DatabaseService.addMelodyToFavourites(
+  //                 widget.melodyList[index].id);
+  //
+  //         await isFavourite();
+  //       },
+  //       child: Container(
+  //         height: widget.btnSize,
+  //         width: widget.btnSize,
+  //         decoration: BoxDecoration(
+  //           shape: BoxShape.circle,
+  //           color: Colors.grey.shade300,
+  //           boxShadow: [
+  //             BoxShadow(
+  //               color: Colors.black54,
+  //               spreadRadius: 2,
+  //               blurRadius: 4,
+  //               offset: Offset(0, 2), // changes position of shadow
+  //             ),
+  //           ],
+  //         ),
+  //         child: Icon(
+  //           _isFavourite ? Icons.favorite : Icons.favorite_border,
+  //           color: MyColors.primaryColor,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget downloadBtn() {
     return widget.onDownload != null ?? false

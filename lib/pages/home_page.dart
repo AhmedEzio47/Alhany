@@ -43,9 +43,9 @@ class _HomePageState extends State<HomePage>
   List<Melody> _exclusives = [];
   int _page = 0;
   bool _isSearching = false;
-  List<Melody> _filteredexclusives = [];
+  //List<Melody> _filteredexclusives = [];
   bool _isPlaying = false;
-  List<Singer> _singers = [];
+  //List<Singer> _singers = [];
 
   PageController _pageController;
 
@@ -446,14 +446,14 @@ class _HomePageState extends State<HomePage>
         });
   }
 
-  getSingers() async {
-    List<Singer> singers = await DatabaseService.getSingersHaveMelodies();
-    if (mounted) {
-      setState(() {
-        _singers = singers;
-      });
-    }
-  }
+  // getSingers() async {
+  //   List<Singer> singers = await DatabaseService.getSingersHaveMelodies();
+  //   if (mounted) {
+  //     setState(() {
+  //       _singers = singers;
+  //     });
+  //   }
+  // }
 
   Timestamp lastVisiblePostSnapShot;
   List<Record> _records = [];
@@ -488,23 +488,9 @@ class _HomePageState extends State<HomePage>
         controller: _recordsScrollController,
         itemCount: _records.length,
         itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () {
-              // setState(() {
-              //   musicPlayer = LocalMusicPlayer(
-              //     url: _records[index].url,
-              //     backColor: MyColors.lightPrimaryColor.withOpacity(.8),
-              //     btnSize: 35,
-              //     initialDuration: _records[index].duration,
-              //     playBtnPosition: PlayBtnPosition.left,
-              //   );
-              //   _isPlaying = true;
-              // });
-            },
-            child: RecordItem(
-              key: ValueKey(_records[index].id),
-              record: _records[index],
-            ),
+          return RecordItem(
+            key: ValueKey(_records[index].id),
+            record: _records[index],
           );
         });
   }
@@ -927,7 +913,8 @@ class _HomePageState extends State<HomePage>
           SizedBox(
             height: 40,
           ),
-          RaisedButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: MyColors.primaryColor),
             onPressed: () async {
               if (_categoryController.text.trim().isEmpty) {
                 AppUtil.showToast(language(
@@ -952,7 +939,6 @@ class _HomePageState extends State<HomePage>
               Navigator.of(context).pop();
               Navigator.of(context).pushReplacementNamed('/');
             },
-            color: MyColors.primaryColor,
             child: Text(
               'Update',
               style: TextStyle(color: Colors.white),
@@ -1062,15 +1048,15 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  searchExclusives(String text) async {
-    List<Melody> filteredExclusives =
-        await DatabaseService.searchExclusives(text);
-    if (mounted) {
-      setState(() {
-        _filteredexclusives = filteredExclusives;
-      });
-    }
-  }
+  // searchExclusives(String text) async {
+  //   List<Melody> filteredExclusives =
+  //       await DatabaseService.searchExclusives(text);
+  //   if (mounted) {
+  //     setState(() {
+  //       _filteredexclusives = filteredExclusives;
+  //     });
+  //   }
+  // }
 
   Widget exclusivesWidget() {
     return GridView.builder(
