@@ -63,7 +63,7 @@ dependencies:
   simple_gesture_detector: ^0.1.4
   apple_sign_in: ^0.1.0
   provider: ^5.0.0
-  just_audio: ^0.7.1
+  just_audio: ^0.9.15
   #flutter_imagepress: ^0.7.0
   flutter_webview_plugin:
   screen: ^0.0.5

@@ -1,5 +1,6 @@
 import 'package:Alhany/constants/constants.dart';
 import 'package:Alhany/pages/melody_page.dart';
+import 'package:audio_session/audio_session.dart';
 //import 'package:audioplayers/audio_cache.dart';
 //import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,10 +9,10 @@ import 'package:just_audio/just_audio.dart';
 import 'new_recorder.dart';
 
 class MyAudioPlayer with ChangeNotifier {
-  AudioPlayer advancedPlayer = AudioPlayer();
+  AudioPlayer _player = AudioPlayer();
   //AudioCache audioCache;
 
-  get isPlaying => advancedPlayer.playing;
+  get isPlaying => _player.playing;
 
   Duration duration;
   Duration position;
@@ -33,14 +34,31 @@ class MyAudioPlayer with ChangeNotifier {
   bool onPlayingStartedCalled = false;
 
   initAudioPlayer() async {
-    advancedPlayer = AudioPlayer();
+    //advancedPlayer = AudioPlayer();
     //audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    if (isLocal)
-      duration = await advancedPlayer.setFilePath(urlList[index]);
-    else
-      duration = await advancedPlayer.setUrl(urlList[index]);
 
-    advancedPlayer.positionStream.listen((p) {
+    // Inform the operating system of our app's audio attributes etc.
+    // We pick a reasonable default for an app that plays speech.
+    final session = await AudioSession.instance;
+    await session.configure(AudioSessionConfiguration.speech());
+    // Listen to errors during playback.
+    _player.playbackEventStream.listen((event) {},
+        onError: (Object e, StackTrace stackTrace) {
+          print('A stream error occurred: $e');
+        });
+    // Try to load audio from a source and catch any errors.
+    try {
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(
+          urlList[index])));
+    } catch (e) {
+      print("Error loading audio source: $e");
+    }
+    if (isLocal)
+      duration = await _player.setFilePath(urlList[index]);
+    else
+      duration = await _player.setUrl(urlList[index]);
+
+    _player.positionStream.listen((p) {
       if (onPlayingStarted != null) {
         if (p > Duration(microseconds: 1) && !onPlayingStartedCalled) {
           onPlayingStarted();
@@ -85,17 +103,17 @@ class MyAudioPlayer with ChangeNotifier {
       index = this.index;
     }
     if (isLocal)
-      duration = await advancedPlayer.setFilePath(urlList[index]);
+      duration = await _player.setFilePath(urlList[index]);
     else
-      duration = await advancedPlayer.setUrl(urlList[index]);
-    await advancedPlayer.play();
+      duration = await _player.setUrl(urlList[index]);
+    await _player.play();
 
     notifyListeners();
   }
 
   Future stop() async {
-    await advancedPlayer.pause();
-    await advancedPlayer.seek(Duration.zero);
+    await _player.stop();
+    await _player.seek(Duration.zero);
     // position = null;
     // duration = null;
     notifyListeners();
@@ -106,17 +124,17 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   Future pause() async {
-    await advancedPlayer.pause();
+    await _player.pause();
     notifyListeners();
   }
 
   seek(Duration p) {
-    advancedPlayer.seek(p);
+    _player.seek(p);
     notifyListeners();
   }
 
   next() {
-    advancedPlayer.stop();
+    _player.stop();
     if (this.index < urlList.length - 1)
       this.index++;
     else
@@ -126,7 +144,7 @@ class MyAudioPlayer with ChangeNotifier {
   }
 
   prev() {
-    advancedPlayer.stop();
+    _player.stop();
     if (this.index > 0)
       this.index--;
     else

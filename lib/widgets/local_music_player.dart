@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
@@ -64,11 +65,12 @@ class LocalMusicPlayer extends StatefulWidget {
   _LocalMusicPlayerState createState() => _LocalMusicPlayerState();
 }
 
-class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
+class _LocalMusicPlayerState extends State<LocalMusicPlayer> with WidgetsBindingObserver {
   _LocalMusicPlayerState();
 
   MyAudioPlayer myAudioPlayer;
   PlayerState playerState = PlayerState.stopped;
+  Duration _duration;
 
   get isPlaying => myAudioPlayer.isPlaying;
 
@@ -111,6 +113,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.checkPrice) checkPrice();
 
     if ((widget.melodyList[index]?.songUrl != null ?? true) &&
@@ -128,18 +131,32 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
         language(en: Strings.en_delete, ar: Strings.ar_delete)
       ];
     }
-    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.black,
+    ));
     initAudioPlayer();
   }
 
+
   @override
   void dispose() {
-    myAudioPlayer.stop();
-    //myAudioPlayer.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
+    // Release decoders and buffers back to the operating system making them
+    // available for other apps to use.
+    myAudioPlayer.dispose();
     super.dispose();
   }
 
-  Duration _duration;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // Release the player's resources when not in use. We use "stop" so that
+      // if the app resumes later, it will still remember what position to
+      // resume from.
+      myAudioPlayer.stop();
+    }
+  }
 
   void initAudioPlayer() async {
     List<String> urlList;
