@@ -68,6 +68,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   _LocalMusicPlayerState();
 
   MyAudioPlayer myAudioPlayer;
+  PlayerState playerState = PlayerState.stopped;
 
   get isPlaying => myAudioPlayer.isPlaying;
 
@@ -134,7 +135,7 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   @override
   void dispose() {
     myAudioPlayer.stop();
-    myAudioPlayer.dispose();
+    //myAudioPlayer.dispose();
     super.dispose();
   }
 
@@ -190,7 +191,8 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
   Future play() async {
     print('_isBought: $_isBought');
     if (_isBought || !widget.checkPrice) {
-      myAudioPlayer.play();
+      playerState == PlayerState.playing ?  stop() : myAudioPlayer.play();
+      playerState = PlayerState.playing;
     } else {
       AppUtil.executeFunctionIfLoggedIn(context, () async {
         _isBought = await widget.onBuy();
@@ -200,10 +202,12 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer> {
 
   Future pause() async {
     await myAudioPlayer.pause();
+    playerState = PlayerState.paused;
   }
 
   Future stop() async {
     await myAudioPlayer.stop();
+    playerState = PlayerState.stopped;
   }
 
   NumberFormat _numberFormatter = new NumberFormat("##");
