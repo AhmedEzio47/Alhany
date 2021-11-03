@@ -239,9 +239,7 @@ class _HomePageState extends State<HomePage>
         getRecords();
         break;
       case 3:
-        exclusivesWidget();
-        //getFavourites();
-        //getBoughtSongs();
+        getExclusives();
         break;
     }
   }
@@ -250,19 +248,17 @@ class _HomePageState extends State<HomePage>
   Map<Category, List<Singer>> _categorySingers = {};
   getCategories() async {
     List<Category> categories = await DatabaseService.getCategories();
-    if (mounted) {
-      setState(() {
-        _categories = categories;
-      });
-    }
+
+    _categories = categories;
+    ;
+
     for (Category category in categories) {
       List<Singer> singers =
           await DatabaseService.getSingersByCategory(category.name);
-      if (mounted) {
-        setState(() {
-          _categorySingers.putIfAbsent(category, () => singers);
-        });
-      }
+      _categorySingers.putIfAbsent(category, () => singers);
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -804,7 +800,8 @@ class _HomePageState extends State<HomePage>
     _pageController = PageController(
       initialPage: 0,
     );
-    _tabController = TabController(vsync: this, length: 4, initialIndex: widget.selectedPage);
+    _tabController = TabController(
+        vsync: this, length: 4, initialIndex: widget.selectedPage);
     _exclusivesScrollController
       ..addListener(() {
         if (_exclusivesScrollController.offset >=
@@ -847,13 +844,19 @@ class _HomePageState extends State<HomePage>
         } else {}
       });
     _melodiesPageScrollController = _controllers.addAndGet();
-    getExclusives();
     getCategories();
+
     super.initState();
   }
 
   @override
   void dispose() {
+    _favScrollController.dispose();
+    _melodiesPageScrollController.dispose();
+    _exclusivesScrollController.dispose();
+    _recordsScrollController.dispose();
+    _tabController.dispose();
+    _pageController.dispose();
     _recordsScrollController.dispose();
     _melodiesPageScrollController.dispose();
     super.dispose();
@@ -874,12 +877,11 @@ class _HomePageState extends State<HomePage>
 
   getExclusives() async {
     List<Melody> exclusives = await DatabaseService.getStarExclusives();
+    _exclusives = exclusives;
+    if (_exclusives.length > 0)
+      this.lastVisiblePostSnapShot = exclusives.last.timestamp;
     if (mounted) {
-      setState(() {
-        _exclusives = exclusives;
-        if (_exclusives.length > 0)
-          this.lastVisiblePostSnapShot = exclusives.last.timestamp;
-      });
+      setState(() {});
     }
   }
 
