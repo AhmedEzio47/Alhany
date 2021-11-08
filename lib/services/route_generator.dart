@@ -43,12 +43,11 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => RootPage());
 
-      case Routes.homePage:
-        Constants.currentRoute = settings.name;
+      case '/home-page':
         return MaterialPageRoute(
             builder: (_) => HomePage(
-              selectedPage: args['selectedPage'],
-            ));
+                  selectedPage: args != null ? args['selectedPage'] : 0,
+                ));
       case '/app-page':
         return MaterialPageRoute(builder: (_) => AppPage());
 

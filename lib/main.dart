@@ -1,5 +1,4 @@
 import 'package:Alhany/constants/colors.dart';
-import 'package:Alhany/pages/root.dart';
 import 'package:Alhany/services/AppleSignInAvailable.dart';
 import 'package:Alhany/services/auth.dart';
 import 'package:Alhany/services/auth_provider.dart';
@@ -59,7 +58,7 @@ class _RestartWidgetState extends State<MyApp> {
             brightness: Brightness.light,
           ),
           debugShowCheckedModeBanner: false,
-          home: RootPage(),
+          initialRoute: '/',
           onGenerateRoute: RouteGenerator.generateRoute,
         ),
       ),

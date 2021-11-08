@@ -147,13 +147,13 @@ class _LocalMusicPlayerState extends State<LocalMusicPlayer>
     super.dispose();
   }
 
-  @override
-  void deactivate() {
-    // Provider.of<MyAudioPlayer>(context, listen: false).pause();
-    // Provider.of<MyAudioPlayer>(context, listen: false).seek(Duration.zero);
-    Provider.of<MyAudioPlayer>(context, listen: false).dispose();
-    super.deactivate();
-  }
+  // @override
+  // void deactivate() {
+  //   // Provider.of<MyAudioPlayer>(context, listen: false).pause();
+  //   // Provider.of<MyAudioPlayer>(context, listen: false).seek(Duration.zero);
+  //   Provider.of<MyAudioPlayer>(context, listen: false).dispose();
+  //   super.deactivate();
+  // }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

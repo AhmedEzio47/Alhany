@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Alhany/app_util.dart';
 import 'package:Alhany/constants/colors.dart';
 import 'package:Alhany/constants/constants.dart';
+import 'package:Alhany/constants/routes.dart';
 import 'package:Alhany/constants/strings.dart';
 import 'package:Alhany/models/melody_model.dart';
 import 'package:Alhany/models/singer_model.dart';
@@ -410,8 +411,8 @@ class _SingerPageState extends State<SingerPage>
   }
 
   Future<bool> _onBackPressed() {
-    Constants.currentRoute = '';
-    Navigator.of(context).pop();
+    Navigator.pushNamedAndRemoveUntil(
+        context, Routes.homePage, (Route<dynamic> route) => false);
   }
 
   var choices = ['Edit Image', 'Edit Name', 'Delete'];
@@ -545,6 +546,10 @@ class _SingerPageState extends State<SingerPage>
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _tabController.dispose();
+    _melodiesScrollController.dispose();
+    _songsScrollController.dispose();
     super.dispose();
   }
 }

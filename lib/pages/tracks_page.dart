@@ -47,7 +47,9 @@ class _TracksPageState extends State<TracksPage> {
   }
 
   getTracks() async {
+    print('getting tracks');
     List<Track> tracks = await DatabaseService.getTracks(widget.song.id);
+    print('got tracks');
     setState(() {
       _tracks = tracks;
     });
@@ -55,8 +57,8 @@ class _TracksPageState extends State<TracksPage> {
 
   @override
   void initState() {
-    super.initState();
     getTracks();
+    super.initState();
   }
 
   @override
@@ -161,31 +163,38 @@ class _TracksPageState extends State<TracksPage> {
                               return ListTile(
                                 onTap: () async {
                                   _index = index;
-                                  setState(() {
-                                    musicPlayer = ChangeNotifierProvider(
-                                      create: (context) => MyAudioPlayer(),
-                                      child: LocalMusicPlayer(
-                                        showFavBtn: false,
-                                        onDownload: () =>
-                                            buyTrack(_tracks[index]),
-                                        checkPrice: false,
-                                        key: ValueKey(_tracks[index].id),
-                                        melodyList: [
-                                          Melody(
-                                              price:
-                                                  _tracks[index].price ?? '0',
-                                              name: _tracks[index].name,
-                                              duration: _tracks[index].duration,
-                                              songUrl: _tracks[index].audio)
-                                        ],
-                                        backColor: MyColors.lightPrimaryColor,
-                                        title: _tracks[index].name,
-                                        initialDuration:
-                                            _tracks[index].duration,
-                                      ),
-                                    );
-                                    _isPlaying = true;
-                                  });
+                                  _tracks[index].duration == '0'
+                                      ? buyTrack(_tracks[index])
+                                      : setState(() {
+                                          musicPlayer = ChangeNotifierProvider(
+                                            create: (context) =>
+                                                MyAudioPlayer(),
+                                            child: LocalMusicPlayer(
+                                              showFavBtn: false,
+                                              onDownload: () =>
+                                                  buyTrack(_tracks[index]),
+                                              checkPrice: false,
+                                              key: ValueKey(_tracks[index].id),
+                                              melodyList: [
+                                                Melody(
+                                                    price:
+                                                        _tracks[index].price ??
+                                                            '0',
+                                                    name: _tracks[index].name,
+                                                    duration:
+                                                        _tracks[index].duration,
+                                                    songUrl:
+                                                        _tracks[index].audio)
+                                              ],
+                                              backColor:
+                                                  MyColors.lightPrimaryColor,
+                                              title: _tracks[index].name,
+                                              initialDuration:
+                                                  _tracks[index].duration,
+                                            ),
+                                          );
+                                          _isPlaying = true;
+                                        });
                                 },
                                 tileColor: Colors.white.withOpacity(.5),
                                 title: Text(
@@ -326,7 +335,7 @@ class _TracksPageState extends State<TracksPage> {
 
       Navigator.of(context).pop();
       AppUtil.showToast(language(en: 'Downloaded!', ar: 'تم التحميل'));
-      Navigator.of(context).pushNamed('/downloads');
+      //Navigator.of(context).pushNamed('/downloads');
     } else {
       Navigator.of(context).pop();
       AppUtil.showToast('Already downloaded!');
@@ -417,21 +426,34 @@ class _TracksPageState extends State<TracksPage> {
 
                 await downloadTrack();
                 loadProgress();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(language(
-                      ar: 'تمت عملية الشراء بنجاح', en: 'Purchase success')),
-                ));
+                await AppUtil.showAlertDialog(
+                    context: context,
+                    message: language(
+                        ar: 'تمت عملية الشراء بنجاح . اضغط نعم ليتم نقلك لصفحة التحميلات',
+                        en: 'Purchase success. You will be redirected to the downloads page'),
+                    firstBtnText: language(ar: 'نعم', en: 'Yes'),
+                    secondBtnText: language(ar: 'لا', en: 'No'),
+                    firstFunc: () async {
+                      Navigator.of(context).pushReplacementNamed('/downloads');
+                    },
+                    secondFunc: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                      return false;
+                    });
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(language(
                       ar: 'لم تتم عملية الشراء', en: 'Purchase Failed')),
                 ));
               }
-              Future.delayed(Duration(milliseconds: 1000), () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              });
+              // Future.delayed(Duration(milliseconds: 5000), () {
+              //   Navigator.of(context).pushReplacementNamed(Routes.homePage,
+              //       arguments: {'selectedPage': 1});
+              //   //Navigator.of(context).pop();
+              //   //Navigator.of(context).pop();
+              //   //Navigator.of(context).pop();
+              // });
             },
           );
         });

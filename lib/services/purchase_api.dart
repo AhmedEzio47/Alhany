@@ -1,4 +1,3 @@
-import 'package:Alhany/constants/constants.dart';
 import 'package:purchases_flutter/object_wrappers.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -14,7 +13,7 @@ class PurchaseApi {
 
   static Future init() async {
     await Purchases.setDebugLogsEnabled(true);
-    await Purchases.setup(_apiKey, appUserId: Constants.currentUserID);
+    await Purchases.setup(_apiKey);
   }
 
   static Future<List<Offering>> fetchOffersByIds(List<String> ids) async {

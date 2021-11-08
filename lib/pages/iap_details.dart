@@ -20,6 +20,7 @@ class IAPDetails extends StatefulWidget {
 
 class _IAPDetailsState extends State<IAPDetails> {
 
+
   TextStyle headingStyle = TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18);
   TextStyle linkStyle = TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
   @override
@@ -197,5 +198,15 @@ class _IAPDetailsState extends State<IAPDetails> {
             },
           );
         });
+  }
+
+  void initIAP() async{
+    await PurchaseApi.init();
+  }
+
+  @override
+  void initState() {
+    initIAP();
+    super.initState();
   }
 }

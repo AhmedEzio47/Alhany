@@ -189,7 +189,7 @@ class _SongPageState extends State<SongPage> {
                           )
                         : Container(),
                     SizedBox(
-                      height: MediaQuery.of(context).size.width / 4,
+                      height: MediaQuery.of(context).size.width / 5,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(20.0),

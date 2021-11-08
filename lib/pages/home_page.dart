@@ -264,6 +264,7 @@ class _HomePageState extends State<HomePage>
 
   Widget _songsPage() {
     return ListView.builder(
+        physics: AlwaysScrollableScrollPhysics(),
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemCount: _categories?.length,
@@ -319,6 +320,7 @@ class _HomePageState extends State<HomePage>
                                 padding: EdgeInsets.only(top: 8),
                                 color: Colors.black26,
                                 child: ListView.builder(
+                                    physics: AlwaysScrollableScrollPhysics(),
                                     itemCount:
                                         _categorySingers[_categories[index]]
                                                 ?.length ??
@@ -480,6 +482,7 @@ class _HomePageState extends State<HomePage>
   ScrollController _melodiesPageScrollController = ScrollController();
   recordListView() {
     return ListView.builder(
+        physics: AlwaysScrollableScrollPhysics(),
         shrinkWrap: true,
         controller: _recordsScrollController,
         itemCount: _records.length,
@@ -607,6 +610,7 @@ class _HomePageState extends State<HomePage>
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
           primary: false,
           shrinkWrap: true,
           //controller: _melodiesPageScrollController,
@@ -697,10 +701,9 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  ScrollController _favScrollController = ScrollController();
   _exclusivesPage() {
     return CustomScrollView(
-      controller: _favScrollController,
+      controller: _exclusivesScrollController,
       slivers: [
         // if (_boughtSongs.isNotEmpty)
         //   SliverToBoxAdapter(
@@ -845,20 +848,20 @@ class _HomePageState extends State<HomePage>
       });
     _melodiesPageScrollController = _controllers.addAndGet();
     getCategories();
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _favScrollController.dispose();
     _melodiesPageScrollController.dispose();
     _exclusivesScrollController.dispose();
     _recordsScrollController.dispose();
     _tabController.dispose();
     _pageController.dispose();
-    _recordsScrollController.dispose();
-    _melodiesPageScrollController.dispose();
+    _controllers.resetScroll();
+    _tabController.dispose();
+    _categoryController.dispose();
+
     super.dispose();
   }
 
@@ -1069,7 +1072,8 @@ class _HomePageState extends State<HomePage>
         itemCount: _exclusives.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           childAspectRatio: .8,
-          crossAxisCount: 2,
+          crossAxisCount:
+              MediaQuery.of(context).size.shortestSide < 600 ? 2 : 4,
         ),
         itemBuilder: (context, index) {
           return InkWell(

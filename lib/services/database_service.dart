@@ -635,7 +635,7 @@ class DatabaseService {
     QuerySnapshot melodiesSnapshot = await melodiesRef
         .where('is_song', isEqualTo: true)
         .where('singer', isEqualTo: singerName)
-        .limit(20)
+        .limit(10)
         .orderBy('timestamp', descending: true)
         .get();
     List<Melody> songs =
